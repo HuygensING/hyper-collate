@@ -37,7 +37,7 @@ import java.time.Instant;
 @Produces(MediaType.APPLICATION_JSON)
 public class AboutResource {
 
-  AboutInfo about = new AboutInfo();
+  private final AboutInfo about = new AboutInfo();
 
   public AboutResource() {
     this("appName");

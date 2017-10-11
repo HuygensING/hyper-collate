@@ -21,9 +21,9 @@ package nl.knaw.huygens.hypercollate.dropwizard.api;
  */
 
 public class AboutInfo {
-  String appName;
-  String startedAt;
-  String version;
+  private String appName;
+  private String startedAt;
+  private String version;
 
   public AboutInfo setAppName(String appName) {
     this.appName = appName;

@@ -55,7 +55,6 @@ public class HomePageResource {
         .header("Pragma", "public")//
         .header("Cache-Control", "public")//
         .build();
-
   }
 
   @GET

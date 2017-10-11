@@ -37,8 +37,8 @@ import org.slf4j.LoggerFactory;
 import java.util.SortedMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class ServerApplication extends Application<ServerConfiguration> {
-  Logger LOG = LoggerFactory.getLogger(getClass());
+class ServerApplication extends Application<ServerConfiguration> {
+  private final Logger LOG = LoggerFactory.getLogger(getClass());
 
   public static void main(final String[] args) throws Exception {
     new ServerApplication().run(args);
