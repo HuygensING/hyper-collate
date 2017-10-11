@@ -1,0 +1,7 @@
+logging:
+  level: INFO
+  loggers:
+    nl.knaw.huygens: DEBUG
+
+swagger:
+  resourcePackage: nl.knaw.huygens.hypercollate.dropwizard.resources

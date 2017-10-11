@@ -1,2 +1,3 @@
-# hyper-collate
-It collates! It's hyper!
+# HyperCollate
+
+TODO
