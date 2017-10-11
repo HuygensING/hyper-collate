@@ -24,6 +24,9 @@ public class AboutInfo {
   private String appName;
   private String startedAt;
   private String version;
+  private String buildDate;
+  private String commitId;
+  private String scmBranch;
 
   public AboutInfo setAppName(String appName) {
     this.appName = appName;
@@ -52,4 +55,30 @@ public class AboutInfo {
     return version;
   }
 
+  public AboutInfo setBuildDate(String buildDate) {
+    this.buildDate = buildDate;
+    return this;
+  }
+
+  public String getBuildDate() {
+    return buildDate;
+  }
+
+  public AboutInfo setCommitId(String commitId) {
+    this.commitId = commitId;
+    return this;
+  }
+
+  public String getCommitId() {
+    return commitId;
+  }
+
+  public AboutInfo setScmBranch(String scmBranch) {
+    this.scmBranch = scmBranch;
+    return this;
+  }
+
+  public String getScmBranch() {
+    return scmBranch;
+  }
 }

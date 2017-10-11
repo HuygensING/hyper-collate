@@ -25,6 +25,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import nl.knaw.huygens.hypercollate.dropwizard.api.AboutInfo;
 import nl.knaw.huygens.hypercollate.dropwizard.api.ResourcePaths;
+import nl.knaw.huygens.hypercollate.dropwizard.config.PropertiesConfiguration;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -36,6 +37,7 @@ import java.time.Instant;
 @Path(ResourcePaths.ABOUT)
 @Produces(MediaType.APPLICATION_JSON)
 public class AboutResource {
+  private static final String PROPERTIES_FILE = "about.properties";
 
   private final AboutInfo about = new AboutInfo();
 
@@ -44,9 +46,14 @@ public class AboutResource {
   }
 
   public AboutResource(String appName) {
-    about.setAppName(appName);
-    about.setStartedAt(Instant.now().toString());
-    about.setVersion("version");
+    PropertiesConfiguration properties = new PropertiesConfiguration(PROPERTIES_FILE, true);
+    about.setAppName(appName)
+        .setStartedAt(Instant.now().toString())
+        .setBuildDate(properties.getProperty("buildDate").get())
+        .setCommitId(properties.getProperty("commitId").get())
+        .setScmBranch(properties.getProperty("scmBranch").get())
+        .setVersion(properties.getProperty("version").get())
+    ;
   }
 
   @GET
