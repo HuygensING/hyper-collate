@@ -31,7 +31,6 @@
 .buildpath
 .cache
 .cache-main
-.coverage
 .coverage.*
 .cproject
 .eggs/
@@ -106,7 +105,6 @@ pom.xml.tag
 pom.xml.versionsBackup
 release.properties
 sdist/
-target/
 tmp/
 var/
 venv.bak/
