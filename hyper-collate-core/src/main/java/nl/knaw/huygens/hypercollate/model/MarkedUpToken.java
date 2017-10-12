@@ -19,22 +19,32 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
-import java.util.stream.Stream;
+public class MarkedUpToken implements Token {
+  private String content;
+  private String normalizedContent;
+  private SimpleWitness witness;
 
-public interface TokenVertex {
+  public MarkedUpToken setContent(String content) {
+    this.content = content;
+    return this;
+  }
 
-  Token getToken();
+  public String getContent() {
+    return this.content;
+  }
 
-  void addIncomingTokenVertex(TokenVertex incoming);
+  public MarkedUpToken setNormalizedContent(String normalizedContent) {
+    this.normalizedContent = normalizedContent;
+    return this;
+  }
 
-  Stream<TokenVertex> getIncomingTokenVertexStream();
+  public String getNormalizedContent() {
+    return this.normalizedContent;
+  }
 
-  void addOutgoingTokenVertex(TokenVertex outgoing);
-
-  Stream<TokenVertex> getOutgoingTokenVertexStream();
-
-  // void addMarkup(Markup markup);
-  //
-  // Stream<Markup> getMarkupStream();
+  @Override
+  public Witness getWitness() {
+    return witness;
+  }
 
 }

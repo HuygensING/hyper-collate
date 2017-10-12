@@ -19,22 +19,17 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
-import java.util.stream.Stream;
+public class SimpleWitness implements Witness {
 
-public interface TokenVertex {
+  private String sigil;
 
-  Token getToken();
+  public SimpleWitness(String sigil) {
+    this.sigil = sigil;
+  }
 
-  void addIncomingTokenVertex(TokenVertex incoming);
-
-  Stream<TokenVertex> getIncomingTokenVertexStream();
-
-  void addOutgoingTokenVertex(TokenVertex outgoing);
-
-  Stream<TokenVertex> getOutgoingTokenVertexStream();
-
-  // void addMarkup(Markup markup);
-  //
-  // Stream<Markup> getMarkupStream();
+  @Override
+  public String getSigil() {
+    return sigil;
+  }
 
 }
