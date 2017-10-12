@@ -1,6 +1,8 @@
 !/.mvn/wrapper/maven-wrapper.jar
 *$py.class
 **/*.iml
+**/.classpath
+**/.project
 **/target/
 *.bak
 *.class

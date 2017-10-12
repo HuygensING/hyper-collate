@@ -16,6 +16,7 @@
         <module>hyper-collate-server</module>
         <module>hyper-collate-core</module>
         <module>hyper-collate-api</module>
+        <module>hyper-collate-test</module>
     </modules>
 
     <properties>
@@ -33,7 +34,8 @@
 
         <dropwizard-swagger.version>1.1.2-1</dropwizard-swagger.version>
         <dropwizard.version>1.2.0</dropwizard.version>
-        <slf4j-api.version>1.7.25</slf4j-api.version>
+		<log.version>1.1.1</log.version>
+		<slf4j-api.version>1.7.25</slf4j-api.version>
         <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
         <jaxb-api.version>2.3.0</jaxb-api.version>
         <activation.version>1.1.1</activation.version>
@@ -44,6 +46,7 @@
 
         <assertj.version>3.8.0</assertj.version>
         <junit.version>4.12</junit.version>
+        <junitparams.version>1.0.5</junitparams.version>
 
         <buildnumber-maven.version>1.4</buildnumber-maven.version>
         <build-helper-maven.version>3.0.0</build-helper-maven.version>
