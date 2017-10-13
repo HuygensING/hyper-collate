@@ -21,7 +21,7 @@ package nl.knaw.huygens.hypercollate.model;
  */
 public class SimpleWitness implements Witness {
 
-  private String sigil;
+  private final String sigil;
 
   public SimpleWitness(String sigil) {
     this.sigil = sigil;

@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class StartTokenVertex implements TokenVertex {
-  private List<TokenVertex> outgoingTokenVertices = new ArrayList<>();
+  private final List<TokenVertex> outgoingTokenVertices = new ArrayList<>();
 
   @Override
   public Token getToken() {

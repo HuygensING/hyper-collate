@@ -24,8 +24,8 @@ import java.util.Optional;
 import java.util.TreeMap;
 
 public class Markup {
-  String tagname;
-  Map<String, String> attributeMap = new TreeMap<>();
+  private final String tagname;
+  private final Map<String, String> attributeMap = new TreeMap<>();
 
   public Markup(String tagName) {
     this.tagname = tagName;

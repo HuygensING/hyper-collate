@@ -25,9 +25,9 @@ import java.util.stream.Stream;
 
 public class SimpleTokenVertex implements TokenVertex {
 
-  private Token token;
-  private List<TokenVertex> incomingVertices = new ArrayList<>();
-  private List<TokenVertex> outgoingVertices = new ArrayList<>();
+  private final Token token;
+  private final List<TokenVertex> incomingVertices = new ArrayList<>();
+  private final List<TokenVertex> outgoingVertices = new ArrayList<>();
 
   public SimpleTokenVertex(MarkedUpToken token) {
     this.token = token;

@@ -27,12 +27,12 @@ import java.util.stream.Stream;
 
 public class VariantWitnessGraph {
 
-  String sigil = "";
-  TokenVertex startTokenVertex = new StartTokenVertex();
-  TokenVertex endTokenVertex = new EndTokenVertex();
-  List<Markup> markupList = new ArrayList<>();
-  Map<Markup, List<TokenVertex>> markup2TokenVertexList = new HashMap<>();
-  Map<TokenVertex, List<Markup>> tokenVertex2MarkupList = new HashMap<>();
+  private String sigil = "";
+  private final TokenVertex startTokenVertex = new StartTokenVertex();
+  private final TokenVertex endTokenVertex = new EndTokenVertex();
+  private final List<Markup> markupList = new ArrayList<>();
+  private final Map<Markup, List<TokenVertex>> markup2TokenVertexList = new HashMap<>();
+  private final Map<TokenVertex, List<Markup>> tokenVertex2MarkupList = new HashMap<>();
 
   public VariantWitnessGraph(String sigil) {
     this.sigil = sigil;
