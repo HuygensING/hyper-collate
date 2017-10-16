@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 
 public class SimpleTokenVertex implements TokenVertex {
 
-  private final Token token;
+  private final MarkedUpToken token;
   private final List<TokenVertex> incomingVertices = new ArrayList<>();
   private final List<TokenVertex> outgoingVertices = new ArrayList<>();
 
@@ -56,6 +56,10 @@ public class SimpleTokenVertex implements TokenVertex {
   @Override
   public Stream<TokenVertex> getOutgoingTokenVertexStream() {
     return outgoingVertices.stream();
+  }
+
+  public String getContent() {
+    return token.getContent();
   }
 
 }

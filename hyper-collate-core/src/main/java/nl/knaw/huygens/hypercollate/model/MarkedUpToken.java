@@ -23,6 +23,7 @@ public class MarkedUpToken implements Token {
   private String content;
   private String normalizedContent;
   private SimpleWitness witness;
+  private Long index = 0L;
 
   public MarkedUpToken setContent(String content) {
     this.content = content;
@@ -45,6 +46,15 @@ public class MarkedUpToken implements Token {
   @Override
   public Witness getWitness() {
     return witness;
+  }
+
+  public MarkedUpToken setIndexNumber(Long index) {
+    this.index = index;
+    return this;
+  }
+
+  public Long getIndexNumber() {
+    return this.index;
   }
 
 }

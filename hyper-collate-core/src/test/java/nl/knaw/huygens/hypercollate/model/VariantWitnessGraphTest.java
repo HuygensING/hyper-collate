@@ -26,6 +26,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import nl.knaw.huygens.hypercollate.tools.DotFactory;
+
 public class VariantWitnessGraphTest {
 
   @Test
@@ -36,12 +38,12 @@ public class VariantWitnessGraphTest {
     Markup delMarkup = new Markup("del");
     Markup addMarkup = new Markup("add");
 
-    SimpleTokenVertex mtv0 = aTokenVertex("Collating ");
-    SimpleTokenVertex mtv1 = aTokenVertex("is ");
-    SimpleTokenVertex mtv2 = aTokenVertex("NP ");
-    SimpleTokenVertex mtv3 = aTokenVertex("hard");
-    SimpleTokenVertex mtv4 = aTokenVertex("easy");
-    SimpleTokenVertex mtv5 = aTokenVertex(".");
+    SimpleTokenVertex mtv0 = aTokenVertex("Collating ", 0L);
+    SimpleTokenVertex mtv1 = aTokenVertex("is ", 1L);
+    SimpleTokenVertex mtv2 = aTokenVertex("NP ", 2L);
+    SimpleTokenVertex mtv3 = aTokenVertex("hard", 3L);
+    SimpleTokenVertex mtv4 = aTokenVertex("easy", 4L);
+    SimpleTokenVertex mtv5 = aTokenVertex(".", 5L);
 
     VariantWitnessGraph vwg1 = new VariantWitnessGraph("A");
     vwg1.addMarkup(sMarkup, delMarkup, addMarkup);
@@ -77,12 +79,37 @@ public class VariantWitnessGraphTest {
     List<TokenVertex> incoming = mtv5.getIncomingTokenVertexStream().collect(toList());
     assertThat(incoming).containsOnly(mtv3, mtv4);
 
+    String dot = DotFactory.fromVariantWitnessGraph(vwg1);
+    System.out.println(dot);
+    String expected = "digraph VariantWitnessGraph{\n"//
+        + "graph [rankdir=LR]\n"//
+        + "labelloc=b\n"//
+        + "st [label=\"\";shape=doublecircle,rank=middle]\n" //
+        + "t0 [label=\"Collating \"]\n"//
+        + "t1 [label=\"is \"]\n"//
+        + "t2 [label=\"NP \"]\n"//
+        + "t4 [label=\"easy\"]\n"//
+        + "t3 [label=\"hard\"]\n"//
+        + "t5 [label=\".\"]\n"//
+        + "et [label=\"\";shape=doublecircle,rank=middle]\n"//
+        + "st->t0\n" + "t0->t1\n"//
+        + "t1->t2\n"//
+        + "t1->t4\n"//
+        + "t2->t3\n"//
+        + "t4->t5\n"//
+        + "t3->t5\n"//
+        + "t5->et\n"//
+        + "}";
+    assertThat(dot).isEqualTo(expected);
+
   }
 
-  private SimpleTokenVertex aTokenVertex(String string) {
+  private SimpleTokenVertex aTokenVertex(String string, Long index) {
     MarkedUpToken token = new MarkedUpToken()//
         .setContent(string)//
-        .setNormalizedContent(string.toLowerCase());
+        .setNormalizedContent(string.toLowerCase())//
+        .setIndexNumber(index);
+
     return new SimpleTokenVertex(token);
   }
 
