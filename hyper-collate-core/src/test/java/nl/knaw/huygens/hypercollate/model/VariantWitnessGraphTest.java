@@ -81,25 +81,26 @@ public class VariantWitnessGraphTest {
 
     String dot = DotFactory.fromVariantWitnessGraph(vwg1);
     System.out.println(dot);
-    String expected = "digraph VariantWitnessGraph{\n"//
-        + "graph [rankdir=LR]\n"//
-        + "labelloc=b\n"//
-        + "st [label=\"\";shape=doublecircle,rank=middle]\n" //
-        + "t0 [label=\"Collating \"]\n"//
-        + "t1 [label=\"is \"]\n"//
-        + "t2 [label=\"NP \"]\n"//
-        + "t4 [label=\"easy\"]\n"//
-        + "t3 [label=\"hard\"]\n"//
-        + "t5 [label=\".\"]\n"//
-        + "et [label=\"\";shape=doublecircle,rank=middle]\n"//
-        + "st->t0\n" + "t0->t1\n"//
-        + "t1->t2\n"//
-        + "t1->t4\n"//
-        + "t2->t3\n"//
-        + "t4->t5\n"//
-        + "t3->t5\n"//
-        + "t5->et\n"//
-        + "}";
+    String expected = "digraph VariantWitnessGraph{\n" + //
+        "graph [rankdir=LR]\n" + //
+        "labelloc=b\n" + //
+        "st [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "t0 [label=<Collating&#9251;<br/>{<i>s</i>}>]\n" + //
+        "t1 [label=<is&#9251;<br/>{<i>s</i>}>]\n" + //
+        "t2 [label=<NP&#9251;<br/>{<i>s, del</i>}>]\n" + //
+        "t4 [label=<easy<br/>{<i>s, add</i>}>]\n" + //
+        "t3 [label=<hard<br/>{<i>s, del</i>}>]\n" + //
+        "t5 [label=<.<br/>{<i>s</i>}>]\n" + //
+        "et [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "st->t0\n" + //
+        "t0->t1\n" + //
+        "t1->t2\n" + //
+        "t1->t4\n" + //
+        "t2->t3\n" + //
+        "t4->t5\n" + //
+        "t3->t5\n" + //
+        "t5->et\n" + //
+        "}";
     assertThat(dot).isEqualTo(expected);
 
   }

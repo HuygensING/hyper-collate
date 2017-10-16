@@ -26,9 +26,11 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import nl.knaw.huygens.hypercollate.model.EndTokenVertex;
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
+import nl.knaw.huygens.hypercollate.model.Markup;
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
 import nl.knaw.huygens.hypercollate.model.StartTokenVertex;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
@@ -46,7 +48,6 @@ public class DotFactory {
   public static String fromVariantWitnessGraph(VariantWitnessGraph graph) {
     StringBuilder dotBuilder = new StringBuilder("digraph VariantWitnessGraph{\ngraph [rankdir=LR]\nlabelloc=b\n");
 
-    // Deque<String> openMarkup = new LinkedList();
     List<String> edges = new ArrayList<>();
     Deque<TokenVertex> nextTokens = new LinkedList<>();
     nextTokens.add(graph.getStartTokenVertex());
@@ -56,10 +57,17 @@ public class DotFactory {
       if (!verticesDone.contains(tokenVertex)) {
         String tokenVariable = vertexVariable(tokenVertex);
         if (tokenVertex instanceof SimpleTokenVertex) {
+          SimpleTokenVertex stv = (SimpleTokenVertex) tokenVertex;
+          String markup = graph.getMarkupListForTokenVertex(stv).stream()//
+              .map(Markup::getTagname)//
+              .collect(Collectors.joining(", "));
           dotBuilder.append(tokenVariable)//
-              .append(" [label=\"")//
-              .append(((SimpleTokenVertex) tokenVertex).getContent())//
-              .append("\"]\n");
+              .append(" [label=<")//
+              .append(stv.getContent().replaceAll(" ", "&#9251;"))//
+              .append("<br/>{<i>")//
+              .append(markup)//
+              .append("</i>}")//
+              .append(">]\n");
         } else {
           dotBuilder.append(tokenVariable)//
               .append(" [label=\"\";shape=doublecircle,rank=middle]\n");

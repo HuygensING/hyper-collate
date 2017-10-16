@@ -40,4 +40,8 @@ public class Markup {
     return Optional.ofNullable(attributeMap.get(key));
   }
 
+  public String getTagname() {
+    return this.tagname;
+  }
+
 }
