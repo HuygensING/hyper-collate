@@ -73,7 +73,7 @@ public class VariantWitnessGraph {
   }
 
   public List<Markup> getMarkupListForTokenVertex(TokenVertex tokenVertex) {
-    return tokenVertex2MarkupList.get(tokenVertex);
+    return tokenVertex2MarkupList.getOrDefault(tokenVertex, new ArrayList<>());
   }
 
 }

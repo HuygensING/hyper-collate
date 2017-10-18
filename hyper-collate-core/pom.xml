@@ -16,6 +16,17 @@
 			<artifactId>hyper-collate-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>eu.interedition</groupId>
+			<artifactId>collatex-core</artifactId>
+			<version>${collatex.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>${commons-io.version}</version>
+		</dependency>
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>

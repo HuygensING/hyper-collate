@@ -24,6 +24,7 @@ public class MarkedUpToken implements Token {
   private String normalizedContent;
   private SimpleWitness witness;
   private Long index = 0L;
+  private String parentXPath = "";
 
   public MarkedUpToken setContent(String content) {
     this.content = content;
@@ -55,6 +56,14 @@ public class MarkedUpToken implements Token {
 
   public Long getIndexNumber() {
     return this.index;
+  }
+
+  public void setParentXPath(String parentXPath) {
+    this.parentXPath = parentXPath;
+  }
+
+  public String getParentXPath() {
+    return this.parentXPath;
   }
 
 }
