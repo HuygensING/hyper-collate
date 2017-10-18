@@ -24,12 +24,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 
+import org.junit.Ignore;
+import org.junit.Test;
+
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 import nl.knaw.huygens.hypercollate.tools.DotFactory;
 
 public class XMLImporterTest {
 
-  // @Test
+  @Ignore
+  @Test
   public void testImportFromString() {
     XMLImporter importer = new XMLImporter();
     VariantWitnessGraph wg = importer.importXML("A", "<xml>Mondays are <del>well good</del><add>def bad</add>!</xml>");
@@ -61,7 +65,8 @@ public class XMLImporterTest {
     assertThat(dot).isEqualTo(expected);
   }
 
-  // @Test
+  @Ignore
+  @Test
   public void testImportFromFile() {
     XMLImporter importer = new XMLImporter();
     VariantWitnessGraph wg = importer.importXML("A", new File("test/resources/witness.xml"));
