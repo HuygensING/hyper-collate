@@ -73,7 +73,7 @@ public class XMLImporter {
     }
   }
 
-  private VariantWitnessGraph importXML(String sigil, InputStream input) {
+  public VariantWitnessGraph importXML(String sigil, InputStream input) {
     VariantWitnessGraph graph = new VariantWitnessGraph(sigil);
     XMLInputFactory factory = XMLInputFactory.newInstance();
     try {
@@ -206,7 +206,6 @@ public class XMLImporter {
   }
 
   private void handleComment(XMLEvent event, Context context) {
-    throw new RuntimeException("unexpected event: Comment");
   }
 
   private void handleProcessingInstruction(XMLEvent event, Context context) {
