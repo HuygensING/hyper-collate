@@ -218,6 +218,9 @@ public class XMLImporter {
     private Deque<Markup> openMarkup = new LinkedList<>();
     private TokenVertex lastTokenVertex;
     private long tokenCounter = 0L;
+    private Deque<TokenVertex> variationStartVertices = new LinkedList<>(); // the tokenvertices whose outgoing vertices are the variant vertices (add/del)
+    private Deque<TokenVertex> variationEndVertices = new LinkedList<>(); // the tokenvertices that are the last in a <del>
+    private Deque<TokenVertex> unconnectedVertices = new LinkedList<>(); // the last tokenvertex in an <add> which hasn't been linked to the tokenvertex after the </del> yet
 
     public Context(VariantWitnessGraph graph) {
       this.graph = graph;
@@ -227,6 +230,19 @@ public class XMLImporter {
     public void openMarkup(Markup markup) {
       graph.addMarkup(markup);
       openMarkup.push(markup);
+      if (isVariationStartingMarkup(markup)) {
+        variationStartVertices.push(lastTokenVertex);
+      } else if (isVariationEndingMarkup(markup)) {
+        lastTokenVertex = variationStartVertices.pop();
+      }
+    }
+
+    private boolean isVariationStartingMarkup(Markup markup) {
+      return "del".equals(markup.getTagname());
+    }
+
+    private boolean isVariationEndingMarkup(Markup markup) {
+      return "add".equals(markup.getTagname());
     }
 
     public void closeMarkup(Markup markup) {
@@ -236,6 +252,11 @@ public class XMLImporter {
       if (!expectedTag.equals(closingTag)) {
         throw new RuntimeException("XML error: expected </" + expectedTag + ">, got </" + closingTag + ">");
       }
+      if (isVariationStartingMarkup(markup)) {
+        unconnectedVertices.push(lastTokenVertex);
+      } else if (isVariationEndingMarkup(markup)) {
+        variationEndVertices.push(lastTokenVertex);
+      }
     }
 
     public void addToken(MarkedUpToken token) {
@@ -243,7 +264,17 @@ public class XMLImporter {
       graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex);
       this.openMarkup.descendingIterator()//
           .forEachRemaining(markup -> graph.addMarkupToTokenVertex(tokenVertex, markup));
+      checkUnconnectedVertices(tokenVertex);
       lastTokenVertex = tokenVertex;
+    }
+
+    private void checkUnconnectedVertices(SimpleTokenVertex tokenVertex) {
+      if (!variationEndVertices.isEmpty() && lastTokenVertex.equals(variationEndVertices.peek())) {
+        variationEndVertices.pop();
+        TokenVertex unconnectedVertex = unconnectedVertices.pop();
+        graph.addOutgoingTokenVertexToTokenVertex(unconnectedVertex, tokenVertex);
+        checkUnconnectedVertices(tokenVertex);
+      }
     }
 
     public void closeDocument() {

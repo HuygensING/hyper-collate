@@ -1,5 +1,7 @@
 package nl.knaw.huygens.hypercollate.importer;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /*-
  * #%L
  * hyper-collate-core
@@ -36,29 +38,29 @@ public class XMLImporterTest {
 
     String dot = DotFactory.fromVariantWitnessGraph(wg);
     System.out.println(dot);
-    String expected = "digraph VariantWitnessGraph{\n"//
-        + "graph [rankdir=LR]\n" + //
+    String expected = "digraph VariantWitnessGraph{\n" + //
+        "graph [rankdir=LR]\n" + //
         "labelloc=b\n" + //
         "st [label=\"\";shape=doublecircle,rank=middle]\n" + //
         "t0 [label=<Mondays&#9251;<br/>{<i>xml</i>}>]\n" + //
         "t1 [label=<are&#9251;<br/>{<i>xml</i>}>]\n" + //
         "t2 [label=<well&#9251;<br/>{<i>xml, del</i>}>]\n" + //
-        "t3 [label=<good<br/>{<i>xml, del</i>}>]\n" + //
         "t4 [label=<def&#9251;<br/>{<i>xml, add</i>}>]\n" + //
+        "t3 [label=<good<br/>{<i>xml, del</i>}>]\n" + //
         "t5 [label=<bad<br/>{<i>xml, add</i>}>]\n" + //
         "t6 [label=<!<br/>{<i>xml</i>}>]\n" + //
         "et [label=\"\";shape=doublecircle,rank=middle]\n" + //
         "st->t0\n" + //
         "t0->t1\n" + //
         "t1->t2\n" + //
-        "t2->t3\n" + //
-        "t3->t6\n" + //
         "t1->t4\n" + //
+        "t2->t3\n" + //
         "t4->t5\n" + //
+        "t3->t6\n" + //
         "t5->t6\n" + //
         "t6->et\n" + //
         "}";
-    // assertThat(dot).isEqualTo(expected);
+    assertThat(dot).isEqualTo(expected);
   }
 
   // @Ignore
@@ -70,8 +72,48 @@ public class XMLImporterTest {
 
     String dot = DotFactory.fromVariantWitnessGraph(wg);
     System.out.println(dot);
-    String expected = "";
-    // assertThat(dot).isEqualTo(expected);
+    String expected = "digraph VariantWitnessGraph{\n" + //
+        "graph [rankdir=LR]\n" + //
+        "labelloc=b\n" + //
+        "st [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "t0 [label=<De&#9251;<br/>{<i>text, s</i>}>]\n" + //
+        "t1 [label=<vent&#9251;<br/>{<i>text, s</i>}>]\n" + //
+        "t2 [label=<was&#9251;<br/>{<i>text, s</i>}>]\n" + //
+        "t3 [label=<woedend&#9251;<br/>{<i>text, s</i>}>]\n" + //
+        "t4 [label=<en&#9251;<br/>{<i>text, s</i>}>]\n" + //
+        "t5 [label=<maakte&#9251;<br/>{<i>text, s</i>}>]\n" + //
+        "t6 [label=<Shiriar<br/>{<i>text, s, del</i>}>]\n" + //
+        "t7 [label=<den&#9251;<br/>{<i>text, s, add</i>}>]\n" + //
+        "t11 [label=<uit&#9251;<br/>{<i>text, s</i>}>]\n" + //
+        "t8 [label=<bedremmelden&#9251;<br/>{<i>text, s, add</i>}>]\n" + //
+        "t12 [label=<voor&#9251;<br/>{<i>text, s</i>}>]\n" + //
+        "t9 [label=<man<br/>{<i>text, s, add, del</i>}>]\n" + //
+        "t10 [label=<Sultan<br/>{<i>text, s, add, add</i>}>]\n" + //
+        "t13 [label=<\"lompen&#9251;<br/>{<i>text, s</i>}>]\n" + //
+        "t14 [label=<boer\"<br/>{<i>text, s</i>}>]\n" + //
+        "t15 [label=<.<br/>{<i>text, s</i>}>]\n" + //
+        "et [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "st->t0\n" + //
+        "t0->t1\n" + //
+        "t1->t2\n" + //
+        "t2->t3\n" + //
+        "t3->t4\n" + //
+        "t4->t5\n" + //
+        "t5->t6\n" + //
+        "t5->t7\n" + //
+        "t6->t11\n" + //
+        "t7->t8\n" + //
+        "t11->t12\n" + //
+        "t8->t9\n" + //
+        "t8->t10\n" + //
+        "t12->t13\n" + //
+        "t9->t11\n" + //
+        "t10->t11\n" + //
+        "t13->t14\n" + //
+        "t14->t15\n" + //
+        "t15->et\n" + //
+        "}";
+    assertThat(dot).isEqualTo(expected);
   }
 
 }
