@@ -43,13 +43,14 @@ public class TokenMerger {
     List<TokenVertex> verticesToAdd = originaltokenVertex.getOutgoingTokenVertexStream().collect(Collectors.toList());
     List<Long> handledTokens = new ArrayList<>();
     TokenVertex mergedVertexToLinkTo = mergedGraph.getStartTokenVertex();
-    verticesToAdd.forEach(originalVertex -> {
-      handle(originalGraph, mergedGraph, originalToMergedMap, handledTokens, originalVertex, mergedVertexToLinkTo);
-    });
+    verticesToAdd.forEach(originalVertex -> handle(originalGraph, mergedGraph, originalToMergedMap, handledTokens,//
+        originalVertex, mergedVertexToLinkTo));
     return mergedGraph;
   }
 
-  private static void handle(VariantWitnessGraph originalGraph, VariantWitnessGraph mergedGraph, Map<Long, TokenVertex> originalToMergedMap, List<Long> handledTokens, TokenVertex originalVertex,
+  private static void handle(VariantWitnessGraph originalGraph, VariantWitnessGraph mergedGraph,//
+                             Map<Long, TokenVertex> originalToMergedMap, List<Long> handledTokens,//
+                              TokenVertex originalVertex,
       TokenVertex mergedVertexToLinkTo) {
     if (originalVertex instanceof EndTokenVertex) {
       TokenVertex endTokenVertex = mergedGraph.getEndTokenVertex();

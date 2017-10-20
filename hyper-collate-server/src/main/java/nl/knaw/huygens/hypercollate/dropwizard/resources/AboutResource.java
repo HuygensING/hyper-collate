@@ -49,10 +49,10 @@ public class AboutResource {
     PropertiesConfiguration properties = new PropertiesConfiguration(PROPERTIES_FILE, true);
     about.setAppName(appName)
         .setStartedAt(Instant.now().toString())
-        .setBuildDate(properties.getProperty("buildDate").get())
-        .setCommitId(properties.getProperty("commitId").get())
-        .setScmBranch(properties.getProperty("scmBranch").get())
-        .setVersion(properties.getProperty("version").get())
+        .setBuildDate(properties.getProperty("buildDate").orElse("no buildDate set in about.properties"))
+        .setCommitId(properties.getProperty("commitId").orElse("no commitId set in about.properties"))
+        .setScmBranch(properties.getProperty("scmBranch").orElse("no scmBranch set in about.properties"))
+        .setVersion(properties.getProperty("version").orElse("no version set in about.properties"))
     ;
   }
 

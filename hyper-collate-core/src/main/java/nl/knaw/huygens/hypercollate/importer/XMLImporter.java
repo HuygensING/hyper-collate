@@ -168,13 +168,9 @@ public class XMLImporter {
   private void handleCharacters(Characters characters, Context context) {
     String data = characters.getData();
     if (data.startsWith(" ")) {// because the tokenizer will lose theses leading whitespaces;
-      MarkedUpToken token = new MarkedUpToken().setContent(" ");
-      context.addToken(token);
+      context.addNewToken(" ");
     }
-    tokenizer.apply(data).forEach(t -> {
-      MarkedUpToken token = new MarkedUpToken().setContent(t);
-      context.addToken(token);
-    });
+    tokenizer.apply(data).forEach(context::addNewToken);
   }
 
   private void handleNotationDeclaration(XMLEvent event, Context context) {
@@ -263,7 +259,8 @@ public class XMLImporter {
       }
     }
 
-    public void addToken(MarkedUpToken token) {
+    public void addNewToken(String content) {
+      MarkedUpToken token = new MarkedUpToken().setContent(content);
       SimpleTokenVertex tokenVertex = new SimpleTokenVertex(token.setIndexNumber(tokenCounter++));
       graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex);
       this.openMarkup.descendingIterator()//

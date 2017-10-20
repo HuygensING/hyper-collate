@@ -19,10 +19,7 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class VariantWitnessGraph {
@@ -55,9 +52,7 @@ public class VariantWitnessGraph {
   }
 
   public void addMarkup(Markup... markup) {
-    for (Markup m : markup) {
-      this.markupList.add(m);
-    }
+    Collections.addAll(this.markupList, markup);
   }
 
   public void addOutgoingTokenVertexToTokenVertex(TokenVertex token0, TokenVertex token1) {
