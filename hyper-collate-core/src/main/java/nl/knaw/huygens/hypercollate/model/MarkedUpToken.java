@@ -19,6 +19,10 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
+
+import eu.interedition.collatex.Token;
+import eu.interedition.collatex.Witness;
+
 public class MarkedUpToken implements Token {
   private String content;
   private String normalizedContent;

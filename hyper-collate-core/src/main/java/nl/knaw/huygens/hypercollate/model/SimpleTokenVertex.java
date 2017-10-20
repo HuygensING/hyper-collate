@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import eu.interedition.collatex.Token;
+
 public class SimpleTokenVertex implements TokenVertex {
 
   private final MarkedUpToken token;

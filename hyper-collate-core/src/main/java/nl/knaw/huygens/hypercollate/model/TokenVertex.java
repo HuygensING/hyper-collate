@@ -21,6 +21,8 @@ package nl.knaw.huygens.hypercollate.model;
  */
 import java.util.stream.Stream;
 
+import eu.interedition.collatex.Token;
+
 public interface TokenVertex {
 
   Token getToken();

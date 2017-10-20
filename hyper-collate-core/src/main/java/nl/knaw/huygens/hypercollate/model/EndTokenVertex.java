@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import eu.interedition.collatex.Token;
+
 public class EndTokenVertex implements TokenVertex {
 
   private final List<TokenVertex> incomingTokenVertices = new ArrayList<>();

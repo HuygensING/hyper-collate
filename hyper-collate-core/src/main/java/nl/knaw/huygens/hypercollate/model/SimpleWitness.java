@@ -19,6 +19,8 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
+import eu.interedition.collatex.Witness;
+
 public class SimpleWitness implements Witness {
 
   private final String sigil;
