@@ -1,7 +1,5 @@
 package nl.knaw.huygens.hypercollate.importer;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 /*-
  * #%L
  * hyper-collate-core
@@ -21,20 +19,23 @@ import static org.assertj.core.api.Assertions.assertThat;
  * limitations under the License.
  * #L%
  */
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.InputStream;
 
 import org.junit.Test;
 
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 import nl.knaw.huygens.hypercollate.tools.DotFactory;
+import nl.knaw.huygens.hypercollate.tools.TokenMerger;
 
 public class XMLImporterTest {
 
-  // @Ignore
   @Test
   public void testImportFromString() {
     XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph wg = importer.importXML("A", "<xml>Mondays are <del>well good</del><add>def bad</add>!</xml>");
+    VariantWitnessGraph wg0 = importer.importXML("A", "<xml>Mondays are <del>well good</del><add>def bad</add>!</xml>");
+    VariantWitnessGraph wg = TokenMerger.merge(wg0);
 
     String dot = DotFactory.fromVariantWitnessGraph(wg);
     System.out.println(dot);
@@ -42,33 +43,27 @@ public class XMLImporterTest {
         "graph [rankdir=LR]\n" + //
         "labelloc=b\n" + //
         "st [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "t0 [label=<Mondays&#9251;<br/>{<i>xml</i>}>]\n" + //
-        "t1 [label=<are&#9251;<br/>{<i>xml</i>}>]\n" + //
-        "t2 [label=<well&#9251;<br/>{<i>xml, del</i>}>]\n" + //
-        "t4 [label=<def&#9251;<br/>{<i>xml, add</i>}>]\n" + //
-        "t3 [label=<good<br/>{<i>xml, del</i>}>]\n" + //
-        "t5 [label=<bad<br/>{<i>xml, add</i>}>]\n" + //
-        "t6 [label=<!<br/>{<i>xml</i>}>]\n" + //
+        "t0 [label=<Mondays&#9251;are&#9251;<br/><i>A: /xml</i>>]\n" + //
+        "t2 [label=<well&#9251;good<br/><i>A: /xml/del</i>>]\n" + //
+        "t4 [label=<def&#9251;bad<br/><i>A: /xml/add</i>>]\n" + //
+        "t6 [label=<!<br/><i>A: /xml</i>>]\n" + //
         "et [label=\"\";shape=doublecircle,rank=middle]\n" + //
         "st->t0\n" + //
-        "t0->t1\n" + //
-        "t1->t2\n" + //
-        "t1->t4\n" + //
-        "t2->t3\n" + //
-        "t4->t5\n" + //
-        "t3->t6\n" + //
-        "t5->t6\n" + //
+        "t0->t2\n" + //
+        "t0->t4\n" + //
+        "t2->t6\n" + //
+        "t4->t6\n" + //
         "t6->et\n" + //
         "}";
     assertThat(dot).isEqualTo(expected);
   }
 
-  // @Ignore
   @Test
   public void testImportFromFile() {
     XMLImporter importer = new XMLImporter();
     InputStream resourceAsStream = getClass().getResourceAsStream("/witness.xml");
-    VariantWitnessGraph wg = importer.importXML("A", resourceAsStream);
+    VariantWitnessGraph wg0 = importer.importXML("A", resourceAsStream);
+    VariantWitnessGraph wg = TokenMerger.merge(wg0);
 
     String dot = DotFactory.fromVariantWitnessGraph(wg);
     System.out.println(dot);
@@ -76,42 +71,47 @@ public class XMLImporterTest {
         "graph [rankdir=LR]\n" + //
         "labelloc=b\n" + //
         "st [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "t0 [label=<De&#9251;<br/>{<i>text, s</i>}>]\n" + //
-        "t1 [label=<vent&#9251;<br/>{<i>text, s</i>}>]\n" + //
-        "t2 [label=<was&#9251;<br/>{<i>text, s</i>}>]\n" + //
-        "t3 [label=<woedend&#9251;<br/>{<i>text, s</i>}>]\n" + //
-        "t4 [label=<en&#9251;<br/>{<i>text, s</i>}>]\n" + //
-        "t5 [label=<maakte&#9251;<br/>{<i>text, s</i>}>]\n" + //
-        "t6 [label=<Shiriar<br/>{<i>text, s, del</i>}>]\n" + //
-        "t7 [label=<den&#9251;<br/>{<i>text, s, add</i>}>]\n" + //
-        "t11 [label=<uit&#9251;<br/>{<i>text, s</i>}>]\n" + //
-        "t8 [label=<bedremmelden&#9251;<br/>{<i>text, s, add</i>}>]\n" + //
-        "t12 [label=<voor&#9251;<br/>{<i>text, s</i>}>]\n" + //
-        "t9 [label=<man<br/>{<i>text, s, add, del</i>}>]\n" + //
-        "t10 [label=<Sultan<br/>{<i>text, s, add, add</i>}>]\n" + //
-        "t13 [label=<\"lompen&#9251;<br/>{<i>text, s</i>}>]\n" + //
-        "t14 [label=<boer\"<br/>{<i>text, s</i>}>]\n" + //
-        "t15 [label=<.<br/>{<i>text, s</i>}>]\n" + //
+        "t0 [label=<De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/><i>A: /text/s</i>>]\n" + //
+        "t6 [label=<Shiriar<br/><i>A: /text/s/del</i>>]\n" + //
+        "t7 [label=<den&#9251;bedremmelden&#9251;<br/><i>A: /text/s/add</i>>]\n" + //
+        "t11 [label=<uit&#9251;voor&#9251;\"lompen&#9251;boer\".<br/><i>A: /text/s</i>>]\n" + //
+        "t9 [label=<man<br/><i>A: /text/s/add/del</i>>]\n" + //
+        "t10 [label=<Sultan<br/><i>A: /text/s/add/add</i>>]\n" + //
         "et [label=\"\";shape=doublecircle,rank=middle]\n" + //
         "st->t0\n" + //
-        "t0->t1\n" + //
-        "t1->t2\n" + //
-        "t2->t3\n" + //
-        "t3->t4\n" + //
-        "t4->t5\n" + //
-        "t5->t6\n" + //
-        "t5->t7\n" + //
-        "t6->t11\n" + //
-        "t7->t8\n" + //
-        "t11->t12\n" + //
-        "t8->t9\n" + //
-        "t8->t10\n" + //
-        "t12->t13\n" + //
-        "t9->t11\n" + //
+        "t0->t6\n" + //
+        "t0->t7\n" + //
         "t10->t11\n" + //
-        "t13->t14\n" + //
-        "t14->t15\n" + //
-        "t15->et\n" + //
+        "t11->et\n" + //
+        "t6->t11\n" + //
+        "t7->t10\n" + //
+        "t7->t9\n" + //
+        "t9->t11\n" + //
+        "}";
+    assertThat(dot).isEqualTo(expected);
+  }
+
+  @Test
+  public void testDelWithoutAdd() {
+    XMLImporter importer = new XMLImporter();
+    VariantWitnessGraph wg0 = importer.importXML("A", "<xml>Ja toch! <del>Niet dan?</del> Ik dacht het wel!</xml>");
+
+    VariantWitnessGraph wg = TokenMerger.merge(wg0);
+
+    String dot = DotFactory.fromVariantWitnessGraph(wg);
+    System.out.println(dot);
+    String expected = "digraph VariantWitnessGraph{\n" + //
+        "graph [rankdir=LR]\n" + //
+        "labelloc=b\n" + //
+        "st [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "t0 [label=<Ja&#9251;toch!&#9251;<br/><i>A: /xml</i>>]\n" + //
+        "t3 [label=<Niet&#9251;dan?<br/><i>A: /xml/del</i>>]\n" + //
+        "t6 [label=<Ik&#9251;dacht&#9251;het&#9251;wel!<br/><i>A: /xml</i>>]\n" + //
+        "et [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "st->t0\n" + //
+        "t0->t3\n" + //
+        "t3->t6\n" + //
+        "t6->et\n" + //
         "}";
     assertThat(dot).isEqualTo(expected);
   }

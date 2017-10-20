@@ -58,15 +58,15 @@ public class DotFactory {
         String tokenVariable = vertexVariable(tokenVertex);
         if (tokenVertex instanceof SimpleTokenVertex) {
           SimpleTokenVertex stv = (SimpleTokenVertex) tokenVertex;
-          String markup = graph.getMarkupListForTokenVertex(stv).stream()//
+          String markup = graph.getSigil() + ": /" + graph.getMarkupListForTokenVertex(stv).stream()//
               .map(Markup::getTagname)//
-              .collect(Collectors.joining(", "));
+              .collect(Collectors.joining("/"));
           dotBuilder.append(tokenVariable)//
               .append(" [label=<")//
               .append(stv.getContent().replaceAll(" ", "&#9251;"))//
-              .append("<br/>{<i>")//
+              .append("<br/><i>")//
               .append(markup)//
-              .append("</i>}")//
+              .append("</i>")//
               .append(">]\n");
         } else {
           dotBuilder.append(tokenVariable)//
@@ -80,7 +80,7 @@ public class DotFactory {
         verticesDone.add(tokenVertex);
       }
     }
-    edges.forEach(e -> dotBuilder.append(e).append("\n"));
+    edges.stream().sorted().forEach(e -> dotBuilder.append(e).append("\n"));
     dotBuilder.append("}");
     return dotBuilder.toString();
   }
