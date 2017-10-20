@@ -74,7 +74,7 @@ public class XMLImporterTest {
         "t0 [label=<De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/><i>A: /text/s</i>>]\n" + //
         "t6 [label=<Shiriar<br/><i>A: /text/s/del</i>>]\n" + //
         "t7 [label=<den&#9251;bedremmelden&#9251;<br/><i>A: /text/s/add</i>>]\n" + //
-        "t11 [label=<uit&#9251;voor&#9251;\"lompen&#9251;boer\".<br/><i>A: /text/s</i>>]\n" + //
+        "t11 [label=<&#9251;uit&#9251;voor&#9251;\"lompen&#9251;boer\".<br/><i>A: /text/s</i>>]\n" + //
         "t9 [label=<man<br/><i>A: /text/s/add/del</i>>]\n" + //
         "t10 [label=<Sultan<br/><i>A: /text/s/add/add</i>>]\n" + //
         "et [label=\"\";shape=doublecircle,rank=middle]\n" + //
@@ -106,7 +106,7 @@ public class XMLImporterTest {
         "st [label=\"\";shape=doublecircle,rank=middle]\n" + //
         "t0 [label=<Ja&#9251;toch!&#9251;<br/><i>A: /xml</i>>]\n" + //
         "t3 [label=<Niet&#9251;dan?<br/><i>A: /xml/del</i>>]\n" + //
-        "t6 [label=<Ik&#9251;dacht&#9251;het&#9251;wel!<br/><i>A: /xml</i>>]\n" + //
+        "t6 [label=<&#9251;Ik&#9251;dacht&#9251;het&#9251;wel!<br/><i>A: /xml</i>>]\n" + //
         "et [label=\"\";shape=doublecircle,rank=middle]\n" + //
         "st->t0\n" + //
         "t0->t3\n" + //
