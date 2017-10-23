@@ -26,10 +26,10 @@ import java.util.List;
 
 import org.junit.Test;
 
+import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.tools.DotFactory;
-import nl.knaw.huygens.hypercollate.tools.TokenMerger;
 
-public class VariantWitnessGraphTest {
+public class VariantWitnessGraphTest extends HyperCollateTest {
 
   @Test
   public void test() {
@@ -104,9 +104,6 @@ public class VariantWitnessGraphTest {
         "}";
     assertThat(dot).isEqualTo(expected);
 
-    VariantWitnessGraph mwg = TokenMerger.merge(vwg1);
-    String dot2 = DotFactory.fromVariantWitnessGraph(mwg);
-    System.out.println(dot2);
     String expected2 = "digraph VariantWitnessGraph{\n" + //
         "graph [rankdir=LR]\n" + //
         "labelloc=b\n" + //
@@ -123,7 +120,7 @@ public class VariantWitnessGraphTest {
         "t4->t5\n" + //
         "t5->et\n" + //
         "}";
-    assertThat(dot2).isEqualTo(expected2);
+    verifyDotExport(vwg1, expected2);
 
   }
 

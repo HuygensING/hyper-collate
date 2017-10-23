@@ -19,27 +19,20 @@ package nl.knaw.huygens.hypercollate.importer;
  * limitations under the License.
  * #L%
  */
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.InputStream;
 
 import org.junit.Test;
 
+import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
-import nl.knaw.huygens.hypercollate.tools.DotFactory;
-import nl.knaw.huygens.hypercollate.tools.TokenMerger;
 
-public class XMLImporterTest {
+public class XMLImporterTest extends HyperCollateTest {
 
   @Test
   public void testImportFromString() {
     XMLImporter importer = new XMLImporter();
     VariantWitnessGraph wg0 = importer.importXML("A", "<xml>Mondays are <del>well good</del><add>def bad</add>!</xml>");
-    VariantWitnessGraph wg = TokenMerger.merge(wg0);
-
-    String dot = DotFactory.fromVariantWitnessGraph(wg);
-    System.out.println(dot);
-    String expected = "digraph VariantWitnessGraph{\n" + //
+    String expectedDot = "digraph VariantWitnessGraph{\n" + //
         "graph [rankdir=LR]\n" + //
         "labelloc=b\n" + //
         "st [label=\"\";shape=doublecircle,rank=middle]\n" + //
@@ -55,7 +48,7 @@ public class XMLImporterTest {
         "t4->t6\n" + //
         "t6->et\n" + //
         "}";
-    assertThat(dot).isEqualTo(expected);
+    verifyDotExport(wg0, expectedDot);
   }
 
   @Test
@@ -63,10 +56,6 @@ public class XMLImporterTest {
     XMLImporter importer = new XMLImporter();
     InputStream resourceAsStream = getClass().getResourceAsStream("/witness.xml");
     VariantWitnessGraph wg0 = importer.importXML("A", resourceAsStream);
-    VariantWitnessGraph wg = TokenMerger.merge(wg0);
-
-    String dot = DotFactory.fromVariantWitnessGraph(wg);
-    System.out.println(dot);
     String expected = "digraph VariantWitnessGraph{\n" + //
         "graph [rankdir=LR]\n" + //
         "labelloc=b\n" + //
@@ -88,19 +77,15 @@ public class XMLImporterTest {
         "t7->t9\n" + //
         "t9->t11\n" + //
         "}";
-    assertThat(dot).isEqualTo(expected);
+
+    verifyDotExport(wg0, expected);
   }
 
   @Test
   public void testDelWithoutAdd() {
     XMLImporter importer = new XMLImporter();
     VariantWitnessGraph wg0 = importer.importXML("A", "<xml>Ja toch! <del>Niet dan?</del> Ik dacht het wel!</xml>");
-
-    VariantWitnessGraph wg = TokenMerger.merge(wg0);
-
-    String dot = DotFactory.fromVariantWitnessGraph(wg);
-    System.out.println(dot);
-    String expected = "digraph VariantWitnessGraph{\n" + //
+    String expectedDot = "digraph VariantWitnessGraph{\n" + //
         "graph [rankdir=LR]\n" + //
         "labelloc=b\n" + //
         "st [label=\"\";shape=doublecircle,rank=middle]\n" + //
@@ -113,7 +98,8 @@ public class XMLImporterTest {
         "t3->t6\n" + //
         "t6->et\n" + //
         "}";
-    assertThat(dot).isEqualTo(expected);
+
+    verifyDotExport(wg0, expectedDot);
   }
 
 }

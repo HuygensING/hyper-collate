@@ -64,7 +64,7 @@ public class DotFactory {
               .collect(Collectors.joining("/"));
           dotBuilder.append(tokenVariable)//
               .append(" [label=<")//
-              .append(stv.getContent().replaceAll(" ", "&#9251;"))//
+              .append(stv.getContent().replaceAll("\n", "&#x21A9;<br/>").replaceAll(" +", "&#9251;"))//
               .append("<br/><i>")//
               .append(markup)//
               .append("</i>")//

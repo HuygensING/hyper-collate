@@ -80,6 +80,10 @@ public class VariantWitnessGraph {
     return tokenVertex2MarkupList.getOrDefault(tokenVertex, new ArrayList<>());
   }
 
+  public List<TokenVertex> getTokenVertexListForMarkup(Markup markup) {
+    return markup2TokenVertexList.getOrDefault(markup, new ArrayList<>());
+  }
+
   public Iterable<TokenVertex> vertices() {
     return VariantWitnessGraphTraversal.of(this);
   }

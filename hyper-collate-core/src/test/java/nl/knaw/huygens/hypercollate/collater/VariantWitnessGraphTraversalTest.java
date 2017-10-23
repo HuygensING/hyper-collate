@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.EndTokenVertex;
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
@@ -38,7 +39,7 @@ import nl.knaw.huygens.hypercollate.model.TokenVertex;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 import nl.knaw.huygens.hypercollate.tools.TokenMerger;
 
-public class VariantWitnessGraphTraversalTest {
+public class VariantWitnessGraphTraversalTest extends HyperCollateTest {
 
   @Test
   public void testVariantWitnessGraphTraversal() {

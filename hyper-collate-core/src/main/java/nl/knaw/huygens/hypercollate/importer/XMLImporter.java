@@ -246,7 +246,11 @@ public class XMLImporter {
     }
 
     public void closeMarkup(Markup markup) {
-      Markup firstToClose = openMarkup.pop();
+      Markup firstToClose = openMarkup.peek();
+      if (graph.getTokenVertexListForMarkup(firstToClose).isEmpty()) {
+        addNewToken("");
+      }
+      openMarkup.pop();
       String closingTag = markup.getTagname();
       String expectedTag = firstToClose.getTagname();
       if (!expectedTag.equals(closingTag)) {
