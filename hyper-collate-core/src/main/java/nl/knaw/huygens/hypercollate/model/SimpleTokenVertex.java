@@ -64,4 +64,8 @@ public class SimpleTokenVertex implements TokenVertex {
     return token.getContent();
   }
 
+  public String getNormalizedContent() {
+    return token.getNormalizedContent();
+  }
+
 }

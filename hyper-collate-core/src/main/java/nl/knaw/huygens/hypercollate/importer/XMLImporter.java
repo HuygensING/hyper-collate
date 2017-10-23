@@ -52,7 +52,18 @@ import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
 public class XMLImporter {
 
-  Function<String, Stream<String>> tokenizer = SimplePatternTokenizer.BY_WS_OR_PUNCT;
+  private final Function<String, Stream<String>> tokenizer;
+  private final Function<String, String> normalizer;
+
+  public XMLImporter(Function<String, Stream<String>> tokenizer, Function<String, String> normalizer) {
+    this.tokenizer = tokenizer;
+    this.normalizer = normalizer;
+  }
+
+  public XMLImporter() {
+    this.tokenizer = SimplePatternTokenizer.BY_WS_OR_PUNCT;
+    this.normalizer = (String raw) -> raw.trim().toLowerCase();
+  }
 
   public VariantWitnessGraph importXML(String sigil, String xmlString) {
     InputStream inputStream;
@@ -78,7 +89,7 @@ public class XMLImporter {
     XMLInputFactory factory = XMLInputFactory.newInstance();
     try {
       XMLEventReader reader = factory.createXMLEventReader(input);
-      Context context = new Context(graph);
+      Context context = new Context(graph, normalizer);
       while (reader.hasNext()) {
         XMLEvent event = reader.nextEvent();
         switch (event.getEventType()) {
@@ -221,9 +232,11 @@ public class XMLImporter {
     private Deque<TokenVertex> variationStartVertices = new LinkedList<>(); // the tokenvertices whose outgoing vertices are the variant vertices (add/del)
     private Deque<TokenVertex> variationEndVertices = new LinkedList<>(); // the tokenvertices that are the last in a <del>
     private Deque<TokenVertex> unconnectedVertices = new LinkedList<>(); // the last tokenvertex in an <add> which hasn't been linked to the tokenvertex after the </del> yet
+    private Function<String, String> normalizer;
 
-    public Context(VariantWitnessGraph graph) {
+    public Context(VariantWitnessGraph graph, Function<String, String> normalizer) {
       this.graph = graph;
+      this.normalizer = normalizer;
       this.lastTokenVertex = graph.getStartTokenVertex();
     }
 
@@ -264,7 +277,7 @@ public class XMLImporter {
     }
 
     public void addNewToken(String content) {
-      MarkedUpToken token = new MarkedUpToken().setContent(content);
+      MarkedUpToken token = new MarkedUpToken().setContent(content).setNormalizedContent(normalizer.apply(content));
       SimpleTokenVertex tokenVertex = new SimpleTokenVertex(token.setIndexNumber(tokenCounter++));
       graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex);
       this.openMarkup.descendingIterator()//

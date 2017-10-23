@@ -19,14 +19,11 @@ package nl.knaw.huygens.hypercollate.collater;
  * limitations under the License.
  * #L%
  */
-
 import org.junit.Test;
 
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
-import nl.knaw.huygens.hypercollate.tools.DotFactory;
 
 public class HyperCollaterTest extends HyperCollateTest {
 
@@ -41,8 +38,6 @@ public class HyperCollaterTest extends HyperCollateTest {
         "    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !\n" + //
         "        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>\n" + //
         "</text>");
-    CollationGraph collation = HyperCollater.collate(wF, wQ);
-    System.out.println(collation);
 
     String expectedDotF = "digraph VariantWitnessGraph{\n" + //
         "graph [rankdir=LR]\n" + //
@@ -90,10 +85,13 @@ public class HyperCollaterTest extends HyperCollateTest {
         "}";
     verifyDotExport(wQ, expectedDotQ);
 
-    String dot = DotFactory.fromCollationGraph(collation);
-    System.out.println(dot);
-    String expected = "something";
-    // assertThat(dot).isEqualTo(expected);
+    // CollationGraph collation = HyperCollater.collate(wF, wQ);
+    // System.out.println(collation);
+    //
+    // String dot = DotFactory.fromCollationGraph(collation);
+    // System.out.println(dot);
+    // String expected = "something";
+    // // assertThat(dot).isEqualTo(expected);
 
   }
 
