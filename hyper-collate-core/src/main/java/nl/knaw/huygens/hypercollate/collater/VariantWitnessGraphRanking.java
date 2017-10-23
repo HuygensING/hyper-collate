@@ -1,5 +1,8 @@
 package nl.knaw.huygens.hypercollate.collater;
 
+import java.util.Collections;
+import java.util.Comparator;
+
 /*-
  * #%L
  * hyper-collate-core
@@ -22,27 +25,29 @@ package nl.knaw.huygens.hypercollate.collater;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
-public class VariantWitnessGraphRanking {
+public class VariantWitnessGraphRanking implements Iterable<Set<TokenVertex>>, Function<TokenVertex, Integer> {
 
   private final Map<TokenVertex, Integer> byVertex = new HashMap<>();
   private final SortedMap<Integer, Set<TokenVertex>> byRank = new TreeMap<>();
-  private final VariantWitnessGraph graph;
+  // private final VariantWitnessGraph graph;
 
-  VariantWitnessGraphRanking(VariantWitnessGraph graph) {
-    this.graph = graph;
-  }
+  // VariantWitnessGraphRanking(VariantWitnessGraph graph) {
+  // this.graph = graph;
+  // }
 
   public static VariantWitnessGraphRanking of(VariantWitnessGraph graph) {
-    final VariantWitnessGraphRanking ranking = new VariantWitnessGraphRanking(graph);
+    final VariantWitnessGraphRanking ranking = new VariantWitnessGraphRanking();
     for (TokenVertex v : graph.vertices()) {
       AtomicInteger rank = new AtomicInteger(-1);
       v.getIncomingTokenVertexStream().forEach(incoming -> rank.set(Math.max(rank.get(), ranking.byVertex.get(incoming))));
@@ -51,6 +56,32 @@ public class VariantWitnessGraphRanking {
       ranking.byRank.computeIfAbsent(rank.get(), r -> new HashSet<>()).add(v);
     }
     return ranking;
+  }
+
+  public Map<TokenVertex, Integer> getByVertex() {
+    return Collections.unmodifiableMap(byVertex);
+  }
+
+  public Map<Integer, Set<TokenVertex>> getByRank() {
+    return Collections.unmodifiableMap(byRank);
+  }
+
+  public int size() {
+    return byRank.keySet().size();
+  }
+
+  @Override
+  public Iterator<Set<TokenVertex>> iterator() {
+    return byRank.values().iterator();
+  }
+
+  @Override
+  public Integer apply(TokenVertex vertex) {
+    return byVertex.get(vertex);
+  }
+
+  public Comparator<TokenVertex> comparator() {
+    return Comparator.comparingInt(byVertex::get);
   }
 
 }

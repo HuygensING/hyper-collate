@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.model;
+package nl.knaw.huygens.hypercollate.collater;
 
 /*-
  * #%L
@@ -26,6 +26,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
+
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
 public class VariantWitnessGraphTraversal implements Iterable<TokenVertex> {
   private final VariantWitnessGraph graph;

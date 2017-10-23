@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import nl.knaw.huygens.hypercollate.collater.VariantWitnessGraphTraversal;
+
 public class VariantWitnessGraph {
 
   private String sigil = "";
