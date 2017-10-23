@@ -19,15 +19,22 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class VariantWitnessGraph {
 
   private String sigil = "";
+  private final List<TokenVertex> vertexList = new ArrayList<>();
+  private final List<Markup> markupList = new ArrayList<>();
+
   private final TokenVertex startTokenVertex = new StartTokenVertex();
   private final TokenVertex endTokenVertex = new EndTokenVertex();
-  private final List<Markup> markupList = new ArrayList<>();
+
   private final Map<Markup, List<TokenVertex>> markup2TokenVertexList = new HashMap<>();
   private final Map<TokenVertex, List<Markup>> tokenVertex2MarkupList = new HashMap<>();
 
@@ -69,6 +76,10 @@ public class VariantWitnessGraph {
 
   public List<Markup> getMarkupListForTokenVertex(TokenVertex tokenVertex) {
     return tokenVertex2MarkupList.getOrDefault(tokenVertex, new ArrayList<>());
+  }
+
+  public Iterable<TokenVertex> vertices() {
+    return VariantWitnessGraphTraversal.of(this);
   }
 
 }

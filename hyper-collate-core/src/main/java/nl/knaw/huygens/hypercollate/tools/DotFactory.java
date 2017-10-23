@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.EndTokenVertex;
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
 import nl.knaw.huygens.hypercollate.model.Markup;
@@ -97,6 +98,10 @@ public class DotFactory {
       return "et";
     }
     return null;
+  }
+
+  public static String fromCollationGraph(CollationGraph collation) {
+    return "";
   }
 
 }

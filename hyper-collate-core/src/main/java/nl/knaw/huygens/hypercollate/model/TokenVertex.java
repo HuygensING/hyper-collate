@@ -35,8 +35,4 @@ public interface TokenVertex {
 
   Stream<TokenVertex> getOutgoingTokenVertexStream();
 
-  // void addMarkup(Markup markup);
-  //
-  // Stream<Markup> getMarkupStream();
-
 }

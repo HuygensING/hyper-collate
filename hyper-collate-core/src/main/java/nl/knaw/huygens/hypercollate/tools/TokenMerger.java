@@ -43,15 +43,15 @@ public class TokenMerger {
     List<TokenVertex> verticesToAdd = originaltokenVertex.getOutgoingTokenVertexStream().collect(Collectors.toList());
     List<Long> handledTokens = new ArrayList<>();
     TokenVertex mergedVertexToLinkTo = mergedGraph.getStartTokenVertex();
-    verticesToAdd.forEach(originalVertex -> handle(originalGraph, mergedGraph, originalToMergedMap, handledTokens,//
+    verticesToAdd.forEach(originalVertex -> handle(originalGraph, mergedGraph, originalToMergedMap, handledTokens, //
         originalVertex, mergedVertexToLinkTo));
     return mergedGraph;
   }
 
-  private static void handle(VariantWitnessGraph originalGraph, VariantWitnessGraph mergedGraph,//
-                             Map<Long, TokenVertex> originalToMergedMap, List<Long> handledTokens,//
-                              TokenVertex originalVertex,
-      TokenVertex mergedVertexToLinkTo) {
+  private static void handle(VariantWitnessGraph originalGraph, VariantWitnessGraph mergedGraph, //
+      Map<Long, TokenVertex> originalToMergedMap, List<Long> handledTokens, //
+      TokenVertex originalVertex, TokenVertex mergedVertexToLinkTo) {
+
     if (originalVertex instanceof EndTokenVertex) {
       TokenVertex endTokenVertex = mergedGraph.getEndTokenVertex();
       originalVertex.getIncomingTokenVertexStream().forEach(tv -> {
@@ -62,23 +62,24 @@ public class TokenMerger {
       return;
     }
 
-    MarkedUpToken token = (MarkedUpToken) originalVertex.getToken();
-    if (handledTokens.contains(token.getIndexNumber())) {
-      TokenVertex mergedTokenVertex = originalToMergedMap.get(token.getIndexNumber());
+    MarkedUpToken originalToken = (MarkedUpToken) originalVertex.getToken();
+    Long tokenNumber = originalToken.getIndexNumber();
+    if (handledTokens.contains(tokenNumber)) {
+      TokenVertex mergedTokenVertex = originalToMergedMap.get(tokenNumber);
       mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedVertexToLinkTo, mergedTokenVertex);
       return;
     }
 
     MarkedUpToken mergedToken = new MarkedUpToken()//
-        .setContent(token.getContent())//
-        .setIndexNumber(token.getIndexNumber());
+        .setContent(originalToken.getContent())//
+        .setIndexNumber(tokenNumber);
 
     SimpleTokenVertex mergedVertex = new SimpleTokenVertex(mergedToken);
     originalGraph.getMarkupListForTokenVertex(originalVertex)//
         .forEach(markup -> mergedGraph.addMarkupToTokenVertex(mergedVertex, markup));
-    originalToMergedMap.put(token.getIndexNumber(), mergedVertex);
+    originalToMergedMap.put(tokenNumber, mergedVertex);
     mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedVertexToLinkTo, mergedVertex);
-    handledTokens.add(token.getIndexNumber());
+    handledTokens.add(tokenNumber);
     List<TokenVertex> originalOutgoingVertices = originalVertex.getOutgoingTokenVertexStream().collect(Collectors.toList());
     while (canMerge(originalGraph, originalVertex, originalOutgoingVertices)) {
       MarkedUpToken nextOriginalToken = (MarkedUpToken) originalOutgoingVertices.get(0).getToken();
