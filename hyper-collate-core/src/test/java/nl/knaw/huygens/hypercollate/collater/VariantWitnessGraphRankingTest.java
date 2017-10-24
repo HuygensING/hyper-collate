@@ -20,22 +20,18 @@ package nl.knaw.huygens.hypercollate.collater;
  * #L%
  */
 
-import static org.assertj.core.api.Assertions.assertThat;
+import nl.knaw.huygens.hypercollate.HyperCollateTest;
+import nl.knaw.huygens.hypercollate.importer.XMLImporter;
+import nl.knaw.huygens.hypercollate.model.*;
+import nl.knaw.huygens.hypercollate.tools.TokenMerger;
+import org.junit.Test;
 
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-
-import nl.knaw.huygens.hypercollate.HyperCollateTest;
-import nl.knaw.huygens.hypercollate.importer.XMLImporter;
-import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.StartTokenVertex;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
-import nl.knaw.huygens.hypercollate.tools.TokenMerger;
+import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class VariantWitnessGraphRankingTest extends HyperCollateTest {
 
@@ -60,17 +56,17 @@ public class VariantWitnessGraphRankingTest extends HyperCollateTest {
     assertThat(content).isEqualTo("Een ongeluk komt ");
 
     assertThat(byRank.get(2)).hasSize(2);
-    Iterator<TokenVertex> iterator = byRank.get(2).iterator();
+    List<TokenVertex> tokenVertices = byRank.get(2).stream().sorted().collect(toList());
 
-    TokenVertex tokenVertex1 = iterator.next();
+    TokenVertex tokenVertex1 = tokenVertices.get(0);
     assertThat(tokenVertex1).isInstanceOf(SimpleTokenVertex.class);
     String content1 = ((MarkedUpToken) tokenVertex1.getToken()).getContent();
-    // assertThat(content1).isEqualTo("nooit");
+    assertThat(content1).isEqualTo("nooit");
 
-    TokenVertex tokenVertex2 = iterator.next();
+    TokenVertex tokenVertex2 = tokenVertices.get(1);
     assertThat(tokenVertex2).isInstanceOf(SimpleTokenVertex.class);
     String content2 = ((MarkedUpToken) tokenVertex2.getToken()).getContent();
-    // assertThat(content2).isEqualTo("zelden");
+    assertThat(content2).isEqualTo("zelden");
 
     // Map<TokenVertex, Integer> byVertex = ranking.getByVertex();
 
