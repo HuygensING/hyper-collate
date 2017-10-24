@@ -1,9 +1,16 @@
 package nl.knaw.huygens.hypercollate.collater;
 
+import eu.interedition.collatex.VariantGraph.Vertex;
+import nl.knaw.huygens.hypercollate.model.CollationGraph;
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+
+import java.util.*;
+import java.util.function.BiFunction;
+
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
-
-import java.util.ArrayList;
 
 /*-
  * #%L
@@ -14,9 +21,9 @@ import java.util.ArrayList;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,19 +31,6 @@ import java.util.ArrayList;
  * limitations under the License.
  * #L%
  */
-
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-
-import eu.interedition.collatex.VariantGraph.Vertex;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
 public class HyperCollater {
 
@@ -58,19 +52,21 @@ public class HyperCollater {
       SimpleTokenVertex stv1 = m1.getTokenVertexForWitness(sigil);
       Integer rank1 = ranking1.apply(stv1);
       SimpleTokenVertex stv2 = m2.getTokenVertexForWitness(sigil);
-      Integer rank2 = ranking2.apply(stv2);
+      Integer rank2 = ranking1.apply(stv2);
       return rank1.compareTo(rank2);
     };
     Comparator<Match> bySecondWitness = (m1, m2) -> {
       String sigil = graphs[1].getSigil();
       SimpleTokenVertex stv1 = m1.getTokenVertexForWitness(sigil);
-      Integer rank1 = ranking1.apply(stv1);
+      Integer rank1 = ranking2.apply(stv1);
       SimpleTokenVertex stv2 = m2.getTokenVertexForWitness(sigil);
       Integer rank2 = ranking2.apply(stv2);
       return rank1.compareTo(rank2);
     };
     List<Match> matchesSortedByFirstWitness = matches.stream().sorted(byFirstWitness).collect(toList());
     List<Match> matchesSortedBySecondWitness = matches.stream().sorted(bySecondWitness).collect(toList());
+
+    
 
     // merge(collationGraph, firstWitness, Collections.emptyMap());
 

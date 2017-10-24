@@ -72,4 +72,8 @@ public class SimpleTokenVertex implements TokenVertex, Comparable<SimpleTokenVer
   public int compareTo(SimpleTokenVertex other) {
     return token.getIndexNumber().compareTo(other.token.getIndexNumber());
   }
+
+  public Long getIndexNumber() {
+    return token.getIndexNumber();
+  }
 }

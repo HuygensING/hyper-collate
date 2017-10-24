@@ -20,14 +20,14 @@ package nl.knaw.huygens.hypercollate.collater;
  * #L%
  */
 
-import java.util.HashMap;
-import java.util.Map;
-
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+
+import java.util.Map;
+import java.util.TreeMap;
 
 public class Match {
 
-  Map<String, SimpleTokenVertex> tokenVertexMap = new HashMap<>();
+  Map<String, SimpleTokenVertex> tokenVertexMap = new TreeMap<>();
 
   public Match(SimpleTokenVertex... matchingTokenVertices) {
     for (SimpleTokenVertex mtv : matchingTokenVertices) {
@@ -43,4 +43,16 @@ public class Match {
     return tokenVertexMap.get(sigil);
   }
 
+  @Override
+  public String toString() {
+    StringBuilder stringBuilder = new StringBuilder();
+    tokenVertexMap.forEach((k,v)->//
+        stringBuilder.append(k)//
+            .append(":")//
+            .append(v.getIndexNumber())//
+            .append(":'")//
+            .append(v.getContent())//
+            .append("' "));
+    return stringBuilder.toString();
+  }
 }

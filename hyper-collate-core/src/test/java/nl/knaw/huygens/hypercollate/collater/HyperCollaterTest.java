@@ -19,11 +19,15 @@ package nl.knaw.huygens.hypercollate.collater;
  * limitations under the License.
  * #L%
  */
-import org.junit.Test;
 
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
+import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+import nl.knaw.huygens.hypercollate.tools.DotFactory;
+import org.junit.Test;
+
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 public class HyperCollaterTest extends HyperCollateTest {
 
@@ -85,13 +89,13 @@ public class HyperCollaterTest extends HyperCollateTest {
         "}";
     verifyDotExport(wQ, expectedDotQ);
 
-    // CollationGraph collation = HyperCollater.collate(wF, wQ);
-    // System.out.println(collation);
-    //
-    // String dot = DotFactory.fromCollationGraph(collation);
-    // System.out.println(dot);
-    // String expected = "something";
-    // // assertThat(dot).isEqualTo(expected);
+    CollationGraph collation = HyperCollater.collate(wF, wQ);
+    System.out.println(collation);
+
+    String dot = DotFactory.fromCollationGraph(collation);
+    System.out.println(dot);
+    String expected = "something";
+    assertThat(dot).isEqualTo(expected);
 
   }
 

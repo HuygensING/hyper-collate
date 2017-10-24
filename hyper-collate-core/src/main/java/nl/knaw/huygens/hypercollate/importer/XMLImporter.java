@@ -20,35 +20,21 @@ package nl.knaw.huygens.hypercollate.importer;
  * #L%
  */
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.function.Function;
-import java.util.stream.Stream;
+import eu.interedition.collatex.simple.SimplePatternTokenizer;
+import nl.knaw.huygens.hypercollate.model.*;
+import org.apache.commons.io.FileUtils;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.Attribute;
-import javax.xml.stream.events.Characters;
-import javax.xml.stream.events.EndElement;
-import javax.xml.stream.events.StartElement;
-import javax.xml.stream.events.XMLEvent;
-
-import org.apache.commons.io.FileUtils;
-
-import eu.interedition.collatex.simple.SimplePatternTokenizer;
-import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
-import nl.knaw.huygens.hypercollate.model.Markup;
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+import javax.xml.stream.events.*;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class XMLImporter {
 
@@ -86,10 +72,11 @@ public class XMLImporter {
 
   public VariantWitnessGraph importXML(String sigil, InputStream input) {
     VariantWitnessGraph graph = new VariantWitnessGraph(sigil);
+    SimpleWitness witness = new SimpleWitness(sigil);
     XMLInputFactory factory = XMLInputFactory.newInstance();
     try {
       XMLEventReader reader = factory.createXMLEventReader(input);
-      Context context = new Context(graph, normalizer);
+      Context context = new Context(graph, normalizer,witness);
       while (reader.hasNext()) {
         XMLEvent event = reader.nextEvent();
         switch (event.getEventType()) {
@@ -233,11 +220,13 @@ public class XMLImporter {
     private Deque<TokenVertex> variationEndVertices = new LinkedList<>(); // the tokenvertices that are the last in a <del>
     private Deque<TokenVertex> unconnectedVertices = new LinkedList<>(); // the last tokenvertex in an <add> which hasn't been linked to the tokenvertex after the </del> yet
     private Function<String, String> normalizer;
+    private SimpleWitness witness;
 
-    public Context(VariantWitnessGraph graph, Function<String, String> normalizer) {
+    public Context(VariantWitnessGraph graph, Function<String, String> normalizer, SimpleWitness witness) {
       this.graph = graph;
       this.normalizer = normalizer;
       this.lastTokenVertex = graph.getStartTokenVertex();
+      this.witness = witness;
     }
 
     public void openMarkup(Markup markup) {
@@ -277,7 +266,10 @@ public class XMLImporter {
     }
 
     public void addNewToken(String content) {
-      MarkedUpToken token = new MarkedUpToken().setContent(content).setNormalizedContent(normalizer.apply(content));
+      MarkedUpToken token = new MarkedUpToken()//
+          .setContent(content)//
+          .setWitness(witness)//
+          .setNormalizedContent(normalizer.apply(content));
       SimpleTokenVertex tokenVertex = new SimpleTokenVertex(token.setIndexNumber(tokenCounter++));
       graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex);
       this.openMarkup.descendingIterator()//

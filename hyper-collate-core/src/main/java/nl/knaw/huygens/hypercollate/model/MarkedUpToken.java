@@ -48,6 +48,11 @@ public class MarkedUpToken implements Token {
     return this.normalizedContent;
   }
 
+  public MarkedUpToken setWitness(SimpleWitness witness) {
+    this.witness = witness;
+    return this;
+  }
+
   @Override
   public Witness getWitness() {
     return witness;

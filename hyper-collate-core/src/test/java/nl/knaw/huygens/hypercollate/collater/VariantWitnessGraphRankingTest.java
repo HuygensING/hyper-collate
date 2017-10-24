@@ -43,7 +43,7 @@ public class VariantWitnessGraphRankingTest extends HyperCollateTest {
 
     VariantWitnessGraphRanking ranking = VariantWitnessGraphRanking.of(witnessGraph);
     Map<Integer, Set<TokenVertex>> byRank = ranking.getByRank();
-    byRank.entrySet().forEach(entry -> System.out.println(entry.getKey() + ":" + entry.getValue()));
+    byRank.forEach((key, value) -> System.out.println(key + ":" + value));
 
     assertThat(byRank.get(0)).hasSize(1);
     assertThat(byRank.get(0).iterator().next()).isInstanceOf(StartTokenVertex.class);
