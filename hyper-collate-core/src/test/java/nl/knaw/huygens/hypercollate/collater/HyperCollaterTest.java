@@ -95,7 +95,9 @@ public class HyperCollaterTest extends HyperCollateTest {
 
     String dot = DotFactory.fromCollationGraph(collation);
     System.out.println(dot);
-    String expected = "";
+    String expected = "digraph CollationGraph{\n" + //
+        "labelloc=b\n" + //
+        "}";
     assertThat(dot).isEqualTo(expected);
 
   }

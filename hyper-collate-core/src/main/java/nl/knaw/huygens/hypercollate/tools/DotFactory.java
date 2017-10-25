@@ -100,7 +100,9 @@ public class DotFactory {
   }
 
   public static String fromCollationGraph(CollationGraph collation) {
-    return "";
+    StringBuilder dotBuilder = new StringBuilder("digraph CollationGraph{\nlabelloc=b\n");
+    dotBuilder.append("}");
+    return dotBuilder.toString();
   }
 
 }

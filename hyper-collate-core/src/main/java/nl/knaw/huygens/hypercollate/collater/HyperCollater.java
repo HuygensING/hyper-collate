@@ -28,13 +28,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiFunction;
 
-import eu.interedition.collatex.VariantGraph.Vertex;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
 public class HyperCollater {
@@ -56,48 +53,33 @@ public class HyperCollater {
 
   public static CollationGraph collate(VariantWitnessGraph... graphs) {
     CollationGraph collationGraph = new CollationGraph();
-    Iterator<VariantWitnessGraph> witnessIterable = Arrays.asList(graphs).iterator();
-    VariantWitnessGraph firstWitness = witnessIterable.next();
-    VariantWitnessGraph secondWitness = witnessIterable.next();
-
-    VariantWitnessGraphRanking ranking1 = VariantWitnessGraphRanking.of(firstWitness);
-    VariantWitnessGraphRanking ranking2 = VariantWitnessGraphRanking.of(secondWitness);
-
-    List<Match> matches = match(firstWitness, secondWitness);
-    Comparator<Match> byFirstWitness = (m1, m2) -> {
-      String sigil = graphs[0].getSigil();
-      SimpleTokenVertex stv1 = m1.getTokenVertexForWitness(sigil);
-      Integer rank1 = ranking1.apply(stv1);
-      SimpleTokenVertex stv2 = m2.getTokenVertexForWitness(sigil);
-      Integer rank2 = ranking1.apply(stv2);
-      return rank1.compareTo(rank2);
-    };
-    Comparator<Match> bySecondWitness = (m1, m2) -> {
-      String sigil = graphs[1].getSigil();
-      SimpleTokenVertex stv1 = m1.getTokenVertexForWitness(sigil);
-      Integer rank1 = ranking2.apply(stv1);
-      SimpleTokenVertex stv2 = m2.getTokenVertexForWitness(sigil);
-      Integer rank2 = ranking2.apply(stv2);
-      return rank1.compareTo(rank2);
-    };
-    List<Match> matchesSortedByFirstWitness = matches.stream().sorted(byFirstWitness).collect(toList());
-    List<Match> matchesSortedBySecondWitness = matches.stream().sorted(bySecondWitness).collect(toList());
-
-    int rank1 = 0;
-    int rank2 = 0;
     String sigil1 = graphs[0].getSigil();
     String sigil2 = graphs[1].getSigil();
 
-    while (!matchesSortedByFirstWitness.isEmpty()) {
-      Match matchOption1 = matchesSortedByFirstWitness.get(0);
-      Match matchOption2 = matchesSortedBySecondWitness.get(0);
+    Iterator<VariantWitnessGraph> witnessIterable = Arrays.asList(graphs).iterator();
+    VariantWitnessGraph witness1 = witnessIterable.next();
+    VariantWitnessGraph witness2 = witnessIterable.next();
 
+    List<Match> matches = match(witness1, witness2);
+
+    VariantWitnessGraphRanking ranking1 = VariantWitnessGraphRanking.of(witness1);
+    List<Match> matchesSortedByWitness1 = sortMatchesByWitness(matches, sigil1, ranking1);
+
+    VariantWitnessGraphRanking ranking2 = VariantWitnessGraphRanking.of(witness2);
+    List<Match> matchesSortedByWitness2 = sortMatchesByWitness(matches, sigil2, ranking2);
+
+    int rank1 = 0;
+    int rank2 = 0;
+
+    while (!matchesSortedByWitness1.isEmpty()) {
+      Match matchOption1 = matchesSortedByWitness1.get(0);
       SimpleTokenVertex tokenVertex11 = matchOption1.getTokenVertexForWitness(sigil1);
       int rank11 = ranking1.apply(tokenVertex11);
       SimpleTokenVertex tokenVertex12 = matchOption1.getTokenVertexForWitness(sigil2);
       int rank12 = ranking2.apply(tokenVertex12);
       int diff1 = rank11 - rank1 + rank12 - rank2;
 
+      Match matchOption2 = matchesSortedByWitness2.get(0);
       SimpleTokenVertex tokenVertex21 = matchOption2.getTokenVertexForWitness(sigil1);
       int rank21 = ranking1.apply(tokenVertex21);
       SimpleTokenVertex tokenVertex22 = matchOption2.getTokenVertexForWitness(sigil2);
@@ -116,8 +98,10 @@ public class HyperCollater {
       }
       System.out.println(match);
 
-      matchesSortedByFirstWitness.remove(match);
-      matchesSortedBySecondWitness.remove(match);
+      SimpleTokenVertex tokenVertexForWitness1 = match.getTokenVertexForWitness(sigil1);
+      SimpleTokenVertex tokenVertexForWitness2 = match.getTokenVertexForWitness(sigil2);
+      removeUnusableMatches(matchesSortedByWitness1, sigil1, sigil2, tokenVertexForWitness1, tokenVertexForWitness2);
+      removeUnusableMatches(matchesSortedByWitness2, sigil1, sigil2, tokenVertexForWitness1, tokenVertexForWitness2);
 
       // TODO something
 
@@ -127,10 +111,38 @@ public class HyperCollater {
     return collationGraph;
   }
 
-  private static List<Match> match(VariantWitnessGraph firstWitness, VariantWitnessGraph secondWitness) {
+  private static List<Match> sortMatchesByWitness(List<Match> matches, String sigil, VariantWitnessGraphRanking ranking) {
+    Comparator<Match> matchComparator = matchComparator(ranking, sigil);
+    return matches.stream()//
+        .sorted(matchComparator)//
+        .collect(toList());
+  }
+
+  private static Comparator<Match> matchComparator(VariantWitnessGraphRanking ranking, String sigil) {
+    Comparator<Match> comparator = (match1, match2) -> {
+      SimpleTokenVertex vertex1 = match1.getTokenVertexForWitness(sigil);
+      Integer rank1 = ranking.apply(vertex1);
+      SimpleTokenVertex vertex2 = match2.getTokenVertexForWitness(sigil);
+      Integer rank2 = ranking.apply(vertex2);
+      return rank1.compareTo(rank2);
+    };
+    return comparator;
+  }
+
+  private static void removeUnusableMatches(List<Match> matchesSortedByWitness, //
+      String sigil1, String sigil2, //
+      SimpleTokenVertex tokenVertexForWitness1, SimpleTokenVertex tokenVertexForWitness2) {
+    List<Match> matchesToRemove = matchesSortedByWitness.stream()//
+        .filter(m -> m.getTokenVertexForWitness(sigil1).equals(tokenVertexForWitness1) //
+            || m.getTokenVertexForWitness(sigil2).equals(tokenVertexForWitness2))//
+        .collect(toList());
+    matchesSortedByWitness.removeAll(matchesToRemove);
+  }
+
+  private static List<Match> match(VariantWitnessGraph witness1, VariantWitnessGraph witness2) {
     List<Match> matches = new ArrayList<>();
-    VariantWitnessGraphTraversal traversal1 = VariantWitnessGraphTraversal.of(firstWitness);
-    VariantWitnessGraphTraversal traversal2 = VariantWitnessGraphTraversal.of(secondWitness);
+    VariantWitnessGraphTraversal traversal1 = VariantWitnessGraphTraversal.of(witness1);
+    VariantWitnessGraphTraversal traversal2 = VariantWitnessGraphTraversal.of(witness2);
     stream(traversal1)//
         .filter(tv -> tv instanceof SimpleTokenVertex)//
         .map(SimpleTokenVertex.class::cast)//
@@ -145,16 +157,16 @@ public class HyperCollater {
     return matches;
   }
 
-  private static void merge(CollationGraph collationGraph, VariantWitnessGraph witnessGraph, Map<Object, Object> alignmentMap) {
-    Vertex start = collationGraph.getStart();
-    if (collationGraph.isEmpty()) {
-      TokenVertex startTokenVertex = witnessGraph.getStartTokenVertex();
-      startTokenVertex.getOutgoingTokenVertexStream().forEach(tv -> {
-        // start.add
-      });
-    } else {
-
-    }
-
-  }
+  // private static void merge(CollationGraph collationGraph, VariantWitnessGraph witnessGraph, Map<Object, Object> alignmentMap) {
+  // Vertex start = collationGraph.getStart();
+  // if (collationGraph.isEmpty()) {
+  // TokenVertex startTokenVertex = witnessGraph.getStartTokenVertex();
+  // startTokenVertex.getOutgoingTokenVertexStream().forEach(tv -> {
+  // // start.add
+  // });
+  // } else {
+  //
+  // }
+  //
+  // }
 }
