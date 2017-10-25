@@ -20,6 +20,8 @@ package nl.knaw.huygens.hypercollate.collater;
  * #L%
  */
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.Test;
 
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
@@ -35,11 +37,11 @@ public class HyperCollaterTest extends HyperCollateTest {
     XMLImporter importer = new XMLImporter();
     VariantWitnessGraph wF = importer.importXML("F", "<text>\n" + //
         "    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,\n" + //
-        "        de ongewisheid v??r de <lb/>liefelijke toestemming!</s>\n" + //
+        "        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>\n" + //
         "</text>");
     VariantWitnessGraph wQ = importer.importXML("Q", "<text>\n" + //
         "    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !\n" + //
-        "        Die dagen van nerveuze verwachting v??r de liefelijke toestemming.</s>\n" + //
+        "        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>\n" + //
         "</text>");
 
     String expectedDotF = "digraph VariantWitnessGraph{\n" + //
@@ -50,15 +52,15 @@ public class HyperCollaterTest extends HyperCollateTest {
         "t6 [label=<<br/><i>F: /text/s/lb</i>>]\n" + //
         "t7 [label=<werven&#9251;om<br/><i>F: /text/s/del</i>>]\n" + //
         "t9 [label=<trachten&#9251;naar<br/><i>F: /text/s/add</i>>]\n" + //
-        "t11 [label=<&#9251;een&#9251;vrouw,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;v??r&#9251;de&#9251;<br/><i>F: /text/s</i>>]\n" + //
-        "t21 [label=<<br/><i>F: /text/s/lb</i>>]\n" + //
-        "t22 [label=<liefelijke&#9251;toestemming!<br/><i>F: /text/s</i>>]\n" + //
+        "t11 [label=<&#9251;een&#9251;vrouw,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;vóór&#9251;de&#9251;<br/><i>F: /text/s</i>>]\n" + //
+        "t19 [label=<<br/><i>F: /text/s/lb</i>>]\n" + //
+        "t20 [label=<liefelijke&#9251;toestemming!<br/><i>F: /text/s</i>>]\n" + //
         "et [label=\"\";shape=doublecircle,rank=middle]\n" + //
         "st->t0\n" + //
         "t0->t6\n" + //
-        "t11->t21\n" + //
-        "t21->t22\n" + //
-        "t22->et\n" + //
+        "t11->t19\n" + //
+        "t19->t20\n" + //
+        "t20->et\n" + //
         "t6->t7\n" + //
         "t6->t9\n" + //
         "t7->t11\n" + //
@@ -75,7 +77,7 @@ public class HyperCollaterTest extends HyperCollateTest {
         "t8 [label=<trachten&#9251;naar<br/><i>Q: /text/s/add</i>>]\n" + //
         "t10 [label=<&#9251;een&#9251;<br/><i>Q: /text/s</i>>]\n" + //
         "t12 [label=<<br/><i>Q: /text/s/lb</i>>]\n" + //
-        "t13 [label=<vrouw&#9251;!&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;nerveuze&#9251;verwachting&#9251;v??r&#9251;de&#9251;liefelijke&#9251;toestemming.<br/><i>Q: /text/s</i>>]\n" + //
+        "t13 [label=<vrouw&#9251;!&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;nerveuze&#9251;verwachting&#9251;vóór&#9251;de&#9251;liefelijke&#9251;toestemming.<br/><i>Q: /text/s</i>>]\n" + //
         "et [label=\"\";shape=doublecircle,rank=middle]\n" + //
         "st->t0\n" + //
         "t0->t6\n" + //
@@ -93,8 +95,8 @@ public class HyperCollaterTest extends HyperCollateTest {
 
     String dot = DotFactory.fromCollationGraph(collation);
     System.out.println(dot);
-    String expected = "something";
-    // assertThat(dot).isEqualTo(expected);
+    String expected = "";
+    assertThat(dot).isEqualTo(expected);
 
   }
 
