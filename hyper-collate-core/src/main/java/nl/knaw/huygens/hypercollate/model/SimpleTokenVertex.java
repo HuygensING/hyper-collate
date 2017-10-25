@@ -19,11 +19,12 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
-import eu.interedition.collatex.Token;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+
+import eu.interedition.collatex.Token;
 
 public class SimpleTokenVertex implements TokenVertex, Comparable<SimpleTokenVertex> {
 
@@ -66,6 +67,10 @@ public class SimpleTokenVertex implements TokenVertex, Comparable<SimpleTokenVer
 
   public String getNormalizedContent() {
     return token.getNormalizedContent();
+  }
+
+  public String getParentXPath() {
+    return token.getParentXPath();
   }
 
   @Override

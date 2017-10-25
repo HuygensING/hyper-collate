@@ -19,6 +19,7 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;

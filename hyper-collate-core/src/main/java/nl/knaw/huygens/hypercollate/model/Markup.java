@@ -19,6 +19,7 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;

@@ -19,6 +19,7 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
+
 import java.util.stream.Stream;
 
 import eu.interedition.collatex.Token;

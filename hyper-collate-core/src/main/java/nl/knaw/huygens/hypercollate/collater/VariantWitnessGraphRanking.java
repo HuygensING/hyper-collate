@@ -1,8 +1,5 @@
 package nl.knaw.huygens.hypercollate.collater;
 
-import java.util.Collections;
-import java.util.Comparator;
-
 /*-
  * #%L
  * hyper-collate-core
@@ -22,6 +19,9 @@ import java.util.Comparator;
  * limitations under the License.
  * #L%
  */
+
+import java.util.Collections;
+import java.util.Comparator;
 
 import java.util.HashMap;
 import java.util.HashSet;

@@ -19,6 +19,7 @@ package nl.knaw.huygens.hypercollate.importer;
  * limitations under the License.
  * #L%
  */
+
 import java.io.InputStream;
 
 import org.junit.Test;

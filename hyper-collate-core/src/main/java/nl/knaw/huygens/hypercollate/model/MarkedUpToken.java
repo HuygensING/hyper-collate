@@ -67,8 +67,9 @@ public class MarkedUpToken implements Token {
     return this.index;
   }
 
-  public void setParentXPath(String parentXPath) {
+  public MarkedUpToken setParentXPath(String parentXPath) {
     this.parentXPath = parentXPath;
+    return this;
   }
 
   public String getParentXPath() {

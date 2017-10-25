@@ -26,12 +26,10 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.EndTokenVertex;
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
-import nl.knaw.huygens.hypercollate.model.Markup;
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
 import nl.knaw.huygens.hypercollate.model.StartTokenVertex;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
@@ -59,9 +57,10 @@ public class DotFactory {
         String tokenVariable = vertexVariable(tokenVertex);
         if (tokenVertex instanceof SimpleTokenVertex) {
           SimpleTokenVertex stv = (SimpleTokenVertex) tokenVertex;
-          String markup = graph.getSigil() + ": /" + graph.getMarkupListForTokenVertex(stv).stream()//
-              .map(Markup::getTagname)//
-              .collect(Collectors.joining("/"));
+          // String markup = graph.getSigil() + ": /" + graph.getMarkupListForTokenVertex(stv).stream()//
+          // .map(Markup::getTagname)//
+          // .collect(Collectors.joining("/"));
+          String markup = graph.getSigil() + ": " + stv.getParentXPath();
           dotBuilder.append(tokenVariable)//
               .append(" [label=<")//
               .append(stv.getContent().replaceAll("\n", "&#x21A9;<br/>").replaceAll(" +", "&#9251;"))//

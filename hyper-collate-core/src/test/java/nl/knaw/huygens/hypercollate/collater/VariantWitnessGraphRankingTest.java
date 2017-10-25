@@ -20,18 +20,23 @@ package nl.knaw.huygens.hypercollate.collater;
  * #L%
  */
 
-import nl.knaw.huygens.hypercollate.HyperCollateTest;
-import nl.knaw.huygens.hypercollate.importer.XMLImporter;
-import nl.knaw.huygens.hypercollate.model.*;
-import nl.knaw.huygens.hypercollate.tools.TokenMerger;
-import org.junit.Test;
+import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static java.util.stream.Collectors.toList;
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import nl.knaw.huygens.hypercollate.HyperCollateTest;
+import nl.knaw.huygens.hypercollate.importer.XMLImporter;
+import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+import nl.knaw.huygens.hypercollate.model.StartTokenVertex;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+import nl.knaw.huygens.hypercollate.tools.TokenMerger;
 
 public class VariantWitnessGraphRankingTest extends HyperCollateTest {
 

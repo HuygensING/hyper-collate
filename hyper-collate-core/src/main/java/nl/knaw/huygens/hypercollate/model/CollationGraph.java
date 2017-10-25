@@ -1,8 +1,5 @@
 package nl.knaw.huygens.hypercollate.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /*-
  * #%L
  * hyper-collate-core
@@ -22,6 +19,10 @@ import java.util.List;
  * limitations under the License.
  * #L%
  */
+
+import java.util.ArrayList;
+import java.util.List;
+
 import eu.interedition.collatex.VariantGraph.Vertex;
 
 public class CollationGraph {

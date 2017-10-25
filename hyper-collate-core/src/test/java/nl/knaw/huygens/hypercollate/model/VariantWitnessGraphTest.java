@@ -19,6 +19,7 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
+
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,12 +40,12 @@ public class VariantWitnessGraphTest extends HyperCollateTest {
     Markup delMarkup = new Markup("del");
     Markup addMarkup = new Markup("add");
 
-    SimpleTokenVertex mtv0 = aTokenVertex("Collating ", 0L);
-    SimpleTokenVertex mtv1 = aTokenVertex("is ", 1L);
-    SimpleTokenVertex mtv2 = aTokenVertex("NP ", 2L);
-    SimpleTokenVertex mtv3 = aTokenVertex("hard", 3L);
-    SimpleTokenVertex mtv4 = aTokenVertex("easy", 4L);
-    SimpleTokenVertex mtv5 = aTokenVertex(".", 5L);
+    SimpleTokenVertex mtv0 = aTokenVertex("Collating ", 0L, "/s");
+    SimpleTokenVertex mtv1 = aTokenVertex("is ", 1L, "/s");
+    SimpleTokenVertex mtv2 = aTokenVertex("NP ", 2L, "/s/del");
+    SimpleTokenVertex mtv3 = aTokenVertex("hard", 3L, "/s/del");
+    SimpleTokenVertex mtv4 = aTokenVertex("easy", 4L, "/s/add");
+    SimpleTokenVertex mtv5 = aTokenVertex(".", 5L, "/s");
 
     VariantWitnessGraph vwg1 = new VariantWitnessGraph("A");
     vwg1.addMarkup(sMarkup, delMarkup, addMarkup);
@@ -124,10 +125,11 @@ public class VariantWitnessGraphTest extends HyperCollateTest {
 
   }
 
-  private SimpleTokenVertex aTokenVertex(String string, Long index) {
+  private SimpleTokenVertex aTokenVertex(String string, Long index, String parentXPath) {
     MarkedUpToken token = new MarkedUpToken()//
         .setContent(string)//
         .setNormalizedContent(string.toLowerCase())//
+        .setParentXPath(parentXPath)//
         .setIndexNumber(index);
 
     return new SimpleTokenVertex(token);

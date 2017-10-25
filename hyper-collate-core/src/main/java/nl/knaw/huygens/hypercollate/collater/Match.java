@@ -20,10 +20,10 @@ package nl.knaw.huygens.hypercollate.collater;
  * #L%
  */
 
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-
 import java.util.Map;
 import java.util.TreeMap;
+
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
 
 public class Match {
 
@@ -46,13 +46,13 @@ public class Match {
   @Override
   public String toString() {
     StringBuilder stringBuilder = new StringBuilder();
-    tokenVertexMap.forEach((k,v)->//
-        stringBuilder.append(k)//
-            .append(":")//
-            .append(v.getIndexNumber())//
-            .append(":'")//
-            .append(v.getContent())//
-            .append("' "));
+    tokenVertexMap.forEach((k, v) -> //
+    stringBuilder.append(k)//
+        .append(":")//
+        .append(v.getIndexNumber())//
+        .append(":'")//
+        .append(v.getContent().replace("\n", "\\n"))//
+        .append("' "));
     return stringBuilder.toString();
   }
 }

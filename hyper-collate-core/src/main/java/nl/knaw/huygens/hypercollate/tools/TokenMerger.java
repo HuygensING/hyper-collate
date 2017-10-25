@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import nl.knaw.huygens.hypercollate.model.EndTokenVertex;
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+import nl.knaw.huygens.hypercollate.model.SimpleWitness;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
@@ -72,6 +73,9 @@ public class TokenMerger {
 
     MarkedUpToken mergedToken = new MarkedUpToken()//
         .setContent(originalToken.getContent())//
+        .setNormalizedContent(originalToken.getNormalizedContent())//
+        .setParentXPath(originalToken.getParentXPath())//
+        .setWitness((SimpleWitness) originalToken.getWitness())//
         .setIndexNumber(tokenNumber);
 
     SimpleTokenVertex mergedVertex = new SimpleTokenVertex(mergedToken);
@@ -83,7 +87,9 @@ public class TokenMerger {
     List<TokenVertex> originalOutgoingVertices = originalVertex.getOutgoingTokenVertexStream().collect(Collectors.toList());
     while (canMerge(originalGraph, originalVertex, originalOutgoingVertices)) {
       MarkedUpToken nextOriginalToken = (MarkedUpToken) originalOutgoingVertices.get(0).getToken();
-      mergedToken.setContent(mergedToken.getContent() + nextOriginalToken.getContent());
+      mergedToken//
+          .setContent(mergedToken.getContent() + nextOriginalToken.getContent())//
+          .setNormalizedContent(mergedToken.getNormalizedContent() + nextOriginalToken.getNormalizedContent());
       originalToMergedMap.put(nextOriginalToken.getIndexNumber(), mergedVertex);
       originalVertex = originalOutgoingVertices.get(0);
       originalOutgoingVertices = originalVertex.getOutgoingTokenVertexStream().collect(Collectors.toList());
