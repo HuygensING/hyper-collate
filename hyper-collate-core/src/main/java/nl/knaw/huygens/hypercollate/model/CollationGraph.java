@@ -20,10 +20,16 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
+import static java.util.stream.Collectors.joining;
 
-import eu.interedition.collatex.VariantGraph.Vertex;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import eu.interedition.collatex.Token;
 
 public class CollationGraph {
 
@@ -41,6 +47,46 @@ public class CollationGraph {
 
   public boolean isEmpty() {
     return vertices.isEmpty();
+  }
+
+  public void connect(Vertex vertex1, Vertex vertex2, String... sigils) {
+    System.out.println("connecting " + vertex1 + " -[" + Arrays.stream(sigils).collect(joining(",")) + "]-> " + vertex2);
+
+  }
+
+  public Vertex addVertex(Token... tokens) {
+    Vertex newVertex = new Vertex(tokens);
+    vertices.add(newVertex);
+    System.out.println("adding " + newVertex);
+    return newVertex;
+  }
+
+  public static class Vertex {
+    Map<String, Token> tokenMap = new HashMap<>();
+
+    public Vertex(Token... tokens) {
+      for (Token token : tokens) {
+        tokenMap.put(token.getWitness().getSigil(), token);
+      }
+    }
+
+    public Token getTokenForWitness(String sigil) {
+      return tokenMap.get(sigil);
+    }
+
+    public Set<String> getSigils() {
+      return tokenMap.keySet();
+    }
+
+    @Override
+    public String toString() {
+      String tokensString = getSigils().stream().sorted().map(tokenMap::get).map(Token::toString).collect(joining(", "));
+      return new StringBuilder("(")//
+          .append(tokensString)//
+          .append(")")//
+          .toString();
+    }
+
   }
 
 }

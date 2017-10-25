@@ -32,6 +32,7 @@ import java.util.function.BiFunction;
 
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
 public class HyperCollater {
@@ -70,7 +71,13 @@ public class HyperCollater {
 
     int rank1 = 0;
     int rank2 = 0;
+    Iterator<TokenVertex> iterator1 = VariantWitnessGraphTraversal.of(witness1).iterator();
+    iterator1.next();
+    Iterator<TokenVertex> iterator2 = VariantWitnessGraphTraversal.of(witness2).iterator();
+    iterator2.next();
 
+    CollationGraph.Vertex lastCollatedVertex1 = collationGraph.getStart();
+    CollationGraph.Vertex lastCollatedVertex2 = collationGraph.getStart();
     while (!matchesSortedByWitness1.isEmpty()) {
       Match matchOption1 = matchesSortedByWitness1.get(0);
       SimpleTokenVertex tokenVertex11 = matchOption1.getTokenVertexForWitness(sigil1);
@@ -102,6 +109,27 @@ public class HyperCollater {
       SimpleTokenVertex tokenVertexForWitness2 = match.getTokenVertexForWitness(sigil2);
       removeUnusableMatches(matchesSortedByWitness1, sigil1, sigil2, tokenVertexForWitness1, tokenVertexForWitness2);
       removeUnusableMatches(matchesSortedByWitness2, sigil1, sigil2, tokenVertexForWitness1, tokenVertexForWitness2);
+      System.out.println(matchesSortedByWitness1.size());
+      System.out.println(matchesSortedByWitness2.size());
+
+      TokenVertex nextWitness1Vertex = iterator1.next();
+      while (!nextWitness1Vertex.equals(tokenVertexForWitness1)) {
+        CollationGraph.Vertex newCollatedVertex = collationGraph.addVertex(nextWitness1Vertex.getToken());
+        collationGraph.connect(lastCollatedVertex1, newCollatedVertex, sigil1);
+        lastCollatedVertex1 = newCollatedVertex;
+        nextWitness1Vertex = iterator1.next();
+      }
+      TokenVertex nextWitness2Vertex = iterator2.next();
+      while (!nextWitness2Vertex.equals(tokenVertexForWitness2)) {
+        CollationGraph.Vertex newCollatedVertex = collationGraph.addVertex(nextWitness2Vertex.getToken());
+        collationGraph.connect(lastCollatedVertex2, newCollatedVertex, sigil2);
+        lastCollatedVertex2 = newCollatedVertex;
+        nextWitness2Vertex = iterator2.next();
+      }
+      CollationGraph.Vertex newCollatedVertex = collationGraph.addVertex(tokenVertexForWitness1.getToken(), tokenVertexForWitness2.getToken());
+      collationGraph.connect(lastCollatedVertex1, newCollatedVertex, sigil1, sigil2);
+      lastCollatedVertex1 = newCollatedVertex;
+      lastCollatedVertex2 = newCollatedVertex;
 
       // TODO something
 
