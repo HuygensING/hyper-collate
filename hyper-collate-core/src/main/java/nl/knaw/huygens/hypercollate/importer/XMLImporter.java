@@ -230,15 +230,15 @@ public class XMLImporter {
 
   private static class Context {
 
-    private VariantWitnessGraph graph;
-    private Deque<Markup> openMarkup = new LinkedList<>();
+    private final VariantWitnessGraph graph;
+    private final Deque<Markup> openMarkup = new LinkedList<>();
     private TokenVertex lastTokenVertex;
     private long tokenCounter = 0L;
-    private Deque<TokenVertex> variationStartVertices = new LinkedList<>(); // the tokenvertices whose outgoing vertices are the variant vertices (add/del)
-    private Deque<TokenVertex> variationEndVertices = new LinkedList<>(); // the tokenvertices that are the last in a <del>
-    private Deque<TokenVertex> unconnectedVertices = new LinkedList<>(); // the last tokenvertex in an <add> which hasn't been linked to the tokenvertex after the </del> yet
-    private Function<String, String> normalizer;
-    private SimpleWitness witness;
+    private final Deque<TokenVertex> variationStartVertices = new LinkedList<>(); // the tokenvertices whose outgoing vertices are the variant vertices (add/del)
+    private final Deque<TokenVertex> variationEndVertices = new LinkedList<>(); // the tokenvertices that are the last in a <del>
+    private final Deque<TokenVertex> unconnectedVertices = new LinkedList<>(); // the last tokenvertex in an <add> which hasn't been linked to the tokenvertex after the </del> yet
+    private final Function<String, String> normalizer;
+    private final SimpleWitness witness;
     private String parentXPath;
 
     public Context(VariantWitnessGraph graph, Function<String, String> normalizer, SimpleWitness witness) {

@@ -78,7 +78,7 @@ public class CollationGraph extends DirectedAcyclicGraph<CollationGraph.Node> {
   // }
 
   public static class Node {
-    Map<String, Token> tokenMap = new HashMap<>();
+    final Map<String, Token> tokenMap = new HashMap<>();
 
     public Node(Token... tokens) {
       for (Token token : tokens) {

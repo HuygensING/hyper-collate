@@ -27,7 +27,7 @@ import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
 
 public class Match {
 
-  Map<String, SimpleTokenVertex> tokenVertexMap = new TreeMap<>();
+  final Map<String, SimpleTokenVertex> tokenVertexMap = new TreeMap<>();
 
   public Match(SimpleTokenVertex... matchingTokenVertices) {
     for (SimpleTokenVertex mtv : matchingTokenVertices) {

@@ -37,7 +37,7 @@ import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
 public class HyperCollater {
 
-  private static BiFunction<SimpleTokenVertex, SimpleTokenVertex, Boolean> matcher = //
+  private static final BiFunction<SimpleTokenVertex, SimpleTokenVertex, Boolean> matcher = //
       (stv1, stv2) -> {
         if (stv1.getNormalizedContent().isEmpty() && stv2.getNormalizedContent().isEmpty()) {
           if (stv1.getContent().isEmpty() && stv2.getContent().isEmpty()) {
