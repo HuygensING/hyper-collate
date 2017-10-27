@@ -33,7 +33,7 @@
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 
         <collatex.version>1.7.1</collatex.version>
-        <commons-io.version>2.5</commons-io.version>
+        <commons-io.version>2.6</commons-io.version>
         <dropwizard-swagger.version>1.1.2-1</dropwizard-swagger.version>
         <dropwizard.version>1.2.0</dropwizard.version>
 		<log.version>1.1.1</log.version>
@@ -60,6 +60,9 @@
         <wagon-ssh.version>2.7</wagon-ssh.version>
         <maven-javadoc.version>3.0.0-M1</maven-javadoc.version>
         <maven-project-info-reports.version>2.9</maven-project-info-reports.version>
+        <logback-classic.version>1.2.3</logback-classic.version>
+        <graphviz-java.version>0.2.2</graphviz-java.version>
+        <batik.version>1.9</batik.version>
     </properties>
 
     <build>
