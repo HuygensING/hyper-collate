@@ -9,9 +9,9 @@ package nl.knaw.huygens.hypercollate.collater;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -159,14 +159,13 @@ public class HyperCollater {
   }
 
   private static Comparator<Match> matchComparator(VariantWitnessGraphRanking ranking, String sigil) {
-    Comparator<Match> comparator = (match1, match2) -> {
+    return (match1, match2) -> {
       SimpleTokenVertex vertex1 = match1.getTokenVertexForWitness(sigil);
       Integer rank1 = ranking.apply(vertex1);
       SimpleTokenVertex vertex2 = match2.getTokenVertexForWitness(sigil);
       Integer rank2 = ranking.apply(vertex2);
       return rank1.compareTo(rank2);
     };
-    return comparator;
   }
 
   private static void removeUnusableMatches(List<Match> matchesSortedByWitness, //
