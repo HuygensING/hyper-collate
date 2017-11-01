@@ -160,34 +160,32 @@ public class HyperCollater {
   }
 
   private static void addEdges(CollationGraph collationGraph, Map<TokenVertex, Node> collatedTokenVertexMap) {
-    collatedTokenVertexMap.keySet().forEach(tv -> {
-      tv.getIncomingTokenVertexStream().forEach(itv -> {
-        Node source = collatedTokenVertexMap.get(itv);
-        Node target = collatedTokenVertexMap.get(tv);
-        if (source==null || target==null){
-          System.out.println();
-        }
-        List<Node> existingTargetNodes = collationGraph.getOutgoingEdges(source)//
+    collatedTokenVertexMap.keySet().forEach(tv -> tv.getIncomingTokenVertexStream().forEach(itv -> {
+      Node source = collatedTokenVertexMap.get(itv);
+      Node target = collatedTokenVertexMap.get(tv);
+      if (source==null || target==null){
+        System.out.println();
+      }
+      List<Node> existingTargetNodes = collationGraph.getOutgoingEdges(source)//
+          .stream()//
+          .map(collationGraph::getTarget)//
+          .collect(toList());
+      String sigil = tv.getSigil();
+      if (!existingTargetNodes.contains(target)) {
+        Set<String> sigils = new HashSet<>();
+        sigils.add(sigil);
+        collationGraph.addDirectedEdge(source, target, sigils);
+        System.out.println("> " + source + " -> " + target);
+      } else {
+        TraditionalEdge edge = collationGraph.getOutgoingEdges(source)//
             .stream()//
-            .map(collationGraph::getTarget)//
-            .collect(toList());
-        String sigil = tv.getSigil();
-        if (!existingTargetNodes.contains(target)) {
-          Set<String> sigils = new HashSet<>();
-          sigils.add(sigil);
-          collationGraph.addDirectedEdge(source, target, sigils);
-          System.out.println("> " + source + " -> " + target);
-        } else {
-          TraditionalEdge edge = collationGraph.getOutgoingEdges(source)//
-              .stream()//
-              .filter(e -> collationGraph.getTarget(e).equals(target))//
-              .findFirst()//
-              .orElseThrow(() -> new RuntimeException("There should be an edge!"));
-          edge.getSigils().add(sigil);
-          System.err.println("duplicate edge: " + source + " -> " + target);
-        }
-      });
-    });
+            .filter(e -> collationGraph.getTarget(e).equals(target))//
+            .findFirst()//
+            .orElseThrow(() -> new RuntimeException("There should be an edge!"));
+        edge.getSigils().add(sigil);
+        System.err.println("duplicate edge: " + source + " -> " + target);
+      }
+    }));
   }
 
   private static CollationGraph.Node collationNode(CollationGraph collationGraph, Map<TokenVertex, CollationGraph.Node> collatedTokenMap, TokenVertex tokenVertex) {
