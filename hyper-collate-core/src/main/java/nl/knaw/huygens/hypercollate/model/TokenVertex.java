@@ -20,9 +20,9 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
-import java.util.stream.Stream;
-
 import eu.interedition.collatex.Token;
+
+import java.util.stream.Stream;
 
 public interface TokenVertex {
 
@@ -35,5 +35,7 @@ public interface TokenVertex {
   void addOutgoingTokenVertex(TokenVertex outgoing);
 
   Stream<TokenVertex> getOutgoingTokenVertexStream();
+
+  String getSigil();
 
 }

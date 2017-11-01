@@ -20,39 +20,47 @@ package nl.knaw.huygens.hypercollate.collater;
  * #L%
  */
 
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
+
 import java.util.Map;
 import java.util.TreeMap;
 
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-
 public class Match {
 
-  final Map<String, SimpleTokenVertex> tokenVertexMap = new TreeMap<>();
+  final Map<String, TokenVertex> tokenVertexMap = new TreeMap<>();
 
-  public Match(SimpleTokenVertex... matchingTokenVertices) {
-    for (SimpleTokenVertex mtv : matchingTokenVertices) {
-      tokenVertexMap.put(mtv.getToken().getWitness().getSigil(), mtv);
+  public Match(TokenVertex... matchingTokenVertices) {
+    for (TokenVertex mtv : matchingTokenVertices) {
+      String sigil = mtv.getSigil();
+      tokenVertexMap.put(sigil, mtv);
     }
   }
 
-  public Iterable<SimpleTokenVertex> getTokenVertexList() {
+  public Iterable<TokenVertex> getTokenVertexList() {
     return tokenVertexMap.values();
   }
 
-  public SimpleTokenVertex getTokenVertexForWitness(String sigil) {
+  public TokenVertex getTokenVertexForWitness(String sigil) {
     return tokenVertexMap.get(sigil);
   }
 
   @Override
   public String toString() {
     StringBuilder stringBuilder = new StringBuilder();
-    tokenVertexMap.forEach((k, v) -> //
-    stringBuilder.append(k)//
-        .append(":")//
-        .append(v.getIndexNumber())//
-        .append(":'")//
-        .append(v.getContent().replace("\n", "\\n"))//
-        .append("' "));
+    tokenVertexMap.forEach((k, v) -> {//
+      if (v instanceof SimpleTokenVertex) {
+        SimpleTokenVertex sv = (SimpleTokenVertex) v;
+        stringBuilder.append(k)//
+            .append(":")//
+            .append(sv.getIndexNumber())//
+            .append(":'")//
+            .append(sv.getContent().replace("\n", "\\n"))//
+            .append("' ");
+      } else {
+        stringBuilder.append(":").append(v.getClass().getSimpleName());
+      }
+    });
     return stringBuilder.toString();
   }
 }

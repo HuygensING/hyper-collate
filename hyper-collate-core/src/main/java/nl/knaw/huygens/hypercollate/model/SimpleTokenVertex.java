@@ -20,11 +20,11 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
+import eu.interedition.collatex.Token;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
-
-import eu.interedition.collatex.Token;
 
 public class SimpleTokenVertex implements TokenVertex, Comparable<SimpleTokenVertex> {
 
@@ -59,6 +59,11 @@ public class SimpleTokenVertex implements TokenVertex, Comparable<SimpleTokenVer
   @Override
   public Stream<TokenVertex> getOutgoingTokenVertexStream() {
     return outgoingVertices.stream();
+  }
+
+  @Override
+  public String getSigil() {
+    return token.getWitness().getSigil();
   }
 
   public String getContent() {

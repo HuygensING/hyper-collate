@@ -20,14 +20,10 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
-
 import nl.knaw.huygens.hypercollate.collater.VariantWitnessGraphTraversal;
+
+import java.util.*;
+import java.util.stream.Stream;
 
 public class VariantWitnessGraph {
 
@@ -35,14 +31,16 @@ public class VariantWitnessGraph {
   private final List<TokenVertex> vertexList = new ArrayList<>();
   private final List<Markup> markupList = new ArrayList<>();
 
-  private final TokenVertex startTokenVertex = new StartTokenVertex();
-  private final TokenVertex endTokenVertex = new EndTokenVertex();
+  private final TokenVertex startTokenVertex;
+  private final TokenVertex endTokenVertex;
 
   private final Map<Markup, List<TokenVertex>> markup2TokenVertexList = new HashMap<>();
   private final Map<TokenVertex, List<Markup>> tokenVertex2MarkupList = new HashMap<>();
 
   public VariantWitnessGraph(String sigil) {
     this.sigil = sigil;
+    startTokenVertex =  new StartTokenVertex(sigil);
+    endTokenVertex = new EndTokenVertex(sigil);
   }
 
   public TokenVertex getStartTokenVertex() {
