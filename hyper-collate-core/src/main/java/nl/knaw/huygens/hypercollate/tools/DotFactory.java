@@ -1,5 +1,11 @@
 package nl.knaw.huygens.hypercollate.tools;
 
+import eu.interedition.collatex.Token;
+import nl.knaw.huygens.hypercollate.model.*;
+import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
+
+import java.util.*;
+
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -12,9 +18,9 @@ import static java.util.stream.Collectors.toList;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,33 +29,13 @@ import static java.util.stream.Collectors.toList;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import eu.interedition.collatex.Token;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
-import nl.knaw.huygens.hypercollate.model.EndTokenVertex;
-import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.StartTokenVertex;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
-
 public class DotFactory {
   /**
    * Generates a .dot format string for visualizing a variant witness graph.
    *
-   * @param graph
-   *          The variant witness graph for which we are generating a dot file.
+   * @param graph The variant witness graph for which we are generating a dot file.
    * @return A string containing the contents of a .dot representation of the
-   *         variant witness graph.
+   * variant witness graph.
    */
   public static String fromVariantWitnessGraph(VariantWitnessGraph graph) {
     StringBuilder dotBuilder = new StringBuilder("digraph VariantWitnessGraph{\ngraph [rankdir=LR]\nlabelloc=b\n");
@@ -113,6 +99,8 @@ public class DotFactory {
       String nodeId = "t" + String.format("%03d", i);
       nodeIdentifiers.put(node, nodeId);
       appendNodeLine(dotBuilder, node, nodeId);
+    }
+    for (Node node : nodes) {
       appendEdgeLines(dotBuilder, node, nodeIdentifiers, collation);
     }
 

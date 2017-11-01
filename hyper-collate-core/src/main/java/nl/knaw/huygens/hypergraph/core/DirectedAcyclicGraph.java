@@ -20,10 +20,7 @@ package nl.knaw.huygens.hypergraph.core;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 // nu zou ik wel topological sort willen hebben
 // teveel gedoe, kan ook gewoon een root node maken
@@ -50,16 +47,22 @@ public class DirectedAcyclicGraph<N> extends Hypergraph<N, TraditionalEdge> {
   }
 
   public List<N> traverse() {
+    Set<N> visitedNodes = new HashSet<>();
     Stack<N> nodesToVisit = new Stack<>();
     nodesToVisit.add(root);
     List<N> result = new ArrayList<>();
     while (!nodesToVisit.isEmpty()) {
       N pop = nodesToVisit.pop();
-      result.add(pop);
-      Collection<TraditionalEdge> outgoingEdges = this.getOutgoingEdges(pop);
-      for (TraditionalEdge e : outgoingEdges) {
-        N target = this.getTarget(e);
-        nodesToVisit.add(target);
+      if (!visitedNodes.contains(pop)) {
+        result.add(pop);
+        Collection<TraditionalEdge> outgoingEdges = this.getOutgoingEdges(pop);
+        visitedNodes.add(pop);
+        for (TraditionalEdge e : outgoingEdges) {
+          N target = this.getTarget(e);
+          nodesToVisit.add(target);
+        }
+      } else {
+        System.out.println("Cycle!: revisiting node " + pop);
       }
     }
     return result;

@@ -78,7 +78,7 @@ public class MarkedUpToken implements Token {
 
   @Override
   public String toString() {
-    return witness.getSigil() + ":'" + content.replace("\n", "\\n") + "'";
+    return witness.getSigil() + index+":" + getParentXPath() + "='" + content.replace("\n", "\\n") + "'";
   }
 
 }
