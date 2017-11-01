@@ -45,7 +45,7 @@ public class HyperCollater {
             String parentTag2 = stv2.getParentXPath().replace("/.*/", "");
             return parentTag1.equals(parentTag2);
           } else {
-            return false;
+            return stv1.getContent().equals(stv2.getContent());
           }
         }
         return stv1.getNormalizedContent().equals(stv2.getNormalizedContent());
