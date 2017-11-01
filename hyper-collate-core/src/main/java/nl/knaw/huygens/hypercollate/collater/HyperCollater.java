@@ -81,7 +81,10 @@ public class HyperCollater {
 
       TokenVertex tokenVertexForWitness1 = match.getTokenVertexForWitness(sigil1);
       TokenVertex tokenVertexForWitness2 = match.getTokenVertexForWitness(sigil2);
-      List<Match> matchesToRemove = unusableMatches(matchesSortedByWitness1, sigil1, sigil2, tokenVertexForWitness1, tokenVertexForWitness2, ranking1, ranking2);
+      List<Match> matchesToRemove = unusableMatches(matchesSortedByWitness1,//
+          sigil1, sigil2,//
+          tokenVertexForWitness1, tokenVertexForWitness2,//
+          ranking1, ranking2);
       matchesSortedByWitness1.removeAll(matchesToRemove);
       matchesSortedByWitness2.removeAll(matchesToRemove);
 
@@ -99,20 +102,20 @@ public class HyperCollater {
 
   private static Match nextMatch(String sigil1, String sigil2, VariantWitnessGraphRanking ranking1, VariantWitnessGraphRanking ranking2, List<Match> matchesSortedByWitness1, List<Match> matchesSortedByWitness2) {
     Match matchOption1 = matchesSortedByWitness1.get(0);
+    int diff1 = rankingDifference(sigil1, sigil2, ranking1, ranking2, matchOption1);
+
+    Match matchOption2 = matchesSortedByWitness2.get(0);
+    int diff2 = rankingDifference(sigil1, sigil2, ranking1, ranking2, matchOption2);
+
+    return diff1 <= diff2 ? matchOption1 : matchOption2;
+  }
+
+  private static int rankingDifference(String sigil1, String sigil2, VariantWitnessGraphRanking ranking1, VariantWitnessGraphRanking ranking2, Match matchOption1) {
     TokenVertex tokenVertex11 = matchOption1.getTokenVertexForWitness(sigil1);
     int rank11 = ranking1.apply(tokenVertex11);
     TokenVertex tokenVertex12 = matchOption1.getTokenVertexForWitness(sigil2);
     int rank12 = ranking2.apply(tokenVertex12);
-    int diff1 = Math.abs(rank11 - rank12);
-
-    Match matchOption2 = matchesSortedByWitness2.get(0);
-    TokenVertex tokenVertex21 = matchOption2.getTokenVertexForWitness(sigil1);
-    int rank21 = ranking1.apply(tokenVertex21);
-    TokenVertex tokenVertex22 = matchOption2.getTokenVertexForWitness(sigil2);
-    int rank22 = ranking2.apply(tokenVertex22);
-    int diff2 = Math.abs(rank21 - rank22);
-
-    return diff1 <= diff2 ? matchOption1 : matchOption2;
+    return Math.abs(rank11 - rank12);
   }
 
   private static void addEndNode(CollationGraph collationGraph, VariantWitnessGraph witness1, VariantWitnessGraph witness2, Map<TokenVertex, Node> collatedTokenVertexMap) {
@@ -147,7 +150,7 @@ public class HyperCollater {
     collatedTokenVertexMap.keySet().forEach(tv -> tv.getIncomingTokenVertexStream().forEach(itv -> {
       Node source = collatedTokenVertexMap.get(itv);
       Node target = collatedTokenVertexMap.get(tv);
-      if (source==null || target==null){
+      if (source == null || target == null) {
         System.out.println();
       }
       List<Node> existingTargetNodes = collationGraph.getOutgoingEdges(source)//
@@ -237,21 +240,9 @@ public class HyperCollater {
                 matches.add(new Match(tv1, tv2));
               }
             }));
-    Match endMatch = new Match(witness1.getEndTokenVertex(),witness2.getEndTokenVertex());
+    Match endMatch = new Match(witness1.getEndTokenVertex(), witness2.getEndTokenVertex());
     matches.add(endMatch);
     return matches;
   }
 
-  // private static void merge(CollationGraph collationGraph, VariantWitnessGraph witnessGraph, Map<Object, Object> alignmentMap) {
-  // Vertex start = collationGraph.getStart();
-  // if (collationGraph.isEmpty()) {
-  // TokenVertex startTokenVertex = witnessGraph.getStartTokenVertex();
-  // startTokenVertex.getOutgoingTokenVertexStream().forEach(tv -> {
-  // // start.add
-  // });
-  // } else {
-  //
-  // }
-  //
-  // }
 }
