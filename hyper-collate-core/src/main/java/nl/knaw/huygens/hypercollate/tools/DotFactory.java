@@ -113,10 +113,13 @@ public class DotFactory {
         .forEach(e -> {
           Node source = collation.getSource(e);
           Node target = collation.getTarget(e);
+          String edgeLabel = e.getSigils().stream().sorted().collect(joining(","));
           dotBuilder.append(nodeIdentifiers.get(source))//
               .append("->")//
               .append(nodeIdentifiers.get(target))//
-              .append("\n");
+              .append("[label=\"")//
+              .append(edgeLabel)//
+              .append("\"]\n");
         });
   }
 

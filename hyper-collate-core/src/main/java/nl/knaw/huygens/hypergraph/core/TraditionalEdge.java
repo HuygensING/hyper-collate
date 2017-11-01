@@ -20,6 +20,21 @@ package nl.knaw.huygens.hypergraph.core;
  * #L%
  */
 
+import java.util.Set;
+
 public class TraditionalEdge {
 
+  private Set<String> sigils;
+
+  TraditionalEdge(Set<String> label){
+    this.sigils = label;
+  }
+
+  public Set<String> getSigils() {
+    return sigils;
+  }
+
+  public void setSigils(Set<String> sigils) {
+    this.sigils = sigils;
+  }
 }

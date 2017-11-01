@@ -41,8 +41,8 @@ public class DirectedAcyclicGraph<N> extends Hypergraph<N, TraditionalEdge> {
   }
 
   // Question: do we want labels here?
-  public void addDirectedEdge(N source, N target) {
-    TraditionalEdge edge = new TraditionalEdge();
+  public void addDirectedEdge(N source, N target, Set<String> sigils) {
+    TraditionalEdge edge = new TraditionalEdge(sigils);
     super.addDirectedHyperedge(edge, "", source, target);
   }
 

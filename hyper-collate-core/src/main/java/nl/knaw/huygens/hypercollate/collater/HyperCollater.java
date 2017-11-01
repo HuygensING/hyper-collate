@@ -26,6 +26,7 @@ import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+import nl.knaw.huygens.hypergraph.core.TraditionalEdge;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -161,11 +162,23 @@ public class HyperCollater {
       tv.getIncomingTokenVertexStream().forEach(itv -> {
         Node source = collatedTokenVertexMap.get(itv);
         Node target = collatedTokenVertexMap.get(tv);
-        List<Node> existingTargetNodes = collationGraph.getOutgoingEdges(source).stream().map(collationGraph::getTarget).collect(toList());
+        List<Node> existingTargetNodes = collationGraph.getOutgoingEdges(source)//
+            .stream()//
+            .map(collationGraph::getTarget)//
+            .collect(toList());
+        String sigil = tv.getToken() == null ? "" : tv.getToken().getWitness().getSigil();
         if (!existingTargetNodes.contains(target)) {
-          collationGraph.addDirectedEdge(source, target);
+          Set<String> sigils = new HashSet<>();
+          sigils.add(sigil);
+          collationGraph.addDirectedEdge(source, target, sigils);
           System.out.println("> " + source + " -> " + target);
         } else {
+          TraditionalEdge edge = collationGraph.getOutgoingEdges(source)//
+              .stream()//
+              .filter(e -> collationGraph.getTarget(e).equals(target))//
+              .findFirst()//
+              .orElseThrow(() -> new RuntimeException("There should be an edge!"));
+          edge.getSigils().add(sigil);
           System.err.println("duplicate edge: " + source + " -> " + target);
         }
       });
