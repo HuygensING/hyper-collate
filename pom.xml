@@ -63,6 +63,7 @@
         <logback-classic.version>1.2.3</logback-classic.version>
         <graphviz-java.version>0.2.2</graphviz-java.version>
         <batik.version>1.9</batik.version>
+        <guava.version>21.0</guava.version>
     </properties>
 
     <build>

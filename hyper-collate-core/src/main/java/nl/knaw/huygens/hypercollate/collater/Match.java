@@ -23,12 +23,15 @@ package nl.knaw.huygens.hypercollate.collater;
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 public class Match {
 
   final Map<String, TokenVertex> tokenVertexMap = new TreeMap<>();
+  final Map<String, Integer> rankingMap = new TreeMap<>();
 
   public Match(TokenVertex... matchingTokenVertices) {
     for (TokenVertex mtv : matchingTokenVertices) {
@@ -45,22 +48,37 @@ public class Match {
     return tokenVertexMap.get(sigil);
   }
 
+  public Match setRank(String sigil, Integer rank) {
+    rankingMap.put(sigil, rank);
+    return this;
+  }
+
+  public Integer getRankForWitness(String sigil) {
+    return rankingMap.get(sigil);
+  }
+
   @Override
   public String toString() {
     StringBuilder stringBuilder = new StringBuilder();
-    tokenVertexMap.forEach((k, v) -> {//
-      if (v instanceof SimpleTokenVertex) {
-        SimpleTokenVertex sv = (SimpleTokenVertex) v;
-        stringBuilder.append(k)//
-            .append(":")//
+    tokenVertexMap.forEach((sigil, vertex) -> {//
+      if (vertex instanceof SimpleTokenVertex) {
+        SimpleTokenVertex sv = (SimpleTokenVertex) vertex;
+        stringBuilder.append(sigil)//
+            .append("[")//
             .append(sv.getIndexNumber())//
-            .append(":'")//
+            .append(",r")//
+            .append(rankingMap.get(sigil))//
+            .append("] '")//
             .append(sv.getContent().replace("\n", "\\n"))//
             .append("' ");
       } else {
-        stringBuilder.append(":").append(v.getClass().getSimpleName());
+        stringBuilder.append(":").append(vertex.getClass().getSimpleName());
       }
     });
     return stringBuilder.toString();
+  }
+
+  public List<String> witnessSigils() {
+    return new ArrayList<>(tokenVertexMap.keySet());
   }
 }

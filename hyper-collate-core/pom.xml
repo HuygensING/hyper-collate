@@ -47,7 +47,13 @@
 			<artifactId>batik-constants</artifactId>
 			<version>${batik.version}</version>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${guava.version}</version>
+		</dependency>
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -55,5 +61,5 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+    </dependencies>
 </project>

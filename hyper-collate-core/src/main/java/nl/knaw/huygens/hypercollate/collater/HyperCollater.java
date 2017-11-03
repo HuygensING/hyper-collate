@@ -59,12 +59,13 @@ public class HyperCollater {
     VariantWitnessGraph witness1 = witnessIterable.next();
     VariantWitnessGraph witness2 = witnessIterable.next();
 
-    List<Match> matches = match(witness1, witness2);
-
     VariantWitnessGraphRanking ranking1 = VariantWitnessGraphRanking.of(witness1);
     VariantWitnessGraphRanking ranking2 = VariantWitnessGraphRanking.of(witness2);
-    List<Match> matchesSortedByWitness1 = sortMatchesByWitness(matches, sigil1, ranking1, sigil2, ranking2);
-    List<Match> matchesSortedByWitness2 = sortMatchesByWitness(matches, sigil2, ranking2, sigil2, ranking2);
+
+    Set<Match> matches = match(witness1, witness2, ranking1, ranking2);
+
+    List<Match> matchesSortedByWitness1 = sortMatchesByWitness(matches, sigil1, sigil2);
+    List<Match> matchesSortedByWitness2 = sortMatchesByWitness(matches, sigil2, sigil1);
 
     Iterator<TokenVertex> iterator1 = VariantWitnessGraphTraversal.of(witness1).iterator();
     Iterator<TokenVertex> iterator2 = VariantWitnessGraphTraversal.of(witness2).iterator();
@@ -81,12 +82,8 @@ public class HyperCollater {
 
       TokenVertex tokenVertexForWitness1 = match.getTokenVertexForWitness(sigil1);
       TokenVertex tokenVertexForWitness2 = match.getTokenVertexForWitness(sigil2);
-      List<Match> matchesToRemove = unusableMatches(matchesSortedByWitness1,//
-          sigil1, sigil2,//
-          tokenVertexForWitness1, tokenVertexForWitness2,//
-          ranking1, ranking2);
-      matchesSortedByWitness1.removeAll(matchesToRemove);
-      matchesSortedByWitness2.removeAll(matchesToRemove);
+      matchesSortedByWitness1.remove(match);
+      matchesSortedByWitness2.remove(match);
 
       advanceWitness(collationGraph, collatedTokenVertexMap, sigil1, iterator1, tokenVertexForWitness1);
       advanceWitness(collationGraph, collatedTokenVertexMap, sigil2, iterator2, tokenVertexForWitness2);
@@ -184,51 +181,35 @@ public class HyperCollater {
     }
   }
 
-  private static List<Match> sortMatchesByWitness(List<Match> matches,//
-                                                  String sigil1, VariantWitnessGraphRanking ranking1,//
-                                                  String sigil2, VariantWitnessGraphRanking ranking2) {
-    Comparator<Match> matchComparator = matchComparator(ranking1, sigil1, ranking2, sigil2);
+  private static List<Match> sortMatchesByWitness(Set<Match> matches,//
+                                                  String sigil1, //
+                                                  String sigil2) {
+    Comparator<Match> matchComparator = matchComparator(sigil1, sigil2);
     return matches.stream()//
         .sorted(matchComparator)//
         .collect(toList());
   }
 
-  private static Comparator<Match> matchComparator(VariantWitnessGraphRanking ranking1, String sigil1,//
-                                                   VariantWitnessGraphRanking ranking2, String sigil2) {
+  private static Comparator<Match> matchComparator(String sigil1,//
+                                                   String sigil2) {
     return (match1, match2) -> {
-      TokenVertex vertex1 = match1.getTokenVertexForWitness(sigil1);
-      Integer rank1 = ranking1.apply(vertex1);
-      TokenVertex vertex2 = match2.getTokenVertexForWitness(sigil1);
-      Integer rank2 = ranking1.apply(vertex2);
+      Integer rank1 = match1.getRankForWitness(sigil1);
+      Integer rank2 = match2.getRankForWitness(sigil1);
       if (rank1.equals(rank2)) {
-        TokenVertex vertex12 = match1.getTokenVertexForWitness(sigil2);
-        rank1 = ranking2.apply(vertex12);
-        TokenVertex vertex22 = match2.getTokenVertexForWitness(sigil2);
-        rank2 = ranking2.apply(vertex22);
+        rank1 = match1.getRankForWitness(sigil2);
+        rank2 = match2.getRankForWitness(sigil2);
       }
       return rank1.compareTo(rank2);
     };
   }
 
-  private static List<Match> unusableMatches(List<Match> matchesSortedByWitness,//
-                                             String sigil1, String sigil2,//
-                                             TokenVertex tokenVertexForWitness1, TokenVertex tokenVertexForWitness2,//
-                                             VariantWitnessGraphRanking ranking1, VariantWitnessGraphRanking ranking2) {
-    int minRank1 = ranking1.apply(tokenVertexForWitness1);
-    int minRank2 = ranking2.apply(tokenVertexForWitness2);
-
-    return matchesSortedByWitness.stream()//
-        .filter(m -> m.getTokenVertexForWitness(sigil1).equals(tokenVertexForWitness1)//
-            || m.getTokenVertexForWitness(sigil2).equals(tokenVertexForWitness2) //
-            || ranking1.apply(m.getTokenVertexForWitness(sigil1)) < minRank1 //
-            || ranking2.apply(m.getTokenVertexForWitness(sigil2)) < minRank2)//
-        .collect(toList());
-  }
-
-  private static List<Match> match(VariantWitnessGraph witness1, VariantWitnessGraph witness2) {
-    List<Match> matches = new ArrayList<>();
+  private static Set<Match> match(VariantWitnessGraph witness1, VariantWitnessGraph witness2,//
+                                  VariantWitnessGraphRanking ranking1, VariantWitnessGraphRanking ranking2) {
+    Set<Match> allPotentialMatches = new HashSet<>();
     VariantWitnessGraphTraversal traversal1 = VariantWitnessGraphTraversal.of(witness1);
     VariantWitnessGraphTraversal traversal2 = VariantWitnessGraphTraversal.of(witness2);
+    String sigil1 = witness1.getSigil();
+    String sigil2 = witness2.getSigil();
     stream(traversal1)//
         .filter(tv -> tv instanceof SimpleTokenVertex)//
         .map(SimpleTokenVertex.class::cast)//
@@ -237,12 +218,20 @@ public class HyperCollater {
             .map(SimpleTokenVertex.class::cast)//
             .forEach(tv2 -> {
               if (matcher.apply(tv1, tv2)) {
-                matches.add(new Match(tv1, tv2));
+                Match match = new Match(tv1, tv2)//
+                    .setRank(sigil1, ranking1.apply(tv1))//
+                    .setRank(sigil2, ranking2.apply(tv2));
+                allPotentialMatches.add(match);
               }
             }));
-    Match endMatch = new Match(witness1.getEndTokenVertex(), witness2.getEndTokenVertex());
-    matches.add(endMatch);
-    return matches;
+    TokenVertex endTokenVertex1 = witness1.getEndTokenVertex();
+    TokenVertex endTokenVertex2 = witness2.getEndTokenVertex();
+    Match endMatch = new Match(endTokenVertex1, endTokenVertex2)//
+        .setRank(sigil1, ranking1.apply(endTokenVertex1))//
+        .setRank(sigil2, ranking2.apply(endTokenVertex2));
+    allPotentialMatches.add(endMatch);
+//    return allPotentialMatches;
+    return new OptimalMatchSetAlgorithm(allPotentialMatches).getOptimalMatchSet();
   }
 
 }
