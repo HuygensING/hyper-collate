@@ -48,7 +48,7 @@ public class HyperCollateTest {
     System.out.println(dot);
     writeGraph(dot);
     assertThat(dot).isEqualTo(expectedDot);
-    showGraph(dot);
+//    showGraph(dot);
   }
 
   public void writeGraph(String dot) {

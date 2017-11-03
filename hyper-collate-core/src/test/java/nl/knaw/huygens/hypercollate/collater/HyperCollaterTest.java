@@ -157,8 +157,8 @@ public class HyperCollaterTest extends HyperCollateTest {
         "t026->t021[label=\"F\"]\n" +
         "t021->t022[label=\"F,Q\"]\n" +
         "t022->t023[label=\"F\"]\n" +
-        "t025->t024[label=\"Q\"]\n" +
         "t023->t024[label=\"F\"]\n" +
+        "t025->t024[label=\"Q\"]\n" +
         "t022->t025[label=\"Q\"]\n" +
         "t020->t026[label=\"F\"]\n" +
         "t012->t027[label=\"F\"]\n" +
