@@ -1,13 +1,28 @@
 package nl.knaw.huygens.hypercollate.tools;
 
-import eu.interedition.collatex.Token;
-import nl.knaw.huygens.hypercollate.model.*;
-import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
-
-import java.util.*;
-
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import eu.interedition.collatex.Token;
+import nl.knaw.huygens.hypercollate.model.CollationGraph;
+import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
+import nl.knaw.huygens.hypercollate.model.EndTokenVertex;
+import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+import nl.knaw.huygens.hypercollate.model.StartTokenVertex;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
 /*-
  * #%L
@@ -18,9 +33,9 @@ import static java.util.stream.Collectors.toList;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,12 +45,14 @@ import static java.util.stream.Collectors.toList;
  */
 
 public class DotFactory {
+
   /**
    * Generates a .dot format string for visualizing a variant witness graph.
    *
-   * @param graph The variant witness graph for which we are generating a dot file.
+   * @param graph
+   *          The variant witness graph for which we are generating a dot file.
    * @return A string containing the contents of a .dot representation of the
-   * variant witness graph.
+   *         variant witness graph.
    */
   public static String fromVariantWitnessGraph(VariantWitnessGraph graph) {
     StringBuilder dotBuilder = new StringBuilder("digraph VariantWitnessGraph{\ngraph [rankdir=LR]\nlabelloc=b\n");
@@ -89,38 +106,45 @@ public class DotFactory {
     return null;
   }
 
+  private static final Comparator<Node> BY_NODE = (n1, n2) -> n1.toString().compareTo(n2.toString());
+
   public static String fromCollationGraph(CollationGraph collation) {
     StringBuilder dotBuilder = new StringBuilder("digraph CollationGraph{\nlabelloc=b\n");
     Map<Node, String> nodeIdentifiers = new HashMap<>();
 
     List<Node> nodes = collation.traverse();
+    nodes.sort(BY_NODE);
     for (int i = 0; i < nodes.size(); i++) {
       Node node = nodes.get(i);
       String nodeId = "t" + String.format("%03d", i);
       nodeIdentifiers.put(node, nodeId);
       appendNodeLine(dotBuilder, node, nodeId);
     }
-    for (Node node : nodes) {
-      appendEdgeLines(dotBuilder, node, nodeIdentifiers, collation);
-    }
+    appendEdgeLines(dotBuilder, collation, nodeIdentifiers, nodes);
 
     dotBuilder.append("}");
     return dotBuilder.toString();
   }
 
-  private static void appendEdgeLines(StringBuilder dotBuilder, Node node, Map<Node, String> nodeIdentifiers, CollationGraph collation) {
-    collation.getIncomingEdges(node)//
-        .forEach(e -> {
-          Node source = collation.getSource(e);
-          Node target = collation.getTarget(e);
-          String edgeLabel = e.getSigils().stream().sorted().collect(joining(","));
-          dotBuilder.append(nodeIdentifiers.get(source))//
-              .append("->")//
-              .append(nodeIdentifiers.get(target))//
-              .append("[label=\"")//
-              .append(edgeLabel)//
-              .append("\"]\n");
-        });
+  private static void appendEdgeLines(StringBuilder dotBuilder, CollationGraph collation, Map<Node, String> nodeIdentifiers, List<Node> nodes) {
+    Set<String> edgeLines = new TreeSet<>();
+    for (Node node : nodes) {
+      collation.getIncomingEdges(node)//
+          .forEach(e -> {
+            Node source = collation.getSource(e);
+            Node target = collation.getTarget(e);
+            String edgeLabel = e.getSigils().stream().sorted().collect(joining(","));
+            StringBuilder lineBuilder = new StringBuilder()//
+                .append(nodeIdentifiers.get(source))//
+                .append("->")//
+                .append(nodeIdentifiers.get(target))//
+                .append("[label=\"")//
+                .append(edgeLabel)//
+                .append("\"]\n");
+            edgeLines.add(lineBuilder.toString());
+          });
+    }
+    edgeLines.forEach(dotBuilder::append);
   }
 
   private static void appendNodeLine(StringBuilder dotBuilder, Node node, String nodeId) {
