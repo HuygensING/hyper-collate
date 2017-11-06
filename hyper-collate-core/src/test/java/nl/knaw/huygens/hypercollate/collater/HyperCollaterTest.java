@@ -28,6 +28,7 @@ import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeMerger;
 import nl.knaw.huygens.hypercollate.tools.DotFactory;
 
 public class HyperCollaterTest extends HyperCollateTest {
@@ -90,11 +91,11 @@ public class HyperCollaterTest extends HyperCollateTest {
         "}";
     verifyDotExport(wQ, expectedDotQ);
 
-    CollationGraph collation = HyperCollater.collate(wF, wQ);
-    System.out.println(collation);
+    CollationGraph collation0 = HyperCollater.collate(wF, wQ);
+    CollationGraph collation = CollationGraphNodeMerger.merge(collation0);
 
     String dot = DotFactory.fromCollationGraph(collation);
-    System.out.println(dot);
+    // System.out.println(dot);
     String expected = "digraph CollationGraph{\n" + //
         "labelloc=b\n" + //
         "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + //
