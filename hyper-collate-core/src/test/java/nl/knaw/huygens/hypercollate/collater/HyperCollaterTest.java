@@ -1,5 +1,9 @@
 package nl.knaw.huygens.hypercollate.collater;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.Test;
+
 /*-
  * #%L
  * hyper-collate-core
@@ -20,8 +24,6 @@ package nl.knaw.huygens.hypercollate.collater;
  * #L%
  */
 
-import org.junit.Test;
-
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
@@ -41,59 +43,135 @@ public class HyperCollaterTest extends HyperCollateTest {
         "    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !\n" + //
         "        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>\n" + //
         "</text>");
-    CollationGraph collation = HyperCollater.collate(wF, wQ);
-    System.out.println(collation);
 
     String expectedDotF = "digraph VariantWitnessGraph{\n" + //
         "graph [rankdir=LR]\n" + //
         "labelloc=b\n" + //
-        "st [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "t0 [label=<Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/><i>F: /text/s</i>>]\n" + //
-        "t6 [label=<<br/><i>F: /text/s/lb</i>>]\n" + //
-        "t7 [label=<werven&#9251;om<br/><i>F: /text/s/del</i>>]\n" + //
-        "t9 [label=<trachten&#9251;naar<br/><i>F: /text/s/add</i>>]\n" + //
-        "t11 [label=<&#9251;een&#9251;vrouw,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;vóór&#9251;de&#9251;<br/><i>F: /text/s</i>>]\n" + //
-        "t19 [label=<<br/><i>F: /text/s/lb</i>>]\n" + //
-        "t20 [label=<liefelijke&#9251;toestemming!<br/><i>F: /text/s</i>>]\n" + //
-        "et [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "st->t0\n" + //
-        "t0->t6\n" + //
-        "t11->t19\n" + //
-        "t19->t20\n" + //
-        "t20->et\n" + //
-        "t6->t7\n" + //
-        "t6->t9\n" + //
-        "t7->t11\n" + //
-        "t9->t11\n" + //
+        "begin [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "F_000 [label=<Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/><i>F: /text/s</i>>]\n" + //
+        "F_006 [label=<<br/><i>F: /text/s/lb</i>>]\n" + //
+        "F_007 [label=<werven&#9251;om<br/><i>F: /text/s/del</i>>]\n" + //
+        "F_009 [label=<trachten&#9251;naar<br/><i>F: /text/s/add</i>>]\n" + //
+        "F_011 [label=<&#9251;een&#9251;vrouw,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;vóór&#9251;de&#9251;<br/><i>F: /text/s</i>>]\n" + //
+        "F_019 [label=<<br/><i>F: /text/s/lb</i>>]\n" + //
+        "F_020 [label=<liefelijke&#9251;toestemming!<br/><i>F: /text/s</i>>]\n" + //
+        "end [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "F_000->F_006\n" + //
+        "F_006->F_007\n" + //
+        "F_006->F_009\n" + //
+        "F_007->F_011\n" + //
+        "F_009->F_011\n" + //
+        "F_011->F_019\n" + //
+        "F_019->F_020\n" + //
+        "F_020->end\n" + //
+        "begin->F_000\n" + //
         "}";
     verifyDotExport(wF, expectedDotF);
 
     String expectedDotQ = "digraph VariantWitnessGraph{\n" + //
         "graph [rankdir=LR]\n" + //
         "labelloc=b\n" + //
-        "st [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "t0 [label=<Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/><i>Q: /text/s</i>>]\n" + //
-        "t6 [label=<werven&#9251;om<br/><i>Q: /text/s/del</i>>]\n" + //
-        "t8 [label=<trachten&#9251;naar<br/><i>Q: /text/s/add</i>>]\n" + //
-        "t10 [label=<&#9251;een&#9251;<br/><i>Q: /text/s</i>>]\n" + //
-        "t12 [label=<<br/><i>Q: /text/s/lb</i>>]\n" + //
-        "t13 [label=<vrouw&#9251;!&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;nerveuze&#9251;verwachting&#9251;vóór&#9251;de&#9251;liefelijke&#9251;toestemming.<br/><i>Q: /text/s</i>>]\n" + //
-        "et [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "st->t0\n" + //
-        "t0->t6\n" + //
-        "t0->t8\n" + //
-        "t10->t12\n" + //
-        "t12->t13\n" + //
-        "t13->et\n" + //
-        "t6->t10\n" + //
-        "t8->t10\n" + //
+        "begin [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "Q_000 [label=<Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/><i>Q: /text/s</i>>]\n" + //
+        "Q_006 [label=<werven&#9251;om<br/><i>Q: /text/s/del</i>>]\n" + //
+        "Q_008 [label=<trachten&#9251;naar<br/><i>Q: /text/s/add</i>>]\n" + //
+        "Q_010 [label=<&#9251;een&#9251;<br/><i>Q: /text/s</i>>]\n" + //
+        "Q_012 [label=<<br/><i>Q: /text/s/lb</i>>]\n" + //
+        "Q_013 [label=<vrouw&#9251;!&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;nerveuze&#9251;verwachting&#9251;vóór&#9251;de&#9251;liefelijke&#9251;toestemming.<br/><i>Q: /text/s</i>>]\n" + //
+        "end [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "Q_000->Q_006\n" + //
+        "Q_000->Q_008\n" + //
+        "Q_006->Q_010\n" + //
+        "Q_008->Q_010\n" + //
+        "Q_010->Q_012\n" + //
+        "Q_012->Q_013\n" + //
+        "Q_013->end\n" + //
+        "begin->Q_000\n" + //
         "}";
     verifyDotExport(wQ, expectedDotQ);
 
+    CollationGraph collation = HyperCollater.collate(wF, wQ);
+    System.out.println(collation);
+
     String dot = DotFactory.fromCollationGraph(collation);
     System.out.println(dot);
-    String expected = "something";
-    // assertThat(dot).isEqualTo(expected);
+    String expected = "digraph CollationGraph{\n" + //
+        "labelloc=b\n" + //
+        "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "t001 [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "t002 [label=<F,Q: Hoe&#9251;<br/>F,Q: <i>/text/s</i>>]\n" + //
+        "t003 [label=<F,Q: naar<br/>F,Q: <i>/text/s/add</i>>]\n" + //
+        "t004 [label=<F,Q: &#9251;<br/>F,Q: <i>/text/s</i>>]\n" + //
+        "t005 [label=<F,Q: een&#9251;<br/>F,Q: <i>/text/s</i>>]\n" + //
+        "t006 [label=<F: vrouw<br/>Q: vrouw&#9251;<br/>F,Q: <i>/text/s</i>>]\n" + //
+        "t007 [label=<F: ,&#x21A9;<br/>&#9251;<br/>F: <i>/text/s</i>>]\n" + //
+        "t008 [label=<F: de&#9251;<br/>F: <i>/text/s</i>>]\n" + //
+        "t009 [label=<F: ongewisheid&#9251;<br/>F: <i>/text/s</i>>]\n" + //
+        "t010 [label=<F,Q: vóór&#9251;<br/>F,Q: <i>/text/s</i>>]\n" + //
+        "t011 [label=<F,Q: de&#9251;<br/>F,Q: <i>/text/s</i>>]\n" + //
+        "t012 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n" + //
+        "t013 [label=<F,Q: zoet&#9251;<br/>F,Q: <i>/text/s</i>>]\n" + //
+        "t014 [label=<F,Q: liefelijke&#9251;<br/>F,Q: <i>/text/s</i>>]\n" + //
+        "t015 [label=<F,Q: toestemming<br/>F,Q: <i>/text/s</i>>]\n" + //
+        "t016 [label=<F: !<br/>F: <i>/text/s</i>>]\n" + //
+        "t017 [label=<F,Q: moet&#9251;<br/>F,Q: <i>/text/s</i>>]\n" + //
+        "t018 [label=<F,Q: nochtans&#9251;<br/>F,Q: <i>/text/s</i>>]\n" + //
+        "t019 [label=<F,Q: zijn&#9251;<br/>F,Q: <i>/text/s</i>>]\n" + //
+        "t020 [label=<F,Q: dit&#9251;<br/>F,Q: <i>/text/s</i>>]\n" + //
+        "t021 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n" + //
+        "t022 [label=<F,Q: werven&#9251;<br/>F,Q: <i>/text/s/del</i>>]\n" + //
+        "t023 [label=<F,Q: om<br/>F,Q: <i>/text/s/del</i>>]\n" + //
+        "t024 [label=<F,Q: trachten&#9251;<br/>F,Q: <i>/text/s/add</i>>]\n" + //
+        "t025 [label=<Q: <br/>Q: <i>/text/s/lb</i>>]\n" + //
+        "t026 [label=<Q: !&#x21A9;<br/>&#9251;<br/>Q: <i>/text/s</i>>]\n" + //
+        "t027 [label=<Q: Die&#9251;<br/>Q: <i>/text/s</i>>]\n" + //
+        "t028 [label=<Q: dagen&#9251;<br/>Q: <i>/text/s</i>>]\n" + //
+        "t029 [label=<Q: van&#9251;<br/>Q: <i>/text/s</i>>]\n" + //
+        "t030 [label=<Q: nerveuze&#9251;<br/>Q: <i>/text/s</i>>]\n" + //
+        "t031 [label=<Q: verwachting&#9251;<br/>Q: <i>/text/s</i>>]\n" + //
+        "t032 [label=<Q: .<br/>Q: <i>/text/s</i>>]\n" + //
+        "t000->t002[label=\"F,Q\"]\n" + //
+        "t002->t013[label=\"F,Q\"]\n" + //
+        "t003->t004[label=\"F,Q\"]\n" + //
+        "t004->t005[label=\"F,Q\"]\n" + //
+        "t005->t006[label=\"F\"]\n" + //
+        "t005->t025[label=\"Q\"]\n" + //
+        "t006->t007[label=\"F\"]\n" + //
+        "t006->t026[label=\"Q\"]\n" + //
+        "t007->t008[label=\"F\"]\n" + //
+        "t008->t009[label=\"F\"]\n" + //
+        "t009->t010[label=\"F\"]\n" + //
+        "t010->t011[label=\"F,Q\"]\n" + //
+        "t011->t012[label=\"F\"]\n" + //
+        "t011->t014[label=\"Q\"]\n" + //
+        "t012->t014[label=\"F\"]\n" + //
+        "t013->t017[label=\"F,Q\"]\n" + //
+        "t014->t015[label=\"F,Q\"]\n" + //
+        "t015->t016[label=\"F\"]\n" + //
+        "t015->t032[label=\"Q\"]\n" + //
+        "t016->t001[label=\"F\"]\n" + //
+        "t017->t018[label=\"F,Q\"]\n" + //
+        "t018->t019[label=\"F,Q\"]\n" + //
+        "t019->t020[label=\"F,Q\"]\n" + //
+        "t020->t021[label=\"F\"]\n" + //
+        "t020->t022[label=\"Q\"]\n" + //
+        "t020->t024[label=\"Q\"]\n" + //
+        "t021->t022[label=\"F\"]\n" + //
+        "t021->t024[label=\"F\"]\n" + //
+        "t022->t023[label=\"F,Q\"]\n" + //
+        "t023->t004[label=\"F,Q\"]\n" + //
+        "t024->t003[label=\"F,Q\"]\n" + //
+        "t025->t006[label=\"Q\"]\n" + //
+        "t026->t027[label=\"Q\"]\n" + //
+        "t027->t028[label=\"Q\"]\n" + //
+        "t028->t029[label=\"Q\"]\n" + //
+        "t029->t030[label=\"Q\"]\n" + //
+        "t030->t031[label=\"Q\"]\n" + //
+        "t031->t010[label=\"Q\"]\n" + //
+        "t032->t001[label=\"Q\"]\n" + //
+        "}";
+    writeGraph(dot);
+    assertThat(dot).isEqualTo(expected);
 
   }
 

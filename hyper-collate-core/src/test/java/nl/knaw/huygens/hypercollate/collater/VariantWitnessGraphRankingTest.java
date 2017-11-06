@@ -20,9 +20,10 @@ package nl.knaw.huygens.hypercollate.collater;
  * #L%
  */
 
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -47,7 +48,7 @@ public class VariantWitnessGraphRankingTest extends HyperCollateTest {
 
     VariantWitnessGraphRanking ranking = VariantWitnessGraphRanking.of(witnessGraph);
     Map<Integer, Set<TokenVertex>> byRank = ranking.getByRank();
-    byRank.entrySet().forEach(entry -> System.out.println(entry.getKey() + ":" + entry.getValue()));
+    byRank.forEach((key, value) -> System.out.println(key + ":" + value));
 
     assertThat(byRank.get(0)).hasSize(1);
     assertThat(byRank.get(0).iterator().next()).isInstanceOf(StartTokenVertex.class);
@@ -60,14 +61,14 @@ public class VariantWitnessGraphRankingTest extends HyperCollateTest {
     assertThat(content).isEqualTo("Een ongeluk komt ");
 
     assertThat(byRank.get(2)).hasSize(2);
-    Iterator<TokenVertex> iterator = byRank.get(2).iterator();
+    List<TokenVertex> tokenVertices = byRank.get(2).stream().sorted().collect(toList());
 
-    TokenVertex tokenVertex1 = iterator.next();
+    TokenVertex tokenVertex1 = tokenVertices.get(0);
     assertThat(tokenVertex1).isInstanceOf(SimpleTokenVertex.class);
     String content1 = ((MarkedUpToken) tokenVertex1.getToken()).getContent();
     assertThat(content1).isEqualTo("nooit");
 
-    TokenVertex tokenVertex2 = iterator.next();
+    TokenVertex tokenVertex2 = tokenVertices.get(1);
     assertThat(tokenVertex2).isInstanceOf(SimpleTokenVertex.class);
     String content2 = ((MarkedUpToken) tokenVertex2.getToken()).getContent();
     assertThat(content2).isEqualTo("zelden");

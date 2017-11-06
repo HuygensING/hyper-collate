@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.model;
+package nl.knaw.huygens.hypercollate.collater;
 
 /*-
  * #%L
@@ -19,23 +19,27 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
+import eu.interedition.collatex.dekker.astar.Cost;
 
-import eu.interedition.collatex.Token;
+public class LostPotential extends Cost<LostPotential> {
 
-import java.util.stream.Stream;
+  private Integer cost;
 
-public interface TokenVertex {
+  public LostPotential(int cost) {
+    this.cost = cost;
+  }
 
-  Token getToken();
+  @Override
+  protected LostPotential plus(LostPotential other) {
+    return new LostPotential(cost + other.getCost());
+  }
 
-  void addIncomingTokenVertex(TokenVertex incoming);
+  @Override
+  public int compareTo(LostPotential other) {
+    return cost.compareTo(other.getCost());
+  }
 
-  Stream<TokenVertex> getIncomingTokenVertexStream();
-
-  void addOutgoingTokenVertex(TokenVertex outgoing);
-
-  Stream<TokenVertex> getOutgoingTokenVertexStream();
-
-  String getSigil();
-
+  public Integer getCost() {
+    return cost;
+  }
 }

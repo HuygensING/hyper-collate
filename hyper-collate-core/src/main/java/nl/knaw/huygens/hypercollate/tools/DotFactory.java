@@ -1,5 +1,29 @@
 package nl.knaw.huygens.hypercollate.tools;
 
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+import eu.interedition.collatex.Token;
+import nl.knaw.huygens.hypercollate.model.CollationGraph;
+import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
+import nl.knaw.huygens.hypercollate.model.EndTokenVertex;
+import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+import nl.knaw.huygens.hypercollate.model.StartTokenVertex;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+
 /*-
  * #%L
  * hyper-collate-core
@@ -20,24 +44,8 @@ package nl.knaw.huygens.hypercollate.tools;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.EndTokenVertex;
-import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
-import nl.knaw.huygens.hypercollate.model.Markup;
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.StartTokenVertex;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
-
 public class DotFactory {
+
   /**
    * Generates a .dot format string for visualizing a variant witness graph.
    *
@@ -59,12 +67,10 @@ public class DotFactory {
         String tokenVariable = vertexVariable(tokenVertex);
         if (tokenVertex instanceof SimpleTokenVertex) {
           SimpleTokenVertex stv = (SimpleTokenVertex) tokenVertex;
-          String markup = graph.getSigil() + ": /" + graph.getMarkupListForTokenVertex(stv).stream()//
-              .map(Markup::getTagname)//
-              .collect(Collectors.joining("/"));
+          String markup = graph.getSigil() + ": " + stv.getParentXPath();
           dotBuilder.append(tokenVariable)//
               .append(" [label=<")//
-              .append(stv.getContent().replaceAll("\n", "&#x21A9;<br/>").replaceAll(" +", "&#9251;"))//
+              .append(asLabel(stv.getContent()))//
               .append("<br/><i>")//
               .append(markup)//
               .append("</i>")//
@@ -89,19 +95,134 @@ public class DotFactory {
   private static String vertexVariable(TokenVertex tokenVertex) {
     if (tokenVertex instanceof SimpleTokenVertex) {
       MarkedUpToken token = (MarkedUpToken) tokenVertex.getToken();
-      return "t" + token.getIndexNumber();
+      return token.getWitness().getSigil() + "_" + String.format("%03d", token.getIndexNumber());
     }
     if (tokenVertex instanceof StartTokenVertex) {
-      return "st";
+      return "begin";
     }
     if (tokenVertex instanceof EndTokenVertex) {
-      return "et";
+      return "end";
     }
     return null;
   }
 
+  private static final Comparator<Node> BY_NODE = (n1, n2) -> n1.toString().compareTo(n2.toString());
+
   public static String fromCollationGraph(CollationGraph collation) {
-    return "";
+    StringBuilder dotBuilder = new StringBuilder("digraph CollationGraph{\nlabelloc=b\n");
+    Map<Node, String> nodeIdentifiers = new HashMap<>();
+
+    List<Node> nodes = collation.traverse();
+    nodes.sort(BY_NODE);
+    for (int i = 0; i < nodes.size(); i++) {
+      Node node = nodes.get(i);
+      String nodeId = "t" + String.format("%03d", i);
+      nodeIdentifiers.put(node, nodeId);
+      appendNodeLine(dotBuilder, node, nodeId);
+    }
+    appendEdgeLines(dotBuilder, collation, nodeIdentifiers, nodes);
+
+    dotBuilder.append("}");
+    return dotBuilder.toString();
+  }
+
+  private static void appendEdgeLines(StringBuilder dotBuilder, CollationGraph collation, Map<Node, String> nodeIdentifiers, List<Node> nodes) {
+    Set<String> edgeLines = new TreeSet<>();
+    for (Node node : nodes) {
+      collation.getIncomingEdges(node)//
+          .forEach(e -> {
+            Node source = collation.getSource(e);
+            Node target = collation.getTarget(e);
+            String edgeLabel = e.getSigils().stream().sorted().collect(joining(","));
+            StringBuilder lineBuilder = new StringBuilder()//
+                .append(nodeIdentifiers.get(source))//
+                .append("->")//
+                .append(nodeIdentifiers.get(target))//
+                .append("[label=\"")//
+                .append(edgeLabel)//
+                .append("\"]\n");
+            edgeLines.add(lineBuilder.toString());
+          });
+    }
+    edgeLines.forEach(dotBuilder::append);
+  }
+
+  private static void appendNodeLine(StringBuilder dotBuilder, Node node, String nodeId) {
+    String labelString = generateNodeLabel(node);
+    if (labelString.isEmpty()) {
+      dotBuilder.append(nodeId)//
+          .append(" [label=\"\";shape=doublecircle,rank=middle]\n");
+
+    } else {
+      dotBuilder.append(nodeId)//
+          .append(" [label=<")//
+          .append(labelString)//
+          .append(">]\n");
+    }
+  }
+
+  private static String generateNodeLabel(Node node) {
+    StringBuilder label = new StringBuilder();
+    Map<String, String> contentLabel = new HashMap<>();
+    Map<String, String> markupLabel = new HashMap<>();
+    List<String> sortedSigils = node.getSigils().stream().sorted().collect(toList());
+    String joinedSigils = sortedSigils.stream().collect(joining(","));
+
+    prepare(node, contentLabel, markupLabel, sortedSigils);
+
+    appendContent(label, contentLabel, sortedSigils, joinedSigils);
+    appendMarkup(label, markupLabel, sortedSigils, joinedSigils);
+
+    return label.toString();
+  }
+
+  private static void prepare(Node node, Map<String, String> contentLabel, Map<String, String> markupLabel, List<String> sortedSigils) {
+    sortedSigils.forEach(s -> {
+      Token token = node.getTokenForWitness(s);
+      if (token != null) {
+        MarkedUpToken mToken = (MarkedUpToken) token;
+        String markup = mToken.getParentXPath();
+        contentLabel.put(s, asLabel(mToken.getContent()));
+        markupLabel.put(s, markup);
+      }
+    });
+  }
+
+  private static void appendMarkup(StringBuilder label, Map<String, String> markupLabel, List<String> sortedSigils, String joinedSigils) {
+    Set<String> markupLabelSet = new HashSet<>(markupLabel.values());
+    if (markupLabelSet.size() == 1) {
+      label.append(joinedSigils)//
+          .append(": <i>")//
+          .append(markupLabelSet.iterator().next())//
+          .append("</i>");
+
+    } else {
+      sortedSigils.forEach(s -> label.append(s)//
+          .append(": <i>")//
+          .append(markupLabel.get(s))//
+          .append("</i><br/>"));
+    }
+  }
+
+  private static void appendContent(StringBuilder label, Map<String, String> contentLabel, List<String> sortedSigils, String joinedSigils) {
+    Set<String> contentLabelSet = new HashSet<>(contentLabel.values());
+    if (contentLabelSet.size() == 1) {
+      label.append(joinedSigils)//
+          .append(": ")//
+          .append(contentLabelSet.iterator().next())//
+          .append("<br/>");
+
+    } else {
+      sortedSigils.forEach(s -> label.append(s)//
+          .append(": ")//
+          .append(contentLabel.get(s))//
+          .append("<br/>"));
+    }
+  }
+
+  private static String asLabel(String content) {
+    return content.replaceAll("\n", "&#x21A9;<br/>")//
+        .replaceAll(" +", "&#9251;");
   }
 
 }

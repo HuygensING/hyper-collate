@@ -48,6 +48,11 @@ public class MarkedUpToken implements Token {
     return this.normalizedContent;
   }
 
+  public MarkedUpToken setWitness(SimpleWitness witness) {
+    this.witness = witness;
+    return this;
+  }
+
   @Override
   public Witness getWitness() {
     return witness;
@@ -62,12 +67,18 @@ public class MarkedUpToken implements Token {
     return this.index;
   }
 
-  public void setParentXPath(String parentXPath) {
+  public MarkedUpToken setParentXPath(String parentXPath) {
     this.parentXPath = parentXPath;
+    return this;
   }
 
   public String getParentXPath() {
     return this.parentXPath;
+  }
+
+  @Override
+  public String toString() {
+    return witness.getSigil() + index+":" + getParentXPath() + "='" + content.replace("\n", "\\n") + "'";
   }
 
 }

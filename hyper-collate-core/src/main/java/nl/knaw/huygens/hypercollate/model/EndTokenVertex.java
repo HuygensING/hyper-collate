@@ -19,15 +19,21 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
+
+import eu.interedition.collatex.Token;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import eu.interedition.collatex.Token;
-
 public class EndTokenVertex implements TokenVertex {
 
   private final List<TokenVertex> incomingTokenVertices = new ArrayList<>();
+  private String sigil;
+
+  EndTokenVertex(String sigil) {
+    this.sigil = sigil;
+  }
 
   @Override
   public Token getToken() {
@@ -42,6 +48,11 @@ public class EndTokenVertex implements TokenVertex {
   @Override
   public Stream<TokenVertex> getOutgoingTokenVertexStream() {
     return Stream.empty();
+  }
+
+  @Override
+  public String getSigil() {
+    return sigil;
   }
 
   @Override

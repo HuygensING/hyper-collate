@@ -20,39 +20,39 @@ package nl.knaw.huygens.hypercollate.importer;
  * #L%
  */
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import eu.interedition.collatex.simple.SimplePatternTokenizer;
+import nl.knaw.huygens.hypercollate.model.*;
+import org.apache.commons.io.FileUtils;
+
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.*;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.Attribute;
-import javax.xml.stream.events.Characters;
-import javax.xml.stream.events.EndElement;
-import javax.xml.stream.events.StartElement;
-import javax.xml.stream.events.XMLEvent;
-
-import org.apache.commons.io.FileUtils;
-
-import eu.interedition.collatex.simple.SimplePatternTokenizer;
-import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
-import nl.knaw.huygens.hypercollate.model.Markup;
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+import static java.util.stream.Collectors.joining;
+import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
 
 public class XMLImporter {
 
-  Function<String, Stream<String>> tokenizer = SimplePatternTokenizer.BY_WS_OR_PUNCT;
+  private final Function<String, Stream<String>> tokenizer;
+  private final Function<String, String> normalizer;
+
+  public XMLImporter(Function<String, Stream<String>> tokenizer, Function<String, String> normalizer) {
+    this.tokenizer = tokenizer;
+    this.normalizer = normalizer;
+  }
+
+  public XMLImporter() {
+    this.tokenizer = SimplePatternTokenizer.BY_WS_OR_PUNCT;
+    this.normalizer = (String raw) -> raw.trim().toLowerCase();
+  }
 
   public VariantWitnessGraph importXML(String sigil, String xmlString) {
     InputStream inputStream;
@@ -75,10 +75,11 @@ public class XMLImporter {
 
   public VariantWitnessGraph importXML(String sigil, InputStream input) {
     VariantWitnessGraph graph = new VariantWitnessGraph(sigil);
+    SimpleWitness witness = new SimpleWitness(sigil);
     XMLInputFactory factory = XMLInputFactory.newInstance();
     try {
       XMLEventReader reader = factory.createXMLEventReader(input);
-      Context context = new Context(graph);
+      Context context = new Context(graph, normalizer, witness);
       while (reader.hasNext()) {
         XMLEvent event = reader.nextEvent();
         switch (event.getEventType()) {
@@ -214,22 +215,28 @@ public class XMLImporter {
 
   private static class Context {
 
-    private VariantWitnessGraph graph;
-    private Deque<Markup> openMarkup = new LinkedList<>();
+    private final VariantWitnessGraph graph;
+    private final Deque<Markup> openMarkup = new LinkedList<>();
     private TokenVertex lastTokenVertex;
     private long tokenCounter = 0L;
-    private Deque<TokenVertex> variationStartVertices = new LinkedList<>(); // the tokenvertices whose outgoing vertices are the variant vertices (add/del)
-    private Deque<TokenVertex> variationEndVertices = new LinkedList<>(); // the tokenvertices that are the last in a <del>
-    private Deque<TokenVertex> unconnectedVertices = new LinkedList<>(); // the last tokenvertex in an <add> which hasn't been linked to the tokenvertex after the </del> yet
+    private final Deque<TokenVertex> variationStartVertices = new LinkedList<>(); // the tokenvertices whose outgoing vertices are the variant vertices (add/del)
+    private final Deque<TokenVertex> variationEndVertices = new LinkedList<>(); // the tokenvertices that are the last in a <del>
+    private final Deque<TokenVertex> unconnectedVertices = new LinkedList<>(); // the last tokenvertex in an <add> which hasn't been linked to the tokenvertex after the </del> yet
+    private final Function<String, String> normalizer;
+    private final SimpleWitness witness;
+    private String parentXPath;
 
-    public Context(VariantWitnessGraph graph) {
+    public Context(VariantWitnessGraph graph, Function<String, String> normalizer, SimpleWitness witness) {
       this.graph = graph;
+      this.normalizer = normalizer;
       this.lastTokenVertex = graph.getStartTokenVertex();
+      this.witness = witness;
     }
 
     public void openMarkup(Markup markup) {
       graph.addMarkup(markup);
       openMarkup.push(markup);
+      parentXPath = buildParentXPath();
       if (isVariationStartingMarkup(markup)) {
         variationStartVertices.push(lastTokenVertex);
       } else if (isVariationEndingMarkup(markup)) {
@@ -248,9 +255,11 @@ public class XMLImporter {
     public void closeMarkup(Markup markup) {
       Markup firstToClose = openMarkup.peek();
       if (graph.getTokenVertexListForMarkup(firstToClose).isEmpty()) {
+        // add milestone
         addNewToken("");
       }
       openMarkup.pop();
+      parentXPath = buildParentXPath();
       String closingTag = markup.getTagname();
       String expectedTag = firstToClose.getTagname();
       if (!expectedTag.equals(closingTag)) {
@@ -264,8 +273,13 @@ public class XMLImporter {
     }
 
     public void addNewToken(String content) {
-      MarkedUpToken token = new MarkedUpToken().setContent(content);
-      SimpleTokenVertex tokenVertex = new SimpleTokenVertex(token.setIndexNumber(tokenCounter++));
+      MarkedUpToken token = new MarkedUpToken()//
+          .setContent(content)//
+          .setWitness(witness)//
+          .setIndexNumber(tokenCounter++)//
+          .setParentXPath(parentXPath)//
+          .setNormalizedContent(normalizer.apply(content));
+      SimpleTokenVertex tokenVertex = new SimpleTokenVertex(token);
       graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex);
       this.openMarkup.descendingIterator()//
           .forEachRemaining(markup -> graph.addMarkupToTokenVertex(tokenVertex, markup));
@@ -284,6 +298,10 @@ public class XMLImporter {
 
     public void closeDocument() {
       graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, graph.getEndTokenVertex());
+    }
+
+    private String buildParentXPath() {
+      return "/" + stream(openMarkup.descendingIterator()).map(Markup::getTagname).collect(joining("/"));
     }
   }
 }

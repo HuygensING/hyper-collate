@@ -19,6 +19,7 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
+
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,14 +40,15 @@ public class VariantWitnessGraphTest extends HyperCollateTest {
     Markup delMarkup = new Markup("del");
     Markup addMarkup = new Markup("add");
 
-    SimpleTokenVertex mtv0 = aTokenVertex("Collating ", 0L);
-    SimpleTokenVertex mtv1 = aTokenVertex("is ", 1L);
-    SimpleTokenVertex mtv2 = aTokenVertex("NP ", 2L);
-    SimpleTokenVertex mtv3 = aTokenVertex("hard", 3L);
-    SimpleTokenVertex mtv4 = aTokenVertex("easy", 4L);
-    SimpleTokenVertex mtv5 = aTokenVertex(".", 5L);
+    SimpleWitness witness = new SimpleWitness("A");
+    SimpleTokenVertex mtv0 = aTokenVertex("Collating ", 0L, "/s", witness);
+    SimpleTokenVertex mtv1 = aTokenVertex("is ", 1L, "/s", witness);
+    SimpleTokenVertex mtv2 = aTokenVertex("NP ", 2L, "/s/del", witness);
+    SimpleTokenVertex mtv3 = aTokenVertex("hard", 3L, "/s/del", witness);
+    SimpleTokenVertex mtv4 = aTokenVertex("easy", 4L, "/s/add", witness);
+    SimpleTokenVertex mtv5 = aTokenVertex(".", 5L, "/s", witness);
 
-    VariantWitnessGraph vwg1 = new VariantWitnessGraph("A");
+    VariantWitnessGraph vwg1 = new VariantWitnessGraph(witness.getSigil());
     vwg1.addMarkup(sMarkup, delMarkup, addMarkup);
     TokenVertex startTokenVertex = vwg1.getStartTokenVertex();
     vwg1.addOutgoingTokenVertexToTokenVertex(startTokenVertex, mtv0); // (START)->(collating)
@@ -82,52 +84,53 @@ public class VariantWitnessGraphTest extends HyperCollateTest {
 
     String dot = DotFactory.fromVariantWitnessGraph(vwg1);
     System.out.println(dot);
-    String expected = "digraph VariantWitnessGraph{\n" + //
-        "graph [rankdir=LR]\n" + //
-        "labelloc=b\n" + //
-        "st [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "t0 [label=<Collating&#9251;<br/><i>A: /s</i>>]\n" + //
-        "t1 [label=<is&#9251;<br/><i>A: /s</i>>]\n" + //
-        "t2 [label=<NP&#9251;<br/><i>A: /s/del</i>>]\n" + //
-        "t4 [label=<easy<br/><i>A: /s/add</i>>]\n" + //
-        "t3 [label=<hard<br/><i>A: /s/del</i>>]\n" + //
-        "t5 [label=<.<br/><i>A: /s</i>>]\n" + //
-        "et [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "st->t0\n" + //
-        "t0->t1\n" + //
-        "t1->t2\n" + //
-        "t1->t4\n" + //
-        "t2->t3\n" + //
-        "t3->t5\n" + //
-        "t4->t5\n" + //
-        "t5->et\n" + //
+    String expected = "digraph VariantWitnessGraph{\n" +//
+        "graph [rankdir=LR]\n" +//
+        "labelloc=b\n" +//
+        "begin [label=\"\";shape=doublecircle,rank=middle]\n" +//
+        "A_000 [label=<Collating&#9251;<br/><i>A: /s</i>>]\n" +//
+        "A_001 [label=<is&#9251;<br/><i>A: /s</i>>]\n" +//
+        "A_002 [label=<NP&#9251;<br/><i>A: /s/del</i>>]\n" +//
+        "A_004 [label=<easy<br/><i>A: /s/add</i>>]\n" +//
+        "A_003 [label=<hard<br/><i>A: /s/del</i>>]\n" +//
+        "A_005 [label=<.<br/><i>A: /s</i>>]\n" +//
+        "end [label=\"\";shape=doublecircle,rank=middle]\n" +//
+        "A_000->A_001\n" +//
+        "A_001->A_002\n" +//
+        "A_001->A_004\n" +//
+        "A_002->A_003\n" +//
+        "A_003->A_005\n" +//
+        "A_004->A_005\n" +//
+        "A_005->end\n" +//
+        "begin->A_000\n" +//
         "}";
     assertThat(dot).isEqualTo(expected);
 
-    String expected2 = "digraph VariantWitnessGraph{\n" + //
-        "graph [rankdir=LR]\n" + //
-        "labelloc=b\n" + //
-        "st [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "t0 [label=<Collating&#9251;is&#9251;<br/><i>A: /s</i>>]\n" + //
-        "t2 [label=<NP&#9251;hard<br/><i>A: /s/del</i>>]\n" + //
-        "t4 [label=<easy<br/><i>A: /s/add</i>>]\n" + //
-        "t5 [label=<.<br/><i>A: /s</i>>]\n" + //
-        "et [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "st->t0\n" + //
-        "t0->t2\n" + //
-        "t0->t4\n" + //
-        "t2->t5\n" + //
-        "t4->t5\n" + //
-        "t5->et\n" + //
+    String expected2 = "digraph VariantWitnessGraph{\n" +//
+        "graph [rankdir=LR]\n" +//
+        "labelloc=b\n" +//
+        "begin [label=\"\";shape=doublecircle,rank=middle]\n" +//
+        "A_000 [label=<Collating&#9251;is&#9251;<br/><i>A: /s</i>>]\n" +//
+        "A_002 [label=<NP&#9251;hard<br/><i>A: /s/del</i>>]\n" +//
+        "A_004 [label=<easy<br/><i>A: /s/add</i>>]\n" +//
+        "A_005 [label=<.<br/><i>A: /s</i>>]\n" +//
+        "end [label=\"\";shape=doublecircle,rank=middle]\n" +//
+        "A_000->A_002\n" +//
+        "A_000->A_004\n" +//
+        "A_002->A_005\n" +//
+        "A_004->A_005\n" +//
+        "A_005->end\n" +//
+        "begin->A_000\n" +//
         "}";
     verifyDotExport(vwg1, expected2);
-
   }
 
-  private SimpleTokenVertex aTokenVertex(String string, Long index) {
+  private SimpleTokenVertex aTokenVertex(String string, Long index, String parentXPath, SimpleWitness witness) {
     MarkedUpToken token = new MarkedUpToken()//
         .setContent(string)//
         .setNormalizedContent(string.toLowerCase())//
+        .setParentXPath(parentXPath)//
+        .setWitness(witness)//
         .setIndexNumber(index);
 
     return new SimpleTokenVertex(token);

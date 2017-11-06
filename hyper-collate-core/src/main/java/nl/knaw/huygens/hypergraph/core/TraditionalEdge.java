@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.model;
+package nl.knaw.huygens.hypergraph.core;
 
 /*-
  * #%L
@@ -20,22 +20,21 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
-import eu.interedition.collatex.Token;
+import java.util.Set;
 
-import java.util.stream.Stream;
+public class TraditionalEdge {
 
-public interface TokenVertex {
+  private Set<String> sigils;
 
-  Token getToken();
+  TraditionalEdge(Set<String> label){
+    this.sigils = label;
+  }
 
-  void addIncomingTokenVertex(TokenVertex incoming);
+  public Set<String> getSigils() {
+    return sigils;
+  }
 
-  Stream<TokenVertex> getIncomingTokenVertexStream();
-
-  void addOutgoingTokenVertex(TokenVertex outgoing);
-
-  Stream<TokenVertex> getOutgoingTokenVertexStream();
-
-  String getSigil();
-
+  public void setSigils(Set<String> sigils) {
+    this.sigils = sigils;
+  }
 }

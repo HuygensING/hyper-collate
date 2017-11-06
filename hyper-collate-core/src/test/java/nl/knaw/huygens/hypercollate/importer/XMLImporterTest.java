@@ -19,6 +19,7 @@ package nl.knaw.huygens.hypercollate.importer;
  * limitations under the License.
  * #L%
  */
+
 import java.io.InputStream;
 
 import org.junit.Test;
@@ -32,21 +33,21 @@ public class XMLImporterTest extends HyperCollateTest {
   public void testImportFromString() {
     XMLImporter importer = new XMLImporter();
     VariantWitnessGraph wg0 = importer.importXML("A", "<xml>Mondays are <del>well good</del><add>def bad</add>!</xml>");
-    String expectedDot = "digraph VariantWitnessGraph{\n" + //
-        "graph [rankdir=LR]\n" + //
-        "labelloc=b\n" + //
-        "st [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "t0 [label=<Mondays&#9251;are&#9251;<br/><i>A: /xml</i>>]\n" + //
-        "t2 [label=<well&#9251;good<br/><i>A: /xml/del</i>>]\n" + //
-        "t4 [label=<def&#9251;bad<br/><i>A: /xml/add</i>>]\n" + //
-        "t6 [label=<!<br/><i>A: /xml</i>>]\n" + //
-        "et [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "st->t0\n" + //
-        "t0->t2\n" + //
-        "t0->t4\n" + //
-        "t2->t6\n" + //
-        "t4->t6\n" + //
-        "t6->et\n" + //
+    String expectedDot = "digraph VariantWitnessGraph{\n" +//
+        "graph [rankdir=LR]\n" +//
+        "labelloc=b\n" +//
+        "begin [label=\"\";shape=doublecircle,rank=middle]\n" +//
+        "A_000 [label=<Mondays&#9251;are&#9251;<br/><i>A: /xml</i>>]\n" +//
+        "A_002 [label=<well&#9251;good<br/><i>A: /xml/del</i>>]\n" +//
+        "A_004 [label=<def&#9251;bad<br/><i>A: /xml/add</i>>]\n" +//
+        "A_006 [label=<!<br/><i>A: /xml</i>>]\n" +//
+        "end [label=\"\";shape=doublecircle,rank=middle]\n" +//
+        "A_000->A_002\n" +//
+        "A_000->A_004\n" +//
+        "A_002->A_006\n" +//
+        "A_004->A_006\n" +//
+        "A_006->end\n" +//
+        "begin->A_000\n" +//
         "}";
     verifyDotExport(wg0, expectedDot);
   }
@@ -56,26 +57,26 @@ public class XMLImporterTest extends HyperCollateTest {
     XMLImporter importer = new XMLImporter();
     InputStream resourceAsStream = getClass().getResourceAsStream("/witness.xml");
     VariantWitnessGraph wg0 = importer.importXML("A", resourceAsStream);
-    String expected = "digraph VariantWitnessGraph{\n" + //
-        "graph [rankdir=LR]\n" + //
-        "labelloc=b\n" + //
-        "st [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "t0 [label=<De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/><i>A: /text/s</i>>]\n" + //
-        "t6 [label=<Shiriar<br/><i>A: /text/s/del</i>>]\n" + //
-        "t7 [label=<den&#9251;bedremmelden&#9251;<br/><i>A: /text/s/add</i>>]\n" + //
-        "t11 [label=<&#9251;uit&#9251;voor&#9251;\"lompen&#9251;boer\".<br/><i>A: /text/s</i>>]\n" + //
-        "t9 [label=<man<br/><i>A: /text/s/add/del</i>>]\n" + //
-        "t10 [label=<Sultan<br/><i>A: /text/s/add/add</i>>]\n" + //
-        "et [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "st->t0\n" + //
-        "t0->t6\n" + //
-        "t0->t7\n" + //
-        "t10->t11\n" + //
-        "t11->et\n" + //
-        "t6->t11\n" + //
-        "t7->t10\n" + //
-        "t7->t9\n" + //
-        "t9->t11\n" + //
+    String expected = "digraph VariantWitnessGraph{\n" +//
+        "graph [rankdir=LR]\n" +//
+        "labelloc=b\n" +//
+        "begin [label=\"\";shape=doublecircle,rank=middle]\n" +//
+        "A_000 [label=<De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/><i>A: /text/s</i>>]\n" +//
+        "A_006 [label=<Shiriar<br/><i>A: /text/s/del</i>>]\n" +//
+        "A_007 [label=<den&#9251;bedremmelden&#9251;<br/><i>A: /text/s/add</i>>]\n" +//
+        "A_011 [label=<&#9251;uit&#9251;voor&#9251;\"lompen&#9251;boer\".<br/><i>A: /text/s</i>>]\n" +//
+        "A_009 [label=<man<br/><i>A: /text/s/add/del</i>>]\n" +//
+        "A_010 [label=<Sultan<br/><i>A: /text/s/add/add</i>>]\n" +//
+        "end [label=\"\";shape=doublecircle,rank=middle]\n" +//
+        "A_000->A_006\n" +//
+        "A_000->A_007\n" +//
+        "A_006->A_011\n" +//
+        "A_007->A_009\n" +//
+        "A_007->A_010\n" +//
+        "A_009->A_011\n" +//
+        "A_010->A_011\n" +//
+        "A_011->end\n" +//
+        "begin->A_000\n" +//
         "}";
 
     verifyDotExport(wg0, expected);
@@ -85,18 +86,18 @@ public class XMLImporterTest extends HyperCollateTest {
   public void testDelWithoutAdd() {
     XMLImporter importer = new XMLImporter();
     VariantWitnessGraph wg0 = importer.importXML("A", "<xml>Ja toch! <del>Niet dan?</del> Ik dacht het wel!</xml>");
-    String expectedDot = "digraph VariantWitnessGraph{\n" + //
-        "graph [rankdir=LR]\n" + //
-        "labelloc=b\n" + //
-        "st [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "t0 [label=<Ja&#9251;toch!&#9251;<br/><i>A: /xml</i>>]\n" + //
-        "t3 [label=<Niet&#9251;dan?<br/><i>A: /xml/del</i>>]\n" + //
-        "t6 [label=<&#9251;Ik&#9251;dacht&#9251;het&#9251;wel!<br/><i>A: /xml</i>>]\n" + //
-        "et [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "st->t0\n" + //
-        "t0->t3\n" + //
-        "t3->t6\n" + //
-        "t6->et\n" + //
+    String expectedDot = "digraph VariantWitnessGraph{\n" +//
+        "graph [rankdir=LR]\n" +//
+        "labelloc=b\n" +//
+        "begin [label=\"\";shape=doublecircle,rank=middle]\n" +//
+        "A_000 [label=<Ja&#9251;toch!&#9251;<br/><i>A: /xml</i>>]\n" +//
+        "A_003 [label=<Niet&#9251;dan?<br/><i>A: /xml/del</i>>]\n" +//
+        "A_006 [label=<&#9251;Ik&#9251;dacht&#9251;het&#9251;wel!<br/><i>A: /xml</i>>]\n" +//
+        "end [label=\"\";shape=doublecircle,rank=middle]\n" +//
+        "A_000->A_003\n" +//
+        "A_003->A_006\n" +//
+        "A_006->end\n" +//
+        "begin->A_000\n" +//
         "}";
 
     verifyDotExport(wg0, expectedDot);
