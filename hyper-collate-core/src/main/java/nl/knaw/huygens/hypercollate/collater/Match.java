@@ -1,5 +1,12 @@
 package nl.knaw.huygens.hypercollate.collater;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import com.google.common.base.Joiner;
+
 /*-
  * #%L
  * hyper-collate-core
@@ -22,11 +29,6 @@ package nl.knaw.huygens.hypercollate.collater;
 
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class Match {
 
@@ -59,23 +61,28 @@ public class Match {
 
   @Override
   public String toString() {
-    StringBuilder stringBuilder = new StringBuilder();
+    StringBuilder stringBuilder = new StringBuilder("<");
+    List<String> vertexStrings = new ArrayList<>();
     tokenVertexMap.forEach((sigil, vertex) -> {//
+      StringBuilder vString = new StringBuilder();
       if (vertex instanceof SimpleTokenVertex) {
         SimpleTokenVertex sv = (SimpleTokenVertex) vertex;
-        stringBuilder.append(sigil)//
-            .append("[")//
-            .append(sv.getIndexNumber())//
-            .append(",r")//
-            .append(rankingMap.get(sigil))//
-            .append("] '")//
-            .append(sv.getContent().replace("\n", "\\n"))//
-            .append("' ");
+        vString.append(sigil)//
+            .append(sv.getIndexNumber());
+        // vString.append(sigil)//
+        // .append("[")//
+        // .append(sv.getIndexNumber())//
+        // .append(",r")//
+        // .append(rankingMap.get(sigil))//
+        // .append("]:'")//
+        // .append(sv.getContent().replace("\n", "\\n"))//
+        // .append("'");
       } else {
-        stringBuilder.append(":").append(vertex.getClass().getSimpleName());
+        vString.append(sigil).append(":").append(vertex.getClass().getSimpleName());
       }
+      vertexStrings.add(vString.toString());
     });
-    return stringBuilder.toString();
+    return stringBuilder.append(Joiner.on(",").join(vertexStrings)).append(">").toString();
   }
 
   public List<String> witnessSigils() {

@@ -19,9 +19,16 @@ package nl.knaw.huygens.hypercollate.collater;
  * limitations under the License.
  * #L%
  */
-import eu.interedition.collatex.dekker.astar.AstarAlgorithm;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
-import java.util.*;
+import com.google.common.base.Stopwatch;
+
+import eu.interedition.collatex.dekker.astar.AstarAlgorithm;
 
 public class OptimalMatchSetAlgorithm extends AstarAlgorithm<QuantumMatchSet, LostPotential> {
 
@@ -35,8 +42,11 @@ public class OptimalMatchSetAlgorithm extends AstarAlgorithm<QuantumMatchSet, Lo
 
   public Set<Match> getOptimalMatchSet() {
     QuantumMatchSet startNode = new QuantumMatchSet(Collections.EMPTY_SET, new HashSet<>(allPotentialMatches));
-    LostPotential startCost = new LostPotential(allPotentialMatches.size());
+    LostPotential startCost = new LostPotential(0);
+    Stopwatch sw = Stopwatch.createStarted();
     List<QuantumMatchSet> winningPath = aStar(startNode, startCost);
+    sw.stop();
+    System.out.println("aStar took " + sw.elapsed(TimeUnit.MILLISECONDS) + "ms");
     QuantumMatchSet winningGoal = winningPath.get(winningPath.size() - 1);
     return winningGoal.getChosenMatches();
   }
@@ -53,7 +63,7 @@ public class OptimalMatchSetAlgorithm extends AstarAlgorithm<QuantumMatchSet, Lo
 
   @Override
   protected LostPotential heuristicCostEstimate(QuantumMatchSet match) {
-    return new LostPotential(maxPotential - match.potentialSize());
+    return new LostPotential(maxPotential - match.totalSize());
   }
 
   @Override

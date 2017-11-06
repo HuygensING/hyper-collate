@@ -42,4 +42,9 @@ public class LostPotential extends Cost<LostPotential> {
   public Integer getCost() {
     return cost;
   }
+
+  @Override
+  public String toString() {
+    return "LostPotential:" + cost;
+  }
 }
