@@ -20,19 +20,16 @@ package nl.knaw.huygens.hypercollate.tools;
  * #L%
  */
 
-import static java.util.stream.Collectors.toList;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.base.Preconditions;
 import eu.interedition.collatex.Token;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
 import nl.knaw.huygens.hypergraph.core.TraditionalEdge;
+
+import java.util.*;
+
+import static java.util.stream.Collectors.toList;
 
 public class CollationGraphNodeMerger {
 
@@ -45,78 +42,41 @@ public class CollationGraphNodeMerger {
 
   private static Map<Node, Node> mergeNodes(CollationGraph originalGraph, CollationGraph mergedGraph) {
     Map<Node, Node> originalToMerged = new HashMap<>();
-    Node lastNode = mergedGraph.getRootNode();
+    Node mergedNode = mergedGraph.getRootNode();
     Boolean isRootNode = true;
     for (Node originalNode : originalGraph.traverse()) {
       if (isRootNode) {
         isRootNode = false;
-        originalToMerged.put(originalNode, lastNode);
+        originalToMerged.put(originalNode, mergedNode);
         continue;
       }
 
-      if (canMergeNodes(lastNode, originalNode, originalGraph)) {
-        mergeNodeTokens(lastNode, originalNode);
+      if (canMergeNodes(mergedNode, originalNode, originalGraph)) {
+        mergeNodeTokens(mergedNode, originalNode);
 
       } else {
-        lastNode = copyNode(originalNode, mergedGraph, originalToMerged);
+        mergedNode = copyNode(originalNode, mergedGraph);
       }
+      originalToMerged.put(originalNode, mergedNode);
     }
     return originalToMerged;
   }
 
-  private static Node copyNode(Node originalNode, CollationGraph mergedGraph, Map<Node, Node> originalToMerged) {
-    Node lastNode;
-    Token[] tokens = originalNode.getSigils()//
-        .stream()//
-        .map(originalNode::getTokenForWitness)//
-        .collect(toList())//
-        .toArray(new Token[] {});
-    Node mergedNode = mergedGraph.addNodeWithTokens(tokens);
-    originalToMerged.put(originalNode, mergedNode);
-    lastNode = mergedNode;
-    return lastNode;
-  }
-
-  private static void mergeNodeTokens(Node lastNode, Node originalNode) {
-    for (String s : lastNode.getSigils()) {
-      MarkedUpToken tokenForWitness = (MarkedUpToken) lastNode.getTokenForWitness(s);
-      MarkedUpToken tokenToMerge = (MarkedUpToken) originalNode.getTokenForWitness(s);
-      tokenForWitness.setContent(tokenForWitness.getContent() + tokenToMerge.getContent())//
-          .setNormalizedContent(tokenForWitness.getNormalizedContent() + tokenToMerge.getNormalizedContent());
-    }
-  }
-
-  private static void copyIncomingEdges(CollationGraph originalGraph, Map<Node, Node> originalToMerged, CollationGraph mergedGraph) {
-    Set<Node> linkedNodes = new HashSet<>();
-    originalGraph.traverse().forEach(node -> {
-      Node mergedNode = originalToMerged.get(node);
-      if (!linkedNodes.contains(mergedNode)) {
-        originalGraph.getIncomingEdges(node)//
-            .forEach(e -> {
-              Node oSource = originalGraph.getSource(e);
-              Node mSource = originalToMerged.get(oSource);
-              Node oTarget = originalGraph.getTarget(e);
-              Node mTarget = originalToMerged.get(oTarget);
-              mergedGraph.addDirectedEdge(mSource, mTarget, e.getSigils());
-            });
-        linkedNodes.add(mergedNode);
-      }
-    });
-  }
-
   private static boolean canMergeNodes(Node mergedNode, Node originalNode, CollationGraph originalGraph) {
-    Collection<TraditionalEdge> outgoingEdges = originalGraph.getOutgoingEdges(originalNode);
-    if (outgoingEdges.size() != 1) {
+    Collection<TraditionalEdge> incomingEdges = originalGraph.getIncomingEdges(originalNode);
+    if (incomingEdges.size() != 1) {
       return false;
     }
-
-    TraditionalEdge outGoingEdge = outgoingEdges.iterator().next();
-    Node nextNode = originalGraph.getTarget(outGoingEdge);
-    Boolean sigilsMatch = nextNode.getSigils().equals(mergedNode.getSigils());
+    if (!mergedNode.getSigils().equals(originalNode.getSigils())) {
+      return false;
+    }
+    TraditionalEdge incomingEdge = incomingEdges.iterator().next();
+    Node prevNode = originalGraph.getSource(incomingEdge);
+    Boolean sigilsMatch = prevNode.getSigils().equals(mergedNode.getSigils());
     if (sigilsMatch) {
       for (String s : mergedNode.getSigils()) {
         Token mWitnessToken = mergedNode.getTokenForWitness(s);
-        Token nWitnessToken = nextNode.getTokenForWitness(s);
+        Token nWitnessToken = originalNode.getTokenForWitness(s);
         if (nWitnessToken == null) {
           // it's an endtoken, so not mergable
           return false;
@@ -128,5 +88,52 @@ public class CollationGraphNodeMerger {
     }
     return false;
   }
+
+  private static void mergeNodeTokens(Node lastNode, Node originalNode) {
+    for (String s : lastNode.getSigils()) {
+      MarkedUpToken tokenForWitness = (MarkedUpToken) lastNode.getTokenForWitness(s);
+      MarkedUpToken tokenToMerge = (MarkedUpToken) originalNode.getTokenForWitness(s);
+      tokenForWitness.setContent(tokenForWitness.getContent() + tokenToMerge.getContent())//
+          .setNormalizedContent(tokenForWitness.getNormalizedContent() + tokenToMerge.getNormalizedContent());
+    }
+  }
+
+  private static Node copyNode(Node originalNode, CollationGraph mergedGraph) {
+    Token[] tokens = originalNode.getSigils()//
+        .stream()//
+        .map(originalNode::getTokenForWitness)//
+        .map(CollationGraphNodeMerger::cloneToken)//
+        .collect(toList())//
+        .toArray(new Token[]{});
+    return mergedGraph.addNodeWithTokens(tokens);
+  }
+
+  private static Token cloneToken(Token original) {
+    if (original instanceof MarkedUpToken) {
+      return ((MarkedUpToken) original).clone();
+    }
+    throw new RuntimeException("Can't clone token of type " + original.getClass());
+  }
+
+  private static void copyIncomingEdges(CollationGraph originalGraph, Map<Node, Node> originalToMerged, CollationGraph mergedGraph) {
+    Set<Node> linkedNodes = new HashSet<>();
+    originalGraph.traverse().forEach(node -> {
+      Node mergedNode = originalToMerged.get(node);
+      if (!linkedNodes.contains(mergedNode)) {
+        originalGraph.getIncomingEdges(node)//
+            .forEach(e -> {
+              Node oSource = originalGraph.getSource(e);
+              Node mSource = originalToMerged.get(oSource);
+              Preconditions.checkNotNull(mSource);
+              Node oTarget = originalGraph.getTarget(e);
+              Node mTarget = originalToMerged.get(oTarget);
+              Preconditions.checkNotNull(mTarget);
+              mergedGraph.addDirectedEdge(mSource, mTarget, e.getSigils());
+            });
+        linkedNodes.add(mergedNode);
+      }
+    });
+  }
+
 
 }

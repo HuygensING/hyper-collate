@@ -19,12 +19,8 @@ package nl.knaw.huygens.hypergraph.core;
  * limitations under the License.
  * #L%
  */
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Stack;
+
+import java.util.*;
 
 // nu zou ik wel topological sort willen hebben
 // teveel gedoe, kan ook gewoon een root node maken
@@ -63,6 +59,9 @@ public class DirectedAcyclicGraph<N> extends Hypergraph<N, TraditionalEdge> {
         visitedNodes.add(pop);
         for (TraditionalEdge e : outgoingEdges) {
           N target = this.getTarget(e);
+          if (target == null) {
+            throw new RuntimeException("edge target is null for edge " + pop + "->");
+          }
           nodesToVisit.add(target);
         }
       } else {
