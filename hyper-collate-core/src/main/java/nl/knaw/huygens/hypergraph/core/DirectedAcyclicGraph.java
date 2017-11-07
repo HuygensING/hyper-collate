@@ -59,10 +59,13 @@ public class DirectedAcyclicGraph<N> extends Hypergraph<N, TraditionalEdge> {
         visitedNodes.add(pop);
         for (TraditionalEdge e : outgoingEdges) {
           N target = this.getTarget(e);
+          if (target == null) {
+            throw new RuntimeException("edge target is null for edge " + pop + "->");
+          }
           nodesToVisit.add(target);
         }
       } else {
-        System.out.println("Cycle!: revisiting node " + pop);
+        System.out.println("revisiting node " + pop);
       }
     }
     return result;

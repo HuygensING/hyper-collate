@@ -19,13 +19,17 @@ package nl.knaw.huygens.hypercollate.collater;
  * limitations under the License.
  * #L%
  */
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-
-import java.util.*;
-import java.util.stream.Stream;
-
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
 public class QuantumMatchSet {
 
@@ -72,8 +76,7 @@ public class QuantumMatchSet {
     int minRank2 = match.getRankForWitness(sigil2);
 
     return potentialMatches.stream()//
-        .filter(m ->
-               m.getTokenVertexForWitness(sigil1).equals(tokenVertexForWitness1) //
+        .filter(m -> m.getTokenVertexForWitness(sigil1).equals(tokenVertexForWitness1) //
             || m.getTokenVertexForWitness(sigil2).equals(tokenVertexForWitness2) //
             || m.getRankForWitness(sigil1) < minRank1 //
             || m.getRankForWitness(sigil2) < minRank2)//
@@ -94,4 +97,23 @@ public class QuantumMatchSet {
   public Integer potentialSize() {
     return potentialMatches.size();
   }
+
+  @Override
+  public String toString() {
+    return "(" + chosenMatches + " | " + potentialMatches + ")";
+  }
+
+  // @Override
+  // public int hashCode() {
+  // return chosenMatches.hashCode() + potentialMatches.hashCode();
+  // }
+  //
+  // @Override
+  // public boolean equals(Object obj) {
+  // if (!(obj instanceof QuantumMatchSet)) {
+  // return false;
+  // }
+  // QuantumMatchSet other = (QuantumMatchSet) obj;
+  // return chosenMatches.equals(other.chosenMatches) && potentialMatches.equals(other.potentialMatches);
+  // }
 }
