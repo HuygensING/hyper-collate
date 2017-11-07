@@ -46,7 +46,7 @@ public class Hypergraph<N, H> {
   private final Map<H, N> sourceNode;
   private final Map<H, Collection<N>> targetNodes;
   private final Map<H, String> edgeLabels;
-  private final Map<N, String> nodeLabels;
+  protected final Map<N, String> nodeLabels;
 
   public Hypergraph(GraphType graphType) {
     this.graphType = graphType;

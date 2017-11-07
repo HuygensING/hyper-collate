@@ -106,7 +106,7 @@ public class DotFactory {
     return null;
   }
 
-  private static final Comparator<Node> BY_NODE = (n1, n2) -> n1.toString().compareTo(n2.toString());
+  private static final Comparator<Node> BY_NODE = Comparator.comparing(Node::toString);
 
   public static String fromCollationGraph(CollationGraph collation) {
     StringBuilder dotBuilder = new StringBuilder("digraph CollationGraph{\nlabelloc=b\n");
@@ -134,14 +134,14 @@ public class DotFactory {
             Node source = collation.getSource(e);
             Node target = collation.getTarget(e);
             String edgeLabel = e.getSigils().stream().sorted().collect(joining(","));
-            StringBuilder lineBuilder = new StringBuilder()//
-                .append(nodeIdentifiers.get(source))//
-                .append("->")//
-                .append(nodeIdentifiers.get(target))//
-                .append("[label=\"")//
-                .append(edgeLabel)//
-                .append("\"]\n");
-            edgeLines.add(lineBuilder.toString());
+            String lineBuilder =//
+                nodeIdentifiers.get(source) +//
+                    "->" +//
+                    nodeIdentifiers.get(target) +//
+                    "[label=\"" +//
+                    edgeLabel +//
+                    "\"]\n";
+            edgeLines.add(lineBuilder);
           });
     }
     edgeLines.forEach(dotBuilder::append);
