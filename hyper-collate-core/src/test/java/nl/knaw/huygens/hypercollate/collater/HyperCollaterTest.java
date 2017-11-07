@@ -228,4 +228,64 @@ public class HyperCollaterTest extends HyperCollateTest {
     assertThat(dot).isEqualTo(expected);
   }
 
+  @Test
+  public void testje() {
+    XMLImporter importer = new XMLImporter();
+    VariantWitnessGraph wF = importer.importXML("A", "<text>\n" + //
+        "    <s>Lunch,\n" + //
+        "        DE soep VOOR DE <lb/>taart!</s>\n" + //
+        "</text>");
+    VariantWitnessGraph wQ = importer.importXML("B", "<text>\n" + //
+        "    <s>Lunch !\n" + //
+        "        veel brood VOOR DE taart.</s>\n" + //
+        "</text>");
+
+    CollationGraph collation0 = HyperCollater.collate(wF, wQ);
+    CollationGraph collation = CollationGraphNodeMerger.merge(collation0);
+
+    String dot = DotFactory.fromCollationGraph(collation);
+    System.out.println(dot);
+    String expected = "digraph CollationGraph{\n" +//
+        "labelloc=b\n" +//
+        "}";
+    writeGraph(dot);
+    assertThat(dot).isEqualTo(expected);
+  }
+
+  @Test
+  public void testje2() {
+    XMLImporter importer = new XMLImporter();
+    VariantWitnessGraph wF = importer.importXML("A", "<text>T b b b b b b b Y</text>");
+    VariantWitnessGraph wQ = importer.importXML("B", "<text>X b b b b b b b T</text>");
+
+    CollationGraph collation0 = HyperCollater.collate(wF, wQ);
+    CollationGraph collation = CollationGraphNodeMerger.merge(collation0);
+
+    String dot = DotFactory.fromCollationGraph(collation);
+    System.out.println(dot);
+    String expected = "digraph CollationGraph{\n" +//
+        "labelloc=b\n" +//
+        "}";
+    writeGraph(dot);
+    assertThat(dot).isEqualTo(expected);
+  }
+
+  @Test
+  public void testje3() {
+    XMLImporter importer = new XMLImporter();
+    VariantWitnessGraph wF = importer.importXML("A", "<text>A b C d E C f G H</text>");
+    VariantWitnessGraph wQ = importer.importXML("B", "<text>A H i j E C G k</text>");
+
+    CollationGraph collation0 = HyperCollater.collate(wF, wQ);
+    CollationGraph collation = CollationGraphNodeMerger.merge(collation0);
+
+    String dot = DotFactory.fromCollationGraph(collation);
+    System.out.println(dot);
+    String expected = "digraph CollationGraph{\n" +//
+        "labelloc=b\n" +//
+        "}";
+    writeGraph(dot);
+    assertThat(dot).isEqualTo(expected);
+  }
+
 }

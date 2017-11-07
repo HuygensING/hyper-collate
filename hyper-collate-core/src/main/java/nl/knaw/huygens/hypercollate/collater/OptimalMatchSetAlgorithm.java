@@ -19,16 +19,11 @@ package nl.knaw.huygens.hypercollate.collater;
  * limitations under the License.
  * #L%
  */
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import com.google.common.base.Stopwatch;
-
 import eu.interedition.collatex.dekker.astar.AstarAlgorithm;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class OptimalMatchSetAlgorithm extends AstarAlgorithm<QuantumMatchSet, LostPotential> {
 
@@ -58,6 +53,7 @@ public class OptimalMatchSetAlgorithm extends AstarAlgorithm<QuantumMatchSet, Lo
 
   @Override
   protected Iterable<QuantumMatchSet> neighborNodes(QuantumMatchSet matchSet) {
+
     return matchSet.neighborSets();
   }
 

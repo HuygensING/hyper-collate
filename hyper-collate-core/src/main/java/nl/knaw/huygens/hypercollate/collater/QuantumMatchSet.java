@@ -19,17 +19,14 @@ package nl.knaw.huygens.hypercollate.collater;
  * limitations under the License.
  * #L%
  */
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.stream.Collectors.toList;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
 
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
+
+import java.util.*;
+import java.util.stream.Stream;
+
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.stream.Collectors.toList;
 
 public class QuantumMatchSet {
 
@@ -103,17 +100,21 @@ public class QuantumMatchSet {
     return "(" + chosenMatches + " | " + potentialMatches + ")";
   }
 
-  // @Override
-  // public int hashCode() {
-  // return chosenMatches.hashCode() + potentialMatches.hashCode();
-  // }
-  //
-  // @Override
-  // public boolean equals(Object obj) {
-  // if (!(obj instanceof QuantumMatchSet)) {
-  // return false;
-  // }
-  // QuantumMatchSet other = (QuantumMatchSet) obj;
-  // return chosenMatches.equals(other.chosenMatches) && potentialMatches.equals(other.potentialMatches);
-  // }
+  public Set<Match> getPotentialMatches() {
+    return potentialMatches;
+  }
+
+  @Override
+  public int hashCode() {
+    return chosenMatches.hashCode() + potentialMatches.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof QuantumMatchSet)) {
+      return false;
+    }
+    QuantumMatchSet other = (QuantumMatchSet) obj;
+    return chosenMatches.equals(other.chosenMatches) && potentialMatches.equals(other.potentialMatches);
+  }
 }
