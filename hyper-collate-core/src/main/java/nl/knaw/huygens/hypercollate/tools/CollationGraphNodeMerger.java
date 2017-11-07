@@ -74,17 +74,19 @@ public class CollationGraphNodeMerger {
     Node prevNode = originalGraph.getSource(incomingEdge);
     Boolean sigilsMatch = prevNode.getSigils().equals(mergedNode.getSigils());
     if (sigilsMatch) {
+      Boolean parentXPathsMatch = true;
       for (String s : mergedNode.getSigils()) {
         Token mWitnessToken = mergedNode.getTokenForWitness(s);
         Token nWitnessToken = originalNode.getTokenForWitness(s);
         if (nWitnessToken == null) {
           // it's an endtoken, so not mergable
-          return false;
+          parentXPathsMatch = false;
         }
         String mParentXPath = ((MarkedUpToken) mWitnessToken).getParentXPath();
         String nParentXPath = ((MarkedUpToken) nWitnessToken).getParentXPath();
-        return mParentXPath.equals(nParentXPath);
+        parentXPathsMatch = parentXPathsMatch && mParentXPath.equals(nParentXPath);
       }
+      return parentXPathsMatch;
     }
     return false;
   }
