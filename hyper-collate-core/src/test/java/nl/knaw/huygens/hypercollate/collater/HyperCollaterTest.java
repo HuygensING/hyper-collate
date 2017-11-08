@@ -21,7 +21,13 @@ package nl.knaw.huygens.hypercollate.collater;
  */
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Stopwatch;
 
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
@@ -31,6 +37,11 @@ import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeMerger;
 import nl.knaw.huygens.hypercollate.tools.DotFactory;
 
 public class HyperCollaterTest extends HyperCollateTest {
+  private static final Logger LOG = LoggerFactory.getLogger(HyperCollateTest.class);
+
+  HyperCollater hyperCollater1 = new HyperCollater(new OptimalMatchSetAlgorithm1());
+  HyperCollater hyperCollater2 = new HyperCollater(new OptimalMatchSetAlgorithm2());
+  HyperCollater[] hyperCollaters = new HyperCollater[] { hyperCollater1, hyperCollater2 };
 
   @Test
   public void testHierarchy() {
@@ -90,11 +101,6 @@ public class HyperCollaterTest extends HyperCollateTest {
         "}";
     verifyDotExport(wQ, expectedDotQ);
 
-    CollationGraph collation0 = HyperCollater.collate(wF, wQ);
-    CollationGraph collation = CollationGraphNodeMerger.merge(collation0);
-
-    String dot = DotFactory.fromCollationGraph(collation);
-    // System.out.println(dot);
     String expected = "digraph CollationGraph{\n" + //
         "labelloc=b\n" + //
         "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + //
@@ -136,8 +142,8 @@ public class HyperCollaterTest extends HyperCollateTest {
         "t014->t006[label=\"Q\"]\n" + //
         "t015->t001[label=\"Q\"]\n" + //
         "}";
-    writeGraph(dot);
-    assertThat(dot).isEqualTo(expected);
+
+    testHyperCollation(wF, wQ, expected);
   }
 
   @Test
@@ -193,11 +199,6 @@ public class HyperCollaterTest extends HyperCollateTest {
         "}";
     verifyDotExport(wQ, expectedDotQ);
 
-    CollationGraph collation0 = HyperCollater.collate(wF, wQ);
-    CollationGraph collation = CollationGraphNodeMerger.merge(collation0);
-
-    String dot = DotFactory.fromCollationGraph(collation);
-    System.out.println(dot);
     String expected = "digraph CollationGraph{\n" + //
         "labelloc=b\n" + //
         "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + //
@@ -224,8 +225,8 @@ public class HyperCollaterTest extends HyperCollateTest {
         "t008->t004[label=\"Q\"]\n" + //
         "t009->t008[label=\"Q\"]\n" + //
         "}";
-    writeGraph(dot);
-    assertThat(dot).isEqualTo(expected);
+
+    testHyperCollation(wF, wQ, expected);
   }
 
   @Test
@@ -239,12 +240,6 @@ public class HyperCollaterTest extends HyperCollateTest {
         "    <s>Lunch !\n" + //
         "        veel brood VOOR DE taart.</s>\n" + //
         "</text>");
-
-    CollationGraph collation0 = HyperCollater.collate(wF, wQ);
-    CollationGraph collation = CollationGraphNodeMerger.merge(collation0);
-
-    String dot = DotFactory.fromCollationGraph(collation);
-    System.out.println(dot);
     String expected = "digraph CollationGraph{\n" + //
         "labelloc=b\n" + //
         "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + //
@@ -270,8 +265,8 @@ public class HyperCollaterTest extends HyperCollateTest {
         "t008->t004[label=\"B\"]\n" + //
         "t009->t001[label=\"B\"]\n" + //
         "}";
-    writeGraph(dot);
-    assertThat(dot).isEqualTo(expected);
+
+    testHyperCollation(wF, wQ, expected);
   }
 
   @Test
@@ -279,12 +274,6 @@ public class HyperCollaterTest extends HyperCollateTest {
     XMLImporter importer = new XMLImporter();
     VariantWitnessGraph wF = importer.importXML("A", "<text>T b b b b b b b Y</text>");
     VariantWitnessGraph wQ = importer.importXML("B", "<text>X b b b b b b b T</text>");
-
-    CollationGraph collation0 = HyperCollater.collate(wF, wQ);
-    CollationGraph collation = CollationGraphNodeMerger.merge(collation0);
-
-    String dot = DotFactory.fromCollationGraph(collation);
-    System.out.println(dot);
     String expected = "digraph CollationGraph{\n" + //
         "labelloc=b\n" + //
         "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + //
@@ -303,8 +292,8 @@ public class HyperCollaterTest extends HyperCollateTest {
         "t005->t003[label=\"B\"]\n" + //
         "t006->t001[label=\"B\"]\n" + //
         "}";
-    writeGraph(dot);
-    assertThat(dot).isEqualTo(expected);
+
+    testHyperCollation(wF, wQ, expected);
   }
 
   @Test
@@ -312,12 +301,6 @@ public class HyperCollaterTest extends HyperCollateTest {
     XMLImporter importer = new XMLImporter();
     VariantWitnessGraph wF = importer.importXML("A", "<text>A b C d E C f G H</text>");
     VariantWitnessGraph wQ = importer.importXML("B", "<text>A H i j E C G k</text>");
-
-    CollationGraph collation0 = HyperCollater.collate(wF, wQ);
-    CollationGraph collation = CollationGraphNodeMerger.merge(collation0);
-
-    String dot = DotFactory.fromCollationGraph(collation);
-    System.out.println(dot);
     String expected = "digraph CollationGraph{\n" + //
         "labelloc=b\n" + //
         "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + //
@@ -343,8 +326,24 @@ public class HyperCollaterTest extends HyperCollateTest {
         "t008->t004[label=\"B\"]\n" + //
         "t009->t001[label=\"B\"]\n" + //
         "}";
-    writeGraph(dot);
-    assertThat(dot).isEqualTo(expected);
+
+    testHyperCollation(wF, wQ, expected);
+  }
+
+  private void testHyperCollation(VariantWitnessGraph witness1, VariantWitnessGraph witness2, String expected) {
+    for (HyperCollater hypercollater : hyperCollaters) {
+      LOG.info("Collating with {}", hypercollater.getOptimalMatchSetFinderName());
+      Stopwatch stopwatch = Stopwatch.createStarted();
+      CollationGraph collation0 = hypercollater.collate(witness1, witness2);
+      stopwatch.stop();
+      LOG.info("Collating with {} took {} ms.", hypercollater.getOptimalMatchSetFinderName(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
+      CollationGraph collation = CollationGraphNodeMerger.merge(collation0);
+
+      String dot = DotFactory.fromCollationGraph(collation);
+      // System.out.println(dot);
+      writeGraph(dot);
+      assertThat(dot).isEqualTo(expected);
+    }
   }
 
 }

@@ -1,5 +1,15 @@
 package nl.knaw.huygens.hypercollate.collater;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*-
  * #%L
  * hyper-collate-core
@@ -20,28 +30,32 @@ package nl.knaw.huygens.hypercollate.collater;
  * #L%
  */
 import com.google.common.base.Stopwatch;
+
 import eu.interedition.collatex.dekker.astar.AstarAlgorithm;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+public class OptimalMatchSetAlgorithm1 extends AstarAlgorithm<QuantumMatchSet, LostPotential> implements OptimalMatchSetFinder {
+  private static final Logger LOG = LoggerFactory.getLogger(OptimalMatchSetAlgorithm1.class);
 
-public class OptimalMatchSetAlgorithm extends AstarAlgorithm<QuantumMatchSet, LostPotential> {
+  private Integer maxPotential;
 
-  private final Collection<Match> allPotentialMatches;
-  private final Integer maxPotential;
-
-  OptimalMatchSetAlgorithm(Collection<Match> allPotentialMatches) {
-    maxPotential = allPotentialMatches.size();
-    this.allPotentialMatches = allPotentialMatches;
+  @Override
+  public String getName() {
+    return "Brute-Force";
   }
 
-  public Set<Match> getOptimalMatchSet() {
+  /*
+   * (non-Javadoc)
+   * @see nl.knaw.huygens.hypercollate.collater.OptimalMatchSetFinder#getOptimalMatchSet()
+   */
+  @Override
+  public Set<Match> getOptimalMatchSet(Collection<Match> allPotentialMatches) {
+    maxPotential = allPotentialMatches.size();
     QuantumMatchSet startNode = new QuantumMatchSet(Collections.EMPTY_SET, new HashSet<>(allPotentialMatches));
     LostPotential startCost = new LostPotential(0);
     Stopwatch sw = Stopwatch.createStarted();
     List<QuantumMatchSet> winningPath = aStar(startNode, startCost);
     sw.stop();
-    System.out.println("aStar took " + sw.elapsed(TimeUnit.MILLISECONDS) + "ms");
+    LOG.debug("aStar took {} ms", sw.elapsed(TimeUnit.MILLISECONDS));
     QuantumMatchSet winningGoal = winningPath.get(winningPath.size() - 1);
     return winningGoal.getChosenMatches();
   }
@@ -53,7 +67,6 @@ public class OptimalMatchSetAlgorithm extends AstarAlgorithm<QuantumMatchSet, Lo
 
   @Override
   protected Iterable<QuantumMatchSet> neighborNodes(QuantumMatchSet matchSet) {
-
     return matchSet.neighborSets();
   }
 
@@ -66,4 +79,5 @@ public class OptimalMatchSetAlgorithm extends AstarAlgorithm<QuantumMatchSet, Lo
   protected LostPotential distBetween(QuantumMatchSet match, QuantumMatchSet other) {
     return new LostPotential(Math.abs(match.totalSize() - other.totalSize()));
   }
+
 }

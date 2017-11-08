@@ -19,12 +19,20 @@ package nl.knaw.huygens.hypergraph.core;
  * limitations under the License.
  * #L%
  */
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.Stack;
 
-import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // nu zou ik wel topological sort willen hebben
 // teveel gedoe, kan ook gewoon een root node maken
 public class DirectedAcyclicGraph<N> extends Hypergraph<N, TraditionalEdge> {
+  private static final Logger LOG = LoggerFactory.getLogger(DirectedAcyclicGraph.class);
   private N root;
 
   public DirectedAcyclicGraph() {
@@ -65,7 +73,7 @@ public class DirectedAcyclicGraph<N> extends Hypergraph<N, TraditionalEdge> {
           nodesToVisit.add(target);
         }
       } else {
-        System.out.println("revisiting node " + pop);
+        LOG.debug("revisiting node {}", pop);
       }
     }
     return result;

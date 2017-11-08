@@ -1,5 +1,15 @@
 package nl.knaw.huygens.hypercollate.collater;
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.stream.Collectors.toList;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
+
 /*-
  * #%L
  * hyper-collate-core
@@ -22,12 +32,6 @@ package nl.knaw.huygens.hypercollate.collater;
 
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
-import java.util.*;
-import java.util.stream.Stream;
-
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.stream.Collectors.toList;
-
 public class QuantumMatchSet {
 
   private final Set<Match> chosenMatches;
@@ -40,11 +44,31 @@ public class QuantumMatchSet {
 
   public QuantumMatchSet chooseMatch(Match match) {
     checkState(potentialMatches.contains(match));
+
+    Set<Match> newChosen = cloneChosenMatches();
+    newChosen.add(match);
+
+    Set<Match> newPotential = calculateNewPotential(potentialMatches, match);
+
+    return new QuantumMatchSet(newChosen, newPotential);
+  }
+
+  public QuantumMatchSet ignoreMatch(Match match) {
+    checkState(potentialMatches.contains(match));
+
+    Set<Match> newChosen = cloneChosenMatches();
+
+    Set<Match> newPotential = new HashSet<>();
+    newPotential.addAll(potentialMatches);
+    newPotential.remove(match);
+
+    return new QuantumMatchSet(newChosen, newPotential);
+  }
+
+  private Set<Match> cloneChosenMatches() {
     Set<Match> newChosen = new HashSet<>();
     newChosen.addAll(chosenMatches);
-    newChosen.add(match);
-    Set<Match> newPotential = calculateNewPotential(potentialMatches, match);
-    return new QuantumMatchSet(newChosen, newPotential);
+    return newChosen;
   }
 
   private Set<Match> calculateNewPotential(Collection<Match> potentialMatches, Match match) {
@@ -117,4 +141,5 @@ public class QuantumMatchSet {
     QuantumMatchSet other = (QuantumMatchSet) obj;
     return chosenMatches.equals(other.chosenMatches) && potentialMatches.equals(other.potentialMatches);
   }
+
 }

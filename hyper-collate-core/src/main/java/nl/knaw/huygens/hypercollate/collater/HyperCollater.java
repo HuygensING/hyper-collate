@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 
+import com.google.common.base.Preconditions;
+
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
@@ -56,8 +58,14 @@ public class HyperCollater {
         }
         return stv1.getNormalizedContent().equals(stv2.getNormalizedContent());
       };
+  private final OptimalMatchSetFinder optimalMatchSetFinder;
 
-  public static CollationGraph collate(VariantWitnessGraph... graphs) {
+  public HyperCollater(OptimalMatchSetFinder optimalMatchSetFinder) {
+    Preconditions.checkNotNull(optimalMatchSetFinder);
+    this.optimalMatchSetFinder = optimalMatchSetFinder;
+  }
+
+  public CollationGraph collate(VariantWitnessGraph... graphs) {
     CollationGraph collationGraph = new CollationGraph();
     String sigil1 = graphs[0].getSigil();
     String sigil2 = graphs[1].getSigil();
@@ -191,7 +199,7 @@ public class HyperCollater {
     };
   }
 
-  private static Set<Match> match(VariantWitnessGraph witness1, VariantWitnessGraph witness2, //
+  private Set<Match> match(VariantWitnessGraph witness1, VariantWitnessGraph witness2, //
       VariantWitnessGraphRanking ranking1, VariantWitnessGraphRanking ranking2) {
     Set<Match> allPotentialMatches = new HashSet<>();
     VariantWitnessGraphTraversal traversal1 = VariantWitnessGraphTraversal.of(witness1);
@@ -218,7 +226,11 @@ public class HyperCollater {
         .setRank(sigil1, ranking1.apply(endTokenVertex1))//
         .setRank(sigil2, ranking2.apply(endTokenVertex2));
     allPotentialMatches.add(endMatch);
-    return new OptimalMatchSetAlgorithm(allPotentialMatches).getOptimalMatchSet();
+    return optimalMatchSetFinder.getOptimalMatchSet(allPotentialMatches);
+  }
+
+  public String getOptimalMatchSetFinderName() {
+    return optimalMatchSetFinder.getName();
   }
 
 }
