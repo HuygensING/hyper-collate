@@ -41,9 +41,9 @@ import nl.knaw.huygens.hypercollate.tools.DotFactory;
 public class HyperCollaterTest extends HyperCollateTest {
   private static final Logger LOG = LoggerFactory.getLogger(HyperCollateTest.class);
 
-  HyperCollater hyperCollater1 = new HyperCollater(new OptimalMatchSetAlgorithm1());
-  HyperCollater hyperCollater2 = new HyperCollater(new OptimalMatchSetAlgorithm2());
-  HyperCollater[] hyperCollaters = new HyperCollater[] { hyperCollater1, hyperCollater2 };
+  final HyperCollater hyperCollater1 = new HyperCollater(new OptimalMatchSetAlgorithm1());
+  final HyperCollater hyperCollater2 = new HyperCollater(new OptimalMatchSetAlgorithm2());
+  final HyperCollater[] hyperCollaters = new HyperCollater[] { hyperCollater1, hyperCollater2 };
 
   @Test
   public void testHierarchy() {

@@ -40,7 +40,7 @@ import java.util.function.Function;
 public class Hypergraph<N, H> {
   private final GraphType graphType;
   private final Function<N, Collection<H>> mappingFunction;
-  private Set<N> nodes;
+  private final Set<N> nodes;
   private final Map<N, Collection<H>> incomingEdges;
   private final Map<N, Collection<H>> outgoingEdges;
   private final Map<H, N> sourceNode;

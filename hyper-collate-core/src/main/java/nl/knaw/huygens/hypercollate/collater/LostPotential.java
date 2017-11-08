@@ -23,7 +23,7 @@ import eu.interedition.collatex.dekker.astar.Cost;
 
 public class LostPotential extends Cost<LostPotential> {
 
-  private Integer cost;
+  private final Integer cost;
 
   public LostPotential(int cost) {
     this.cost = cost;

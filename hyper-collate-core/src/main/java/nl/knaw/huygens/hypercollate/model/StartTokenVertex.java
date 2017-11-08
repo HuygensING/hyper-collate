@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 
 public class StartTokenVertex implements TokenVertex {
   private final List<TokenVertex> outgoingTokenVertices = new ArrayList<>();
-  private String sigil;
+  private final String sigil;
 
   StartTokenVertex(String sigil) {
     this.sigil = sigil;

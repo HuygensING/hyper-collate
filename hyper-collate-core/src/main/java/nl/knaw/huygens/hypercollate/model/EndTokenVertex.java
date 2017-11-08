@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 public class EndTokenVertex implements TokenVertex {
 
   private final List<TokenVertex> incomingTokenVertices = new ArrayList<>();
-  private String sigil;
+  private final String sigil;
 
   EndTokenVertex(String sigil) {
     this.sigil = sigil;

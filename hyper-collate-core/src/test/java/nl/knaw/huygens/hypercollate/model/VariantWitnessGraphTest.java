@@ -34,7 +34,7 @@ public class VariantWitnessGraphTest extends HyperCollateTest {
 
   @Test
   public void test() {
-    String xml = "<s>Collating is <del>NP hard</del><add>easy</add>.</s>";
+//    String xml = "<s>Collating is <del>NP hard</del><add>easy</add>.</s>";
 
     Markup sMarkup = new Markup("s");
     Markup delMarkup = new Markup("del");
