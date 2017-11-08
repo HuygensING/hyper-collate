@@ -1,5 +1,12 @@
 package nl.knaw.huygens.hypercollate.model;
 
+import static java.util.stream.Collectors.joining;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /*-
  * #%L
  * hyper-collate-core
@@ -23,22 +30,19 @@ package nl.knaw.huygens.hypercollate.model;
 import eu.interedition.collatex.Token;
 import nl.knaw.huygens.hypergraph.core.DirectedAcyclicGraph;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import static java.util.stream.Collectors.joining;
-
 public class CollationGraph extends DirectedAcyclicGraph<CollationGraph.Node> {
 
-  public CollationGraph() {
+  private List<String> sigils;
+
+  public CollationGraph(List<String> sigils) {
+    this.sigils = sigils;
     setRootNode(new Node());
   }
 
   public Node addNodeWithTokens(Token... tokens) {
     Node newNode = new Node(tokens);
     addNode(newNode, "");
-//    System.out.println("adding " + newNode);
+    // System.out.println("adding " + newNode);
     return newNode;
   }
 
@@ -76,9 +80,13 @@ public class CollationGraph extends DirectedAcyclicGraph<CollationGraph.Node> {
       return "(" + //
           tokensString + //
           ")"//
-          ;
+      ;
     }
 
+  }
+
+  public List<String> getSigils() {
+    return sigils;
   }
 
 }

@@ -54,6 +54,12 @@
 			<version>${guava.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>de.vandermeer</groupId>
+			<artifactId>asciitable</artifactId>
+			<version>0.3.2</version>
+		</dependency>
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -61,5 +67,5 @@
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
-    </dependencies>
+	</dependencies>
 </project>

@@ -46,6 +46,11 @@ public class OptimalMatchSetAlgorithm2 extends AstarAlgorithm<QuantumMatchSet, L
   private Integer maxPotential;
 
   @Override
+  public String getName() {
+    return "Four-Neighbours";
+  }
+
+  @Override
   public Set<Match> getOptimalMatchSet(Collection<Match> allPotentialMatches) {
     maxPotential = allPotentialMatches.size();
     Match aMatch = allPotentialMatches.iterator().next();
@@ -131,8 +136,4 @@ public class OptimalMatchSetAlgorithm2 extends AstarAlgorithm<QuantumMatchSet, L
     return new LostPotential(Math.abs(match.totalSize() - other.totalSize()));
   }
 
-  @Override
-  public String getName() {
-    return "Four-Neighbours";
-  }
 }

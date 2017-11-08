@@ -36,14 +36,14 @@ import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeMerger;
-import nl.knaw.huygens.hypercollate.tools.DotFactory;
+import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
 
 public class HyperCollaterTest extends HyperCollateTest {
   private static final Logger LOG = LoggerFactory.getLogger(HyperCollateTest.class);
 
   final HyperCollater hyperCollater1 = new HyperCollater(new OptimalMatchSetAlgorithm1());
   final HyperCollater hyperCollater2 = new HyperCollater(new OptimalMatchSetAlgorithm2());
-  final HyperCollater[] hyperCollaters = new HyperCollater[] { hyperCollater1, hyperCollater2 };
+  final HyperCollater[] hyperCollaters = new HyperCollater[] { /* hyperCollater1, */hyperCollater2 };
 
   @Test
   public void testHierarchy() {
@@ -232,47 +232,36 @@ public class HyperCollaterTest extends HyperCollateTest {
   }
 
   @Test
-  public void testje() {
+  public void testTheDog() {
     XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph wF = importer.importXML("A", "<text>\n" + //
-        "    <s>Lunch,\n" + //
-        "        DE soep VOOR DE <lb/>taart!</s>\n" + //
-        "</text>");
-    VariantWitnessGraph wQ = importer.importXML("B", "<text>\n" + //
-        "    <s>Lunch !\n" + //
-        "        veel brood VOOR DE taart.</s>\n" + //
-        "</text>");
+    VariantWitnessGraph wF = importer.importXML("A", "<text>The dog's big eyes.</text>");
+    VariantWitnessGraph wQ = importer.importXML("B", "<text>The dog's <del>big black ears</del><add>brown eyes</add>.</text>");
     String expected = "digraph CollationGraph{\n" + //
         "labelloc=b\n" + //
         "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + //
         "t001 [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "t002 [label=<A: Lunch<br/>B: Lunch&#9251;<br/>A,B: <i>/text/s</i>>]\n" + //
-        "t003 [label=<A: ,&#x21A9;<br/>&#9251;DE&#9251;soep&#9251;<br/>A: <i>/text/s</i>>]\n" + //
-        "t004 [label=<A,B: VOOR&#9251;DE&#9251;<br/>A,B: <i>/text/s</i>>]\n" + //
-        "t005 [label=<A: <br/>A: <i>/text/s/lb</i>>]\n" + //
-        "t006 [label=<A,B: taart<br/>A,B: <i>/text/s</i>>]\n" + //
-        "t007 [label=<A: !<br/>A: <i>/text/s</i>>]\n" + //
-        "t008 [label=<B: !&#x21A9;<br/>&#9251;veel&#9251;brood&#9251;<br/>B: <i>/text/s</i>>]\n" + //
-        "t009 [label=<B: .<br/>B: <i>/text/s</i>>]\n" + //
+        "t002 [label=<A,B: The&#9251;dog's&#9251;<br/>A,B: <i>/text</i>>]\n" + //
+        "t003 [label=<A,B: big&#9251;<br/>A: <i>/text</i><br/>B: <i>/text/del</i><br/>>]\n" + //
+        "t004 [label=<A,B: eyes<br/>A: <i>/text</i><br/>B: <i>/text/add</i><br/>>]\n" + //
+        "t005 [label=<A,B: .<br/>A,B: <i>/text</i>>]\n" + //
+        "t006 [label=<B: black&#9251;ears<br/>B: <i>/text/del</i>>]\n" + //
+        "t007 [label=<B: brown&#9251;<br/>B: <i>/text/add</i>>]\n" + //
         "t000->t002[label=\"A,B\"]\n" + //
-        "t002->t003[label=\"A\"]\n" + //
-        "t002->t008[label=\"B\"]\n" + //
+        "t002->t003[label=\"A,B\"]\n" + //
+        "t002->t007[label=\"B\"]\n" + //
         "t003->t004[label=\"A\"]\n" + //
-        "t004->t005[label=\"A\"]\n" + //
-        "t004->t006[label=\"B\"]\n" + //
-        "t005->t006[label=\"A\"]\n" + //
-        "t006->t007[label=\"A\"]\n" + //
-        "t006->t009[label=\"B\"]\n" + //
-        "t007->t001[label=\"A\"]\n" + //
-        "t008->t004[label=\"B\"]\n" + //
-        "t009->t001[label=\"B\"]\n" + //
+        "t003->t006[label=\"B\"]\n" + //
+        "t004->t005[label=\"A,B\"]\n" + //
+        "t005->t001[label=\"A,B\"]\n" + //
+        "t006->t005[label=\"B\"]\n" + //
+        "t007->t004[label=\"B\"]\n" + //
         "}";
 
     testHyperCollation(wF, wQ, expected);
   }
 
   @Test
-  public void testje2() {
+  public void testTranspositionAndDuplication() {
     XMLImporter importer = new XMLImporter();
     VariantWitnessGraph wF = importer.importXML("A", "<text>T b b b b b b b Y</text>");
     VariantWitnessGraph wQ = importer.importXML("B", "<text>X b b b b b b b T</text>");
@@ -299,7 +288,7 @@ public class HyperCollaterTest extends HyperCollateTest {
   }
 
   @Test
-  public void testje3() {
+  public void testDoubleTransposition() {
     XMLImporter importer = new XMLImporter();
     VariantWitnessGraph wF = importer.importXML("A", "<text>A b C d E C f G H</text>");
     VariantWitnessGraph wQ = importer.importXML("B", "<text>A H i j E C G k</text>");
@@ -346,10 +335,13 @@ public class HyperCollaterTest extends HyperCollateTest {
 
       CollationGraph collation = CollationGraphNodeMerger.merge(collation0);
 
-      String dot = DotFactory.fromCollationGraph(collation);
+      String dot = CollationGraphVisualizer.toDot(collation);
       // System.out.println(dot);
       writeGraph(dot);
       assertThat(dot).isEqualTo(expected);
+
+      String table = CollationGraphVisualizer.toTableASCII(collation);
+      System.out.println(table);
     }
     collationDuration.forEach((name, duration) -> LOG.info("Collating with {} took {} ms.", name, duration));
   }

@@ -66,9 +66,9 @@ public class HyperCollater {
   }
 
   public CollationGraph collate(VariantWitnessGraph... graphs) {
-    CollationGraph collationGraph = new CollationGraph();
     String sigil1 = graphs[0].getSigil();
     String sigil2 = graphs[1].getSigil();
+    CollationGraph collationGraph = new CollationGraph(Arrays.asList(sigil1, sigil2));
 
     Iterator<VariantWitnessGraph> witnessIterable = Arrays.asList(graphs).iterator();
     VariantWitnessGraph witness1 = witnessIterable.next();

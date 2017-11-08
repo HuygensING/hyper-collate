@@ -1,5 +1,13 @@
 package nl.knaw.huygens.hypercollate.tools;
 
+import static java.util.stream.Collectors.toList;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 /*-
  * #%L
  * hyper-collate-core
@@ -21,20 +29,17 @@ package nl.knaw.huygens.hypercollate.tools;
  */
 
 import com.google.common.base.Preconditions;
+
 import eu.interedition.collatex.Token;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
 import nl.knaw.huygens.hypergraph.core.TraditionalEdge;
 
-import java.util.*;
-
-import static java.util.stream.Collectors.toList;
-
 public class CollationGraphNodeMerger {
 
   public static CollationGraph merge(CollationGraph originalGraph) {
-    CollationGraph mergedGraph = new CollationGraph();
+    CollationGraph mergedGraph = new CollationGraph(originalGraph.getSigils());
     Map<Node, Node> originalToMerged = mergeNodes(originalGraph, mergedGraph);
     copyIncomingEdges(originalGraph, originalToMerged, mergedGraph);
     return mergedGraph;
@@ -106,7 +111,7 @@ public class CollationGraphNodeMerger {
         .map(originalNode::getTokenForWitness)//
         .map(CollationGraphNodeMerger::cloneToken)//
         .collect(toList())//
-        .toArray(new Token[]{});
+        .toArray(new Token[] {});
     return mergedGraph.addNodeWithTokens(tokens);
   }
 
@@ -136,6 +141,5 @@ public class CollationGraphNodeMerger {
       }
     });
   }
-
 
 }

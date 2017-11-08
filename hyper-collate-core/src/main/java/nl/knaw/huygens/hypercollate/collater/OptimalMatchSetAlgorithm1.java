@@ -1,15 +1,5 @@
 package nl.knaw.huygens.hypercollate.collater;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /*-
  * #%L
  * hyper-collate-core
@@ -29,6 +19,17 @@ import org.slf4j.LoggerFactory;
  * limitations under the License.
  * #L%
  */
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Stopwatch;
 
 import eu.interedition.collatex.dekker.astar.AstarAlgorithm;
