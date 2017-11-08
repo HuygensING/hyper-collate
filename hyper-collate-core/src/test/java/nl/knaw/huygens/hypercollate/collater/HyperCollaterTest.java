@@ -21,6 +21,8 @@ package nl.knaw.huygens.hypercollate.collater;
  */
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
@@ -331,12 +333,17 @@ public class HyperCollaterTest extends HyperCollateTest {
   }
 
   private void testHyperCollation(VariantWitnessGraph witness1, VariantWitnessGraph witness2, String expected) {
+    Map<String, Long> collationDuration = new HashMap<>();
     for (HyperCollater hypercollater : hyperCollaters) {
-      LOG.info("Collating with {}", hypercollater.getOptimalMatchSetFinderName());
+      String name = hypercollater.getOptimalMatchSetFinderName();
+      LOG.info("Collating with {}", name);
       Stopwatch stopwatch = Stopwatch.createStarted();
       CollationGraph collation0 = hypercollater.collate(witness1, witness2);
       stopwatch.stop();
-      LOG.info("Collating with {} took {} ms.", hypercollater.getOptimalMatchSetFinderName(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
+      long duration = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+      LOG.info("Collating with {} took {} ms.", name, duration);
+      collationDuration.put(name, duration);
+
       CollationGraph collation = CollationGraphNodeMerger.merge(collation0);
 
       String dot = DotFactory.fromCollationGraph(collation);
@@ -344,6 +351,7 @@ public class HyperCollaterTest extends HyperCollateTest {
       writeGraph(dot);
       assertThat(dot).isEqualTo(expected);
     }
+    collationDuration.forEach((name, duration) -> LOG.info("Collating with {} took {} ms.", name, duration));
   }
 
 }
