@@ -92,27 +92,25 @@ public class OptimalMatchSetAlgorithm2 extends AstarAlgorithm<QuantumMatchSet, L
 
   @Override
   protected Iterable<QuantumMatchSet> neighborNodes(QuantumMatchSet matchSet) {
-    QuantumMatchSet quantumMatchSet1a = getNextQuantumMatchSet(this.matchesSortedByWitness1, matchSet);
-    QuantumMatchSet quantumMatchSet1b = getNextQuantumMatchSetIgnoringNextMatch(this.matchesSortedByWitness1, matchSet);
-    QuantumMatchSet quantumMatchSet2a = getNextQuantumMatchSet(this.matchesSortedByWitness2, matchSet);
-    QuantumMatchSet quantumMatchSet2b = getNextQuantumMatchSetIgnoringNextMatch(this.matchesSortedByWitness2, matchSet);
-
     Set<QuantumMatchSet> nextPotentialMatches = new HashSet<>();
-    nextPotentialMatches.add(quantumMatchSet1a);
-    nextPotentialMatches.add(quantumMatchSet1b);
-    nextPotentialMatches.add(quantumMatchSet2a);
-    nextPotentialMatches.add(quantumMatchSet2b);
+
+    Match firstPotentialMatch1 = getFirstPotentialMatch(this.matchesSortedByWitness1, matchSet);
+    addNeighborNodes(matchSet, nextPotentialMatches, firstPotentialMatch1);
+
+    List<Match> matchesSortedByWitness22 = this.matchesSortedByWitness2;
+    Match firstPotentialMatch2 = getFirstPotentialMatch(matchesSortedByWitness22, matchSet);
+    if (!firstPotentialMatch1.equals(firstPotentialMatch2)) {
+      addNeighborNodes(matchSet, nextPotentialMatches, firstPotentialMatch2);
+    }
+
     return nextPotentialMatches;
   }
 
-  private QuantumMatchSet getNextQuantumMatchSet(List<Match> matches, QuantumMatchSet matchSet) {
-    Match firstPotentialMatch = getFirstPotentialMatch(matches, matchSet);
-    return matchSet.chooseMatch(firstPotentialMatch);
-  }
-
-  private QuantumMatchSet getNextQuantumMatchSetIgnoringNextMatch(List<Match> matches, QuantumMatchSet matchSet) {
-    Match firstPotentialMatch = getFirstPotentialMatch(matches, matchSet);
-    return matchSet.ignoreMatch(firstPotentialMatch);
+  private void addNeighborNodes(QuantumMatchSet matchSet, Set<QuantumMatchSet> nextPotentialMatches, Match firstPotentialMatch2) {
+    QuantumMatchSet quantumMatchSet2a = matchSet.chooseMatch(firstPotentialMatch2);
+    QuantumMatchSet quantumMatchSet2b = matchSet.discardMatch(firstPotentialMatch2);
+    nextPotentialMatches.add(quantumMatchSet2a);
+    nextPotentialMatches.add(quantumMatchSet2b);
   }
 
   private Match getFirstPotentialMatch(List<Match> matches, QuantumMatchSet matchSet) {

@@ -53,7 +53,7 @@ public class QuantumMatchSet {
     return new QuantumMatchSet(newChosen, newPotential);
   }
 
-  public QuantumMatchSet ignoreMatch(Match match) {
+  public QuantumMatchSet discardMatch(Match match) {
     checkState(potentialMatches.contains(match));
 
     Set<Match> newChosen = cloneChosenMatches();
