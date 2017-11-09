@@ -27,14 +27,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import com.google.common.base.Preconditions;
 
 import de.vandermeer.asciitable.AsciiTable;
 import de.vandermeer.asciitable.CWC_LongestLine;
+import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
 import eu.interedition.collatex.Token;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
+import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
 
 public class CollationGraphVisualizer {
+
+  private static final String NBSP = "\u00A0";
 
   public static class Cell {
     List<String> layerNames = new ArrayList<>();
@@ -43,6 +50,9 @@ public class CollationGraphVisualizer {
     public Cell(String layerName, String content) {
       layerNames.add(layerName);
       layerContent.put(layerName, content);
+    }
+
+    public Cell() {
     }
 
     public Cell addLayer(String name) {
@@ -60,57 +70,65 @@ public class CollationGraphVisualizer {
     Map<String, List<Cell>> rowMap = new HashMap<>();
     sigils.forEach(sigil -> rowMap.put(sigil, new ArrayList<>()));
 
-    graph.traverse().forEach(node -> {
+    CollationGraphRanking ranking = CollationGraphRanking.of(graph);
+
+    Map<String, Integer> maxLayers = new HashMap<>();
+    sigils.forEach(sigil -> maxLayers.put(sigil, 1));
+    for (Set<Node> nodeSet : ranking) {
+      if (isBorderNode(nodeSet, graph)) {
+        // skip start and end nodes
+        continue;
+      }
+      Map<String, List<MarkedUpToken>> nodeTokensPerWitness = new HashMap<>();
       sigils.forEach(sigil -> {
-        Token token = node.getTokenForWitness(sigil);
-        if (token == null) {
-          rowMap.get(sigil).add(new Cell("", " "));
-
-        } else {
-          MarkedUpToken t = (MarkedUpToken) token;
-          String content = t.getContent()//
-              .replaceAll("\n", "\\\\n")//
-              .replaceAll(" +", "_");
-          String parentXPath = t.getParentXPath();
-          if (content.isEmpty()) {
-            content = "<" + parentXPath.replaceAll(".*/", "") + "/>";
+        nodeTokensPerWitness.put(sigil, new ArrayList<>());
+        nodeSet.forEach(node -> {
+          Token token = node.getTokenForWitness(sigil);
+          if (token != null) {
+            MarkedUpToken mToken = (MarkedUpToken) token;
+            nodeTokensPerWitness.get(sigil).add(mToken);
           }
-          String layerName = determineLayerName(parentXPath);
-          rowMap.get(sigil).add(new Cell(layerName, content));
-        }
+        });
       });
-    });
+      sigils.forEach(sigil -> {
+        List<MarkedUpToken> tokens = nodeTokensPerWitness.get(sigil);
+        maxLayers.put(sigil, Math.max(maxLayers.get(sigil), tokens.size()));
+        Cell cell = newCell(tokens);
+        rowMap.get(sigil).add(cell);
+      });
+    }
 
-    AsciiTable table = new AsciiTable();
-    CWC_LongestLine cwc = new CWC_LongestLine();
-    table.getRenderer().setCWC(cwc);
-    table.addRule();
-    sigils.forEach(sigil -> {
-      List<String> row = rowMap.get(sigil)//
-          .stream()//
-          .map(CollationGraphVisualizer::toASCII)//
-          .collect(toList());//
-      row.add(0, "[" + sigil + "]");
-      table.addRow(row);
-      table.addRule();
-    });
-
-    return table.render();
+    return asciiTable(graph.getSigils(), rowMap, maxLayers).render();
   }
 
-  private static String toASCII(Cell cell) {
-    return cell.layerNames//
-        .stream()//
-        .map(lName -> {
-          String content = cell.getLayerContent().get(lName);
-          if (lName.equals("add")) {
-            content = "[+] " + content;
-          } else if (lName.equals("del")) {
-            content = "[-] " + content;
-          }
-          return content;
-        })//
-        .collect(joining("<br>"));
+  private static boolean isBorderNode(Set<Node> nodeSet, CollationGraph graph) {
+    if (nodeSet.size() != 1) {
+      return false;
+    }
+    Node node = nodeSet.iterator().next();
+    Boolean hasNoIncomingEdges = graph.getIncomingEdges(node).isEmpty();
+    Boolean hasNoOutgoingEdges = graph.getOutgoingEdges(node).isEmpty();
+    return hasNoIncomingEdges || hasNoOutgoingEdges;
+  }
+
+  private static Cell newCell(List<MarkedUpToken> tokens) {
+    Cell cell = new Cell();
+    if (tokens.isEmpty()) {
+      setCellLayer(cell, "", " ");
+    } else {
+      tokens.forEach(token -> {
+        String content = token.getContent()//
+            .replaceAll("\n", "\\\\n")//
+            .replaceAll(" +", "_");
+        String parentXPath = token.getParentXPath();
+        if (content.isEmpty()) {
+          content = "<" + parentXPath.replaceAll(".*/", "") + "/>";
+        }
+        String layerName = determineLayerName(parentXPath);
+        setCellLayer(cell, layerName, content);
+      });
+    }
+    return cell;
   }
 
   private static String determineLayerName(String parentXPath) {
@@ -122,6 +140,55 @@ public class CollationGraphVisualizer {
       layerName = "del";
     }
     return layerName;
+  }
+
+  private static void setCellLayer(Cell cell, String layerName, String content) {
+    cell.addLayer(layerName);
+    String previousContent = cell.getLayerContent().put(layerName, content);
+    Preconditions.checkState(previousContent == null);
+  }
+
+  private static AsciiTable asciiTable(List<String> sigils, Map<String, List<Cell>> rowMap, Map<String, Integer> cellHeights) {
+    AsciiTable table = new AsciiTable()//
+        .setTextAlignment(TextAlignment.LEFT);
+    CWC_LongestLine cwc = new CWC_LongestLine();
+    table.getRenderer().setCWC(cwc);
+    table.addRule();
+    sigils.forEach(sigil -> {
+      List<String> row = rowMap.get(sigil)//
+          .stream()//
+          .map(cell -> toASCII(cell, cellHeights.get(sigil)))//
+          .collect(toList());//
+      row.add(0, "[" + sigil + "]");
+      table.addRow(row);
+      table.addRule();
+    });
+    return table;
+  }
+
+  private static String toASCII(Cell cell, int cellHeight) {
+    StringBuilder contentBuilder = new StringBuilder();
+    // ASCIITable has no TextAlignment.BOTTOM option, so add empty lines manually
+    int emptyLinesToAdd = cellHeight - cell.layerNames.size();
+    for (int i = 0; i < emptyLinesToAdd; i++) {
+      contentBuilder.append(NBSP + "<br>"); // regular space or just <br> leads to ASCIITable error when rendering
+    }
+    String content = cell.layerNames//
+        .stream()//
+        .sorted()//
+        .map(lName -> cellLine(cell, lName))//
+        .collect(joining("<br>"));
+    return contentBuilder.append(content).toString();
+  }
+
+  private static String cellLine(Cell cell, String lName) {
+    String content = cell.getLayerContent().get(lName);
+    if (lName.equals("add")) {
+      content = "[+] " + content;
+    } else if (lName.equals("del")) {
+      content = "[-] " + content;
+    }
+    return content;
   }
 
   public static String toTableHTML(CollationGraph graph) {

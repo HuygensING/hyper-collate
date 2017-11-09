@@ -122,8 +122,7 @@ public class OptimalMatchSetAlgorithm2 extends AstarAlgorithm<QuantumMatchSet, L
     List<Match> potentialMatches = new ArrayList<>();
     potentialMatches.addAll(matches);
     potentialMatches.retainAll(matchSet.getPotentialMatches());
-    Match firstPotentialMatch = potentialMatches.get(0);
-    return firstPotentialMatch;
+    return potentialMatches.get(0);
   }
 
   @Override

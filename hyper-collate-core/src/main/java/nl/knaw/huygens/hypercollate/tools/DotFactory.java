@@ -134,13 +134,13 @@ public class DotFactory {
             Node source = collation.getSource(e);
             Node target = collation.getTarget(e);
             String edgeLabel = e.getSigils().stream().sorted().collect(joining(","));
-            String lineBuilder =//
-                nodeIdentifiers.get(source) +//
-                    "->" +//
-                    nodeIdentifiers.get(target) +//
-                    "[label=\"" +//
-                    edgeLabel +//
-                    "\"]\n";
+            String lineBuilder = //
+                nodeIdentifiers.get(source) + //
+            "->" + //
+            nodeIdentifiers.get(target) + //
+            "[label=\"" + //
+            edgeLabel + //
+            "\"]\n";
             edgeLines.add(lineBuilder);
           });
     }
