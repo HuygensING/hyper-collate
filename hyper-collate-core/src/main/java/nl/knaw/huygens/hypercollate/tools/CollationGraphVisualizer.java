@@ -20,6 +20,9 @@ package nl.knaw.huygens.hypercollate.tools;
  * #L%
  */
 
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,25 +36,47 @@ import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
 
 public class CollationGraphVisualizer {
 
+  public static class Cell {
+    List<String> layerNames = new ArrayList<>();
+    Map<String, String> layerContent = new HashMap<>();
+
+    public Cell(String layerName, String content) {
+      layerNames.add(layerName);
+      layerContent.put(layerName, content);
+    }
+
+    public Cell addLayer(String name) {
+      layerNames.add(name);
+      return this;
+    }
+
+    public Map<String, String> getLayerContent() {
+      return this.layerContent;
+    }
+  }
+
   public static String toTableASCII(CollationGraph graph) {
     List<String> sigils = graph.getSigils();
-    Map<String, List<String>> rowMap = new HashMap<>();
+    Map<String, List<Cell>> rowMap = new HashMap<>();
     sigils.forEach(sigil -> rowMap.put(sigil, new ArrayList<>()));
 
     graph.traverse().forEach(node -> {
       sigils.forEach(sigil -> {
         Token token = node.getTokenForWitness(sigil);
         if (token == null) {
-          rowMap.get(sigil).add(" ");
+          rowMap.get(sigil).add(new Cell("", " "));
 
         } else {
           MarkedUpToken t = (MarkedUpToken) token;
-          String content = t.getContent().replaceAll("\n", "\\\\n")//
+          String content = t.getContent()//
+              .replaceAll("\n", "\\\\n")//
               .replaceAll(" +", "_");
+          String parentXPath = t.getParentXPath();
           if (content.isEmpty()) {
-            content = "<" + t.getParentXPath().replaceAll(".*/", "") + "/>";
+            content = "<" + parentXPath.replaceAll(".*/", "") + "/>";
           }
-          rowMap.get(sigil).add(content);
+          String layerName = determineLayerName(parentXPath);
+          rowMap.get(sigil).add(new Cell(layerName, content));
         }
       });
     });
@@ -61,13 +86,42 @@ public class CollationGraphVisualizer {
     table.getRenderer().setCWC(cwc);
     table.addRule();
     sigils.forEach(sigil -> {
-      List<String> row = rowMap.get(sigil);
+      List<String> row = rowMap.get(sigil)//
+          .stream()//
+          .map(CollationGraphVisualizer::toASCII)//
+          .collect(toList());//
       row.add(0, "[" + sigil + "]");
       table.addRow(row);
       table.addRule();
     });
 
     return table.render();
+  }
+
+  private static String toASCII(Cell cell) {
+    return cell.layerNames//
+        .stream()//
+        .map(lName -> {
+          String content = cell.getLayerContent().get(lName);
+          if (lName.equals("add")) {
+            content = "[+] " + content;
+          } else if (lName.equals("del")) {
+            content = "[-] " + content;
+          }
+          return content;
+        })//
+        .collect(joining("<br>"));
+  }
+
+  private static String determineLayerName(String parentXPath) {
+    String layerName = "";
+    if (parentXPath.endsWith("/add")) {
+      layerName = "add";
+    }
+    if (parentXPath.endsWith("/del")) {
+      layerName = "del";
+    }
+    return layerName;
   }
 
   public static String toTableHTML(CollationGraph graph) {
