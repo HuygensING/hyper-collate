@@ -26,6 +26,11 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>hyper-collate-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>hyper-collate-api</artifactId>
             <version>${project.version}</version>
         </dependency>

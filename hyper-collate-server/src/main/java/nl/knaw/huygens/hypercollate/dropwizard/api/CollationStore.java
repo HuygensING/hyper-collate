@@ -1,8 +1,6 @@
-package nl.knaw.huygens.hypercollate.dropwizard;
+package nl.knaw.huygens.hypercollate.dropwizard.api;
 
-import org.hibernate.validator.constraints.NotEmpty;
-
-/*
+/*-
  * #%L
  * hyper-collate-server
  * =======
@@ -22,24 +20,22 @@ import org.hibernate.validator.constraints.NotEmpty;
  * #L%
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
-import io.dropwizard.Configuration;
-import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+import nl.knaw.huygens.hypercollate.api.CollationInput;
+import nl.knaw.huygens.hypercollate.dropwizard.db.CollationInfo;
+import nl.knaw.huygens.hypercollate.model.CollationGraph;
 
-public class ServerConfiguration extends Configuration {
-  @NotEmpty
-  private String baseURI;
+public interface CollationStore {
 
-  public void setBaseURI(String baseURI) {
-    this.baseURI = baseURI.replaceFirst("/$", "");
-  }
+  void setCollation(UUID uuid, CollationGraph collationGraph, CollationInput collationInput);
 
-  public String getBaseURI() {
-    return baseURI;
-  }
+  Set<UUID> getCollationUUIDs();
 
-  @JsonProperty("swagger")
-  public SwaggerBundleConfiguration swaggerBundleConfiguration;
+  Optional<CollationGraph> getCollationGraph(UUID uuid);
+
+  Optional<CollationInfo> getCollationInfo(UUID uuid);
 
 }

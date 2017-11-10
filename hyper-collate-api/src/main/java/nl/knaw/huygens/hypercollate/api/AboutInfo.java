@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.dropwizard.api;
+package nl.knaw.huygens.hypercollate.api;
 
 /*
  * #%L

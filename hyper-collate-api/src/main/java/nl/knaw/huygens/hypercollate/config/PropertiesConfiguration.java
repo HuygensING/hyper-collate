@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.dropwizard.config;
+package nl.knaw.huygens.hypercollate.config;
 
 /*-
  * #%L
@@ -19,25 +19,18 @@ package nl.knaw.huygens.hypercollate.dropwizard.config;
  * limitations under the License.
  * #L%
  */
-
-
-
-
-
-
-
-
-
-
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.MissingResourceException;
+import java.util.Optional;
+import java.util.PropertyResourceBundle;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PropertiesConfiguration {
   private static final Logger LOG = LoggerFactory.getLogger(PropertiesConfiguration.class);
