@@ -44,23 +44,23 @@ public class CollationGraphVisualizer {
   private static final String NBSP = "\u00A0";
 
   public static class Cell {
-    List<String> layerNames = new ArrayList<>();
-    Map<String, String> layerContent = new HashMap<>();
+    final List<String> layerNames = new ArrayList<>();
+    final Map<String, String> layerContent = new HashMap<>();
 
     public Cell(String layerName, String content) {
       layerNames.add(layerName);
       layerContent.put(layerName, content);
     }
 
-    public Cell() {
+    Cell() {
     }
 
-    public Cell addLayer(String name) {
+    Cell addLayer(String name) {
       layerNames.add(name);
       return this;
     }
 
-    public Map<String, String> getLayerContent() {
+    Map<String, String> getLayerContent() {
       return this.layerContent;
     }
   }
@@ -192,8 +192,7 @@ public class CollationGraphVisualizer {
   }
 
   public static String toTableHTML(CollationGraph graph) {
-    StringBuilder tableBuilder = new StringBuilder();
-    return tableBuilder.toString();
+    return "";
   }
 
   public static String toDot(CollationGraph graph) {

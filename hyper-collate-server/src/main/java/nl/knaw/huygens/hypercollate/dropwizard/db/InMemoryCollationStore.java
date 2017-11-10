@@ -38,14 +38,14 @@ import nl.knaw.huygens.hypercollate.dropwizard.api.CollationStore;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 
 public class InMemoryCollationStore implements CollationStore {
-  Set<UUID> uuids = new LinkedHashSet<>();
+  private final Set<UUID> uuids = new LinkedHashSet<>();
   private static String baseURI;
 
   public InMemoryCollationStore(ServerConfiguration config) {
     baseURI = config.getBaseURI();
   }
 
-  static Cache<UUID, CollationGraph> CollationGraphCache = CacheBuilder.newBuilder()//
+  private static final Cache<UUID, CollationGraph> CollationGraphCache = CacheBuilder.newBuilder()//
       .maximumSize(100)//
       .build();
 
@@ -84,7 +84,7 @@ public class InMemoryCollationStore implements CollationStore {
     return uuids;
   }
 
-  static Cache<UUID, CollationInfo> CollationInfoCache = CacheBuilder.newBuilder()//
+  private static final Cache<UUID, CollationInfo> CollationInfoCache = CacheBuilder.newBuilder()//
       .maximumSize(100)//
       .build();
 
@@ -101,9 +101,9 @@ public class InMemoryCollationStore implements CollationStore {
     return Optional.empty();
   }
 
-  private static Callable<? extends CollationInfo> readCollationInfo(UUID uuid, CollationInput collationInput) {
-    return () -> newCollationInfo(uuid, collationInput);
-  }
+  // private static Callable<? extends CollationInfo> readCollationInfo(UUID uuid, CollationInput collationInput) {
+  // return () -> newCollationInfo(uuid, collationInput);
+  // }
 
   private static CollationInfo newCollationInfo(UUID uuid, CollationInput collationInput) {
     return new CollationInfo(uuid, baseURI, collationInput)//

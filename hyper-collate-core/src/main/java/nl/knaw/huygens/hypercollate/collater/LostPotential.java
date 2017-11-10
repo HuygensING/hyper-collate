@@ -39,7 +39,7 @@ public class LostPotential extends Cost<LostPotential> {
     return cost.compareTo(other.getCost());
   }
 
-  public Integer getCost() {
+  private Integer getCost() {
     return cost;
   }
 

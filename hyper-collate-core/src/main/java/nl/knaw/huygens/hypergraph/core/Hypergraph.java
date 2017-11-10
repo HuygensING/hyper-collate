@@ -46,9 +46,9 @@ public class Hypergraph<N, H> {
   private final Map<H, N> sourceNode;
   private final Map<H, Collection<N>> targetNodes;
   private final Map<H, String> edgeLabels;
-  protected final Map<N, String> nodeLabels;
+  private final Map<N, String> nodeLabels;
 
-  public Hypergraph(GraphType graphType) {
+  Hypergraph(GraphType graphType) {
     this.graphType = graphType;
     this.nodes = new HashSet<>();
     this.incomingEdges = new HashMap<>();
@@ -65,13 +65,13 @@ public class Hypergraph<N, H> {
     }
   }
 
-  public void addNode(N node, String label) {
+  void addNode(N node, String label) {
     this.nodes.add(node);
     this.nodeLabels.put(node, label);
   }
 
   @SafeVarargs
-  public final void addDirectedHyperedge(H edge, String label, N source, N... targets) {
+  final void addDirectedHyperedge(H edge, String label, N source, N... targets) {
     // TODO: check whether source node is in nodes
     // NOTE: The way it is done now, is that nodes are not added explicitly to the graph
     // NOTE: but rather indirectly through the edges.

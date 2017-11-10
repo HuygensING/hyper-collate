@@ -23,7 +23,7 @@ package nl.knaw.huygens.hypercollate.collater;
 import java.util.Collection;
 import java.util.Set;
 
-public interface OptimalMatchSetFinder {
+interface OptimalMatchSetFinder {
 
   Set<Match> getOptimalMatchSet(Collection<Match> allPotentialMatches);
 

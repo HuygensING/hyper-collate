@@ -44,7 +44,7 @@ import nl.knaw.huygens.hypercollate.tools.TokenMerger;
 
 public class HyperCollateTest {
 
-  public void verifyDotExport(VariantWitnessGraph variantWitnessGraph, String expectedDot) {
+  protected void verifyDotExport(VariantWitnessGraph variantWitnessGraph, String expectedDot) {
     VariantWitnessGraph wg = TokenMerger.merge(variantWitnessGraph);
     // VariantWitnessGraph wg = variantWitnessGraph;
 
@@ -55,7 +55,7 @@ public class HyperCollateTest {
     // showGraph(dot);
   }
 
-  public void writeGraph(String dot) {
+  protected void writeGraph(String dot) {
     try {
       FileUtils.write(new File("out/graph.dot"), dot, Charsets.UTF_8);
     } catch (IOException e) {

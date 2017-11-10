@@ -32,8 +32,8 @@ import nl.knaw.huygens.hypercollate.api.ResourcePaths;
 public class CollationInfo {
   private Instant created;
   private Instant modified;
-  private String uriBase;
-  private CollationInput input;
+  private final String uriBase;
+  private final CollationInput input;
   private long collationDuration;
 
   public CollationInfo(UUID documentId, String baseURL, CollationInput input) {

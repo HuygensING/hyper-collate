@@ -32,8 +32,8 @@ import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
 public class Match {
 
-  final Map<String, TokenVertex> tokenVertexMap = new TreeMap<>();
-  final Map<String, Integer> rankingMap = new TreeMap<>();
+  private final Map<String, TokenVertex> tokenVertexMap = new TreeMap<>();
+  private final Map<String, Integer> rankingMap = new TreeMap<>();
 
   public Match(TokenVertex... matchingTokenVertices) {
     for (TokenVertex mtv : matchingTokenVertices) {

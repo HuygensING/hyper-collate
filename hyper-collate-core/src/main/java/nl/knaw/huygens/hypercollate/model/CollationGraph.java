@@ -32,7 +32,7 @@ import nl.knaw.huygens.hypergraph.core.DirectedAcyclicGraph;
 
 public class CollationGraph extends DirectedAcyclicGraph<CollationGraph.Node> {
 
-  private List<String> sigils;
+  private final List<String> sigils;
 
   public CollationGraph(List<String> sigils) {
     this.sigils = sigils;
@@ -53,7 +53,7 @@ public class CollationGraph extends DirectedAcyclicGraph<CollationGraph.Node> {
   public static class Node {
     final Map<String, Token> tokenMap = new HashMap<>();
 
-    public Node(Token... tokens) {
+    Node(Token... tokens) {
       for (Token token : tokens) {
         if (token != null && token.getWitness() != null) {
           tokenMap.put(token.getWitness().getSigil(), token);

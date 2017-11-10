@@ -226,14 +226,14 @@ public class XMLImporter {
     private final SimpleWitness witness;
     private String parentXPath;
 
-    public Context(VariantWitnessGraph graph, Function<String, String> normalizer, SimpleWitness witness) {
+    Context(VariantWitnessGraph graph, Function<String, String> normalizer, SimpleWitness witness) {
       this.graph = graph;
       this.normalizer = normalizer;
       this.lastTokenVertex = graph.getStartTokenVertex();
       this.witness = witness;
     }
 
-    public void openMarkup(Markup markup) {
+    void openMarkup(Markup markup) {
       graph.addMarkup(markup);
       openMarkup.push(markup);
       parentXPath = buildParentXPath();
@@ -252,7 +252,7 @@ public class XMLImporter {
       return "add".equals(markup.getTagname());
     }
 
-    public void closeMarkup(Markup markup) {
+    void closeMarkup(Markup markup) {
       Markup firstToClose = openMarkup.peek();
       if (graph.getTokenVertexListForMarkup(firstToClose).isEmpty()) {
         // add milestone
@@ -272,7 +272,7 @@ public class XMLImporter {
       }
     }
 
-    public void addNewToken(String content) {
+    void addNewToken(String content) {
       MarkedUpToken token = new MarkedUpToken()//
           .setContent(content)//
           .setWitness(witness)//
@@ -296,7 +296,7 @@ public class XMLImporter {
       }
     }
 
-    public void closeDocument() {
+    void closeDocument() {
       graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, graph.getEndTokenVertex());
     }
 

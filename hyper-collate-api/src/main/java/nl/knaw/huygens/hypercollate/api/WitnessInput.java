@@ -22,8 +22,8 @@ package nl.knaw.huygens.hypercollate.api;
 
 public class WitnessInput {
 
-  String sigil;
-  String xml;
+  private String sigil;
+  private String xml;
 
   public void setSigil(String sigil) {
     this.sigil = sigil;

@@ -65,9 +65,9 @@ import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
 public class CollationsResource {
   public static final String APIPARAM_UUID = "collation UUID";
   public static final String APIPARAM_COLLATION_INPUT = "Collation input";
-  private ServerConfiguration configuration;
-  private HyperCollater hypercollater = new HyperCollater(new OptimalMatchSetAlgorithm2());
-  private CollationStore collationStore;
+  private final ServerConfiguration configuration;
+  private final HyperCollater hypercollater = new HyperCollater(new OptimalMatchSetAlgorithm2());
+  private final CollationStore collationStore;
 
   public CollationsResource(ServerConfiguration configuration, CollationStore collationStore) {
     this.configuration = configuration;
@@ -143,8 +143,7 @@ public class CollationsResource {
     Stopwatch stopwatch = Stopwatch.createStarted();
     CollationGraph collationGraph = hypercollater.collate(w1, w2);
     if (collationInput.getJoin()) {
-      CollationGraph joinedGraph = CollationGraphNodeJoiner.join(collationGraph);
-      collationGraph = joinedGraph;
+      collationGraph = CollationGraphNodeJoiner.join(collationGraph);
     }
     stopwatch.stop();
     collationStore.setCollation(collationId, collationGraph, collationInput, stopwatch.elapsed(TimeUnit.MILLISECONDS));

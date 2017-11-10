@@ -111,11 +111,11 @@ public class OptimalMatchSetAlgorithm2 extends AstarAlgorithm<QuantumMatchSet, L
     return nextPotentialMatches;
   }
 
-  private void addNeighborNodes(QuantumMatchSet matchSet, Set<QuantumMatchSet> nextPotentialMatches, Match firstPotentialMatch2) {
-    QuantumMatchSet quantumMatchSet2a = matchSet.chooseMatch(firstPotentialMatch2);
-    QuantumMatchSet quantumMatchSet2b = matchSet.discardMatch(firstPotentialMatch2);
-    nextPotentialMatches.add(quantumMatchSet2a);
-    nextPotentialMatches.add(quantumMatchSet2b);
+  private void addNeighborNodes(QuantumMatchSet matchSet, Set<QuantumMatchSet> nextPotentialMatches, Match firstPotentialMatch) {
+    QuantumMatchSet quantumMatchSet1 = matchSet.chooseMatch(firstPotentialMatch);
+    QuantumMatchSet quantumMatchSet2 = matchSet.discardMatch(firstPotentialMatch);
+    nextPotentialMatches.add(quantumMatchSet1);
+    nextPotentialMatches.add(quantumMatchSet2);
   }
 
   private Match getFirstPotentialMatch(List<Match> matches, QuantumMatchSet matchSet) {

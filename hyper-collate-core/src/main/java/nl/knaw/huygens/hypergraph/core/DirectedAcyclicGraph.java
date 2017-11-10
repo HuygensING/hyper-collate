@@ -35,7 +35,7 @@ public class DirectedAcyclicGraph<N> extends Hypergraph<N, TraditionalEdge> {
   private static final Logger LOG = LoggerFactory.getLogger(DirectedAcyclicGraph.class);
   private N root;
 
-  public DirectedAcyclicGraph() {
+  protected DirectedAcyclicGraph() {
     super(GraphType.ORDERED);
   }
 
@@ -44,7 +44,7 @@ public class DirectedAcyclicGraph<N> extends Hypergraph<N, TraditionalEdge> {
     super.addNode(node, label);
   }
 
-  public void setRootNode(N root) {
+  protected void setRootNode(N root) {
     this.root = root;
   }
 

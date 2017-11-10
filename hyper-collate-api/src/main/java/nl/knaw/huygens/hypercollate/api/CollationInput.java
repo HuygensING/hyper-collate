@@ -25,8 +25,8 @@ import java.util.List;
 
 public class CollationInput {
 
-  List<WitnessInput> witnesses = new ArrayList<>();
-  Boolean join = true;
+  private final List<WitnessInput> witnesses = new ArrayList<>();
+  private Boolean join = true;
 
   public List<WitnessInput> getWitnesses() {
     return witnesses;
