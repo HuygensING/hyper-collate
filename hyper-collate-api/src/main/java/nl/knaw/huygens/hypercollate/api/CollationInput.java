@@ -1,10 +1,8 @@
-package nl.knaw.huygens.hypercollate.dropwizard;
+package nl.knaw.huygens.hypercollate.api;
 
-import org.hibernate.validator.constraints.NotEmpty;
-
-/*
+/*-
  * #%L
- * hyper-collate-server
+ * hyper-collate-api
  * =======
  * Copyright (C) 2017 Huygens ING (KNAW)
  * =======
@@ -22,24 +20,19 @@ import org.hibernate.validator.constraints.NotEmpty;
  * #L%
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
+import java.util.List;
 
-import io.dropwizard.Configuration;
-import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+public class CollationInput {
 
-public class ServerConfiguration extends Configuration {
-  @NotEmpty
-  private String baseURI;
+  List<WitnessInput> witnesses = new ArrayList<>();
 
-  public void setBaseURI(String baseURI) {
-    this.baseURI = baseURI.replaceFirst("/$", "");
+  public List<WitnessInput> getWitnesses() {
+    return witnesses;
   }
 
-  public String getBaseURI() {
-    return baseURI;
+  public void addWitness(WitnessInput witnessInput) {
+    witnesses.add(witnessInput);
   }
-
-  @JsonProperty("swagger")
-  public SwaggerBundleConfiguration swaggerBundleConfiguration;
 
 }

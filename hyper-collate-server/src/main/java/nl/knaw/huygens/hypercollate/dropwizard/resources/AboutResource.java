@@ -23,9 +23,9 @@ package nl.knaw.huygens.hypercollate.dropwizard.resources;
 import com.codahale.metrics.annotation.Timed;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import nl.knaw.huygens.hypercollate.dropwizard.api.AboutInfo;
-import nl.knaw.huygens.hypercollate.dropwizard.api.ResourcePaths;
-import nl.knaw.huygens.hypercollate.dropwizard.config.PropertiesConfiguration;
+import nl.knaw.huygens.hypercollate.api.AboutInfo;
+import nl.knaw.huygens.hypercollate.api.ResourcePaths;
+import nl.knaw.huygens.hypercollate.config.PropertiesConfiguration;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

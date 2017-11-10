@@ -5,3 +5,5 @@ logging:
 
 swagger:
   resourcePackage: nl.knaw.huygens.hypercollate.dropwizard.resources
+  
+baseURI: http://127.0.0.1:8080/

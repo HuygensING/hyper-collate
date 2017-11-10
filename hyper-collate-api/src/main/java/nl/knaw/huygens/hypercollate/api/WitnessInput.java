@@ -1,6 +1,6 @@
-package nl.knaw.huygens.hypercollate.dropwizard.api;
+package nl.knaw.huygens.hypercollate.api;
 
-/*
+/*-
  * #%L
  * hyper-collate-api
  * =======
@@ -20,7 +20,25 @@ package nl.knaw.huygens.hypercollate.dropwizard.api;
  * #L%
  */
 
-public class ResourcePaths {
-  public static final String ABOUT = "about";
+public class WitnessInput {
+
+  String sigil;
+  String xml;
+
+  public void setSigil(String sigil) {
+    this.sigil = sigil;
+  }
+
+  public String getSigil() {
+    return this.sigil;
+  }
+
+  public void setXml(String xml) {
+    this.xml = xml;
+  }
+
+  public String getXml() {
+    return this.xml;
+  }
 
 }

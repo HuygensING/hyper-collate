@@ -1,10 +1,8 @@
-package nl.knaw.huygens.hypercollate.dropwizard;
-
-import org.hibernate.validator.constraints.NotEmpty;
+package nl.knaw.huygens.hypercollate.api;
 
 /*
  * #%L
- * hyper-collate-server
+ * hyper-collate-api
  * =======
  * Copyright (C) 2017 Huygens ING (KNAW)
  * =======
@@ -22,24 +20,11 @@ import org.hibernate.validator.constraints.NotEmpty;
  * #L%
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.dropwizard.Configuration;
-import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
-
-public class ServerConfiguration extends Configuration {
-  @NotEmpty
-  private String baseURI;
-
-  public void setBaseURI(String baseURI) {
-    this.baseURI = baseURI.replaceFirst("/$", "");
-  }
-
-  public String getBaseURI() {
-    return baseURI;
-  }
-
-  @JsonProperty("swagger")
-  public SwaggerBundleConfiguration swaggerBundleConfiguration;
-
+public class ResourcePaths {
+  public static final String ABOUT = "about";
+  public static final String DOCUMENTS = "documents";
+  public static final String COLLATIONS = "collations";
+  public static final String COLLATIONS_DOT = "dot";
+  public static final String COLLATIONS_ASCII_TABLE = "ascii_table";
+  public static final String COLLATIONS_HTML_TABLE = "html_table";
 }
