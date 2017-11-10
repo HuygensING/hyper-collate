@@ -36,9 +36,9 @@ import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
 import nl.knaw.huygens.hypergraph.core.TraditionalEdge;
 
-public class CollationGraphNodeMerger {
+public class CollationGraphNodeJoiner {
 
-  public static CollationGraph merge(CollationGraph originalGraph) {
+  public static CollationGraph join(CollationGraph originalGraph) {
     CollationGraph mergedGraph = new CollationGraph(originalGraph.getSigils());
     Map<Node, Node> originalToMerged = mergeNodes(originalGraph, mergedGraph);
     copyIncomingEdges(originalGraph, originalToMerged, mergedGraph);
@@ -109,7 +109,7 @@ public class CollationGraphNodeMerger {
     Token[] tokens = originalNode.getSigils()//
         .stream()//
         .map(originalNode::getTokenForWitness)//
-        .map(CollationGraphNodeMerger::cloneToken)//
+        .map(CollationGraphNodeJoiner::cloneToken)//
         .collect(toList())//
         .toArray(new Token[] {});
     return mergedGraph.addNodeWithTokens(tokens);

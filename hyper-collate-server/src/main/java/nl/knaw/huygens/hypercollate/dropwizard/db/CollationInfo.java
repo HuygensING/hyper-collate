@@ -34,6 +34,7 @@ public class CollationInfo {
   private Instant modified;
   private String uriBase;
   private CollationInput input;
+  private long collationDuration;
 
   public CollationInfo(UUID documentId, String baseURL, CollationInput input) {
     this.input = input;
@@ -70,6 +71,14 @@ public class CollationInfo {
   @JsonProperty("^ascii_table")
   public URI getAsciiTableURI() {
     return URI.create(uriBase + ResourcePaths.COLLATIONS_ASCII_TABLE);
+  }
+
+  public void setCollationDurationInMilliseconds(long collationDuration) {
+    this.collationDuration = collationDuration;
+  }
+
+  public long getCollationDurationInMilliseconds() {
+    return this.collationDuration;
   }
 
 }

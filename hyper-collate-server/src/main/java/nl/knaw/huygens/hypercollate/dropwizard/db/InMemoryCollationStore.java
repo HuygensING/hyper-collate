@@ -67,12 +67,13 @@ public class InMemoryCollationStore implements CollationStore {
   }
 
   @Override
-  public void setCollation(UUID collationId, CollationGraph collationGraph, CollationInput collationInput) {
+  public void setCollation(UUID collationId, CollationGraph collationGraph, CollationInput collationInput, long collationDurationInMilliseconds) {
     CollationGraphCache.put(collationId, collationGraph);
 
     CollationInfo docInfo = getCollationInfo(collationId)//
         .orElseGet(() -> newCollationInfo(collationId, collationInput));
     docInfo.setModified(Instant.now());
+    docInfo.setCollationDurationInMilliseconds(collationDurationInMilliseconds);
     CollationInfoCache.put(collationId, docInfo);
 
     uuids.add(collationId);

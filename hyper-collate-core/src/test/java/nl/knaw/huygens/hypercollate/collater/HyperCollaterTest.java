@@ -35,7 +35,7 @@ import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
-import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeMerger;
+import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
 
 public class HyperCollaterTest extends HyperCollateTest {
@@ -333,7 +333,7 @@ public class HyperCollaterTest extends HyperCollateTest {
       LOG.info("Collating with {} took {} ms.", name, duration);
       collationDuration.put(name, duration);
 
-      CollationGraph collation = CollationGraphNodeMerger.merge(collation0);
+      CollationGraph collation = CollationGraphNodeJoiner.join(collation0);
 
       String dot = CollationGraphVisualizer.toDot(collation);
       // System.out.println(dot);

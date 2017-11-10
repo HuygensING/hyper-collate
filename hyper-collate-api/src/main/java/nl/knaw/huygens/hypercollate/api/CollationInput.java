@@ -26,6 +26,7 @@ import java.util.List;
 public class CollationInput {
 
   List<WitnessInput> witnesses = new ArrayList<>();
+  Boolean join = true;
 
   public List<WitnessInput> getWitnesses() {
     return witnesses;
@@ -33,6 +34,14 @@ public class CollationInput {
 
   public void addWitness(WitnessInput witnessInput) {
     witnesses.add(witnessInput);
+  }
+
+  public void setJoin(Boolean join) {
+    this.join = join;
+  }
+
+  public Boolean getJoin() {
+    return this.join;
   }
 
 }

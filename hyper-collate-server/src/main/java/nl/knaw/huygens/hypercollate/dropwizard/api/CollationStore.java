@@ -30,7 +30,7 @@ import nl.knaw.huygens.hypercollate.model.CollationGraph;
 
 public interface CollationStore {
 
-  void setCollation(UUID uuid, CollationGraph collationGraph, CollationInput collationInput);
+  void setCollation(UUID uuid, CollationGraph collationGraph, CollationInput collationInput, long collationDuration);
 
   Set<UUID> getCollationUUIDs();
 
