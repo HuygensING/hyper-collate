@@ -237,6 +237,7 @@ public class XMLImporter {
       graph.addMarkup(markup);
       openMarkup.push(markup);
       parentXPath = buildParentXPath();
+      // TODO: fix for single <del> or <add>
       if (isVariationStartingMarkup(markup)) {
         variationStartVertices.push(lastTokenVertex);
       } else if (isVariationEndingMarkup(markup)) {
