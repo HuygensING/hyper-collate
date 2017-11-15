@@ -118,7 +118,7 @@ public class CollationGraphVisualizer {
     } else {
       tokens.forEach(token -> {
         String content = token.getContent()//
-            .replaceAll("\n", "\\\\n")//
+            .replaceAll("\n", " ")//
             .replaceAll(" +", "_");
         String parentXPath = token.getParentXPath();
         if (content.isEmpty()) {

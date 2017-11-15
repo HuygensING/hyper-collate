@@ -1,0 +1,227 @@
+<html>
+    <head>
+        <style type="text/css">
+        .tg  {border-collapse:collapse;border-spacing:0;}
+        .tg .tg-top {font-weight:bold;vertical-align:top}
+        .tg .tg-bottom {vertical-align:bottom;text-align: left;}
+        .tg .tg-center {text-align: center;}
+        .tg .tg-right {text-align: right;}
+        .tg .tg-markup {background-color: orange;}
+        .tg .tg-markup-match {background-color: lightgreen;}
+        .tg td {font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
+        .tg th {font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
+        span.del {text-decoration: line-through}
+        span.match {color:green}
+        </style>
+    </head>
+    <body>
+
+        <h2>Legenda</h2>
+        <table class="tg">
+            <tr>
+                <td class="tg-right">non-matching text</td>
+            </tr>
+            <tr>
+                <td class="tg-right"><span class="match">matching text</span></td>
+            </tr>
+            <tr>
+                <td class="tg-markup tg-right">non-matching markup</td>
+            </tr>
+            <tr>
+                <td class="tg-markup-match tg-right">matching markup</td>
+            </tr>
+            <tr>
+                <td class="tg-bottom tg-right">added text<br><span class="del">deleted text</span></td>
+            </tr>
+        </table>
+
+        <h2>Witnesses</h2>
+        <table class="tg">
+          <tr>
+            <td class="tg-top">F</td>
+            <td class="tg-bottom">&lt;text&gt;&lt;s&gt;Hoe zoet moet nochtans zijn dit &lt;lb/&gt;&lt;del&gt;werven om&lt;/del&gt;&lt;add&gt;trachten naar&lt;/add&gt; een vrouw, de ongewisheid vóór de &lt;lb/&gt;liefelijke toestemming!&lt;/s&gt;&lt;/text&gt;</td>
+          </tr>
+          <tr>
+            <td class="tg-top">Q</td>
+            <td class="tg-bottom">&lt;text&gt;&lt;s&gt;Hoe zoet moet nochtans zijn dit &lt;del&gt;werven om&lt;/del&gt;&lt;add&gt;trachten naar&lt;/add&gt; een &lt;lb/&gt;vrouw!&lt;/s&gt;&lt;s&gt;Die dagen van nerveuze verwachting vóór de liefelijke toestemming.&lt;/s&gt;&lt;/text&gt;</td>
+          </tr>
+        </table>
+        <hr/>
+
+        <h1>Visualization 1</h1>
+        <table class="tg">
+          <tr>
+            <td class="tg-top">F</td>
+            <td class="tg-bottom"><span class="match">Hoe_zoet_moet_nochtans_zijn_dit_</span></td>
+            <td class="tg-bottom">&lt;lb/&gt;</td>
+            <td class="tg-bottom"><span class="match">trachten_naar</span><br><span class="match del">werven_om</span></td>
+            <td class="tg-bottom"><span class="match">_een_</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span class="match">vrouw</span></td>
+            <td class="tg-bottom">,_de_ongewisheid_</td>
+            <td class="tg-bottom"><span class="match">vóór_de_</span></td>
+            <td class="tg-bottom">&lt;lb/&gt;</td>
+            <td class="tg-bottom"><span class="match">liefelijke_toestemming</span></td>
+            <td class="tg-bottom">!</td>
+          </tr>
+          <tr>
+            <td class="tg-top">Q</td>
+            <td class="tg-bottom"><span class="match">Hoe_zoet_moet_nochtans_zijn_dit_</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span class="match">trachten_naar</span><br><span class="match del">werven_om</span></td>
+            <td class="tg-bottom"><span class="match">_een_</span></td>
+            <td class="tg-bottom">&lt;lb/&gt;</td>
+            <td class="tg-bottom"><span class="match">vrouw</span></td>
+            <td class="tg-bottom">!_Die_dagen_van_nerveuze_verwachting_</td>
+            <td class="tg-bottom"><span class="match">vóór_de_</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span class="match">liefelijke_toestemming</span></td>
+            <td class="tg-bottom">.</td>
+          </tr>
+        </table>
+        <hr/>
+
+        <h1>Visualization 2</h1>
+        <table class="tg">
+          <tr>
+            <td class="tg-top">F</td>
+            <td class="tg-bottom tg-markup-match">&lt;text&gt;</td>
+            <td class="tg-bottom tg-markup">&lt;s&gt;</td>
+            <td class="tg-bottom"><span class="match">Hoe_zoet_moet_nochtans_zijn_dit_</span></td>
+            <td class="tg-bottom tg-markup">&lt;lb/&gt;</td>
+            <td class="tg-bottom"><span class="match">trachten_naar</span><br><span class="match del">werven_om</span></td>
+            <td class="tg-bottom"><span class="match">_een_</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span class="match">vrouw</span></td>
+            <td class="tg-bottom">,_de_ongewisheid_</td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span class="match">vóór_de_</span></td>
+            <td class="tg-bottom tg-markup">&lt;lb/&gt;</td>
+            <td class="tg-bottom"><span class="match">liefelijke_toestemming</span></td>
+            <td class="tg-bottom">!</td>
+            <td class="tg-bottom tg-markup">&lt;/s&gt;</td>
+            <td class="tg-bottom tg-markup-match">&lt;/text&gt;</td>
+          </tr>
+          <tr>
+            <td class="tg-top">Q</td>
+            <td class="tg-bottom tg-markup-match">&lt;text&gt;</td>
+            <td class="tg-bottom tg-markup">&lt;s&gt;</td>
+            <td class="tg-bottom"><span class="match">Hoe_zoet_moet_nochtans_zijn_dit_</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span class="match">trachten_naar</span><br><span class="match del">werven_om</span></td>
+            <td class="tg-bottom"><span class="match">_een_</span></td>
+            <td class="tg-bottom tg-markup">&lt;lb/&gt;</td>
+            <td class="tg-bottom"><span class="match">vrouw</span></td>
+            <td class="tg-bottom">!</td>
+            <td class="tg-bottom tg-markup">&lt;/s&gt;</td>
+            <td class="tg-bottom tg-markup">&lt;s&gt;</td>
+            <td class="tg-bottom">Die_dagen_van_nerveuze_verwachting_</td>
+            <td class="tg-bottom"><span class="match">vóór_de_</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span class="match">liefelijke_toestemming</span></td>
+            <td class="tg-bottom">.</td>
+            <td class="tg-bottom tg-markup">&lt;/s&gt;</td>
+            <td class="tg-bottom tg-markup-match">&lt;/text&gt;</td>
+          </tr>
+        </table>
+        <hr/>
+
+        <h1>Visualization 3a</h1>
+        <table class="tg">
+          <tr>
+            <td class="tg-top" rowspan="3">F</td>
+            <td class="tg-center tg-markup-match" colspan="12">text</td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup" colspan="12">s</td>
+          </tr>
+          <tr>
+            <td class="tg-bottom"><span class="match">Hoe_zoet_moet_nochtans_zijn_dit_</span></td>
+            <td class="tg-bottom">&lt;lb/&gt;</td>
+            <td class="tg-bottom"><span class="match">trachten_naar</span><br><span class="match del">werven_om</span></td>
+            <td class="tg-bottom"><span class="match">_een_</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span class="match">vrouw</span></td>
+            <td class="tg-bottom">,_de_ongewisheid_</td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span class="match">vóór_de_</span></td>
+            <td class="tg-bottom">&lt;lb/&gt;</td>
+            <td class="tg-bottom"><span class="match">liefelijke_toestemming</span></td>
+            <td class="tg-bottom">!</td>
+          </tr>
+          <tr>
+            <td class="tg-top" rowspan="3">Q</td>
+            <td class="tg-bottom"><span class="match">Hoe_zoet_moet_nochtans_zijn_dit_</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span class="match">trachten_naar</span><br><span class="match del">werven_om</span></td>
+            <td class="tg-bottom"><span class="match">_een_</span></td>
+            <td class="tg-bottom">&lt;lb/&gt;</td>
+            <td class="tg-bottom"><span class="match">vrouw</span></td>
+            <td class="tg-bottom">!</td>
+            <td class="tg-bottom">Die_dagen_van_nerveuze_verwachting_</td>
+            <td class="tg-bottom"><span class="match">vóór_de_</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span class="match">liefelijke_toestemming</span></td>
+            <td class="tg-bottom">.</td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup" colspan="7">s</td>
+            <td class="tg-center tg-markup" colspan="5">s</td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup-match" colspan="12">text</td>
+          </tr>
+        </table>
+        <hr/>
+
+        <h1>Visualization 3b</h1>
+        <table class="tg">
+          <tr>
+            <td class="tg-top" rowspan="3">F</td>
+            <td class="tg-center tg-markup-match" colspan="12">text</td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup" colspan="12">s</td>
+          </tr>
+          <tr>
+            <td class="tg-bottom"><span class="match">Hoe_zoet_moet_nochtans_zijn_dit_</span></td>
+            <td class="tg-bottom">&lt;lb/&gt;</td>
+            <td class="tg-bottom"><span class="match">trachten_naar</span><br><span class="match del">werven_om</span></td>
+            <td class="tg-bottom"><span class="match">_een_</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span class="match">vrouw</span></td>
+            <td class="tg-bottom">,_de_ongewisheid_</td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span class="match">vóór_de_</span></td>
+            <td class="tg-bottom">&lt;lb/&gt;</td>
+            <td class="tg-bottom"><span class="match">liefelijke_toestemming</span></td>
+            <td class="tg-bottom">!</td>
+          </tr>
+          <tr>
+            <td class="tg-top" rowspan="3">Q</td>
+            <td class="tg-center tg-markup-match" colspan="12">text</td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup" colspan="7">s</td>
+            <td class="tg-center tg-markup" colspan="5">s</td>
+          </tr>
+          <tr>
+            <td class="tg-bottom"><span class="match">Hoe_zoet_moet_nochtans_zijn_dit_</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span class="match">trachten_naar</span><br><span class="match del">werven_om</span></td>
+            <td class="tg-bottom"><span class="match">_een_</span></td>
+            <td class="tg-bottom">&lt;lb/&gt;</td>
+            <td class="tg-bottom"><span class="match">vrouw</span></td>
+            <td class="tg-bottom">!</td>
+            <td class="tg-bottom">Die_dagen_van_nerveuze_verwachting_</td>
+            <td class="tg-bottom"><span class="match">vóór_de_</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span class="match">liefelijke_toestemming</span></td>
+            <td class="tg-bottom">.</td>
+          </tr>
+        </table>
+        <hr/>
+    </body>
+</html>
