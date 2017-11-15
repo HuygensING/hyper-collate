@@ -6,12 +6,12 @@ import java.awt.FlowLayout;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 
 /*-
@@ -57,7 +57,7 @@ public class HyperCollateTest {
 
   protected void writeGraph(String dot) {
     try {
-      FileUtils.write(new File("out/graph.dot"), dot, Charsets.UTF_8);
+      FileUtils.write(new File("out/graph.dot"), dot, StandardCharsets.UTF_8);
     } catch (IOException e) {
       e.printStackTrace();
     }
