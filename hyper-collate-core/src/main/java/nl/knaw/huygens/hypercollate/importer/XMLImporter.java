@@ -253,7 +253,6 @@ public class XMLImporter {
       graph.addMarkup(markup);
       openMarkup.push(markup);
       parentXPath = buildParentXPath();
-      // TODO: fix for single <del> or <add>
       if (isVariationStartingMarkup(markup)) { // del
         variationStartVertices.push(lastTokenVertex);
 
@@ -262,7 +261,7 @@ public class XMLImporter {
           lastTokenVertex = variationStartVertices.pop();
 
         } else { // add without immediately preceding del
-          unconnectedVertices.push(lastTokenVertex); // add link from verted preceding the <add> to vertex following </add>
+          unconnectedVertices.push(lastTokenVertex); // add link from vertex preceding the <add> to vertex following </add>
 
         }
         afterDel = false;
@@ -300,10 +299,6 @@ public class XMLImporter {
     }
 
     void addNewToken(String content) {
-      if (afterDel) { // del without add
-        unconnectedVertices.push(lastTokenVertex); // add link from verted preceding the <del> to vertex following </del>
-      }
-      afterDel = false;
       MarkedUpToken token = new MarkedUpToken()//
           .setContent(content)//
           .setWitness(witness)//
@@ -312,6 +307,14 @@ public class XMLImporter {
           .setNormalizedContent(normalizer.apply(content));
       SimpleTokenVertex tokenVertex = new SimpleTokenVertex(token);
       graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex);
+
+      if (afterDel) { // del without add
+        // add link from verted preceding the <del> to vertex following </del>
+        graph.addOutgoingTokenVertexToTokenVertex(variationStartVertices.pop(), tokenVertex);
+        unconnectedVertices.pop();
+      }
+      afterDel = false;
+
       this.openMarkup.descendingIterator()//
           .forEachRemaining(markup -> graph.addMarkupToTokenVertex(tokenVertex, markup));
       checkUnconnectedVertices(tokenVertex);
@@ -328,7 +331,19 @@ public class XMLImporter {
     }
 
     void closeDocument() {
-      graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, graph.getEndTokenVertex());
+      TokenVertex endTokenVertex = graph.getEndTokenVertex();
+      graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, endTokenVertex);
+      while (!unconnectedVertices.isEmpty()) {
+        // add link from vertex preceding the <add> to end vertex
+        TokenVertex unconnectedVertex = unconnectedVertices.pop();
+        if (!unconnectedVertex.equals(lastTokenVertex)) {
+          graph.addOutgoingTokenVertexToTokenVertex(unconnectedVertex, endTokenVertex);
+        }
+      }
+      while (!variationStartVertices.isEmpty()) {
+        // add link from vertex preceding the <del> to end vertex
+        graph.addOutgoingTokenVertexToTokenVertex(variationStartVertices.pop(), endTokenVertex);
+      }
     }
 
     private String buildParentXPath() {

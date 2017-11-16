@@ -172,6 +172,7 @@ public class HyperCollaterTest extends HyperCollateTest {
         "F_007 [label=<&#9251;den&#9251;bedremmelden&#x21A9;<br/>&#9251;Sultan&#9251;uit&#9251;voor&#9251;\"lompen&#9251;boer\".<br/><i>F: /text/s</i>>]\n" + //
         "end [label=\"\";shape=doublecircle,rank=middle]\n" + //
         "F_000->F_006\n" + //
+        "F_000->F_007\n" + //
         "F_006->F_007\n" + //
         "F_007->end\n" + //
         "begin->F_000\n" + //
@@ -215,6 +216,7 @@ public class HyperCollaterTest extends HyperCollateTest {
         "t009 [label=<Q: man<br/>Q: <i>/text/s/add/del</i>>]\n" + //
         "t000->t002[label=\"F,Q\"]\n" + //
         "t002->t005[label=\"F,Q\"]\n" + //
+        "t002->t006[label=\"F\"]\n" + //
         "t002->t007[label=\"Q\"]\n" + //
         "t003->t004[label=\"F\"]\n" + //
         "t003->t008[label=\"Q\"]\n" + //

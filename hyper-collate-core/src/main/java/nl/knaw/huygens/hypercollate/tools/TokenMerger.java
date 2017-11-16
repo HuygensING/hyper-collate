@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import nl.knaw.huygens.hypercollate.model.EndTokenVertex;
@@ -43,23 +44,30 @@ public class TokenMerger {
     TokenVertex originaltokenVertex = originalGraph.getStartTokenVertex();
     List<TokenVertex> verticesToAdd = originaltokenVertex.getOutgoingTokenVertexStream().collect(Collectors.toList());
     List<Long> handledTokens = new ArrayList<>();
+    AtomicBoolean endTokenHandled = new AtomicBoolean(false);
     TokenVertex mergedVertexToLinkTo = mergedGraph.getStartTokenVertex();
     verticesToAdd.forEach(originalVertex -> handle(originalGraph, mergedGraph, originalToMergedMap, handledTokens, //
-        originalVertex, mergedVertexToLinkTo));
+        endTokenHandled, originalVertex, mergedVertexToLinkTo));
     return mergedGraph;
   }
 
+  // TODO: introduce context to avoid passing so many parameters
   private static void handle(VariantWitnessGraph originalGraph, VariantWitnessGraph mergedGraph, //
       Map<Long, TokenVertex> originalToMergedMap, List<Long> handledTokens, //
+      AtomicBoolean endTokenHandled, //
       TokenVertex originalVertex, TokenVertex mergedVertexToLinkTo) {
 
     if (originalVertex instanceof EndTokenVertex) {
+      if (endTokenHandled.get()) {
+        return;
+      }
       TokenVertex endTokenVertex = mergedGraph.getEndTokenVertex();
       originalVertex.getIncomingTokenVertexStream().forEach(tv -> {
         Long indexNumber = ((MarkedUpToken) tv.getToken()).getIndexNumber();
         TokenVertex mergedTokenVertex = originalToMergedMap.get(indexNumber);
         mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedTokenVertex, endTokenVertex);
       });
+      endTokenHandled.set(true);
       return;
     }
 
@@ -94,7 +102,7 @@ public class TokenMerger {
       originalVertex = originalOutgoingVertices.get(0);
       originalOutgoingVertices = originalVertex.getOutgoingTokenVertexStream().collect(Collectors.toList());
     }
-    originalOutgoingVertices.forEach(oVertex -> handle(originalGraph, mergedGraph, originalToMergedMap, handledTokens, oVertex, mergedVertex));
+    originalOutgoingVertices.forEach(oVertex -> handle(originalGraph, mergedGraph, originalToMergedMap, handledTokens, endTokenHandled, oVertex, mergedVertex));
   }
 
   private static boolean canMerge(VariantWitnessGraph originalGraph, TokenVertex originalVertex, List<TokenVertex> originalOutgoingVertices) {
