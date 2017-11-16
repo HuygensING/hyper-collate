@@ -1,0 +1,336 @@
+<html>
+    <head>
+        <style type="text/css">
+        .tg  {border-collapse:collapse;border-spacing:0;white-space:nowrap;text-align: center;}
+        .tg .tg-top {font-weight:bold;vertical-align:top}
+        .tg .tg-bottom {vertical-align:bottom;text-align: left;}
+        .tg .tg-center {text-align: center;}
+        .tg .tg-right {text-align: right;}
+        .tg .tg-markup {background-color: orange;}
+        .tg .tg-markup-match {background-color: lightgreen;}
+        .tg td {font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
+        .tg th {font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;background-color: lightgrey}
+        /*span.del {text-decoration: underline; text-decoration-style:dotted;}*/
+        span.del::before{content:'[-] ';text-align: center;}
+        span.add::before{content:'[+] ';text-align: center;}
+        span.match {color:green;background-color: #bff442;}
+        </style>
+    </head>
+    <body>
+
+        <h2>Legenda</h2>
+        <table class="tg">
+            <tr>
+                <td class="tg-right">non-matching text</td>
+            </tr>
+            <tr>
+                <td class="tg-right"><span class="match">matching text</span></td>
+            </tr>
+            <tr>
+                <td class="tg-markup tg-right">non-matching markup</td>
+            </tr>
+            <tr>
+                <td class="tg-markup-match tg-right">matching markup</td>
+            </tr>
+            <tr>
+                <td class="tg-bottom tg-right"><span class="add">added text</span><br><span class="del">deleted text</span></td>
+            </tr>
+        </table>
+
+        <h2>Witnesses</h2>
+        <table class="tg">
+          <tr>
+            <th class="tg-top">N</td>
+            <td class="tg-bottom"><pre>
+&lt;text&gt;
+  &lt;s&gt;so destitute of every hope of consolation to live
+    &lt;del rend="strikethrough"&gt;-&lt;/del&gt;
+    &lt;add place="overwritten" hand="#pbs"&gt;?&lt;/add&gt; oh no – ...
+  &lt;/s&gt;
+&lt;/text&gt;</pre>
+            </td>
+          </tr>
+          <tr>
+            <th class="tg-top">F</td>
+            <td class="tg-bottom"><pre>
+&lt;text&gt;
+  &lt;p&gt;
+    &lt;s&gt;so infinitely miserable, so destitute of every hope of consolation to live?&lt;/s&gt;
+    &lt;s&gt;Oh, no! ... &lt;/s&gt;
+  &lt;/p&gt;
+&lt;/text&gt;</pre>
+            </td>
+          </tr>
+        </table>
+        <hr/>
+
+        <h1>Visualization 1: ASCII table</h1>
+        <pre>
+┌───┬─────────────────────────┬─────────────────────────────────────────────────┬─────┬─┬───┬──┬───┬──┬────┐
+│[N]│                         │                                                 │[+] ?│ │   │  │   │  │    │
+│   │                         │so destitute of every hope of consolation to live│[-] -│ │oh │  │no │– │... │
+├───┼─────────────────────────┼─────────────────────────────────────────────────┼─────┼─┼───┼──┼───┼──┼────┤
+│[F]│so infinitely miserable, │so destitute of every hope of consolation to live│?    │ │Oh │, │no │! │... │
+└───┴─────────────────────────┴─────────────────────────────────────────────────┴─────┴─┴───┴──┴───┴──┴────┘
+        </pre>
+        <hr/>
+
+        <h1>Visualization 2: HTML table, with colors</h1>
+        <table class="tg">
+          <tr>
+            <th class="tg-top">N</td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span class="match">so destitute of every hope of consolation to live</span></td>
+            <td class="tg-bottom"><span class="match add">?</span><br/><span class="del">-</span></td>
+            <td class="tg-bottom"><span class="match">&nbsp;</span></td>
+            <td class="tg-bottom"><span class="match">oh</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span class="match">no</span></td>
+            <td class="tg-bottom">-</td>
+            <td class="tg-bottom"><span class="match">...</span></td>
+          </tr>
+          <tr>
+            <th class="tg-top">F</td>
+            <td class="tg-bottom">so infinitely miserable, </td>
+            <td class="tg-bottom"><span class="match">so destitute of every hope of consolation to live</span></td>
+            <td class="tg-bottom"><span class="match">?</span></td>
+            <td class="tg-bottom"><span class="match">&nbsp;</span></td>
+            <td class="tg-bottom"><span class="match">Oh</span></td>
+            <td class="tg-bottom">,</td>
+            <td class="tg-bottom"><span class="match">no</span></td>
+            <td class="tg-bottom">!</td>
+            <td class="tg-bottom"><span class="match">...</span></td>
+          </tr>
+        </table>
+        <hr/>
+
+        <h1>Visualization 3: HTML table, with markup tags</h1>
+        <table class="tg">
+          <tr>
+            <th class="tg-top">N</td>
+            <td class="tg-bottom tg-markup-match">&lt;text&gt;</td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom tg-markup">&lt;s&gt;</td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom">so destitute of every hope of consolation to live</td>
+            <td class="tg-bottom"><span class="add">?</span><br/><span class="del">-</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom">oh</td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom">no</td>
+            <td class="tg-bottom">-</td>
+            <td class="tg-bottom">...</td>
+            <td class="tg-bottom tg-markup">&lt;/s&gt;</td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom tg-markup-match">&lt;/text&gt;</td>
+          </tr>
+          <tr>
+            <th class="tg-top">F</td>
+            <td class="tg-bottom tg-markup-match">&lt;text&gt;</td>
+            <td class="tg-bottom tg-markup">&lt;p&gt;</td>
+            <td class="tg-bottom tg-markup">&lt;s&gt;</td>
+            <td class="tg-bottom">so infinitely miserable, </td>
+            <td class="tg-bottom">so destitute of every hope of consolation to live</td>
+            <td class="tg-bottom">?</td>
+            <td class="tg-bottom tg-markup">&lt;/s&gt;</td>
+            <td class="tg-bottom tg-markup">&lt;s&gt;</td>
+            <td class="tg-bottom">Oh</td>
+            <td class="tg-bottom">,</td>
+            <td class="tg-bottom">no</td>
+            <td class="tg-bottom">!</td>
+            <td class="tg-bottom">...</td>
+            <td class="tg-bottom tg-markup">&lt;/s&gt;</td>
+            <td class="tg-bottom tg-markup">&lt;/p&gt;</td>
+            <td class="tg-bottom tg-markup-match">&lt;/text&gt;</td>
+          </tr>
+        </table>
+        <hr/>
+
+        <h1>Visualization 4a: HTML table, with markup layers (mirrored)</h1>
+        <table class="tg">
+          <tr>
+            <th class="tg-top" rowspan="3">N</td>
+            <td class="tg-center tg-markup-match" colspan="8">text</td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup" colspan="8">s</td>
+          </tr>
+          <tr>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span >so destitute of every hope of consolation to live</span></td>
+            <td class="tg-bottom"><span class="add">?</span><br/><span class="del">-</span></td>
+            <td class="tg-bottom"><span >oh</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span >no</span></td>
+            <td class="tg-bottom">-</td>
+            <td class="tg-bottom"><span >...</span></td>
+          </tr>
+          <tr>
+            <th class="tg-top" rowspan="4">F</td>
+            <td class="tg-bottom">so infinitely miserable, </td>
+            <td class="tg-bottom"><span >so destitute of every hope of consolation to live</span></td>
+            <td class="tg-bottom"><span >?</span></td>
+            <td class="tg-bottom"><span >Oh</span></td>
+            <td class="tg-bottom">,</td>
+            <td class="tg-bottom"><span >no</span></td>
+            <td class="tg-bottom">!</td>
+            <td class="tg-bottom"><span >...</span></td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup" colspan="3">s</td>
+            <td class="tg-center tg-markup" colspan="5">s</td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup" colspan="8">p</td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup-match" colspan="8">text</td>
+          </tr>
+        </table>
+        <hr/>
+
+        <h1>Visualization 4c: HTML table, with markup layers (with add/del)</h1>
+        <table class="tg">
+          <tr>
+            <th class="tg-top" rowspan="4">N</td>
+            <td class="tg-center tg-markup-match" colspan="9">text</td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup" colspan="9">s</td>
+          </tr>
+          <tr>
+            <td colspan="2"></td>
+            <td class="tg-center tg-markup" colspan="1">del (rend="strikethrough")</td>
+            <td class="tg-center tg-markup" colspan="1">add (place="overwritten", hand="#pbs")</td>
+            <td colspan="5"></td>
+          </tr>
+          <tr>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span >so destitute of every hope of consolation to live</span></td>
+            <td class="tg-bottom"><span class="del">-</span></td>
+            <td class="tg-bottom"><span class="add">?</span></td>
+            <td class="tg-bottom"><span >oh</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span >no</span></td>
+            <td class="tg-bottom">-</td>
+            <td class="tg-bottom"><span >...</span></td>
+          </tr>
+          <tr>
+            <th class="tg-top" rowspan="4">F</td>
+            <td class="tg-bottom">so infinitely miserable, </td>
+            <td class="tg-bottom"><span >so destitute of every hope of consolation to live</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span >?</span></td>
+            <td class="tg-bottom"><span >Oh</span></td>
+            <td class="tg-bottom">,</td>
+            <td class="tg-bottom"><span >no</span></td>
+            <td class="tg-bottom">!</td>
+            <td class="tg-bottom"><span >...</span></td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup" colspan="4">s</td>
+            <td class="tg-center tg-markup" colspan="5">s</td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup" colspan="9">p</td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup-match" colspan="9">text</td>
+          </tr>
+        </table>
+        <hr/>
+
+        <h1>Visualization 4d: HTML table, with markup layers (with add/del, not seperated)</h1>
+        <table class="tg">
+          <tr>
+            <th class="tg-top" rowspan="3">N</td>
+            <td class="tg-center tg-markup-match" colspan="8">text</td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup" colspan="8">s</td>
+          </tr>
+          <tr>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span >so destitute of every hope of consolation to live</span></td>
+            <td><table class="tg">
+            	<tr><td class="tg-center tg-markup" colspan="1">add (place="overwritten", hand="#pbs")</td></tr>
+            	<tr><td class="tg-center tg-bottom"><span class="add">?</span></td></tr>
+            	<tr><td class="tg-center tg-markup" colspan="1">del (rend="strikethrough")</td></tr>
+            	<tr><td class="tg-center tg-bottom"><span class="del">-</span></td></tr>
+            </table></td>
+            <td class="tg-bottom"><span >oh</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span >no</span></td>
+            <td class="tg-bottom">-</td>
+            <td class="tg-bottom"><span >...</span></td>
+          </tr>
+          <tr>
+            <th class="tg-top" rowspan="4">F</td>
+            <td class="tg-bottom">so infinitely miserable, </td>
+            <td class="tg-bottom"><span >so destitute of every hope of consolation to live</span></td>
+            <td class="tg-bottom"><span >?</span></td>
+            <td class="tg-bottom"><span >Oh</span></td>
+            <td class="tg-bottom">,</td>
+            <td class="tg-bottom"><span >no</span></td>
+            <td class="tg-bottom">!</td>
+            <td class="tg-bottom"><span >...</span></td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup" colspan="4">s</td>
+            <td class="tg-center tg-markup" colspan="4">s</td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup" colspan="8">p</td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup-match" colspan="8">text</td>
+          </tr>
+        </table>
+        <hr/>
+
+        <h1>Visualization 4b: HTML table, with markup layers (deprecated)</h1>
+        <table class="tg">
+          <tr>
+            <th class="tg-top" rowspan="3">N</td>
+            <td class="tg-center tg-markup-match" colspan="8">text</td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup" colspan="8">s</td>
+          </tr>
+          <tr>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span >so destitute of every hope of consolation to live</span></td>
+            <td class="tg-bottom"><span class="add">?</span><br/><span class="del">-</span></td>
+            <td class="tg-bottom"><span >oh</span></td>
+            <td class="tg-bottom"></td>
+            <td class="tg-bottom"><span >no</span></td>
+            <td class="tg-bottom">-</td>
+            <td class="tg-bottom"><span >...</span></td>
+          </tr>
+
+          <tr>
+            <th class="tg-top" rowspan="4">F</td>
+            <td class="tg-center tg-markup-match" colspan="8">text</td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup" colspan="8">p</td>
+          </tr>
+          <tr>
+            <td class="tg-center tg-markup" colspan="3">s</td>
+            <td class="tg-center tg-markup" colspan="5">s</td>
+          </tr>
+          <tr>
+            <td class="tg-bottom">so infinitely miserable, </td>
+            <td class="tg-bottom"><span >so destitute of every hope of consolation to live</span></td>
+            <td class="tg-bottom"><span >?</span></td>
+            <td class="tg-bottom"><span >Oh</span></td>
+            <td class="tg-bottom">,</td>
+            <td class="tg-bottom"><span >no</span></td>
+            <td class="tg-bottom">!</td>
+            <td class="tg-bottom"><span >...</span></td>
+          </tr>
+        </table>
+        <hr/>
+    </body>
+</html>
