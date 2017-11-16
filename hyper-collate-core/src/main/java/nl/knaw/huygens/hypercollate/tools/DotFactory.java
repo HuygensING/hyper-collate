@@ -215,7 +215,8 @@ public class DotFactory {
   }
 
   private static String asLabel(String content) {
-    return content.replaceAll("\n", "&#x21A9;<br/>")//
+    return content.replaceAll("&", "&amp;")//
+        .replaceAll("\n", "&#x21A9;<br/>")//
         .replaceAll(" +", "&#9251;");
   }
 

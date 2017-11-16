@@ -1,5 +1,31 @@
 package nl.knaw.huygens.hypercollate.importer;
 
+import static java.util.stream.Collectors.joining;
+import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Attribute;
+import javax.xml.stream.events.Characters;
+import javax.xml.stream.events.EndElement;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
+
+import org.apache.commons.io.FileUtils;
+
 /*-
  * #%L
  * hyper-collate-core
@@ -21,23 +47,12 @@ package nl.knaw.huygens.hypercollate.importer;
  */
 
 import eu.interedition.collatex.simple.SimplePatternTokenizer;
-import nl.knaw.huygens.hypercollate.model.*;
-import org.apache.commons.io.FileUtils;
-
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.*;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.joining;
-import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
+import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
+import nl.knaw.huygens.hypercollate.model.Markup;
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+import nl.knaw.huygens.hypercollate.model.SimpleWitness;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
 public class XMLImporter {
 
@@ -225,6 +240,7 @@ public class XMLImporter {
     private final Function<String, String> normalizer;
     private final SimpleWitness witness;
     private String parentXPath;
+    Boolean afterDel = false;
 
     Context(VariantWitnessGraph graph, Function<String, String> normalizer, SimpleWitness witness) {
       this.graph = graph;
@@ -238,10 +254,18 @@ public class XMLImporter {
       openMarkup.push(markup);
       parentXPath = buildParentXPath();
       // TODO: fix for single <del> or <add>
-      if (isVariationStartingMarkup(markup)) {
+      if (isVariationStartingMarkup(markup)) { // del
         variationStartVertices.push(lastTokenVertex);
-      } else if (isVariationEndingMarkup(markup)) {
-        lastTokenVertex = variationStartVertices.pop();
+
+      } else if (isVariationEndingMarkup(markup)) { // add
+        if (afterDel) {
+          lastTokenVertex = variationStartVertices.pop();
+
+        } else { // add without immediately preceding del
+          unconnectedVertices.push(lastTokenVertex); // add link from verted preceding the <add> to vertex following </add>
+
+        }
+        afterDel = false;
       }
     }
 
@@ -268,12 +292,18 @@ public class XMLImporter {
       }
       if (isVariationStartingMarkup(markup)) {
         unconnectedVertices.push(lastTokenVertex);
+        afterDel = true;
+
       } else if (isVariationEndingMarkup(markup)) {
         variationEndVertices.push(lastTokenVertex);
       }
     }
 
     void addNewToken(String content) {
+      if (afterDel) { // del without add
+        unconnectedVertices.push(lastTokenVertex); // add link from verted preceding the <del> to vertex following </del>
+      }
+      afterDel = false;
       MarkedUpToken token = new MarkedUpToken()//
           .setContent(content)//
           .setWitness(witness)//
