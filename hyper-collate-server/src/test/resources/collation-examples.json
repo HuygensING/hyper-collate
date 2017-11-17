@@ -20,7 +20,7 @@
   "witnesses": [
     {
       "sigil": "H",
-      "xml": "<text><div n=\"2\">...<s> ... or the<del>hum far away in the fields of some</del>some hum rising<del>far away in the</del> in <del>the fields</del>; <del>whether</del>some throb;<del>some pulse</del>. &amp; then gently<del>mak</del> muffling &amp; folding the house again.</s>…</div></text>"
+      "xml": "<text><div n=\"2\">...<s> ... or the <del>hum far away in the fields of some</del> some hum rising <del>far away in the</del> in <del>the fields</del>; <del>whether</del>some throb;<del>some pulse</del>. &amp; then gently<del>mak</del> muffling &amp; folding the house again.</s>…</div></text>"
     },
     {
       "sigil": "T",
