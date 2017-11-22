@@ -112,3 +112,6 @@ var/
 venv.bak/
 venv/
 wheels/
+assertions-generation-report.txt
+*/src/test/generated-assertions
+

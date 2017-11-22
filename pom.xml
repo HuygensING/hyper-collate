@@ -47,6 +47,7 @@
         <groovy.version>1.0-jsr-05-1</groovy.version>
 
         <assertj.version>3.8.0</assertj.version>
+        <assertj-assertions-generator.version>2.1.0</assertj-assertions-generator.version>
         <junit.version>4.12</junit.version>
         <junitparams.version>1.0.5</junitparams.version>
 
@@ -259,7 +260,6 @@
                     <canUpdateDescription>true</canUpdateDescription>
                 </configuration>
             </plugin>
-
         </plugins>
 
         <extensions>

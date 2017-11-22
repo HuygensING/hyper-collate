@@ -21,6 +21,7 @@ package nl.knaw.huygens.hypercollate.collater;
  */
 
 import static java.util.stream.Collectors.toList;
+import static nl.knaw.huygens.hypercollate.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Iterator;
@@ -61,26 +62,26 @@ public class VariantWitnessGraphTraversalTest extends HyperCollateTest {
     tokenVertex = iterator.next();
     assertThat(tokenVertex).isInstanceOf(SimpleTokenVertex.class);
     MarkedUpToken markedUpToken = (MarkedUpToken) tokenVertex.getToken();
-    assertThat(markedUpToken.getContent()).isEqualTo("Eeny, meeny, miny, ");
+    assertThat(markedUpToken).hasContent("Eeny, meeny, miny, ");
 
     tokenVertex = iterator.next();
     assertThat(tokenVertex).isInstanceOf(SimpleTokenVertex.class);
     markedUpToken = (MarkedUpToken) tokenVertex.getToken();
-    assertThat(markedUpToken.getContent()).isEqualTo("curly");
+    assertThat(markedUpToken).hasContent("curly");
     List<String> markupTagListForTokenVertex = markupTags(witnessGraph, tokenVertex);
     assertThat(markupTagListForTokenVertex).contains("del");
 
     tokenVertex = iterator.next();
     assertThat(tokenVertex).isInstanceOf(SimpleTokenVertex.class);
     markedUpToken = (MarkedUpToken) tokenVertex.getToken();
-    assertThat(markedUpToken.getContent()).isEqualTo("moe");
+    assertThat(markedUpToken).hasContent("moe");
     markupTagListForTokenVertex = markupTags(witnessGraph, tokenVertex);
     assertThat(markupTagListForTokenVertex).contains("add");
 
     tokenVertex = iterator.next();
     assertThat(tokenVertex).isInstanceOf(SimpleTokenVertex.class);
     markedUpToken = (MarkedUpToken) tokenVertex.getToken();
-    assertThat(markedUpToken.getContent()).isEqualTo("!");
+    assertThat(markedUpToken).hasContent("!");
 
     tokenVertex = iterator.next();
     assertThat(tokenVertex).isInstanceOf(EndTokenVertex.class);
