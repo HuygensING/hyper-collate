@@ -9,8 +9,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -241,6 +243,8 @@ public class XMLImporter {
     private final SimpleWitness witness;
     private String parentXPath;
     Boolean afterDel = false;
+    Boolean afterApp = false;
+    private final List<TokenVertex> unconnectedRdgVertices = new ArrayList<>();
 
     Context(VariantWitnessGraph graph, Function<String, String> normalizer, SimpleWitness witness) {
       this.graph = graph;
@@ -265,7 +269,22 @@ public class XMLImporter {
 
         }
         afterDel = false;
+
+      } else if (isApp(markup)) { // app
+        variationStartVertices.push(lastTokenVertex);
+
+      } else if (isRdg(markup)) { // rdg
+        lastTokenVertex = variationStartVertices.peek();
+
       }
+    }
+
+    private boolean isApp(Markup markup) {
+      return "app".equals(markup.getTagname());
+    }
+
+    private boolean isRdg(Markup markup) {
+      return "rdg".equals(markup.getTagname());
     }
 
     private boolean isVariationStartingMarkup(Markup markup) {
@@ -295,6 +314,14 @@ public class XMLImporter {
 
       } else if (isVariationEndingMarkup(markup)) {
         variationEndVertices.push(lastTokenVertex);
+
+      } else if (isApp(markup)) {
+        variationStartVertices.pop();
+        afterApp = true;
+
+      } else if (isRdg(markup)) {
+        unconnectedRdgVertices.add(lastTokenVertex);
+
       }
     }
 
@@ -309,11 +336,19 @@ public class XMLImporter {
       graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex);
 
       if (afterDel) { // del without add
-        // add link from verted preceding the <del> to vertex following </del>
+        // add link from vertex preceding the <del> to vertex following </del>
         graph.addOutgoingTokenVertexToTokenVertex(variationStartVertices.pop(), tokenVertex);
         unconnectedVertices.pop();
       }
       afterDel = false;
+
+      if (afterApp) {
+        unconnectedRdgVertices.stream()//
+            .filter(v -> !v.equals(lastTokenVertex))//
+            .forEach(v -> graph.addOutgoingTokenVertexToTokenVertex(v, tokenVertex));
+        unconnectedRdgVertices.clear();
+      }
+      afterApp = false;
 
       this.openMarkup.descendingIterator()//
           .forEachRemaining(markup -> graph.addMarkupToTokenVertex(tokenVertex, markup));
