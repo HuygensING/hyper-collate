@@ -508,7 +508,7 @@ public class HyperCollaterTest extends HyperCollateTest {
 
       String dot = CollationGraphVisualizer.toDot(collation);
       // System.out.println(dot);
-      writeGraph(dot);
+      writeGraph(dot, "graph");
       assertThat(dot).isEqualTo(expected);
 
       String table = CollationGraphVisualizer.toTableASCII(collation);

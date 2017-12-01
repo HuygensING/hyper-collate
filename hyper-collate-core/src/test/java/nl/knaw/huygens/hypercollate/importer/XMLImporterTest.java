@@ -219,7 +219,7 @@ public class XMLImporterTest extends HyperCollateTest {
         "begin->F_000\n" + //
         "}";
 
-    verifyDotExport(wg0, expectedDot);
+    verifyDotExport(wg0, expectedDot, "witness-f-order-app-rdg-bordalejo");
   }
 
   @Test
@@ -248,7 +248,7 @@ public class XMLImporterTest extends HyperCollateTest {
         "begin->F_000\n" + //
         "}";
 
-    verifyDotExport(wg0, expectedDot);
+    verifyDotExport(wg0, expectedDot, "witness-f-order-app-rdg-vincent");
   }
 
   @Test
@@ -291,7 +291,7 @@ public class XMLImporterTest extends HyperCollateTest {
         "begin->Q_000\n" + //
         "}";
 
-    verifyDotExport(wg0, expectedDot);
+    verifyDotExport(wg0, expectedDot, "witness-q-order-app-rdg-bordalejo");
   }
 
   @Test
@@ -341,7 +341,7 @@ public class XMLImporterTest extends HyperCollateTest {
         "begin->Q_000\n" + //
         "}";
 
-    verifyDotExport(wg0, expectedDot);
+    verifyDotExport(wg0, expectedDot, "witness-q-order-app-rdg-vincent");
   }
 
   @Test
@@ -379,7 +379,7 @@ public class XMLImporterTest extends HyperCollateTest {
         "begin->F_000\n" + //
         "}";
 
-    verifyDotExport(wg0, expectedDot);
+    verifyDotExport(wg0, expectedDot, "witness-f-hierarchy-app-rdg-bordalejo");
   }
 
   @Test
@@ -417,7 +417,7 @@ public class XMLImporterTest extends HyperCollateTest {
         "begin->F_000\n" + //
         "}";
 
-    verifyDotExport(wg0, expectedDot);
+    verifyDotExport(wg0, expectedDot, "witness-f-hierarchy-app-rdg-vincent");
   }
 
   @Test
@@ -456,7 +456,7 @@ public class XMLImporterTest extends HyperCollateTest {
         "begin->F_000\n" + //
         "}";
 
-    verifyDotExport(wg0, expectedDot);
+    verifyDotExport(wg0, expectedDot, "witness-q-hierarchy-app-rdg-bordalejo");
   }
 
   @Test
@@ -495,7 +495,7 @@ public class XMLImporterTest extends HyperCollateTest {
         "begin->F_000\n" + //
         "}";
 
-    verifyDotExport(wg0, expectedDot);
+    verifyDotExport(wg0, expectedDot, "witness-q-hierarchy-app-rdg-vincent");
   }
 
 }

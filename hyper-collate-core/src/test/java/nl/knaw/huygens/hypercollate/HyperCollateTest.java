@@ -45,19 +45,23 @@ import nl.knaw.huygens.hypercollate.tools.TokenMerger;
 public class HyperCollateTest {
 
   protected void verifyDotExport(VariantWitnessGraph variantWitnessGraph, String expectedDot) {
+    verifyDotExport(variantWitnessGraph, expectedDot, "graph");
+  }
+
+  protected void verifyDotExport(VariantWitnessGraph variantWitnessGraph, String expectedDot, String name) {
     VariantWitnessGraph wg = TokenMerger.merge(variantWitnessGraph);
     // VariantWitnessGraph wg = variantWitnessGraph;
 
     String dot = DotFactory.fromVariantWitnessGraph(wg);
     // System.out.println(dot);
-    writeGraph(dot);
+    writeGraph(dot, name);
     assertThat(dot).isEqualTo(expectedDot);
     // showGraph(dot);
   }
 
-  protected void writeGraph(String dot) {
+  protected void writeGraph(String dot, String name) {
     try {
-      FileUtils.write(new File("out/graph.dot"), dot, StandardCharsets.UTF_8);
+      FileUtils.write(new File("out/" + name + ".dot"), dot, StandardCharsets.UTF_8);
     } catch (IOException e) {
       e.printStackTrace();
     }
