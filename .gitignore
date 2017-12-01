@@ -112,3 +112,5 @@ var/
 venv.bak/
 venv/
 wheels/
+assertions-generation-report.txt
+hyper-collate-core/src/test/generated-assertions/

@@ -9,8 +9,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -240,23 +242,36 @@ public class XMLImporter {
     private final Function<String, String> normalizer;
     private final SimpleWitness witness;
     private String parentXPath;
-    Boolean afterDel = false;
+    private Boolean afterDel = false;
+
+    private final Deque<Boolean> inAppStack = new LinkedList<>();
+    private final Deque<Boolean> ignoreRdgStack = new LinkedList<>();
+    private final Deque<Boolean> afterAppStack = new LinkedList<>();
+    private final Deque<List<TokenVertex>> unconnectedRdgVerticesStack = new LinkedList<>();
 
     Context(VariantWitnessGraph graph, Function<String, String> normalizer, SimpleWitness witness) {
       this.graph = graph;
       this.normalizer = normalizer;
       this.lastTokenVertex = graph.getStartTokenVertex();
       this.witness = witness;
+      afterAppStack.push(false);
+      ignoreRdgStack.push(false);
+      inAppStack.push(false);
+      unconnectedRdgVerticesStack.push(new ArrayList<>());
     }
 
     void openMarkup(Markup markup) {
+      if (ignoreRdgStack.peek()) {
+        return;
+      }
+
       graph.addMarkup(markup);
       openMarkup.push(markup);
       parentXPath = buildParentXPath();
-      if (isVariationStartingMarkup(markup)) { // del
+      if (!inAppStack.peek() && isVariationStartingMarkup(markup)) { // del
         variationStartVertices.push(lastTokenVertex);
 
-      } else if (isVariationEndingMarkup(markup)) { // add
+      } else if (!inAppStack.peek() && isVariationEndingMarkup(markup)) { // add
         if (afterDel) {
           lastTokenVertex = variationStartVertices.pop();
 
@@ -265,7 +280,29 @@ public class XMLImporter {
 
         }
         afterDel = false;
+
+      } else if (isApp(markup)) { // app
+        variationStartVertices.push(lastTokenVertex);
+        inAppStack.push(true);
+        unconnectedRdgVerticesStack.push(new ArrayList<>());
+
+      } else if (isRdg(markup)) { // rdg
+        if (isLitRdg(markup)) {
+          ignoreRdgStack.push(true);
+
+        } else {
+          lastTokenVertex = variationStartVertices.peek();
+        }
+
       }
+    }
+
+    private boolean isApp(Markup markup) {
+      return "app".equals(markup.getTagname());
+    }
+
+    private boolean isRdg(Markup markup) {
+      return "rdg".equals(markup.getTagname());
     }
 
     private boolean isVariationStartingMarkup(Markup markup) {
@@ -277,6 +314,13 @@ public class XMLImporter {
     }
 
     void closeMarkup(Markup markup) {
+      if (ignoreRdgStack.peek()) {
+        if (isRdg(markup) && isLitRdg(openMarkup.pop())) {
+          ignoreRdgStack.pop();
+        }
+        return;
+      }
+
       Markup firstToClose = openMarkup.peek();
       if (graph.getTokenVertexListForMarkup(firstToClose).isEmpty()) {
         // add milestone
@@ -289,16 +333,33 @@ public class XMLImporter {
       if (!expectedTag.equals(closingTag)) {
         throw new RuntimeException("XML error: expected </" + expectedTag + ">, got </" + closingTag + ">");
       }
-      if (isVariationStartingMarkup(markup)) {
+      if (!inAppStack.peek() && isVariationStartingMarkup(markup)) {
         unconnectedVertices.push(lastTokenVertex);
         afterDel = true;
 
-      } else if (isVariationEndingMarkup(markup)) {
+      } else if (!inAppStack.peek() && isVariationEndingMarkup(markup)) {
         variationEndVertices.push(lastTokenVertex);
+
+      } else if (isApp(markup)) {
+        variationStartVertices.pop();
+        inAppStack.pop();
+        afterAppStack.push(true);
+
+      } else if (isRdg(markup)) {
+        unconnectedRdgVerticesStack.peek().add(lastTokenVertex);
+
       }
     }
 
+    private boolean isLitRdg(Markup markup) {
+      return "lit".equals(markup.getAttributeValue("type").orElse(""));
+    }
+
     void addNewToken(String content) {
+      if (ignoreRdgStack.peek()) {
+        return;
+      }
+
       MarkedUpToken token = new MarkedUpToken()//
           .setContent(content)//
           .setWitness(witness)//
@@ -309,11 +370,18 @@ public class XMLImporter {
       graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex);
 
       if (afterDel) { // del without add
-        // add link from verted preceding the <del> to vertex following </del>
+        // add link from vertex preceding the <del> to vertex following </del>
         graph.addOutgoingTokenVertexToTokenVertex(variationStartVertices.pop(), tokenVertex);
         unconnectedVertices.pop();
+        afterDel = false;
       }
-      afterDel = false;
+
+      while (afterAppStack.peek()) {
+        unconnectedRdgVerticesStack.pop().stream()//
+            .filter(v -> !v.equals(lastTokenVertex))//
+            .forEach(v -> graph.addOutgoingTokenVertexToTokenVertex(v, tokenVertex));
+        afterAppStack.pop();
+      }
 
       this.openMarkup.descendingIterator()//
           .forEachRemaining(markup -> graph.addMarkupToTokenVertex(tokenVertex, markup));
@@ -324,9 +392,11 @@ public class XMLImporter {
     private void checkUnconnectedVertices(SimpleTokenVertex tokenVertex) {
       if (!variationEndVertices.isEmpty() && lastTokenVertex.equals(variationEndVertices.peek())) {
         variationEndVertices.pop();
-        TokenVertex unconnectedVertex = unconnectedVertices.pop();
-        graph.addOutgoingTokenVertexToTokenVertex(unconnectedVertex, tokenVertex);
-        checkUnconnectedVertices(tokenVertex);
+        if (!unconnectedVertices.isEmpty()) {
+          TokenVertex unconnectedVertex = unconnectedVertices.pop();
+          graph.addOutgoingTokenVertexToTokenVertex(unconnectedVertex, tokenVertex);
+          checkUnconnectedVertices(tokenVertex);
+        }
       }
     }
 
