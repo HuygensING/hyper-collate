@@ -242,31 +242,41 @@ public class XMLImporter {
     private final Function<String, String> normalizer;
     private final SimpleWitness witness;
     private String parentXPath;
-    Boolean afterDel = false;
-    Boolean afterApp = false;
-    private final List<TokenVertex> unconnectedRdgVertices = new ArrayList<>();
-    private boolean ignoreRdg = false;
-    private boolean inApp = false;
+    private Boolean afterDel = false;
+
+    private final Deque<Boolean> inAppStack = new LinkedList<>();
+    private final Deque<Boolean> ignoreRdgStack = new LinkedList<>();
+    private final Deque<Boolean> afterAppStack = new LinkedList<>();
+    private final Deque<List<TokenVertex>> unconnectedRdgVerticesStack = new LinkedList<>();
+
+    // private final List<TokenVertex> unconnectedRdgVertices = new ArrayList<>();
+    // private boolean afterApp = false;
+    // private boolean ignoreRdg = false;
+    // private boolean inApp = false;
 
     Context(VariantWitnessGraph graph, Function<String, String> normalizer, SimpleWitness witness) {
       this.graph = graph;
       this.normalizer = normalizer;
       this.lastTokenVertex = graph.getStartTokenVertex();
       this.witness = witness;
+      afterAppStack.push(false);
+      ignoreRdgStack.push(false);
+      inAppStack.push(false);
+      unconnectedRdgVerticesStack.push(new ArrayList<>());
     }
 
     void openMarkup(Markup markup) {
-      if (ignoreRdg) {
+      if (ignoreRdgStack.peek()) {
         return;
       }
 
       graph.addMarkup(markup);
       openMarkup.push(markup);
       parentXPath = buildParentXPath();
-      if (!inApp && isVariationStartingMarkup(markup)) { // del
+      if (!inAppStack.peek() && isVariationStartingMarkup(markup)) { // del
         variationStartVertices.push(lastTokenVertex);
 
-      } else if (!inApp && isVariationEndingMarkup(markup)) { // add
+      } else if (!inAppStack.peek() && isVariationEndingMarkup(markup)) { // add
         if (afterDel) {
           lastTokenVertex = variationStartVertices.pop();
 
@@ -278,11 +288,12 @@ public class XMLImporter {
 
       } else if (isApp(markup)) { // app
         variationStartVertices.push(lastTokenVertex);
-        inApp = true;
+        inAppStack.push(true);
+        unconnectedRdgVerticesStack.push(new ArrayList<>());
 
       } else if (isRdg(markup)) { // rdg
         if (isLitRdg(markup)) {
-          ignoreRdg = true;
+          ignoreRdgStack.push(true);
 
         } else {
           lastTokenVertex = variationStartVertices.peek();
@@ -308,9 +319,9 @@ public class XMLImporter {
     }
 
     void closeMarkup(Markup markup) {
-      if (ignoreRdg) {
+      if (ignoreRdgStack.peek()) {
         if (isRdg(markup) && isLitRdg(openMarkup.pop())) {
-          ignoreRdg = false;
+          ignoreRdgStack.pop();
         }
         return;
       }
@@ -327,20 +338,20 @@ public class XMLImporter {
       if (!expectedTag.equals(closingTag)) {
         throw new RuntimeException("XML error: expected </" + expectedTag + ">, got </" + closingTag + ">");
       }
-      if (!inApp && isVariationStartingMarkup(markup)) {
+      if (!inAppStack.peek() && isVariationStartingMarkup(markup)) {
         unconnectedVertices.push(lastTokenVertex);
         afterDel = true;
 
-      } else if (!inApp && isVariationEndingMarkup(markup)) {
+      } else if (!inAppStack.peek() && isVariationEndingMarkup(markup)) {
         variationEndVertices.push(lastTokenVertex);
 
       } else if (isApp(markup)) {
         variationStartVertices.pop();
-        inApp = false;
-        afterApp = true;
+        inAppStack.pop();
+        afterAppStack.push(true);
 
       } else if (isRdg(markup)) {
-        unconnectedRdgVertices.add(lastTokenVertex);
+        unconnectedRdgVerticesStack.peek().add(lastTokenVertex);
 
       }
     }
@@ -350,7 +361,7 @@ public class XMLImporter {
     }
 
     void addNewToken(String content) {
-      if (ignoreRdg) {
+      if (ignoreRdgStack.peek()) {
         return;
       }
 
@@ -367,16 +378,15 @@ public class XMLImporter {
         // add link from vertex preceding the <del> to vertex following </del>
         graph.addOutgoingTokenVertexToTokenVertex(variationStartVertices.pop(), tokenVertex);
         unconnectedVertices.pop();
+        afterDel = false;
       }
-      afterDel = false;
 
-      if (afterApp) {
-        unconnectedRdgVertices.stream()//
+      while (afterAppStack.peek()) {
+        unconnectedRdgVerticesStack.pop().stream()//
             .filter(v -> !v.equals(lastTokenVertex))//
             .forEach(v -> graph.addOutgoingTokenVertexToTokenVertex(v, tokenVertex));
-        unconnectedRdgVertices.clear();
+        afterAppStack.pop();
       }
-      afterApp = false;
 
       this.openMarkup.descendingIterator()//
           .forEachRemaining(markup -> graph.addMarkupToTokenVertex(tokenVertex, markup));

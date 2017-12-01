@@ -195,7 +195,7 @@ public class XMLImporterTest extends HyperCollateTest {
   }
 
   @Test
-  public void testShiriarFAppRdgBordalejo() {
+  public void testWitnessFOrderAppRdgBordalejo() {
     XMLImporter importer = new XMLImporter();
     VariantWitnessGraph wg0 = importer.importXML("F", "<text>\n" + //
         "    <s>De vent was woedend en maakte \n" + //
@@ -223,7 +223,7 @@ public class XMLImporterTest extends HyperCollateTest {
   }
 
   @Test
-  public void testShiriarFAppRdgVincent() {
+  public void testWitnessFOrderAppRdgVincent() {
     XMLImporter importer = new XMLImporter();
     VariantWitnessGraph wg0 = importer.importXML("F", "<text>\n" + //
         "    <s>De vent was woedend en maakte \n" + //
@@ -252,7 +252,7 @@ public class XMLImporterTest extends HyperCollateTest {
   }
 
   @Test
-  public void testShiriarQAppRdgBordalejo() {
+  public void testWitnessQOrderAppRdgBordalejo() {
     XMLImporter importer = new XMLImporter();
     VariantWitnessGraph wg0 = importer.importXML("Q", "<text>\n" + //
         "    <s>De vent was woedend en maakte \n" + //
