@@ -249,11 +249,6 @@ public class XMLImporter {
     private final Deque<Boolean> afterAppStack = new LinkedList<>();
     private final Deque<List<TokenVertex>> unconnectedRdgVerticesStack = new LinkedList<>();
 
-    // private final List<TokenVertex> unconnectedRdgVertices = new ArrayList<>();
-    // private boolean afterApp = false;
-    // private boolean ignoreRdg = false;
-    // private boolean inApp = false;
-
     Context(VariantWitnessGraph graph, Function<String, String> normalizer, SimpleWitness witness) {
       this.graph = graph;
       this.normalizer = normalizer;
