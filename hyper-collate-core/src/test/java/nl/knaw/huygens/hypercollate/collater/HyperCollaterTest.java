@@ -46,6 +46,29 @@ public class HyperCollaterTest extends HyperCollateTest {
   private final HyperCollater[] hyperCollaters = new HyperCollater[] { /* hyperCollater1, */hyperCollater2 };
 
   @Test
+  public void testHierarchyWith3Witnesses() {
+    XMLImporter importer = new XMLImporter();
+    VariantWitnessGraph wF = importer.importXML("F", "<text>\n" + //
+        "    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,\n" + //
+        "        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>\n" + //
+        "</text>");
+    VariantWitnessGraph wQ = importer.importXML("Q", "<text>\n" + //
+        "    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !\n" + //
+        "        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>\n" + //
+        "</text>");
+    VariantWitnessGraph wZ = importer.importXML("Q", "<text>\n" + //
+        "    <s>Hoe zoet moet nochtans zijn dit trachten naar een vrouw !\n" + //
+        "        Die dagen van ongewisheid vóór de liefelijke toestemming.</s>\n" + //
+        "</text>");
+
+    String expected = "digraph CollationGraph{\n" + //
+        "labelloc=b\n" + //
+        "}";
+
+    testHyperCollation3(wF, wQ, wZ, expected);
+  }
+
+  @Test
   public void testHierarchy() {
     XMLImporter importer = new XMLImporter();
     VariantWitnessGraph wF = importer.importXML("F", "<text>\n" + //
@@ -378,119 +401,119 @@ public class HyperCollaterTest extends HyperCollateTest {
     testHyperCollation(wF, wQ, expected);
   }
 
-  // @Test
-  // public void testMaryShellyGodwinFrankensteinFragment() {
-  // XMLImporter importer = new XMLImporter();
-  // String xmlN = "<text>\n" + //
-  // "<s>so destitute of every hope of consolation to live\n" + //
-  // "<del rend=\"strikethrough\">-</del>\n" + //
-  // "<add place=\"overwritten\" hand=\"#pbs\">?</add> oh no – ...\n" + //
-  // "</s>\n" + //
-  // "</text>";
-  // VariantWitnessGraph wF = importer.importXML("N", xmlN);
-  // LOG.info("N: {}", xmlN);
-  // String xmlF = "<text>\n" + //
-  // "<p>\n" + //
-  // "<s>so infinitely miserable, so destitute of every hope of consolation to live?</s> <s>Oh, no! ... </s>\n" + //
-  // "</p></text>";
-  // LOG.info("F: {}", xmlF);
-  // VariantWitnessGraph wQ = importer.importXML("F", xmlF);//
-  // String expected = "digraph CollationGraph{\n" + //
-  // "labelloc=b\n" + //
-  // "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + //
-  // "t001 [label=\"\";shape=doublecircle,rank=middle]\n" + //
-  // "t002 [label=<F,N: so&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
-  // "t003 [label=<F,N: ?<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s/add</i><br/>>]\n" + //
-  // "t004 [label=<F,N: &#9251;<br/>F: <i>/text/p</i><br/>N: <i>/text/s</i><br/>>]\n" + //
-  // "t005 [label=<F: Oh<br/>N: oh&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
-  // "t006 [label=<F: ,&#9251;<br/>F: <i>/text/p/s</i>>]\n" + //
-  // "t007 [label=<F: no<br/>N: no&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
-  // "t008 [label=<F: !&#9251;<br/>F: <i>/text/p/s</i>>]\n" + //
-  // "t009 [label=<F: ...&#9251;<br/>N: ...&#x21A9;<br/><br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
-  // "t010 [label=<F: infinitely&#9251;miserable,&#9251;so&#9251;<br/>F: <i>/text/p/s</i>>]\n" + //
-  // "t011 [label=<F,N: destitute&#9251;of&#9251;every&#9251;hope&#9251;of&#9251;consolation&#9251;to&#9251;live<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
-  // "t012 [label=<N: –&#9251;<br/>N: <i>/text/s</i>>]\n" + //
-  // "t013 [label=<N: -<br/>N: <i>/text/s/del</i>>]\n" + //
-  // "t000->t002[label=\"F,N\"]\n" + //
-  // "t002->t010[label=\"F\"]\n" + //
-  // "t002->t011[label=\"N\"]\n" + //
-  // "t003->t004[label=\"F,N\"]\n" + //
-  // "t004->t005[label=\"F,N\"]\n" + //
-  // "t005->t006[label=\"F\"]\n" + //
-  // "t005->t007[label=\"N\"]\n" + //
-  // "t006->t007[label=\"F\"]\n" + //
-  // "t007->t008[label=\"F\"]\n" + //
-  // "t007->t012[label=\"N\"]\n" + //
-  // "t008->t009[label=\"F\"]\n" + //
-  // "t009->t001[label=\"F,N\"]\n" + //
-  // "t010->t011[label=\"F\"]\n" + //
-  // "t011->t003[label=\"F,N\"]\n" + //
-  // "t011->t013[label=\"N\"]\n" + //
-  // "t012->t009[label=\"N\"]\n" + //
-  // "t013->t004[label=\"N\"]\n" + //
-  // "}";
-  //
-  // testHyperCollation(wF, wQ, expected);
-  // }
-  //
-  // @Test
-  // public void testMaryShellyGodwinFrankensteinFragment2() {
-  // XMLImporter importer = new XMLImporter();
-  // String xmlN = "<text>\n" + //
-  // "<s>Frankenstein discovered that I detailed or made notes concerning his history he asked to see them &amp; himself corrected\n" + //
-  // "<add place=\"superlinear\">and augmented</add>\n" + //
-  // "them in many places</s>\n" + //
-  // "</text>";
-  // VariantWitnessGraph wF = importer.importXML("N", xmlN);
-  // LOG.info("N: {}", xmlN);
-  // String xmlF = "<text>\n" + //
-  // "<s>Frankenstein discovered\n" + //
-  // "<del rend=\"strikethrough\">or</del>\n" + //
-  // "<add place=\"superlinear\">that I</add> made notes concerning his history; he asked to see them and then himself corrected and augmented them in many places\n" + //
-  // "</s>\n" + //
-  // "</text>";
-  // LOG.info("F: {}", xmlF);
-  // VariantWitnessGraph wQ = importer.importXML("F", xmlF);//
-  // String expected = "digraph CollationGraph{\n" + //
-  // "labelloc=b\n" + //
-  // "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + //
-  // "t001 [label=\"\";shape=doublecircle,rank=middle]\n" + //
-  // "t002 [label=<F: Frankenstein&#9251;discovered<br/>N: Frankenstein&#9251;discovered&#9251;<br/>F,N: <i>/text/s</i>>]\n" + //
-  // "t003 [label=<F: ;&#9251;<br/>F: <i>/text/s</i>>]\n" + //
-  // "t004 [label=<F,N: he&#9251;asked&#9251;to&#9251;see&#9251;them&#9251;<br/>F,N: <i>/text/s</i>>]\n" + //
-  // "t005 [label=<F: and&#9251;then&#9251;<br/>F: <i>/text/s</i>>]\n" + //
-  // "t006 [label=<F: himself&#9251;corrected&#9251;<br/>N: himself&#9251;corrected&#x21A9;<br/><br/>F,N: <i>/text/s</i>>]\n" + //
-  // "t007 [label=<F: and&#9251;augmented&#9251;<br/>N: and&#9251;augmented<br/>F: <i>/text/s</i><br/>N: <i>/text/s/add</i><br/>>]\n" + //
-  // "t008 [label=<F: them&#9251;in&#9251;many&#9251;places&#x21A9;<br/><br/>N: them&#9251;in&#9251;many&#9251;places<br/>F,N: <i>/text/s</i>>]\n" + //
-  // "t009 [label=<F: or<br/>F: <i>/text/s/del</i>>]\n" + //
-  // "t010 [label=<F: that&#9251;I<br/>N: that&#9251;I&#9251;<br/>F: <i>/text/s/add</i><br/>N: <i>/text/s</i><br/>>]\n" + //
-  // "t011 [label=<F: &#9251;<br/>F: <i>/text/s</i>>]\n" + //
-  // "t012 [label=<F: made&#9251;notes&#9251;concerning&#9251;his&#9251;history<br/>N: made&#9251;notes&#9251;concerning&#9251;his&#9251;history&#9251;<br/>F,N: <i>/text/s</i>>]\n" + //
-  // "t013 [label=<N: &amp;&#9251;<br/>N: <i>/text/s</i>>]\n" + //
-  // "t014 [label=<N: detailed&#9251;or&#9251;<br/>N: <i>/text/s</i>>]\n" + //
-  // "t000->t002[label=\"F,N\"]\n" + //
-  // "t002->t009[label=\"F\"]\n" + //
-  // "t002->t010[label=\"F,N\"]\n" + //
-  // "t003->t004[label=\"F\"]\n" + //
-  // "t004->t005[label=\"F\"]\n" + //
-  // "t004->t013[label=\"N\"]\n" + //
-  // "t005->t006[label=\"F\"]\n" + //
-  // "t006->t007[label=\"F,N\"]\n" + //
-  // "t006->t008[label=\"N\"]\n" + //
-  // "t007->t008[label=\"F,N\"]\n" + //
-  // "t008->t001[label=\"F,N\"]\n" + //
-  // "t009->t011[label=\"F\"]\n" + //
-  // "t010->t011[label=\"F\"]\n" + //
-  // "t010->t014[label=\"N\"]\n" + //
-  // "t011->t012[label=\"F\"]\n" + //
-  // "t012->t003[label=\"F\"]\n" + //
-  // "t012->t004[label=\"N\"]\n" + //
-  // "t013->t006[label=\"N\"]\n" + //
-  // "t014->t012[label=\"N\"]\n" + //
-  // "}";
-  //
-  // testHyperCollation(wF, wQ, expected);
-  // }
+  @Test
+  public void testMaryShellyGodwinFrankensteinFragment() {
+    XMLImporter importer = new XMLImporter();
+    String xmlN = "<text>\n" + //
+        "<s>so destitute of every hope of consolation to live\n" + //
+        "<del rend=\"strikethrough\">-</del>\n" + //
+        "<add place=\"overwritten\" hand=\"#pbs\">?</add> oh no – ...\n" + //
+        "</s>\n" + //
+        "</text>";
+    VariantWitnessGraph wF = importer.importXML("N", xmlN);
+    LOG.info("N: {}", xmlN);
+    String xmlF = "<text>\n" + //
+        "<p>\n" + //
+        "<s>so infinitely miserable, so destitute of every hope of consolation to live?</s> <s>Oh, no! ... </s>\n" + //
+        "</p></text>";
+    LOG.info("F: {}", xmlF);
+    VariantWitnessGraph wQ = importer.importXML("F", xmlF);//
+    String expected = "digraph CollationGraph{\n" + //
+        "labelloc=b\n" + //
+        "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "t001 [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "t002 [label=<F,N: so&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
+        "t003 [label=<F,N: ?<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s/add</i><br/>>]\n" + //
+        "t004 [label=<F,N: &#9251;<br/>F: <i>/text/p</i><br/>N: <i>/text/s</i><br/>>]\n" + //
+        "t005 [label=<F: Oh<br/>N: oh&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
+        "t006 [label=<F: ,&#9251;<br/>F: <i>/text/p/s</i>>]\n" + //
+        "t007 [label=<F: no<br/>N: no&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
+        "t008 [label=<F: !&#9251;<br/>F: <i>/text/p/s</i>>]\n" + //
+        "t009 [label=<F: ...&#9251;<br/>N: ...&#x21A9;<br/><br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
+        "t010 [label=<F: infinitely&#9251;miserable,&#9251;so&#9251;<br/>F: <i>/text/p/s</i>>]\n" + //
+        "t011 [label=<F,N: destitute&#9251;of&#9251;every&#9251;hope&#9251;of&#9251;consolation&#9251;to&#9251;live<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
+        "t012 [label=<N: –&#9251;<br/>N: <i>/text/s</i>>]\n" + //
+        "t013 [label=<N: -<br/>N: <i>/text/s/del</i>>]\n" + //
+        "t000->t002[label=\"F,N\"]\n" + //
+        "t002->t010[label=\"F\"]\n" + //
+        "t002->t011[label=\"N\"]\n" + //
+        "t003->t004[label=\"F,N\"]\n" + //
+        "t004->t005[label=\"F,N\"]\n" + //
+        "t005->t006[label=\"F\"]\n" + //
+        "t005->t007[label=\"N\"]\n" + //
+        "t006->t007[label=\"F\"]\n" + //
+        "t007->t008[label=\"F\"]\n" + //
+        "t007->t012[label=\"N\"]\n" + //
+        "t008->t009[label=\"F\"]\n" + //
+        "t009->t001[label=\"F,N\"]\n" + //
+        "t010->t011[label=\"F\"]\n" + //
+        "t011->t003[label=\"F,N\"]\n" + //
+        "t011->t013[label=\"N\"]\n" + //
+        "t012->t009[label=\"N\"]\n" + //
+        "t013->t004[label=\"N\"]\n" + //
+        "}";
+
+    testHyperCollation(wF, wQ, expected);
+  }
+
+  @Test
+  public void testMaryShellyGodwinFrankensteinFragment2() {
+    XMLImporter importer = new XMLImporter();
+    String xmlN = "<text>\n" + //
+        "<s>Frankenstein discovered that I detailed or made notes concerning his history he asked to see them &amp; himself corrected\n" + //
+        "<add place=\"superlinear\">and augmented</add>\n" + //
+        "them in many places</s>\n" + //
+        "</text>";
+    VariantWitnessGraph wF = importer.importXML("N", xmlN);
+    LOG.info("N: {}", xmlN);
+    String xmlF = "<text>\n" + //
+        "<s>Frankenstein discovered\n" + //
+        "<del rend=\"strikethrough\">or</del>\n" + //
+        "<add place=\"superlinear\">that I</add> made notes concerning his history; he asked to see them and then himself corrected and augmented them in many places\n" + //
+        "</s>\n" + //
+        "</text>";
+    LOG.info("F: {}", xmlF);
+    VariantWitnessGraph wQ = importer.importXML("F", xmlF);//
+    String expected = "digraph CollationGraph{\n" + //
+        "labelloc=b\n" + //
+        "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "t001 [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "t002 [label=<F: Frankenstein&#9251;discovered<br/>N: Frankenstein&#9251;discovered&#9251;<br/>F,N: <i>/text/s</i>>]\n" + //
+        "t003 [label=<F: ;&#9251;<br/>F: <i>/text/s</i>>]\n" + //
+        "t004 [label=<F,N: he&#9251;asked&#9251;to&#9251;see&#9251;them&#9251;<br/>F,N: <i>/text/s</i>>]\n" + //
+        "t005 [label=<F: and&#9251;then&#9251;<br/>F: <i>/text/s</i>>]\n" + //
+        "t006 [label=<F: himself&#9251;corrected&#9251;<br/>N: himself&#9251;corrected&#x21A9;<br/><br/>F,N: <i>/text/s</i>>]\n" + //
+        "t007 [label=<F: and&#9251;augmented&#9251;<br/>N: and&#9251;augmented<br/>F: <i>/text/s</i><br/>N: <i>/text/s/add</i><br/>>]\n" + //
+        "t008 [label=<F: them&#9251;in&#9251;many&#9251;places&#x21A9;<br/><br/>N: them&#9251;in&#9251;many&#9251;places<br/>F,N: <i>/text/s</i>>]\n" + //
+        "t009 [label=<F: or<br/>F: <i>/text/s/del</i>>]\n" + //
+        "t010 [label=<F: that&#9251;I<br/>N: that&#9251;I&#9251;<br/>F: <i>/text/s/add</i><br/>N: <i>/text/s</i><br/>>]\n" + //
+        "t011 [label=<F: &#9251;<br/>F: <i>/text/s</i>>]\n" + //
+        "t012 [label=<F: made&#9251;notes&#9251;concerning&#9251;his&#9251;history<br/>N: made&#9251;notes&#9251;concerning&#9251;his&#9251;history&#9251;<br/>F,N: <i>/text/s</i>>]\n" + //
+        "t013 [label=<N: &amp;&#9251;<br/>N: <i>/text/s</i>>]\n" + //
+        "t014 [label=<N: detailed&#9251;or&#9251;<br/>N: <i>/text/s</i>>]\n" + //
+        "t000->t002[label=\"F,N\"]\n" + //
+        "t002->t009[label=\"F\"]\n" + //
+        "t002->t010[label=\"F,N\"]\n" + //
+        "t003->t004[label=\"F\"]\n" + //
+        "t004->t005[label=\"F\"]\n" + //
+        "t004->t013[label=\"N\"]\n" + //
+        "t005->t006[label=\"F\"]\n" + //
+        "t006->t007[label=\"F,N\"]\n" + //
+        "t006->t008[label=\"N\"]\n" + //
+        "t007->t008[label=\"F,N\"]\n" + //
+        "t008->t001[label=\"F,N\"]\n" + //
+        "t009->t011[label=\"F\"]\n" + //
+        "t010->t011[label=\"F\"]\n" + //
+        "t010->t014[label=\"N\"]\n" + //
+        "t011->t012[label=\"F\"]\n" + //
+        "t012->t003[label=\"F\"]\n" + //
+        "t012->t004[label=\"N\"]\n" + //
+        "t013->t006[label=\"N\"]\n" + //
+        "t014->t012[label=\"N\"]\n" + //
+        "}";
+
+    testHyperCollation(wF, wQ, expected);
+  }
 
   private void testHyperCollation(VariantWitnessGraph witness1, VariantWitnessGraph witness2, String expected) {
     Map<String, Long> collationDuration = new HashMap<>();
@@ -517,4 +540,28 @@ public class HyperCollaterTest extends HyperCollateTest {
     collationDuration.forEach((name, duration) -> LOG.info("Collating with {} took {} ms.", name, duration));
   }
 
+  private void testHyperCollation3(VariantWitnessGraph witness1, VariantWitnessGraph witness2, VariantWitnessGraph witness3, String expected) {
+    Map<String, Long> collationDuration = new HashMap<>();
+    for (HyperCollater hypercollater : hyperCollaters) {
+      String name = hypercollater.getOptimalMatchSetFinderName();
+      LOG.info("Collating with {}", name);
+      Stopwatch stopwatch = Stopwatch.createStarted();
+      CollationGraph collation0 = hypercollater.collate(witness1, witness2, witness3);
+      stopwatch.stop();
+      long duration = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+      LOG.info("Collating with {} took {} ms.", name, duration);
+      collationDuration.put(name, duration);
+
+      CollationGraph collation = CollationGraphNodeJoiner.join(collation0);
+
+      String dot = CollationGraphVisualizer.toDot(collation);
+      // System.out.println(dot);
+      writeGraph(dot, "graph");
+      assertThat(dot).isEqualTo(expected);
+
+      String table = CollationGraphVisualizer.toTableASCII(collation);
+      System.out.println(table);
+    }
+    collationDuration.forEach((name, duration) -> LOG.info("Collating with {} took {} ms.", name, duration));
+  }
 }

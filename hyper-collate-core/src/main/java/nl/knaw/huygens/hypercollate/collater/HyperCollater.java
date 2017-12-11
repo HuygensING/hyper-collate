@@ -9,9 +9,9 @@ package nl.knaw.huygens.hypercollate.collater;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,7 @@ package nl.knaw.huygens.hypercollate.collater;
 import static java.util.stream.Collectors.toList;
 import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -66,20 +66,19 @@ public class HyperCollater {
   }
 
   public CollationGraph collate(VariantWitnessGraph... graphs) {
-    String sigil1 = graphs[0].getSigil();
-    String sigil2 = graphs[1].getSigil();
-    CollationGraph collationGraph = new CollationGraph(Arrays.asList(sigil1, sigil2));
+    List<String> sigils = new ArrayList<>();
+    List<VariantWitnessGraph> witnesses = new ArrayList<>();
+    List<VariantWitnessGraphRanking> rankings = new ArrayList<>();
+    for (VariantWitnessGraph graph : graphs) {
+      sigils.add(graph.getSigil());
+      witnesses.add(graph);
+      rankings.add(VariantWitnessGraphRanking.of(graph));
+    }
+    CollationGraph collationGraph = new CollationGraph(sigils);
 
-    Iterator<VariantWitnessGraph> witnessIterable = Arrays.asList(graphs).iterator();
-    VariantWitnessGraph witness1 = witnessIterable.next();
-    VariantWitnessGraph witness2 = witnessIterable.next();
+    Set<Match> matches = match(witnesses, rankings);
 
-    VariantWitnessGraphRanking ranking1 = VariantWitnessGraphRanking.of(witness1);
-    VariantWitnessGraphRanking ranking2 = VariantWitnessGraphRanking.of(witness2);
-
-    Set<Match> matches = match(witness1, witness2, ranking1, ranking2);
-
-    List<Match> matchesSortedByRank = sortMatchesByWitness(matches, sigil1, sigil2);
+    List<Match> matchesSortedByRank = sortMatchesByWitness(matches, sigils);
 
     Iterator<TokenVertex> iterator1 = VariantWitnessGraphTraversal.of(witness1).iterator();
     Iterator<TokenVertex> iterator2 = VariantWitnessGraphTraversal.of(witness2).iterator();
@@ -178,8 +177,7 @@ public class HyperCollater {
   }
 
   private static List<Match> sortMatchesByWitness(Set<Match> matches, //
-      String sigil1, //
-      String sigil2) {
+      List<String> sigils) {
     Comparator<Match> matchComparator = matchComparator(sigil1, sigil2);
     return matches.stream()//
         .sorted(matchComparator)//
@@ -199,8 +197,7 @@ public class HyperCollater {
     };
   }
 
-  private Set<Match> match(VariantWitnessGraph witness1, VariantWitnessGraph witness2, //
-      VariantWitnessGraphRanking ranking1, VariantWitnessGraphRanking ranking2) {
+  private Set<Match> match(List<VariantWitnessGraph> witnesses, List<VariantWitnessGraphRanking> rankings) {
     Set<Match> allPotentialMatches = new HashSet<>();
     VariantWitnessGraphTraversal traversal1 = VariantWitnessGraphTraversal.of(witness1);
     VariantWitnessGraphTraversal traversal2 = VariantWitnessGraphTraversal.of(witness2);
@@ -220,11 +217,16 @@ public class HyperCollater {
                 allPotentialMatches.add(match);
               }
             }));
-    TokenVertex endTokenVertex1 = witness1.getEndTokenVertex();
-    TokenVertex endTokenVertex2 = witness2.getEndTokenVertex();
-    Match endMatch = new Match(endTokenVertex1, endTokenVertex2)//
-        .setRank(sigil1, ranking1.apply(endTokenVertex1))//
-        .setRank(sigil2, ranking2.apply(endTokenVertex2));
+    TokenVertex[] endTokenVertices = witnesses.stream().map(VariantWitnessGraph::getEndTokenVertex).toArray(TokenVertex[]::new);
+    Match endMatch = new Match(endTokenVertices);
+    for (int i = 0; i < endTokenVertices.length; i++) {
+      String sigil = witnesses.get(i).getSigil();
+      Integer rank = rankings.get(i).apply(endTokenVertices[i]);
+      endMatch.setRank(sigil, rank);
+    }
+    //
+    // .setRank(sigil1, ranking1.apply(endTokenVertex1))//
+    // .setRank(sigil2, ranking2.apply(endTokenVertex2));
     allPotentialMatches.add(endMatch);
     return optimalMatchSetFinder.getOptimalMatchSet(allPotentialMatches);
   }
