@@ -217,6 +217,7 @@ public class HyperCollater {
                 allPotentialMatches.add(match);
               }
             }));
+
     TokenVertex[] endTokenVertices = witnesses.stream().map(VariantWitnessGraph::getEndTokenVertex).toArray(TokenVertex[]::new);
     Match endMatch = new Match(endTokenVertices);
     for (int i = 0; i < endTokenVertices.length; i++) {
@@ -224,9 +225,6 @@ public class HyperCollater {
       Integer rank = rankings.get(i).apply(endTokenVertices[i]);
       endMatch.setRank(sigil, rank);
     }
-    //
-    // .setRank(sigil1, ranking1.apply(endTokenVertex1))//
-    // .setRank(sigil2, ranking2.apply(endTokenVertex2));
     allPotentialMatches.add(endMatch);
     return optimalMatchSetFinder.getOptimalMatchSet(allPotentialMatches);
   }
