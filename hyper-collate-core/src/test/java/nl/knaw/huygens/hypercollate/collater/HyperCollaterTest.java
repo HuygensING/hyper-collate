@@ -1,49 +1,55 @@
 package nl.knaw.huygens.hypercollate.collater;
 
-import static org.assertj.core.api.Assertions.assertThat;
+    /*-
+     * #%L
+     * hyper-collate-core
+     * =======
+     * Copyright (C) 2017 Huygens ING (KNAW)
+     * =======
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *      http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     * #L%
+     */
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-/*-
- * #%L
- * hyper-collate-core
- * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
- * =======
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 import com.google.common.base.Stopwatch;
-
+import eu.interedition.collatex.dekker.Tuple;
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class HyperCollaterTest extends HyperCollateTest {
   private static final Logger LOG = LoggerFactory.getLogger(HyperCollateTest.class);
 
   final HyperCollater hyperCollater1 = new HyperCollater(new OptimalMatchSetAlgorithm1());
   private final HyperCollater hyperCollater2 = new HyperCollater(new OptimalMatchSetAlgorithm2());
-  private final HyperCollater[] hyperCollaters = new HyperCollater[] { /* hyperCollater1, */hyperCollater2 };
+  private final HyperCollater[] hyperCollaters = new HyperCollater[]{ /* hyperCollater1, */hyperCollater2};
 
   @Test
   public void testHierarchyWith3Witnesses() {
@@ -56,7 +62,7 @@ public class HyperCollaterTest extends HyperCollateTest {
         "    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !\n" + //
         "        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>\n" + //
         "</text>");
-    VariantWitnessGraph wZ = importer.importXML("Q", "<text>\n" + //
+    VariantWitnessGraph wZ = importer.importXML("Z", "<text>\n" + //
         "    <s>Hoe zoet moet nochtans zijn dit trachten naar een vrouw !\n" + //
         "        Die dagen van ongewisheid vóór de liefelijke toestemming.</s>\n" + //
         "</text>");
@@ -513,6 +519,72 @@ public class HyperCollaterTest extends HyperCollateTest {
         "}";
 
     testHyperCollation(wF, wQ, expected);
+  }
+
+  @Test
+  public void testCollationGraphInitialization() {
+    XMLImporter importer = new XMLImporter();
+    VariantWitnessGraph wF = importer.importXML("F", "<text>\n" + //
+        "    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,\n" + //
+        "        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>\n" + //
+        "</text>");
+    CollationGraph collationGraph = new CollationGraph();
+    hyperCollater2.collate(collationGraph, wF);
+    CollationGraph collation = CollationGraphNodeJoiner.join(collationGraph);
+    String dot = CollationGraphVisualizer.toDot(collation);
+    String expected = "digraph CollationGraph{\n" +
+        "labelloc=b\n" +
+        "t000 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t001 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t002 [label=<F: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F: <i>/text/s</i>>]\n" +
+        "t003 [label=<F: &#9251;een&#9251;vrouw,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;vóór&#9251;de&#9251;<br/>F: <i>/text/s</i>>]\n" +
+        "t004 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n" +
+        "t005 [label=<F: liefelijke&#9251;toestemming!<br/>F: <i>/text/s</i>>]\n" +
+        "t006 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n" +
+        "t007 [label=<F: werven&#9251;om<br/>F: <i>/text/s/del</i>>]\n" +
+        "t008 [label=<F: trachten&#9251;naar<br/>F: <i>/text/s/add</i>>]\n" +
+        "t000->t002[label=\"F\"]\n" +
+        "t002->t006[label=\"F\"]\n" +
+        "t003->t004[label=\"F\"]\n" +
+        "t004->t005[label=\"F\"]\n" +
+        "t005->t001[label=\"F\"]\n" +
+        "t006->t007[label=\"F\"]\n" +
+        "t006->t008[label=\"F\"]\n" +
+        "t007->t003[label=\"F\"]\n" +
+        "t008->t003[label=\"F\"]\n" +
+        "}";
+    assertThat(dot).isEqualTo(expected);
+//    System.out.println(dot);
+//    writeGraph(dot, "graph");
+  }
+
+  @Test
+  public void testPermute() {
+    List<Tuple<Integer>> permute1 = hyperCollater2.permute(3);
+    LOG.info("permute={}", visualize(permute1));
+    List<Tuple<Integer>> permute2 = hyperCollater2.permute(4);
+    LOG.info("permute={}", visualize(permute2));
+    List<Tuple<Integer>> permute3 = hyperCollater2.permute(10);
+    LOG.info("permute={}", visualize(permute3));
+  }
+
+  @Test
+  public void testPotentialMatches() {
+    XMLImporter importer = new XMLImporter();
+    VariantWitnessGraph w1 = importer.importXML("A", "<x>the black cat</x>");
+    VariantWitnessGraph w2 = importer.importXML("B", "<x>the blue dog</x>");
+    VariantWitnessGraph w3 = importer.importXML("C", "<x>the black dog</x>");
+    List<VariantWitnessGraph> witnesses = asList(w1, w2, w3);
+    List<VariantWitnessGraphRanking> rankings = witnesses.stream()//
+        .map(VariantWitnessGraphRanking::of)//
+        .collect(toList());
+    Set<Match> allPotentialMatches = hyperCollater2.getAllPotentialMatches(witnesses, rankings);
+    LOG.info("allPotentialMatches={}", allPotentialMatches);
+    assertThat(allPotentialMatches).hasSize(4);
+  }
+
+  private String visualize(List<Tuple<Integer>> list) {
+    return list.stream().map(t -> "<" + t.left + "," + t.right + ">").collect(joining(""));
   }
 
   private void testHyperCollation(VariantWitnessGraph witness1, VariantWitnessGraph witness2, String expected) {
