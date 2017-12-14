@@ -1,33 +1,34 @@
 package nl.knaw.huygens.hypercollate.collater;
 
-import com.google.common.base.Joiner;
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-    /*-
-     * #%L
-     * hyper-collate-core
-     * =======
-     * Copyright (C) 2017 Huygens ING (KNAW)
-     * =======
-     * Licensed under the Apache License, Version 2.0 (the "License");
-     * you may not use this file except in compliance with the License.
-     * You may obtain a copy of the License at
-     *
-     *      http://www.apache.org/licenses/LICENSE-2.0
-     *
-     * Unless required by applicable law or agreed to in writing, software
-     * distributed under the License is distributed on an "AS IS" BASIS,
-     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     * See the License for the specific language governing permissions and
-     * limitations under the License.
-     * #L%
-     */
+import com.google.common.base.Joiner;
+
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
+
+/*-
+ * #%L
+ * hyper-collate-core
+ * =======
+ * Copyright (C) 2017 Huygens ING (KNAW)
+ * =======
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ * 
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ * #L%
+ */
 
 public class Match {
 
@@ -56,6 +57,15 @@ public class Match {
 
   public Integer getRankForWitness(String sigil) {
     return rankingMap.get(sigil);
+  }
+
+  public Integer getLowestRankForWitnessesOtherThan(String s) {
+    return rankingMap.entrySet()//
+        .stream()//
+        .filter(e -> !e.getKey().equals(s))//
+        .mapToInt(e -> e.getValue())//
+        .min()//
+        .getAsInt();
   }
 
   @Override
@@ -89,7 +99,12 @@ public class Match {
   }
 
   public Match addTokenVertex(SimpleTokenVertex tokenVertex) {
-    tokenVertexMap.put(tokenVertex.getSigil(),tokenVertex);
+    tokenVertexMap.put(tokenVertex.getSigil(), tokenVertex);
     return this;
   }
+
+  public boolean hasWitness(String sigil) {
+    return tokenVertexMap.containsKey(sigil);
+  }
+
 }

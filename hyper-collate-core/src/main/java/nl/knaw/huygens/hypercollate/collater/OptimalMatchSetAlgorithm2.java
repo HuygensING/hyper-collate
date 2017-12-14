@@ -73,6 +73,7 @@ public class OptimalMatchSetAlgorithm2 extends AstarAlgorithm<QuantumMatchSet, L
       String sigil2) {
     Comparator<Match> matchComparator = matchComparator(sigil1, sigil2);
     return matches.stream()//
+        .peek(System.out::println)//
         .sorted(matchComparator)//
         .collect(toList());
   }
@@ -82,9 +83,13 @@ public class OptimalMatchSetAlgorithm2 extends AstarAlgorithm<QuantumMatchSet, L
     return (match1, match2) -> {
       Integer rank1 = match1.getRankForWitness(sigil1);
       Integer rank2 = match2.getRankForWitness(sigil1);
+      LOG.info("match1={}, rank1={}", match1, rank1);
+      LOG.info("match2={}, rank2={}", match2, rank2);
       if (rank1.equals(rank2)) {
         rank1 = match1.getRankForWitness(sigil2);
         rank2 = match2.getRankForWitness(sigil2);
+        LOG.info("match1={}, rank1'={}", match1, rank1);
+        LOG.info("match2={}, rank2'={}", match2, rank2);
       }
       return rank1.compareTo(rank2);
     };
