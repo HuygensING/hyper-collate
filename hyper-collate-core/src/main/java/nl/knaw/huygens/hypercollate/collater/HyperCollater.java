@@ -10,9 +10,9 @@ import static java.util.stream.Collectors.joining;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -125,9 +125,11 @@ public class HyperCollater {
     // Set<Match> optimalMatchSet = optimalMatchSetFinder.getOptimalMatchSet(filteredSortedMatchesForWitness);
     // LOG.info("optimalMatchSet = {}", optimalMatchSet);
     String witnessSigil = witnessGraph.getSigil();
-    Iterator<Node> collationNodeIterator = collationGraph.traverse().iterator();
     Iterator<TokenVertex> witnessIterator = VariantWitnessGraphTraversal.of(witnessGraph).iterator();
-    // Node collationNode = collationNodeIterator.next();
+
+    TokenVertex first = witnessIterator.next();
+    Node rootNode = collationGraph.getRootNode();
+    collatedTokenVertexMap.put(first, rootNode);
 
     logCollated(collatedTokenVertexMap);
     while (!filteredSortedMatchesForWitness.isEmpty()) {
@@ -153,7 +155,8 @@ public class HyperCollater {
     }
     collationGraph.getSigils().add(witnessSigil);
 
-    addEndNode(collationGraph, witnessGraph, collatedTokenVertexMap);
+    collatedTokenVertexMap.put(witnessGraph.getEndTokenVertex(), collationGraph.getEndNode());
+
     logCollated(collatedTokenVertexMap);
     addEdges(collationGraph, collatedTokenVertexMap);
     logCollated(collatedTokenVertexMap);
@@ -171,10 +174,6 @@ public class HyperCollater {
     Node endNode = collationGraph.addNodeWithTokens();
     collatedTokenVertexMap.put(witness1.getEndTokenVertex(), endNode);
     collatedTokenVertexMap.put(witness2.getEndTokenVertex(), endNode);
-  }
-
-  private static void addEndNode(CollationGraph collationGraph, VariantWitnessGraph witness, Map<TokenVertex, Node> collatedTokenVertexMap) {
-    collatedTokenVertexMap.put(witness.getEndTokenVertex(), collationGraph.getEndNode());
   }
 
   private static void handleMatch(CollationGraph collationGraph, String sigil1, String sigil2, Map<TokenVertex, Node> collatedTokenVertexMap, TokenVertex tokenVertexForWitness1,
