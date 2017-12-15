@@ -20,14 +20,13 @@ package nl.knaw.huygens.hypercollate.collater;
  * #L%
  */
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import org.junit.Test;
-
+import eu.interedition.collatex.Token;
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
+import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import java.util.stream.Stream;
 
 public class MatchTest extends HyperCollateTest {
   @Test
@@ -46,9 +45,35 @@ public class MatchTest extends HyperCollateTest {
   }
 
   private TokenVertex mockVertexWithSigil(String sigil) {
-    TokenVertex vertex = mock(TokenVertex.class);
-    when(vertex.getSigil()).thenReturn(sigil);
-    return vertex;
+    return new TokenVertex() {
+      @Override
+      public Token getToken() {
+        return null;
+      }
+
+      @Override
+      public void addIncomingTokenVertex(TokenVertex incoming) {
+      }
+
+      @Override
+      public Stream<TokenVertex> getIncomingTokenVertexStream() {
+        return null;
+      }
+
+      @Override
+      public void addOutgoingTokenVertex(TokenVertex outgoing) {
+      }
+
+      @Override
+      public Stream<TokenVertex> getOutgoingTokenVertexStream() {
+        return null;
+      }
+
+      @Override
+      public String getSigil() {
+        return sigil;
+      }
+    };
   }
 
 }

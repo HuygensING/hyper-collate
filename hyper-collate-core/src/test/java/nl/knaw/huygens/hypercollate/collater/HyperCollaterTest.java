@@ -1,25 +1,29 @@
 package nl.knaw.huygens.hypercollate.collater;
 
+import com.google.common.base.Stopwatch;
+import eu.interedition.collatex.dekker.Tuple;
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
+import nl.knaw.huygens.hypercollate.HyperCollateTest;
+import nl.knaw.huygens.hypercollate.importer.XMLImporter;
+import nl.knaw.huygens.hypercollate.model.CollationGraph;
+import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
+import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import org.assertj.core.util.Sets;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
 /*-
-     * #%L
+ * #%L
  * hyper-collate-core
  * =======
  * Copyright (C) 2017 Huygens ING (KNAW)
@@ -36,26 +40,14 @@ import org.slf4j.LoggerFactory;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
-     */
-
-import com.google.common.base.Stopwatch;
-
-import eu.interedition.collatex.dekker.Tuple;
-import nl.knaw.huygens.hypercollate.HyperCollateTest;
-import nl.knaw.huygens.hypercollate.importer.XMLImporter;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
-import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
-import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
+ */
 
 public class HyperCollaterTest extends HyperCollateTest {
   private static final Logger LOG = LoggerFactory.getLogger(HyperCollateTest.class);
 
   final HyperCollater hyperCollater1 = new HyperCollater(new OptimalMatchSetAlgorithm1());
   private final HyperCollater hyperCollater2 = new HyperCollater(new OptimalMatchSetAlgorithm2());
-  private final HyperCollater[] hyperCollaters = new HyperCollater[] { /* hyperCollater1, */hyperCollater2 };
+  private final HyperCollater[] hyperCollaters = new HyperCollater[]{ /* hyperCollater1, */hyperCollater2};
 
   @Test
   public void testHierarchyWith3Witnesses() {
@@ -536,7 +528,9 @@ public class HyperCollaterTest extends HyperCollateTest {
         "</text>");
     CollationGraph collationGraph = new CollationGraph();
     Map<TokenVertex, Node> map = new HashMap<>();
-    hyperCollater2.initialize(collationGraph, wF, map);
+    List<CollatedMatch> collatedMatches = new ArrayList<>();
+    List<Match> matches = new ArrayList<>();
+    hyperCollater2.initialize(collationGraph, map, collatedMatches, wF, matches);
     CollationGraph collation = CollationGraphNodeJoiner.join(collationGraph);
     String dot = CollationGraphVisualizer.toDot(collation);
     String expected = "digraph CollationGraph{\n" + "labelloc=b\n" + "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
@@ -584,26 +578,30 @@ public class HyperCollaterTest extends HyperCollateTest {
         .collect(toList());
     Set<Match> allPotentialMatches = hyperCollater2.getPotentialMatches(witnesses, rankings);
     LOG.info("allPotentialMatches={}", allPotentialMatches);
-    assertThat(allPotentialMatches).hasSize(4);
-    String match1 = "<A0,B0,C0>";
-    String match2 = "<A1,C1>";
-    String match3 = "<B2,C2>";
-    String match4 = "<A:EndTokenVertex,B:EndTokenVertex,C:EndTokenVertex>";
+    String match1 = "<A0,B0>";
+    String match2 = "<A0,C0>";
+    String match3 = "<A1,C1>";
+    String match4 = "<B0,C0>";
+    String match5 = "<B2,C2>";
+    String match6 = "<A:EndTokenVertex,B:EndTokenVertex>";
+    String match7 = "<A:EndTokenVertex,C:EndTokenVertex>";
+    String match8 = "<B:EndTokenVertex,C:EndTokenVertex>";
+    assertThat(allPotentialMatches).hasSize(8);
     Set<String> matchStrings = allPotentialMatches.stream().map(Match::toString).collect(toSet());
-    assertThat(matchStrings).contains(match1, match2, match3, match4);
+    assertThat(matchStrings).contains(match1, match2, match3, match4, match5, match6, match7, match8);
 
     Map<String, List<Match>> sortAndFilterMatchesByWitness = hyperCollater2.sortAndFilterMatchesByWitness(allPotentialMatches, asList(sigil1, sigil2, sigil3));
     LOG.info("sortAndFilterMatchesByWitness={}", sortAndFilterMatchesByWitness);
     assertThat(sortAndFilterMatchesByWitness).containsOnlyKeys(sigil1, sigil2, sigil3);
 
     List<String> listA = stringList(sortAndFilterMatchesByWitness, sigil1);
-    assertThat(listA).containsExactly(match1, match2, match4);
+    assertThat(listA).containsOnly(match1, match2, match3, match6, match7);
 
     List<String> listB = stringList(sortAndFilterMatchesByWitness, sigil2);
-    assertThat(listB).containsExactly(match1, match3, match4);
+    assertThat(listB).containsOnly(match4, match1, match5, match6, match8);
 
     List<String> listC = stringList(sortAndFilterMatchesByWitness, sigil3);
-    assertThat(listC).containsExactly(match1, match2, match3, match4);
+    assertThat(listC).containsOnly(match4, match2, match3, match5, match7, match8);
   }
 
   private List<String> stringList(Map<String, List<Match>> sortAndFilterMatchesByWitness, String key) {

@@ -26,15 +26,8 @@ package nl.knaw.huygens.hypergraph.core;
 * Are we going to make the child nodes ordered?
 * @author: Ronald Haentjens Dekker
 */
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 import java.util.function.Function;
 
 public class Hypergraph<N, H> {
@@ -83,8 +76,7 @@ public class Hypergraph<N, H> {
       targetNodes.put(edge, targetList);
     } else {
       // convert Array target to set
-      Set<N> targetSet = new HashSet<>();
-      targetSet.addAll(Arrays.asList(targets));
+      Set<N> targetSet = new HashSet<>(Arrays.asList(targets));
       targetNodes.put(edge, targetSet);
     }
     // set incoming

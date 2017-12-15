@@ -1,14 +1,13 @@
 package nl.knaw.huygens.hypercollate.collater;
 
+import com.google.common.base.Joiner;
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
-import com.google.common.base.Joiner;
-
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
 /*-
  * #%L
@@ -63,7 +62,7 @@ public class Match {
     return rankingMap.entrySet()//
         .stream()//
         .filter(e -> !e.getKey().equals(s))//
-        .mapToInt(e -> e.getValue())//
+        .mapToInt(Map.Entry::getValue)//
         .min()//
         .getAsInt();
   }

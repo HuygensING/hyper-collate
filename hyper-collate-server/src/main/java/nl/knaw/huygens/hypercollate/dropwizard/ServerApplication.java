@@ -1,12 +1,6 @@
 package nl.knaw.huygens.hypercollate.dropwizard;
 
-import java.util.SortedMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-/*
+/*-
  * #%L
  * hyper-collate-server
  * =======
@@ -27,7 +21,6 @@ import org.slf4j.LoggerFactory;
  */
 
 import com.codahale.metrics.health.HealthCheck;
-
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -41,6 +34,11 @@ import nl.knaw.huygens.hypercollate.dropwizard.health.ServerHealthCheck;
 import nl.knaw.huygens.hypercollate.dropwizard.resources.AboutResource;
 import nl.knaw.huygens.hypercollate.dropwizard.resources.CollationsResource;
 import nl.knaw.huygens.hypercollate.dropwizard.resources.HomePageResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.SortedMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 class ServerApplication extends Application<ServerConfiguration> {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
