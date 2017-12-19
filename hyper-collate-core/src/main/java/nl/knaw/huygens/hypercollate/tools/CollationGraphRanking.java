@@ -44,6 +44,7 @@ public class CollationGraphRanking implements Iterable<Set<Node>>, Function<Node
 
   public static CollationGraphRanking of(CollationGraph graph) {
     final CollationGraphRanking ranking = new CollationGraphRanking();
+    // Set<Node> nodesRanked = new HashSet<>();
     List<Node> nodesToRank = new ArrayList<>();
     nodesToRank.add(graph.getRootNode());
     while (!nodesToRank.isEmpty()) {

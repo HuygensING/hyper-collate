@@ -1,12 +1,13 @@
 package nl.knaw.huygens.hypercollate.collater;
 
 import static java.util.stream.Collectors.joining;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import nl.knaw.huygens.hypercollate.model.CollationGraph;
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
 /*-
  * #%L
@@ -17,9 +18,9 @@ import java.util.Set;
  * Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- *
+ * 
  *       http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -67,8 +68,9 @@ public class CollatedMatch {
     return vertexRank;
   }
 
-  public void setVertexRank(int vertexRank) {
+  public CollatedMatch setVertexRank(int vertexRank) {
     this.vertexRank = vertexRank;
+    return this;
   }
 
   public Set<String> getSigils() {
@@ -79,7 +81,7 @@ public class CollatedMatch {
   public String toString() {
     StringBuilder stringBuilder = new StringBuilder("<[")//
         .append(collatedNode.getSigils().stream().sorted().collect(joining(",")))//
-        .append("]:")//
+        .append("]")//
         .append(nodeRank);
 
     StringBuilder vString = new StringBuilder();
@@ -88,13 +90,24 @@ public class CollatedMatch {
       vString.append(sv.getSigil())//
           .append(sv.getIndexNumber());
     } else {
-      vString.append(witnessVertex.getSigil()).append(":").append(witnessVertex.getClass().getSimpleName());
+      vString.append(witnessVertex.getSigil()).append(witnessVertex.getClass().getSimpleName());
     }
-    return stringBuilder
-        .append(",")
-        .append(vString.toString())
-        .append(">")
-        .toString();
+    return stringBuilder.append(",").append(vString.toString()).append(">").toString();
+  }
+
+  @Override
+  public int hashCode() {
+    return collatedNode.hashCode() * witnessVertex.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof CollatedMatch) {
+      CollatedMatch other = (CollatedMatch) obj;
+      return collatedNode.equals(other.collatedNode) && witnessVertex.equals(other.witnessVertex);
+
+    } else
+      return false;
   }
 
 }

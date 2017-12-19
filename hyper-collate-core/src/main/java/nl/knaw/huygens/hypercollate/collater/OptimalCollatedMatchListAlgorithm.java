@@ -1,5 +1,19 @@
 package nl.knaw.huygens.hypercollate.collater;
 
+import static java.util.stream.Collectors.toList;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*-
  * #%L
  * hyper-collate-core
@@ -9,9 +23,9 @@ package nl.knaw.huygens.hypercollate.collater;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,13 +35,8 @@ package nl.knaw.huygens.hypercollate.collater;
  */
 
 import com.google.common.base.Stopwatch;
-import eu.interedition.collatex.dekker.astar.AstarAlgorithm;
-import static java.util.stream.Collectors.toList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import eu.interedition.collatex.dekker.astar.AstarAlgorithm;
 
 public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCollatedMatchList, LostPotential> implements OptimalCollatedMatchListFinder {
   private static final Logger LOG = LoggerFactory.getLogger(OptimalCollatedMatchListAlgorithm.class);
@@ -53,18 +62,16 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
     sw.stop();
     LOG.debug("aStar took {} ms", sw.elapsed(TimeUnit.MILLISECONDS));
     QuantumCollatedMatchList winningGoal = winningPath.get(winningPath.size() - 1);
-    return winningGoal.getChosenMatches();
+    return new ArrayList<>(winningGoal.getChosenMatches());
   }
 
   private static List<CollatedMatch> sortMatchesByNode(Collection<CollatedMatch> matches) {
-    Comparator<CollatedMatch> matchComparator = Comparator.comparing(CollatedMatch::getNodeRank)
-        .thenComparing(CollatedMatch::getVertexRank);
+    Comparator<CollatedMatch> matchComparator = Comparator.comparing(CollatedMatch::getNodeRank).thenComparing(CollatedMatch::getVertexRank);
     return sortMatches(matches, matchComparator);
   }
 
   private static List<CollatedMatch> sortMatchesByWitness(Collection<CollatedMatch> matches) {
-    Comparator<CollatedMatch> matchComparator = Comparator.comparing(CollatedMatch::getVertexRank)
-        .thenComparing(CollatedMatch::getNodeRank);
+    Comparator<CollatedMatch> matchComparator = Comparator.comparing(CollatedMatch::getVertexRank).thenComparing(CollatedMatch::getNodeRank);
     return sortMatches(matches, matchComparator);
   }
 
@@ -74,7 +81,6 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
         .sorted(matchComparator)//
         .collect(toList());
   }
-
 
   @Override
   protected boolean isGoal(QuantumCollatedMatchList matchSet) {
