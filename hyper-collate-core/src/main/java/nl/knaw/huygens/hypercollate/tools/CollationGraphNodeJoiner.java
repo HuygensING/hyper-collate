@@ -1,14 +1,20 @@
 package nl.knaw.huygens.hypercollate.tools;
 
-import com.google.common.base.Preconditions;
-import eu.interedition.collatex.Token;
 import static java.util.stream.Collectors.toList;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import com.google.common.base.Preconditions;
+
+import eu.interedition.collatex.Token;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
 import nl.knaw.huygens.hypergraph.core.TraditionalEdge;
-
-import java.util.*;
 
 /*-
  * #%L
@@ -91,6 +97,7 @@ public class CollationGraphNodeJoiner {
   }
 
   private static void mergeNodeTokens(Node lastNode, Node originalNode) {
+    lastNode.getSubSigils().addAll(originalNode.getSubSigils());
     for (String s : lastNode.getSigils()) {
       MarkedUpToken tokenForWitness = (MarkedUpToken) lastNode.getTokenForWitness(s);
       MarkedUpToken tokenToMerge = (MarkedUpToken) originalNode.getTokenForWitness(s);
@@ -106,7 +113,9 @@ public class CollationGraphNodeJoiner {
         .map(CollationGraphNodeJoiner::cloneToken)//
         .collect(toList())//
         .toArray(new Token[] {});
-    return mergedGraph.addNodeWithTokens(tokens);
+    Node newNode = mergedGraph.addNodeWithTokens(tokens);
+    newNode.getSubSigils().addAll(originalNode.getSubSigils());
+    return newNode;
   }
 
   private static Token cloneToken(Token original) {

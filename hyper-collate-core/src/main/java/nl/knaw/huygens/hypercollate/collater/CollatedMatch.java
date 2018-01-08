@@ -1,13 +1,5 @@
 package nl.knaw.huygens.hypercollate.collater;
 
-import static java.util.stream.Collectors.joining;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-
-import java.util.HashSet;
-import java.util.Set;
-
 /*-
  * #%L
  * hyper-collate-core
@@ -15,18 +7,26 @@ import java.util.Set;
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  * 
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  * 
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  * #L%
  */
+import static java.util.stream.Collectors.joining;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import nl.knaw.huygens.hypercollate.model.CollationGraph;
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
 public class CollatedMatch {
 
@@ -35,12 +35,15 @@ public class CollatedMatch {
   private final TokenVertex witnessVertex;
   private int vertexRank;
   private final Set<String> sigils = new HashSet<>();
+  private final Set<String> subSigils = new HashSet<>();
 
   public CollatedMatch(CollationGraph.Node collatedNode, TokenVertex witnessVertex) {
     this.collatedNode = collatedNode;
     this.witnessVertex = witnessVertex;
     sigils.add(witnessVertex.getSigil());
     sigils.addAll(collatedNode.getSigils());
+    subSigils.add(witnessVertex.getSubSigil());
+    subSigils.addAll(collatedNode.getSubSigils());
   }
 
   public CollationGraph.Node getCollatedNode() {
@@ -74,6 +77,10 @@ public class CollatedMatch {
 
   public Set<String> getSigils() {
     return sigils;
+  }
+
+  public Set<String> getSubSigils() {
+    return subSigils;
   }
 
   @Override

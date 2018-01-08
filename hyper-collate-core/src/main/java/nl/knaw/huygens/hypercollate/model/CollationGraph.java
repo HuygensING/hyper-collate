@@ -19,12 +19,17 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
+import static java.util.stream.Collectors.joining;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import eu.interedition.collatex.Token;
-import static java.util.stream.Collectors.joining;
 import nl.knaw.huygens.hypergraph.core.DirectedAcyclicGraph;
-
-import java.util.*;
 
 public class CollationGraph extends DirectedAcyclicGraph<CollationGraph.Node> {
 
@@ -66,6 +71,7 @@ public class CollationGraph extends DirectedAcyclicGraph<CollationGraph.Node> {
 
   public static class Node {
     final Map<String, Token> tokenMap = new HashMap<>();
+    final Set<String> subSigils = new HashSet<>();
 
     Node(Token... tokens) {
       for (Token token : tokens) {
@@ -85,6 +91,10 @@ public class CollationGraph extends DirectedAcyclicGraph<CollationGraph.Node> {
 
     public Set<String> getSigils() {
       return tokenMap.keySet();
+    }
+
+    public Set<String> getSubSigils() {
+      return subSigils;
     }
 
     @Override
