@@ -28,6 +28,7 @@ import nl.knaw.huygens.hypercollate.model.TokenVertex;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class QuantumCollatedMatchList {
@@ -85,15 +86,20 @@ public class QuantumCollatedMatchList {
   private List<CollatedMatch> calculateInvalidatedMatches(List<CollatedMatch> potentialMatches, CollatedMatch match) {
     CollationGraph.Node node = match.getCollatedNode();
     TokenVertex tokenVertexForWitness = match.getWitnessVertex();
+    Set<String> nodeSigils = node.getSigils();
     int minNodeRank = match.getNodeRank();
     int minVertexRank = match.getVertexRank();
 
     return potentialMatches.stream()//
         .filter(m -> m.getCollatedNode().equals(node) //
             || m.getWitnessVertex().equals(tokenVertexForWitness) //
-            || m.getNodeRank() < minNodeRank //
+            || (hasSigilOverlap(m,nodeSigils) && m.getNodeRank() < minNodeRank) //
             || m.getVertexRank() < minVertexRank)//
         .collect(toList());
+  }
+
+  private boolean hasSigilOverlap(CollatedMatch m, Set<String> nodeSigils) {
+    return m.getSigils().stream().anyMatch(nodeSigils::contains);
   }
 
   public Iterable<QuantumCollatedMatchList> neighborSets() {

@@ -1,14 +1,5 @@
 package nl.knaw.huygens.hypercollate.collater;
 
-import com.google.common.base.Stopwatch;
-import eu.interedition.collatex.dekker.astar.AstarAlgorithm;
-import static java.util.stream.Collectors.toList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
 /*-
  * #%L
  * hyper-collate-core
@@ -28,6 +19,14 @@ import java.util.concurrent.TimeUnit;
  * limitations under the License.
  * #L%
  */
+import com.google.common.base.Stopwatch;
+import eu.interedition.collatex.dekker.astar.AstarAlgorithm;
+import static java.util.stream.Collectors.toList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCollatedMatchList, LostPotential> implements OptimalCollatedMatchListFinder {
   private static final Logger LOG = LoggerFactory.getLogger(OptimalCollatedMatchListAlgorithm.class);
@@ -85,8 +84,8 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
     CollatedMatch firstPotentialMatch1 = getFirstPotentialMatch(this.matchesSortedByNode, matchSet);
     addNeighborNodes(matchSet, nextPotentialMatches, firstPotentialMatch1);
 
-    List<CollatedMatch> matchesSortedByWitness22 = this.matchesSortedByWitness;
-    CollatedMatch firstPotentialMatch2 = getFirstPotentialMatch(matchesSortedByWitness22, matchSet);
+    List<CollatedMatch> matchesSortedByWitness = this.matchesSortedByWitness;
+    CollatedMatch firstPotentialMatch2 = getFirstPotentialMatch(matchesSortedByWitness, matchSet);
     if (!firstPotentialMatch1.equals(firstPotentialMatch2)) {
       addNeighborNodes(matchSet, nextPotentialMatches, firstPotentialMatch2);
     }

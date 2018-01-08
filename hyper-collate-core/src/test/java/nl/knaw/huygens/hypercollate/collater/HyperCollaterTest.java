@@ -1,27 +1,5 @@
 package nl.knaw.huygens.hypercollate.collater;
 
-import com.google.common.base.Stopwatch;
-import eu.interedition.collatex.dekker.Tuple;
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.*;
-import nl.knaw.huygens.hypercollate.HyperCollateTest;
-import nl.knaw.huygens.hypercollate.importer.XMLImporter;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
-import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
-import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
-import static org.assertj.core.api.Assertions.assertThat;
-import org.assertj.core.util.Sets;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
 /*-
  * #%L
  * hyper-collate-core
@@ -41,6 +19,36 @@ import java.util.concurrent.TimeUnit;
  * limitations under the License.
  * #L%
  */
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.assertj.core.util.Sets;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Stopwatch;
+
+import eu.interedition.collatex.dekker.Tuple;
+import nl.knaw.huygens.hypercollate.HyperCollateTest;
+import nl.knaw.huygens.hypercollate.importer.XMLImporter;
+import nl.knaw.huygens.hypercollate.model.CollationGraph;
+import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
+import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
 
 public class HyperCollaterTest extends HyperCollateTest {
   private static final Logger LOG = LoggerFactory.getLogger(HyperCollateTest.class);
@@ -65,57 +73,21 @@ public class HyperCollaterTest extends HyperCollateTest {
         "        Die dagen van ongewisheid vóór de liefelijke toestemming.</s>\n" + //
         "</text>");
 
-    String expected = "digraph CollationGraph{\n" + //
-        "labelloc=b\n" + //
-        "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "t001 [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "t002 [label=<F,Q,Z: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n" + //
-        "t003 [label=<F,Q: &#9251;<br/>F,Q: <i>/text/s</i>>]\n" + //
-        "t004 [label=<F,Q,Z: een&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n" + //
-        "t005 [label=<F: vrouw<br/>Q: vrouw&#9251;<br/>Z: vrouw&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n" + //
-        "t006 [label=<F: ,&#x21A9;<br/>&#9251;de&#9251;<br/>F: <i>/text/s</i>>]\n" + //
-        "t007 [label=<F,Z: ongewisheid&#9251;<br/>F,Z: <i>/text/s</i>>]\n" + //
-        "t008 [label=<F,Q,Z: vóór&#9251;de&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n" + //
-        "t009 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n" + //
-        "t010 [label=<F,Q,Z: liefelijke&#9251;toestemming<br/>F,Q,Z: <i>/text/s</i>>]\n" + //
-        "t011 [label=<F: !<br/>F: <i>/text/s</i>>]\n" + //
-        "t012 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n" + //
-        "t013 [label=<F,Q: werven&#9251;om<br/>F,Q: <i>/text/s/del</i>>]\n" + //
-        "t014 [label=<F: trachten&#9251;naar<br/>Q: trachten&#9251;naar<br/>Z: trachten&#9251;naar&#9251;<br/>F: <i>/text/s/add</i><br/>Q: <i>/text/s/add</i><br/>Z: <i>/text/s</i><br/>>]\n" + //
-        "t015 [label=<Q: <br/>Q: <i>/text/s/lb</i>>]\n" + //
-        "t016 [label=<Q: !&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;<br/>Z: !Die&#9251;dagen&#9251;<br/>Q,Z: <i>/text/s</i>>]\n" + //
-        "t017 [label=<Q: van&#9251;nerveuze&#9251;verwachting&#9251;<br/>Q: <i>/text/s</i>>]\n" + //
-        "t018 [label=<Q,Z: .<br/>Q,Z: <i>/text/s</i>>]\n" + //
-        "t019 [label=<Z: van&#9251;<br/>Z: <i>/text/s</i>>]\n" + //
-        "t000->t002[label=\"F,Q,Z\"]\n" + //
-        "t002->t012[label=\"F\"]\n" + //
-        "t002->t013[label=\"Q\"]\n" + //
-        "t002->t014[label=\"Q,Z\"]\n" + //
-        "t003->t004[label=\"F,Q\"]\n" + //
-        "t004->t005[label=\"F,Z\"]\n" + //
-        "t004->t015[label=\"Q\"]\n" + //
-        "t005->t006[label=\"F\"]\n" + //
-        "t005->t016[label=\"Q,Z\"]\n" + //
-        "t006->t007[label=\"F\"]\n" + //
-        "t007->t008[label=\"F,Z\"]\n" + //
-        "t008->t009[label=\"F\"]\n" + //
-        "t008->t010[label=\"Q,Z\"]\n" + //
-        "t009->t010[label=\"F\"]\n" + //
-        "t010->t011[label=\"F\"]\n" + //
-        "t010->t018[label=\"Q,Z\"]\n" + //
-        "t011->t001[label=\"F\"]\n" + //
-        "t012->t013[label=\"F\"]\n" + //
-        "t012->t014[label=\"F\"]\n" + //
-        "t013->t003[label=\"F,Q\"]\n" + //
-        "t014->t003[label=\"F,Q\"]\n" + //
-        "t014->t004[label=\"Z\"]\n" + //
-        "t015->t005[label=\"Q\"]\n" + //
-        "t016->t017[label=\"Q\"]\n" + //
-        "t016->t019[label=\"Z\"]\n" + //
-        "t017->t008[label=\"Q\"]\n" + //
-        "t018->t001[label=\"Q,Z\"]\n" + //
-        "t019->t007[label=\"Z\"]\n" + //
-        "}";
+    String expected = "digraph CollationGraph{\n" + "labelloc=b\n" + "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
+        + "t002 [label=<F,Q,Z: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n" + "t003 [label=<F,Q: &#9251;<br/>F,Q: <i>/text/s</i>>]\n"
+        + "t004 [label=<F,Q,Z: een&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n" + "t005 [label=<F: vrouw<br/>Q: vrouw&#9251;<br/>Z: vrouw&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n"
+        + "t006 [label=<F: ,&#x21A9;<br/>&#9251;de&#9251;<br/>F: <i>/text/s</i>>]\n" + "t007 [label=<F,Z: ongewisheid&#9251;<br/>F,Z: <i>/text/s</i>>]\n"
+        + "t008 [label=<F,Q,Z: vóór&#9251;de&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n" + "t009 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n"
+        + "t010 [label=<F,Q,Z: liefelijke&#9251;toestemming<br/>F,Q,Z: <i>/text/s</i>>]\n" + "t011 [label=<F: !<br/>F: <i>/text/s</i>>]\n" + "t012 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n"
+        + "t013 [label=<F,Q: werven&#9251;om<br/>F,Q: <i>/text/s/del</i>>]\n"
+        + "t014 [label=<F: trachten&#9251;naar<br/>Q: trachten&#9251;naar<br/>Z: trachten&#9251;naar&#9251;<br/>F: <i>/text/s/add</i><br/>Q: <i>/text/s/add</i><br/>Z: <i>/text/s</i><br/>>]\n"
+        + "t015 [label=<Q: <br/>Q: <i>/text/s/lb</i>>]\n" + "t016 [label=<Q: !&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;<br/>Z: !Die&#9251;dagen&#9251;van&#9251;<br/>Q,Z: <i>/text/s</i>>]\n"
+        + "t017 [label=<Q: nerveuze&#9251;verwachting&#9251;<br/>Q: <i>/text/s</i>>]\n" + "t018 [label=<Q,Z: .<br/>Q,Z: <i>/text/s</i>>]\n" + "t000->t002[label=\"F,Q,Z\"]\n"
+        + "t002->t012[label=\"F\"]\n" + "t002->t013[label=\"Q\"]\n" + "t002->t014[label=\"Q,Z\"]\n" + "t003->t004[label=\"F,Q\"]\n" + "t004->t005[label=\"F,Z\"]\n" + "t004->t015[label=\"Q\"]\n"
+        + "t005->t006[label=\"F\"]\n" + "t005->t016[label=\"Q,Z\"]\n" + "t006->t007[label=\"F\"]\n" + "t007->t008[label=\"F,Z\"]\n" + "t008->t009[label=\"F\"]\n" + "t008->t010[label=\"Q,Z\"]\n"
+        + "t009->t010[label=\"F\"]\n" + "t010->t011[label=\"F\"]\n" + "t010->t018[label=\"Q,Z\"]\n" + "t011->t001[label=\"F\"]\n" + "t012->t013[label=\"F\"]\n" + "t012->t014[label=\"F\"]\n"
+        + "t013->t003[label=\"F,Q\"]\n" + "t014->t003[label=\"F,Q\"]\n" + "t014->t004[label=\"Z\"]\n" + "t015->t005[label=\"Q\"]\n" + "t016->t007[label=\"Z\"]\n" + "t016->t017[label=\"Q\"]\n"
+        + "t017->t008[label=\"Q\"]\n" + "t018->t001[label=\"Q,Z\"]\n" + "}";
 
     testHyperCollation3(wF, wQ, wZ, expected);
   }
@@ -474,7 +446,7 @@ public class HyperCollaterTest extends HyperCollateTest {
         "labelloc=b\n" + //
         "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + //
         "t001 [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "t002 [label=<F,N: so&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
+        "t002 [label=<F: so&#9251;infinitely&#9251;miserable,&#9251;<br/>F: <i>/text/p/s</i>>]\n" + //
         "t003 [label=<F,N: ?<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s/add</i><br/>>]\n" + //
         "t004 [label=<F,N: &#9251;<br/>F: <i>/text/p</i><br/>N: <i>/text/s</i><br/>>]\n" + //
         "t005 [label=<F: Oh<br/>N: oh&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
@@ -482,27 +454,25 @@ public class HyperCollaterTest extends HyperCollateTest {
         "t007 [label=<F: no<br/>N: no&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
         "t008 [label=<F: !&#9251;<br/>F: <i>/text/p/s</i>>]\n" + //
         "t009 [label=<F: ...&#9251;<br/>N: ...&#x21A9;<br/><br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
-        "t010 [label=<F: infinitely&#9251;miserable,&#9251;so&#9251;<br/>F: <i>/text/p/s</i>>]\n" + //
-        "t011 [label=<F,N: destitute&#9251;of&#9251;every&#9251;hope&#9251;of&#9251;consolation&#9251;to&#9251;live<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
-        "t012 [label=<N: –&#9251;<br/>N: <i>/text/s</i>>]\n" + //
-        "t013 [label=<N: -<br/>N: <i>/text/s/del</i>>]\n" + //
-        "t000->t002[label=\"F,N\"]\n" + //
+        "t010 [label=<F,N: so&#9251;destitute&#9251;of&#9251;every&#9251;hope&#9251;of&#9251;consolation&#9251;to&#9251;live<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
+        "t011 [label=<N: –&#9251;<br/>N: <i>/text/s</i>>]\n" + //
+        "t012 [label=<N: -<br/>N: <i>/text/s/del</i>>]\n" + //
+        "t000->t002[label=\"F\"]\n" + //
+        "t000->t010[label=\"N\"]\n" + //
         "t002->t010[label=\"F\"]\n" + //
-        "t002->t011[label=\"N\"]\n" + //
         "t003->t004[label=\"F,N\"]\n" + //
         "t004->t005[label=\"F,N\"]\n" + //
         "t005->t006[label=\"F\"]\n" + //
         "t005->t007[label=\"N\"]\n" + //
         "t006->t007[label=\"F\"]\n" + //
         "t007->t008[label=\"F\"]\n" + //
-        "t007->t012[label=\"N\"]\n" + //
+        "t007->t011[label=\"N\"]\n" + //
         "t008->t009[label=\"F\"]\n" + //
         "t009->t001[label=\"F,N\"]\n" + //
-        "t010->t011[label=\"F\"]\n" + //
-        "t011->t003[label=\"F,N\"]\n" + //
-        "t011->t013[label=\"N\"]\n" + //
-        "t012->t009[label=\"N\"]\n" + //
-        "t013->t004[label=\"N\"]\n" + //
+        "t010->t003[label=\"F,N\"]\n" + //
+        "t010->t012[label=\"N\"]\n" + //
+        "t011->t009[label=\"N\"]\n" + //
+        "t012->t004[label=\"N\"]\n" + //
         "}";
 
     testHyperCollation(wF, wQ, expected);
