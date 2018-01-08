@@ -22,14 +22,15 @@ package nl.knaw.huygens.hypercollate.collater;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import nl.knaw.huygens.hypercollate.model.CollationGraph;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
 public class QuantumCollatedMatchList {
 
@@ -93,7 +94,7 @@ public class QuantumCollatedMatchList {
     return potentialMatches.stream()//
         .filter(m -> m.getCollatedNode().equals(node) //
             || m.getWitnessVertex().equals(tokenVertexForWitness) //
-            || (hasSigilOverlap(m,nodeSigils) && m.getNodeRank() < minNodeRank) //
+            || (hasSigilOverlap(m, nodeSigils) && m.getNodeRank() < minNodeRank) //
             || m.getVertexRank() < minVertexRank)//
         .collect(toList());
   }

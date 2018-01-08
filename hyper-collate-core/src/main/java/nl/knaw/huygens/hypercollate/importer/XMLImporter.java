@@ -1,25 +1,5 @@
 package nl.knaw.huygens.hypercollate.importer;
 
-import eu.interedition.collatex.simple.SimplePatternTokenizer;
-import static java.util.stream.Collectors.joining;
-import nl.knaw.huygens.hypercollate.model.*;
-import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
-import org.apache.commons.io.FileUtils;
-
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.*;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
 /*-
  * #%L
  * hyper-collate-core
@@ -39,6 +19,42 @@ import java.util.stream.Stream;
  * limitations under the License.
  * #L%
  */
+import static java.util.stream.Collectors.joining;
+import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Attribute;
+import javax.xml.stream.events.Characters;
+import javax.xml.stream.events.EndElement;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
+
+import org.apache.commons.io.FileUtils;
+
+import eu.interedition.collatex.simple.SimplePatternTokenizer;
+import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
+import nl.knaw.huygens.hypercollate.model.Markup;
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+import nl.knaw.huygens.hypercollate.model.SimpleWitness;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
 public class XMLImporter {
 
@@ -227,6 +243,8 @@ public class XMLImporter {
     private final SimpleWitness witness;
     private String parentXPath;
     private Boolean afterDel = false;
+    private AtomicInteger branchCounter = new AtomicInteger(0);
+    private final Deque<String> branchIds = new LinkedList<>();
 
     private final Deque<Boolean> inAppStack = new LinkedList<>();
     private final Deque<Boolean> ignoreRdgStack = new LinkedList<>();
@@ -242,6 +260,11 @@ public class XMLImporter {
       ignoreRdgStack.push(false);
       inAppStack.push(false);
       unconnectedRdgVerticesStack.push(new ArrayList<>());
+      branchIds.push(nextBranchId());
+    }
+
+    private String nextBranchId() {
+      return this.witness.getSigil() + "^" + branchCounter.getAndIncrement();
     }
 
     void openMarkup(Markup markup) {
@@ -254,6 +277,7 @@ public class XMLImporter {
       parentXPath = buildParentXPath();
       if (!inAppStack.peek() && isVariationStartingMarkup(markup)) { // del
         variationStartVertices.push(lastTokenVertex);
+        branchIds.push(nextBranchId());
 
       } else if (!inAppStack.peek() && isVariationEndingMarkup(markup)) { // add
         if (afterDel) {
@@ -264,6 +288,7 @@ public class XMLImporter {
 
         }
         afterDel = false;
+        branchIds.push(nextBranchId());
 
       } else if (isApp(markup)) { // app
         variationStartVertices.push(lastTokenVertex);
@@ -276,6 +301,7 @@ public class XMLImporter {
 
         } else {
           lastTokenVertex = variationStartVertices.peek();
+          branchIds.push(nextBranchId());
         }
 
       }
@@ -317,12 +343,15 @@ public class XMLImporter {
       if (!expectedTag.equals(closingTag)) {
         throw new RuntimeException("XML error: expected </" + expectedTag + ">, got </" + closingTag + ">");
       }
+
       if (!inAppStack.peek() && isVariationStartingMarkup(markup)) {
         unconnectedVertices.push(lastTokenVertex);
+        branchIds.pop();
         afterDel = true;
 
       } else if (!inAppStack.peek() && isVariationEndingMarkup(markup)) {
         variationEndVertices.push(lastTokenVertex);
+        branchIds.pop();
 
       } else if (isApp(markup)) {
         variationStartVertices.pop();
@@ -331,6 +360,7 @@ public class XMLImporter {
 
       } else if (isRdg(markup)) {
         unconnectedRdgVerticesStack.peek().add(lastTokenVertex);
+        branchIds.pop();
 
       }
     }
@@ -351,6 +381,7 @@ public class XMLImporter {
           .setParentXPath(parentXPath)//
           .setNormalizedContent(normalizer.apply(content));
       SimpleTokenVertex tokenVertex = new SimpleTokenVertex(token);
+      tokenVertex.setSubSigil(branchIds.peek());
       graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex);
 
       if (afterDel) { // del without add

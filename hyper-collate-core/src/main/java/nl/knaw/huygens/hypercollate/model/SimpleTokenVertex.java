@@ -19,18 +19,18 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
-
-import eu.interedition.collatex.Token;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+
+import eu.interedition.collatex.Token;
 
 public class SimpleTokenVertex implements TokenVertex, Comparable<SimpleTokenVertex> {
 
   private final MarkedUpToken token;
   private final List<TokenVertex> incomingVertices = new ArrayList<>();
   private final List<TokenVertex> outgoingVertices = new ArrayList<>();
+  private String subSigil;
 
   public SimpleTokenVertex(MarkedUpToken token) {
     this.token = token;
@@ -66,6 +66,16 @@ public class SimpleTokenVertex implements TokenVertex, Comparable<SimpleTokenVer
     return token.getWitness().getSigil();
   }
 
+  public SimpleTokenVertex setSubSigil(String subSigil) {
+    this.subSigil = subSigil;
+    return this;
+  }
+
+  @Override
+  public String getSubSigil() {
+    return subSigil;
+  }
+
   public String getContent() {
     return token.getContent();
   }
@@ -86,4 +96,5 @@ public class SimpleTokenVertex implements TokenVertex, Comparable<SimpleTokenVer
   public Long getIndexNumber() {
     return token.getIndexNumber();
   }
+
 }

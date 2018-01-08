@@ -1,27 +1,5 @@
 package nl.knaw.huygens.hypercollate.collater;
 
-import com.google.common.base.Preconditions;
-import eu.interedition.collatex.Token;
-import eu.interedition.collatex.dekker.Tuple;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
-import nl.knaw.huygens.hypercollate.tools.CollationGraphRanking;
-import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
-import nl.knaw.huygens.hypercollate.tools.StreamUtil;
-import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
-import nl.knaw.huygens.hypergraph.core.TraditionalEdge;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
-
 /*-
  * #%L
  * hyper-collate-core
@@ -41,6 +19,37 @@ import java.util.function.Predicate;
  * limitations under the License.
  * #L%
  */
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
+
+import eu.interedition.collatex.Token;
+import eu.interedition.collatex.dekker.Tuple;
+import nl.knaw.huygens.hypercollate.model.CollationGraph;
+import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+import nl.knaw.huygens.hypercollate.tools.CollationGraphRanking;
+import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
+import nl.knaw.huygens.hypercollate.tools.StreamUtil;
+import nl.knaw.huygens.hypergraph.core.TraditionalEdge;
 
 public class HyperCollater {
   private static final Logger LOG = LoggerFactory.getLogger(HyperCollater.class);
@@ -113,6 +122,7 @@ public class HyperCollater {
         .filter(SimpleTokenVertex.class::isInstance)//
         .forEach(tokenVertex -> {
           Node node = collationGraph.addNodeWithTokens(tokenVertex.getToken());
+          node.getSubSigils().add(tokenVertex.getSubSigil());
           collatedTokenVertexMap.put(tokenVertex, node);
         });
     Node endNode = collationGraph.addNodeWithTokens();
@@ -176,6 +186,7 @@ public class HyperCollater {
       Token token = tokenVertexForWitnessGraph.getToken();
       if (token != null) {
         matchingNode.addToken(token);
+        matchingNode.getSubSigils().add(tokenVertexForWitnessGraph.getSubSigil());
       }
       collatedTokenVertexMap.put(tokenVertexForWitnessGraph, matchingNode);
     }
@@ -265,6 +276,7 @@ public class HyperCollater {
       TokenVertex tokenVertex) {
     if (!collatedTokenMap.containsKey(tokenVertex)) {
       Node collationNode = collationGraph.addNodeWithTokens(tokenVertex.getToken());
+      collationNode.getSubSigils().add(tokenVertex.getSubSigil());
       collatedTokenMap.put(tokenVertex, collationNode);
     }
   }

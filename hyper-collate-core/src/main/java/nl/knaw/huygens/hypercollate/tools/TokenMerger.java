@@ -1,5 +1,12 @@
 package nl.knaw.huygens.hypercollate.tools;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
 /*-
  * #%L
  * hyper-collate-core
@@ -19,15 +26,12 @@ package nl.knaw.huygens.hypercollate.tools;
  * limitations under the License.
  * #L%
  */
-
-import nl.knaw.huygens.hypercollate.model.*;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
+import nl.knaw.huygens.hypercollate.model.EndTokenVertex;
+import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+import nl.knaw.huygens.hypercollate.model.SimpleWitness;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
 public class TokenMerger {
 
@@ -81,7 +85,8 @@ public class TokenMerger {
         .setWitness((SimpleWitness) originalToken.getWitness())//
         .setIndexNumber(tokenNumber);
 
-    SimpleTokenVertex mergedVertex = new SimpleTokenVertex(mergedToken);
+    SimpleTokenVertex mergedVertex = new SimpleTokenVertex(mergedToken)//
+        .setSubSigil(originalVertex.getSubSigil());
     originalGraph.getMarkupListForTokenVertex(originalVertex)//
         .forEach(markup -> mergedGraph.addMarkupToTokenVertex(mergedVertex, markup));
     originalToMergedMap.put(tokenNumber, mergedVertex);

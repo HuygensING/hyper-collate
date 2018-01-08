@@ -1,5 +1,11 @@
 package nl.knaw.huygens.hypercollate.collater;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.stream.Stream;
+
+import org.junit.Test;
+
 /*-
  * #%L
  * hyper-collate-core
@@ -23,10 +29,6 @@ package nl.knaw.huygens.hypercollate.collater;
 import eu.interedition.collatex.Token;
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import static org.assertj.core.api.Assertions.assertThat;
-import org.junit.Test;
-
-import java.util.stream.Stream;
 
 public class MatchTest extends HyperCollateTest {
   @Test
@@ -71,6 +73,11 @@ public class MatchTest extends HyperCollateTest {
 
       @Override
       public String getSigil() {
+        return sigil;
+      }
+
+      @Override
+      public String getSubSigil() {
         return sigil;
       }
     };
