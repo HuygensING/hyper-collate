@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.dropwizard.db;
  * #%L
  * hyper-collate-server
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,22 +20,17 @@ package nl.knaw.huygens.hypercollate.dropwizard.db;
  * #L%
  */
 
-import java.time.Instant;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-
 import nl.knaw.huygens.hypercollate.api.CollationInput;
 import nl.knaw.huygens.hypercollate.dropwizard.ServerConfiguration;
 import nl.knaw.huygens.hypercollate.dropwizard.api.CollationStore;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
+
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 public class InMemoryCollationStore implements CollationStore {
   private final Set<UUID> uuids = new LinkedHashSet<>();
