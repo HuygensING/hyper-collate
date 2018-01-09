@@ -1,11 +1,12 @@
 package nl.knaw.huygens.hypercollate.collater;
 
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
 import java.util.*;
 import java.util.stream.Stream;
+
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.stream.Collectors.toList;
 
 /*-
  * #%L
@@ -60,8 +61,7 @@ public class QuantumMatchSet {
   }
 
   private Set<Match> cloneChosenMatches() {
-    Set<Match> newChosen = new HashSet<>(chosenMatches);
-    return newChosen;
+    return new HashSet<>(chosenMatches);
   }
 
   private Set<Match> calculateNewPotential(Collection<Match> potentialMatches, Match match) {

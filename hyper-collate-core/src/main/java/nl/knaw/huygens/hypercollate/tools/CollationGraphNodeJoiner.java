@@ -1,20 +1,15 @@
 package nl.knaw.huygens.hypercollate.tools;
 
-import static java.util.stream.Collectors.toList;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.common.base.Preconditions;
-
 import eu.interedition.collatex.Token;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
 import nl.knaw.huygens.hypergraph.core.TraditionalEdge;
+
+import java.util.*;
+
+import static java.util.stream.Collectors.toList;
 
 /*-
  * #%L
@@ -25,9 +20,9 @@ import nl.knaw.huygens.hypergraph.core.TraditionalEdge;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -97,7 +92,7 @@ public class CollationGraphNodeJoiner {
   }
 
   private static void mergeNodeTokens(Node lastNode, Node originalNode) {
-    lastNode.getSubSigils().addAll(originalNode.getSubSigils());
+    originalNode.getSigils().forEach(s -> lastNode.addBranchPath(s, originalNode.getBranchPath(s)));
     for (String s : lastNode.getSigils()) {
       MarkedUpToken tokenForWitness = (MarkedUpToken) lastNode.getTokenForWitness(s);
       MarkedUpToken tokenToMerge = (MarkedUpToken) originalNode.getTokenForWitness(s);
@@ -112,9 +107,9 @@ public class CollationGraphNodeJoiner {
         .map(originalNode::getTokenForWitness)//
         .map(CollationGraphNodeJoiner::cloneToken)//
         .collect(toList())//
-        .toArray(new Token[] {});
+        .toArray(new Token[]{});
     Node newNode = mergedGraph.addNodeWithTokens(tokens);
-    newNode.getSubSigils().addAll(originalNode.getSubSigils());
+    originalNode.getSigils().forEach(s -> newNode.addBranchPath(s, originalNode.getBranchPath(s)));
     return newNode;
   }
 

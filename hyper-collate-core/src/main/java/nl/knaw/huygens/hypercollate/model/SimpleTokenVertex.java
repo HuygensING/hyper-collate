@@ -9,9 +9,9 @@ package nl.knaw.huygens.hypercollate.model;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,18 +19,19 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
+
+import eu.interedition.collatex.Token;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
-
-import eu.interedition.collatex.Token;
 
 public class SimpleTokenVertex implements TokenVertex, Comparable<SimpleTokenVertex> {
 
   private final MarkedUpToken token;
   private final List<TokenVertex> incomingVertices = new ArrayList<>();
   private final List<TokenVertex> outgoingVertices = new ArrayList<>();
-  private String subSigil;
+  private List<Integer> branchPath;
 
   public SimpleTokenVertex(MarkedUpToken token) {
     this.token = token;
@@ -66,14 +67,14 @@ public class SimpleTokenVertex implements TokenVertex, Comparable<SimpleTokenVer
     return token.getWitness().getSigil();
   }
 
-  public SimpleTokenVertex setSubSigil(String subSigil) {
-    this.subSigil = subSigil;
+  public SimpleTokenVertex setBranchPath(List<Integer> branchPath) {
+    this.branchPath = branchPath;
     return this;
   }
 
   @Override
-  public String getSubSigil() {
-    return subSigil;
+  public List<Integer> getBranchPath() {
+    return branchPath;
   }
 
   public String getContent() {

@@ -19,14 +19,16 @@ package nl.knaw.huygens.hypercollate.importer;
  * limitations under the License.
  * #L%
  */
-import static java.util.stream.Collectors.joining;
-import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
+import eu.interedition.collatex.simple.SimplePatternTokenizer;
+import nl.knaw.huygens.hypercollate.model.*;
+import org.apache.commons.io.FileUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.*;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -36,25 +38,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.Attribute;
-import javax.xml.stream.events.Characters;
-import javax.xml.stream.events.EndElement;
-import javax.xml.stream.events.StartElement;
-import javax.xml.stream.events.XMLEvent;
-
-import org.apache.commons.io.FileUtils;
-
-import eu.interedition.collatex.simple.SimplePatternTokenizer;
-import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
-import nl.knaw.huygens.hypercollate.model.Markup;
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.SimpleWitness;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+import static java.util.stream.Collectors.joining;
+import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
 
 public class XMLImporter {
 
@@ -243,8 +228,8 @@ public class XMLImporter {
     private final SimpleWitness witness;
     private String parentXPath;
     private Boolean afterDel = false;
-    private AtomicInteger branchCounter = new AtomicInteger(0);
-    private final Deque<String> branchIds = new LinkedList<>();
+    private final AtomicInteger branchCounter = new AtomicInteger(0);
+    private final Deque<Integer> branchIds = new LinkedList<>();
 
     private final Deque<Boolean> inAppStack = new LinkedList<>();
     private final Deque<Boolean> ignoreRdgStack = new LinkedList<>();
@@ -263,8 +248,8 @@ public class XMLImporter {
       branchIds.push(nextBranchId());
     }
 
-    private String nextBranchId() {
-      return this.witness.getSigil() + "^" + branchCounter.getAndIncrement();
+    private Integer nextBranchId() {
+      return branchCounter.getAndIncrement();
     }
 
     void openMarkup(Markup markup) {
@@ -381,7 +366,7 @@ public class XMLImporter {
           .setParentXPath(parentXPath)//
           .setNormalizedContent(normalizer.apply(content));
       SimpleTokenVertex tokenVertex = new SimpleTokenVertex(token);
-      tokenVertex.setSubSigil(branchIds.peek());
+      tokenVertex.setBranchPath(new ArrayList<>(branchIds));
       graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex);
 
       if (afterDel) { // del without add

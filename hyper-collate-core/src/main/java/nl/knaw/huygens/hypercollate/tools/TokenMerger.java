@@ -86,7 +86,7 @@ public class TokenMerger {
         .setIndexNumber(tokenNumber);
 
     SimpleTokenVertex mergedVertex = new SimpleTokenVertex(mergedToken)//
-        .setSubSigil(originalVertex.getSubSigil());
+        .setBranchPath(originalVertex.getBranchPath());
     originalGraph.getMarkupListForTokenVertex(originalVertex)//
         .forEach(markup -> mergedGraph.addMarkupToTokenVertex(mergedVertex, markup));
     originalToMergedMap.put(tokenNumber, mergedVertex);

@@ -9,9 +9,9 @@ package nl.knaw.huygens.hypercollate.collater;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,14 +19,14 @@ package nl.knaw.huygens.hypercollate.collater;
  * limitations under the License.
  * #L%
  */
-import static java.util.stream.Collectors.joining;
-
-import java.util.HashSet;
-import java.util.Set;
 
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
+
+import java.util.*;
+
+import static java.util.stream.Collectors.joining;
 
 public class CollatedMatch {
 
@@ -35,15 +35,17 @@ public class CollatedMatch {
   private final TokenVertex witnessVertex;
   private int vertexRank;
   private final Set<String> sigils = new HashSet<>();
-  private final Set<String> subSigils = new HashSet<>();
+  private final Map<String, List<Integer>> branchPaths = new HashMap<>();
 
   public CollatedMatch(CollationGraph.Node collatedNode, TokenVertex witnessVertex) {
     this.collatedNode = collatedNode;
     this.witnessVertex = witnessVertex;
     sigils.add(witnessVertex.getSigil());
     sigils.addAll(collatedNode.getSigils());
-    subSigils.add(witnessVertex.getSubSigil());
-    subSigils.addAll(collatedNode.getSubSigils());
+    branchPaths.put(witnessVertex.getSigil(), witnessVertex.getBranchPath());
+    for (String s : collatedNode.getSigils()) {
+      branchPaths.put(s, collatedNode.getBranchPath(s));
+    }
   }
 
   public CollationGraph.Node getCollatedNode() {
@@ -79,10 +81,6 @@ public class CollatedMatch {
     return sigils;
   }
 
-  public Set<String> getSubSigils() {
-    return subSigils;
-  }
-
   @Override
   public String toString() {
     StringBuilder stringBuilder = new StringBuilder("<[")//
@@ -116,4 +114,7 @@ public class CollatedMatch {
       return false;
   }
 
+  public List<Integer> getBranchPath(String s) {
+    return branchPaths.get(s);
+  }
 }

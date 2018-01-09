@@ -19,29 +19,14 @@ package nl.knaw.huygens.hypercollate.tools;
  * limitations under the License.
  * #L%
  */
+import eu.interedition.collatex.Token;
+import nl.knaw.huygens.hypercollate.model.*;
+import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
+
+import java.util.*;
+
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
-import eu.interedition.collatex.Token;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
-import nl.knaw.huygens.hypercollate.model.EndTokenVertex;
-import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.StartTokenVertex;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
 public class DotFactory {
 
@@ -158,20 +143,19 @@ public class DotFactory {
     StringBuilder label = new StringBuilder();
     Map<String, String> contentLabel = new HashMap<>();
     Map<String, String> markupLabel = new HashMap<>();
-    List<String> sortedSubSigils = node.getSubSigils().stream().sorted().collect(toList());
-    String joinedSubSigils = node.getSubSigils().stream().sorted().collect(joining(","));
+    List<String> sortedSigils = node.getSigils().stream().sorted().collect(toList());
+    String joinedSigils = sortedSigils.stream().collect(joining(","));
 
-    prepare(node, contentLabel, markupLabel, sortedSubSigils);
+    prepare(node, contentLabel, markupLabel, sortedSigils);
 
-    appendContent(label, contentLabel, sortedSubSigils, joinedSubSigils);
-    appendMarkup(label, markupLabel, sortedSubSigils, joinedSubSigils);
+    appendContent(label, contentLabel, sortedSigils, joinedSigils);
+    appendMarkup(label, markupLabel, sortedSigils, joinedSigils);
 
     return label.toString();
   }
 
-  private static void prepare(Node node, Map<String, String> contentLabel, Map<String, String> markupLabel, List<String> sortedSubSigils) {
-    sortedSubSigils.forEach(sub -> {
-      String s = extractSigil(sub);
+  private static void prepare(Node node, Map<String, String> contentLabel, Map<String, String> markupLabel, List<String> sortedSigils) {
+    sortedSigils.forEach(s -> {
       Token token = node.getTokenForWitness(s);
       if (token != null) {
         MarkedUpToken mToken = (MarkedUpToken) token;
@@ -182,38 +166,34 @@ public class DotFactory {
     });
   }
 
-  private static String extractSigil(String sub) {
-    return sub.replaceFirst("\\^.*$", "");
-  }
-
-  private static void appendMarkup(StringBuilder label, Map<String, String> markupLabel, List<String> sortedSubSigils, String joinedSubSigils) {
+  private static void appendMarkup(StringBuilder label, Map<String, String> markupLabel, List<String> sortedSigils, String joinedSigils) {
     Set<String> markupLabelSet = new HashSet<>(markupLabel.values());
     if (markupLabelSet.size() == 1) {
-      label.append(joinedSubSigils)//
+      label.append(joinedSigils)//
           .append(": <i>")//
           .append(markupLabelSet.iterator().next())//
           .append("</i>");
 
     } else {
-      sortedSubSigils.forEach(sub -> label.append(sub)//
+      sortedSigils.forEach(s -> label.append(s)//
           .append(": <i>")//
-          .append(markupLabel.get(extractSigil(sub)))//
+          .append(markupLabel.get(s))//
           .append("</i><br/>"));
     }
   }
 
-  private static void appendContent(StringBuilder label, Map<String, String> contentLabel, List<String> sortedSubSigils, String joinedSubSigils) {
+  private static void appendContent(StringBuilder label, Map<String, String> contentLabel, List<String> sortedSigils, String joinedSigils) {
     Set<String> contentLabelSet = new HashSet<>(contentLabel.values());
     if (contentLabelSet.size() == 1) {
-      label.append(joinedSubSigils)//
+      label.append(joinedSigils)//
           .append(": ")//
           .append(contentLabelSet.iterator().next())//
           .append("<br/>");
 
     } else {
-      sortedSubSigils.forEach(s -> label.append(s)//
+      sortedSigils.forEach(s -> label.append(s)//
           .append(": ")//
-          .append(contentLabel.get(extractSigil(s)))//
+          .append(contentLabel.get(s))//
           .append("<br/>"));
     }
   }
