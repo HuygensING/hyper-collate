@@ -19,9 +19,9 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
-
 import eu.interedition.collatex.Token;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 public interface TokenVertex {
@@ -38,4 +38,5 @@ public interface TokenVertex {
 
   String getSigil();
 
+  List<Integer> getBranchPath();
 }

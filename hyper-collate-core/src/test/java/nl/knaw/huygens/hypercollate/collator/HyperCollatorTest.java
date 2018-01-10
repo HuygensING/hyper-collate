@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.collater;
+package nl.knaw.huygens.hypercollate.collator;
 
 /*-
  * #%L
@@ -19,28 +19,11 @@ package nl.knaw.huygens.hypercollate.collater;
  * limitations under the License.
  * #L%
  */
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import org.assertj.core.util.Sets;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
-
 import eu.interedition.collatex.dekker.Tuple;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.*;
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
@@ -49,13 +32,22 @@ import nl.knaw.huygens.hypercollate.model.TokenVertex;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
+import org.assertj.core.api.Assertions;
+import static org.assertj.core.api.Assertions.assertThat;
+import org.assertj.core.util.Sets;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class HyperCollaterTest extends HyperCollateTest {
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+public class HyperCollatorTest extends HyperCollateTest {
   private static final Logger LOG = LoggerFactory.getLogger(HyperCollateTest.class);
 
-  final HyperCollater hyperCollater1 = new HyperCollater(new OptimalMatchSetAlgorithm1());
-  private final HyperCollater hyperCollater2 = new HyperCollater(new OptimalMatchSetAlgorithm2());
-  private final HyperCollater[] hyperCollaters = new HyperCollater[] { /* hyperCollater1, */hyperCollater2 };
+  final HyperCollator hyperCollator = new HyperCollator();
 
   @Test
   public void testHierarchyWith3Witnesses() {
@@ -442,42 +434,45 @@ public class HyperCollaterTest extends HyperCollateTest {
         "</p></text>";
     LOG.info("F: {}", xmlF);
     VariantWitnessGraph wQ = importer.importXML("F", xmlF);//
-    String expected = "digraph CollationGraph{\n" + //
-        "labelloc=b\n" + //
-        "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "t001 [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "t002 [label=<F: so&#9251;infinitely&#9251;miserable,&#9251;<br/>F: <i>/text/p/s</i>>]\n" + //
-        "t003 [label=<F,N: ?<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s/add</i><br/>>]\n" + //
-        "t004 [label=<F,N: &#9251;<br/>F: <i>/text/p</i><br/>N: <i>/text/s</i><br/>>]\n" + //
-        "t005 [label=<F: Oh<br/>N: oh&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
-        "t006 [label=<F: ,&#9251;<br/>F: <i>/text/p/s</i>>]\n" + //
-        "t007 [label=<F: no<br/>N: no&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
-        "t008 [label=<F: !&#9251;<br/>F: <i>/text/p/s</i>>]\n" + //
-        "t009 [label=<F: ...&#9251;<br/>N: ...&#x21A9;<br/><br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
-        "t010 [label=<F,N: so&#9251;destitute&#9251;of&#9251;every&#9251;hope&#9251;of&#9251;consolation&#9251;to&#9251;live<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" + //
-        "t011 [label=<N: –&#9251;<br/>N: <i>/text/s</i>>]\n" + //
-        "t012 [label=<N: -<br/>N: <i>/text/s/del</i>>]\n" + //
-        "t000->t002[label=\"F\"]\n" + //
-        "t000->t010[label=\"N\"]\n" + //
-        "t002->t010[label=\"F\"]\n" + //
-        "t003->t004[label=\"F,N\"]\n" + //
-        "t004->t005[label=\"F,N\"]\n" + //
-        "t005->t006[label=\"F\"]\n" + //
-        "t005->t007[label=\"N\"]\n" + //
-        "t006->t007[label=\"F\"]\n" + //
-        "t007->t008[label=\"F\"]\n" + //
-        "t007->t011[label=\"N\"]\n" + //
-        "t008->t009[label=\"F\"]\n" + //
-        "t009->t001[label=\"F,N\"]\n" + //
-        "t010->t003[label=\"F,N\"]\n" + //
-        "t010->t012[label=\"N\"]\n" + //
-        "t011->t009[label=\"N\"]\n" + //
-        "t012->t004[label=\"N\"]\n" + //
+    String expected = "digraph CollationGraph{\n" +
+        "labelloc=b\n" +
+        "t000 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t001 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t002 [label=<F,N: so&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" +
+        "t003 [label=<F,N: ?<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s/add</i><br/>>]\n" +
+        "t004 [label=<F,N: &#9251;<br/>F: <i>/text/p</i><br/>N: <i>/text/s</i><br/>>]\n" +
+        "t005 [label=<F: Oh<br/>N: oh&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" +
+        "t006 [label=<F: ,&#9251;<br/>F: <i>/text/p/s</i>>]\n" +
+        "t007 [label=<F: no<br/>N: no&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" +
+        "t008 [label=<F: !&#9251;<br/>F: <i>/text/p/s</i>>]\n" +
+        "t009 [label=<F: ...&#9251;<br/>N: ...&#x21A9;<br/><br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" +
+        "t010 [label=<F: infinitely&#9251;miserable,&#9251;so&#9251;<br/>F: <i>/text/p/s</i>>]\n" +
+        "t011 [label=<F,N: destitute&#9251;of&#9251;every&#9251;hope&#9251;of&#9251;consolation&#9251;to&#9251;live<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n" +
+        "t012 [label=<N: –&#9251;<br/>N: <i>/text/s</i>>]\n" +
+        "t013 [label=<N: -<br/>N: <i>/text/s/del</i>>]\n" +
+        "t000->t002[label=\"F,N\"]\n" +
+        "t002->t010[label=\"F\"]\n" +
+        "t002->t011[label=\"N\"]\n" +
+        "t003->t004[label=\"F,N\"]\n" +
+        "t004->t005[label=\"F,N\"]\n" +
+        "t005->t006[label=\"F\"]\n" +
+        "t005->t007[label=\"N\"]\n" +
+        "t006->t007[label=\"F\"]\n" +
+        "t007->t008[label=\"F\"]\n" +
+        "t007->t012[label=\"N\"]\n" +
+        "t008->t009[label=\"F\"]\n" +
+        "t009->t001[label=\"F,N\"]\n" +
+        "t010->t011[label=\"F\"]\n" +
+        "t011->t003[label=\"F,N\"]\n" +
+        "t011->t013[label=\"N\"]\n" +
+        "t012->t009[label=\"N\"]\n" +
+        "t013->t004[label=\"N\"]\n" +
         "}";
 
     testHyperCollation(wF, wQ, expected);
   }
 
+  @Ignore
   @Test
   public void testMaryShellyGodwinFrankensteinFragment2() {
     XMLImporter importer = new XMLImporter();
@@ -496,43 +491,43 @@ public class HyperCollaterTest extends HyperCollateTest {
         "</text>";
     LOG.info("F: {}", xmlF);
     VariantWitnessGraph wQ = importer.importXML("F", xmlF);//
-    String expected = "digraph CollationGraph{\n" + //
-        "labelloc=b\n" + //
-        "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "t001 [label=\"\";shape=doublecircle,rank=middle]\n" + //
-        "t002 [label=<F: Frankenstein&#9251;discovered<br/>N: Frankenstein&#9251;discovered&#9251;<br/>F,N: <i>/text/s</i>>]\n" + //
-        "t003 [label=<F: ;&#9251;<br/>F: <i>/text/s</i>>]\n" + //
-        "t004 [label=<F,N: he&#9251;asked&#9251;to&#9251;see&#9251;them&#9251;<br/>F,N: <i>/text/s</i>>]\n" + //
-        "t005 [label=<F: and&#9251;then&#9251;<br/>F: <i>/text/s</i>>]\n" + //
-        "t006 [label=<F: himself&#9251;corrected&#9251;<br/>N: himself&#9251;corrected&#x21A9;<br/><br/>F,N: <i>/text/s</i>>]\n" + //
-        "t007 [label=<F: and&#9251;augmented&#9251;<br/>N: and&#9251;augmented<br/>F: <i>/text/s</i><br/>N: <i>/text/s/add</i><br/>>]\n" + //
-        "t008 [label=<F: them&#9251;in&#9251;many&#9251;places&#x21A9;<br/><br/>N: them&#9251;in&#9251;many&#9251;places<br/>F,N: <i>/text/s</i>>]\n" + //
-        "t009 [label=<F: or<br/>F: <i>/text/s/del</i>>]\n" + //
-        "t010 [label=<F: that&#9251;I<br/>N: that&#9251;I&#9251;<br/>F: <i>/text/s/add</i><br/>N: <i>/text/s</i><br/>>]\n" + //
-        "t011 [label=<F: &#9251;<br/>F: <i>/text/s</i>>]\n" + //
-        "t012 [label=<F: made&#9251;notes&#9251;concerning&#9251;his&#9251;history<br/>N: made&#9251;notes&#9251;concerning&#9251;his&#9251;history&#9251;<br/>F,N: <i>/text/s</i>>]\n" + //
-        "t013 [label=<N: &amp;&#9251;<br/>N: <i>/text/s</i>>]\n" + //
-        "t014 [label=<N: detailed&#9251;or&#9251;<br/>N: <i>/text/s</i>>]\n" + //
-        "t000->t002[label=\"F,N\"]\n" + //
-        "t002->t009[label=\"F\"]\n" + //
-        "t002->t010[label=\"F,N\"]\n" + //
-        "t003->t004[label=\"F\"]\n" + //
-        "t004->t005[label=\"F\"]\n" + //
-        "t004->t013[label=\"N\"]\n" + //
-        "t005->t006[label=\"F\"]\n" + //
-        "t006->t007[label=\"F,N\"]\n" + //
-        "t006->t008[label=\"N\"]\n" + //
-        "t007->t008[label=\"F,N\"]\n" + //
-        "t008->t001[label=\"F,N\"]\n" + //
-        "t009->t011[label=\"F\"]\n" + //
-        "t010->t011[label=\"F\"]\n" + //
-        "t010->t014[label=\"N\"]\n" + //
-        "t011->t012[label=\"F\"]\n" + //
-        "t012->t003[label=\"F\"]\n" + //
-        "t012->t004[label=\"N\"]\n" + //
-        "t013->t006[label=\"N\"]\n" + //
-        "t014->t012[label=\"N\"]\n" + //
-        "}";
+    String expected = "digraph CollationGraph{\n" +
+        "labelloc=b\n" +
+        "t000 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t001 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t002 [label=<F: Frankenstein&#9251;discovered<br/>N: Frankenstein&#9251;discovered&#9251;<br/>F,N: <i>/text/s</i>>]\n" +
+        "t003 [label=<F: ;&#9251;<br/>F: <i>/text/s</i>>]\n" +
+        "t004 [label=<F,N: he&#9251;asked&#9251;to&#9251;see&#9251;them&#9251;<br/>F,N: <i>/text/s</i>>]\n" +
+        "t005 [label=<F: and&#9251;then&#9251;<br/>F: <i>/text/s</i>>]\n" +
+        "t006 [label=<F: himself&#9251;corrected&#9251;<br/>N: himself&#9251;corrected&#x21A9;<br/><br/>F,N: <i>/text/s</i>>]\n" +
+        "t007 [label=<F: and&#9251;augmented&#9251;<br/>N: and&#9251;augmented<br/>F: <i>/text/s</i><br/>N: <i>/text/s/add</i><br/>>]\n" +
+        "t008 [label=<F: them&#9251;in&#9251;many&#9251;places&#x21A9;<br/><br/>N: them&#9251;in&#9251;many&#9251;places<br/>F,N: <i>/text/s</i>>]\n" +
+        "t009 [label=<F: or<br/>F: <i>/text/s/del</i>>]\n" +
+        "t010 [label=<F: that&#9251;I<br/>N: that&#9251;I&#9251;<br/>F: <i>/text/s/add</i><br/>N: <i>/text/s</i><br/>>]\n" +
+        "t011 [label=<F: &#9251;<br/>F: <i>/text/s</i>>]\n" +
+        "t012 [label=<F: made&#9251;notes&#9251;concerning&#9251;his&#9251;history<br/>N: made&#9251;notes&#9251;concerning&#9251;his&#9251;history&#9251;<br/>F,N: <i>/text/s</i>>]\n" +
+        "t013 [label=<N: &amp;&#9251;<br/>N: <i>/text/s</i>>]\n" +
+        "t014 [label=<N: detailed&#9251;or&#9251;<br/>N: <i>/text/s</i>>]\n" +
+        "t000->t002[label=\"F,N\"]\n" +
+        "t002->t009[label=\"F\"]\n" +
+        "t002->t010[label=\"F,N\"]\n" +
+        "t003->t004[label=\"F\"]\n" +
+        "t004->t005[label=\"F\"]\n" +
+        "t004->t013[label=\"N\"]\n" +
+        "t005->t006[label=\"F\"]\n" +
+        "t006->t007[label=\"F,N\"]\n" +
+        "t006->t008[label=\"N\"]\n" +
+        "t007->t008[label=\"F,N\"]\n" +
+        "t008->t001[label=\"F,N\"]\n" +
+        "t009->t011[label=\"F\"]\n" +
+        "t010->t011[label=\"F\"]\n" +
+        "t010->t014[label=\"N\"]\n" +
+        "t011->t012[label=\"F\"]\n" +
+        "t012->t003[label=\"F\"]\n" +
+        "t012->t004[label=\"N\"]\n" +
+        "t013->t006[label=\"N\"]\n" +
+        "t014->t012[label=\"N\"]\n" +
+        "}  ";
 
     testHyperCollation(wF, wQ, expected);
   }
@@ -547,7 +542,7 @@ public class HyperCollaterTest extends HyperCollateTest {
     CollationGraph collationGraph = new CollationGraph();
     Map<TokenVertex, Node> map = new HashMap<>();
     List<Match> matches = new ArrayList<>();
-    hyperCollater2.initialize(collationGraph, map, wF, matches);
+    hyperCollator.initialize(collationGraph, map, wF);
     CollationGraph collation = CollationGraphNodeJoiner.join(collationGraph);
     String dot = CollationGraphVisualizer.toDot(collation);
     String expected = "digraph CollationGraph{\n" + "labelloc=b\n" + "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
@@ -563,21 +558,20 @@ public class HyperCollaterTest extends HyperCollateTest {
 
   @Test
   public void testPermute() {
-    List<Tuple<Integer>> permute1 = hyperCollater2.permute(3);
+    List<Tuple<Integer>> permute1 = hyperCollator.permute(3);
     LOG.info("permute={}", visualize(permute1));
     assertThat(Sets.newHashSet(permute1)).hasSameSizeAs(permute1);
     assertThat(permute1).hasSize(3);
 
-    List<Tuple<Integer>> permute2 = hyperCollater2.permute(4);
+    List<Tuple<Integer>> permute2 = hyperCollator.permute(4);
     LOG.info("permute={}", visualize(permute2));
     assertThat(Sets.newHashSet(permute2)).hasSameSizeAs(permute2);
     assertThat(permute2).hasSize(6);
 
-    List<Tuple<Integer>> permute3 = hyperCollater2.permute(10);
+    List<Tuple<Integer>> permute3 = hyperCollator.permute(10);
     LOG.info("permute={}", visualize(permute3));
     assertThat(Sets.newHashSet(permute3)).hasSameSizeAs(permute3);
     assertThat(permute3).hasSize(45);
-
   }
 
   @Test
@@ -593,7 +587,7 @@ public class HyperCollaterTest extends HyperCollateTest {
     List<VariantWitnessGraphRanking> rankings = witnesses.stream()//
         .map(VariantWitnessGraphRanking::of)//
         .collect(toList());
-    Set<Match> allPotentialMatches = hyperCollater2.getPotentialMatches(witnesses, rankings);
+    Set<Match> allPotentialMatches = hyperCollator.getPotentialMatches(witnesses, rankings);
     LOG.info("allPotentialMatches={}", allPotentialMatches);
     String match1 = "<A0,B0>";
     String match2 = "<A0,C0>";
@@ -603,11 +597,11 @@ public class HyperCollaterTest extends HyperCollateTest {
     String match6 = "<A:EndTokenVertex,B:EndTokenVertex>";
     String match7 = "<A:EndTokenVertex,C:EndTokenVertex>";
     String match8 = "<B:EndTokenVertex,C:EndTokenVertex>";
-    assertThat(allPotentialMatches).hasSize(8);
+    Assertions.assertThat(allPotentialMatches).hasSize(8);
     Set<String> matchStrings = allPotentialMatches.stream().map(Match::toString).collect(toSet());
     assertThat(matchStrings).contains(match1, match2, match3, match4, match5, match6, match7, match8);
 
-    Map<String, List<Match>> sortAndFilterMatchesByWitness = hyperCollater2.sortAndFilterMatchesByWitness(allPotentialMatches, asList(sigil1, sigil2, sigil3));
+    Map<String, List<Match>> sortAndFilterMatchesByWitness = hyperCollator.sortAndFilterMatchesByWitness(allPotentialMatches, asList(sigil1, sigil2, sigil3));
     LOG.info("sortAndFilterMatchesByWitness={}", sortAndFilterMatchesByWitness);
     assertThat(sortAndFilterMatchesByWitness).containsOnlyKeys(sigil1, sigil2, sigil3);
 
@@ -636,15 +630,11 @@ public class HyperCollaterTest extends HyperCollateTest {
 
   private void testHyperCollation(VariantWitnessGraph witness1, VariantWitnessGraph witness2, String expected) {
     Map<String, Long> collationDuration = new HashMap<>();
-    for (HyperCollater hypercollater : hyperCollaters) {
-      String name = hypercollater.getOptimalMatchSetFinderName();
-      LOG.info("Collating with {}", name);
       Stopwatch stopwatch = Stopwatch.createStarted();
-      CollationGraph collation0 = hypercollater.collate(witness1, witness2);
+    CollationGraph collation0 = hyperCollator.collate(witness1, witness2);
       stopwatch.stop();
       long duration = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-      LOG.info("Collating with {} took {} ms.", name, duration);
-      collationDuration.put(name, duration);
+    LOG.info("Collating took {} ms.", duration);
 
       CollationGraph collation = CollationGraphNodeJoiner.join(collation0);
 
@@ -655,32 +645,25 @@ public class HyperCollaterTest extends HyperCollateTest {
 
       String table = CollationGraphVisualizer.toTableASCII(collation);
       System.out.println(table);
-    }
-    collationDuration.forEach((name, duration) -> LOG.info("Collating with {} took {} ms.", name, duration));
   }
 
   private void testHyperCollation3(VariantWitnessGraph witness1, VariantWitnessGraph witness2, VariantWitnessGraph witness3, String expected) {
     Map<String, Long> collationDuration = new HashMap<>();
-    for (HyperCollater hypercollater : hyperCollaters) {
-      String name = hypercollater.getOptimalMatchSetFinderName();
-      LOG.info("Collating with {}", name);
-      Stopwatch stopwatch = Stopwatch.createStarted();
-      CollationGraph collation = hypercollater.collate(witness1, witness2, witness3);
-      stopwatch.stop();
-      long duration = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-      LOG.info("Collating with {} took {} ms.", name, duration);
-      collationDuration.put(name, duration);
+    Stopwatch stopwatch = Stopwatch.createStarted();
+    CollationGraph collation = hyperCollator.collate(witness1, witness2, witness3);
+    stopwatch.stop();
+    long duration = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+    LOG.info("Collating took {} ms.", duration);
 
-      collation = CollationGraphNodeJoiner.join(collation);
+    collation = CollationGraphNodeJoiner.join(collation);
 
-      String dot = CollationGraphVisualizer.toDot(collation);
-      System.out.println(dot);
-      writeGraph(dot, "graph");
-      assertThat(dot).isEqualTo(expected);
+    String dot = CollationGraphVisualizer.toDot(collation);
+    System.out.println(dot);
+    writeGraph(dot, "graph");
+    assertThat(dot).isEqualTo(expected);
 
-      String table = CollationGraphVisualizer.toTableASCII(collation);
-      System.out.println(table);
-    }
-    collationDuration.forEach((name, duration) -> LOG.info("Collating with {} took {} ms.", name, duration));
+    String table = CollationGraphVisualizer.toTableASCII(collation);
+    System.out.println(table);
+
   }
 }

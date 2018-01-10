@@ -64,8 +64,13 @@ public class CollationGraph extends DirectedAcyclicGraph<CollationGraph.Node> {
     return sigils.isEmpty();
   }
 
+  public List<String> getSigils() {
+    return sigils;
+  }
+
   public static class Node {
     final Map<String, Token> tokenMap = new HashMap<>();
+    private final Map<String, List<Integer>> branchPaths = new HashMap<>();
 
     Node(Token... tokens) {
       for (Token token : tokens) {
@@ -98,10 +103,13 @@ public class CollationGraph extends DirectedAcyclicGraph<CollationGraph.Node> {
       return "(" + tokensString + ")";
     }
 
-  }
+    public List<Integer> getBranchPath(String s) {
+      return branchPaths.get(s);
+    }
 
-  public List<String> getSigils() {
-    return sigils;
+    public void addBranchPath(String sigil, List<Integer> branchPath) {
+      branchPaths.put(sigil, branchPath);
+    }
   }
 
 }

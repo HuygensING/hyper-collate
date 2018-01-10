@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.collater;
+package nl.knaw.huygens.hypercollate.collator;
 
 /*-
  * #%L
@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
 public class QuantumCollatedMatchList {
 
@@ -64,8 +63,7 @@ public class QuantumCollatedMatchList {
   }
 
   private List<CollatedMatch> cloneChosenMatches() {
-    List<CollatedMatch> newChosen = new ArrayList<>(chosenMatches);
-    return newChosen;
+    return new ArrayList<>(chosenMatches);
   }
 
   private List<CollatedMatch> calculateNewPotential(List<CollatedMatch> potentialMatches, CollatedMatch match) {
@@ -86,34 +84,38 @@ public class QuantumCollatedMatchList {
   private List<CollatedMatch> calculateInvalidatedMatches(List<CollatedMatch> potentialMatches, CollatedMatch match) {
     CollationGraph.Node node = match.getCollatedNode();
     TokenVertex tokenVertexForWitness = match.getWitnessVertex();
-    Set<String> nodeSigils = node.getSigils();
     int minNodeRank = match.getNodeRank();
     int minVertexRank = match.getVertexRank();
 
     return potentialMatches.stream()//
         .filter(m -> m.getCollatedNode().equals(node) //
             || m.getWitnessVertex().equals(tokenVertexForWitness) //
-            || (hasSigilOverlap(m,nodeSigils) && m.getNodeRank() < minNodeRank) //
+            || (hasSigilOverlap(m, node) && m.getNodeRank() < minNodeRank) //
             || m.getVertexRank() < minVertexRank)//
         .collect(toList());
   }
 
-  private boolean hasSigilOverlap(CollatedMatch m, Set<String> nodeSigils) {
-    return m.getSigils().stream().anyMatch(nodeSigils::contains);
+  private boolean hasSigilOverlap(CollatedMatch m, CollationGraph.Node node) {
+    Set<String> nodeSigils = node.getSigils();
+    // m and node have witnesses in common
+    // for those witnesses they have in common, the branchpath of one is the startsubpath otf the other.
+    return m.getSigils().stream().filter(nodeSigils::contains).anyMatch(s ->
+        branchPathsOverlap(m.getBranchPath(s), node.getBranchPath(s))
+    );
   }
 
-  public Iterable<QuantumCollatedMatchList> neighborSets() {
-    Stream<QuantumCollatedMatchList> stream = potentialMatches.stream()//
-        .map(this::chooseMatch);
-    return stream::iterator;
+  static boolean branchPathsOverlap(List<Integer> matchBranchPath, List<Integer> nodeBranchPath) {
+    int minSize = Math.min(matchBranchPath.size(), nodeBranchPath.size());
+    for (int i = 0; i < minSize; i++) {
+      if (!matchBranchPath.get(i).equals(nodeBranchPath.get(i))) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public List<CollatedMatch> getChosenMatches() {
     return chosenMatches;
-  }
-
-  public Integer potentialSize() {
-    return potentialMatches.size();
   }
 
   @Override

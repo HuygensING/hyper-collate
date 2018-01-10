@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.collater;
+package nl.knaw.huygens.hypercollate.collator;
 
 import com.google.common.base.Joiner;
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;

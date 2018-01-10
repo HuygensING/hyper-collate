@@ -91,6 +91,7 @@ public class CollationGraphNodeJoiner {
   }
 
   private static void mergeNodeTokens(Node lastNode, Node originalNode) {
+    originalNode.getSigils().forEach(s -> lastNode.addBranchPath(s, originalNode.getBranchPath(s)));
     for (String s : lastNode.getSigils()) {
       MarkedUpToken tokenForWitness = (MarkedUpToken) lastNode.getTokenForWitness(s);
       MarkedUpToken tokenToMerge = (MarkedUpToken) originalNode.getTokenForWitness(s);
@@ -105,8 +106,10 @@ public class CollationGraphNodeJoiner {
         .map(originalNode::getTokenForWitness)//
         .map(CollationGraphNodeJoiner::cloneToken)//
         .collect(toList())//
-        .toArray(new Token[] {});
-    return mergedGraph.addNodeWithTokens(tokens);
+        .toArray(new Token[]{});
+    Node newNode = mergedGraph.addNodeWithTokens(tokens);
+    originalNode.getSigils().forEach(s -> newNode.addBranchPath(s, originalNode.getBranchPath(s)));
+    return newNode;
   }
 
   private static Token cloneToken(Token original) {

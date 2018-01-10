@@ -1,5 +1,11 @@
 package nl.knaw.huygens.hypercollate.model;
 
+import eu.interedition.collatex.Token;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
 /*-
  * #%L
  * hyper-collate-core
@@ -19,12 +25,6 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
-
-import eu.interedition.collatex.Token;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
 
 public class StartTokenVertex implements TokenVertex {
   private final List<TokenVertex> outgoingTokenVertices = new ArrayList<>();
@@ -52,6 +52,11 @@ public class StartTokenVertex implements TokenVertex {
   @Override
   public String getSigil() {
     return sigil;
+  }
+
+  @Override
+  public List<Integer> getBranchPath() {
+    return new ArrayList<>();
   }
 
   @Override

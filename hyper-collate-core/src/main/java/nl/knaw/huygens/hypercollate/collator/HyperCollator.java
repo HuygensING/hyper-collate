@@ -1,26 +1,4 @@
-package nl.knaw.huygens.hypercollate.collater;
-
-import com.google.common.base.Preconditions;
-import eu.interedition.collatex.Token;
-import eu.interedition.collatex.dekker.Tuple;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
-import nl.knaw.huygens.hypercollate.tools.CollationGraphRanking;
-import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
-import nl.knaw.huygens.hypercollate.tools.StreamUtil;
-import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
-import nl.knaw.huygens.hypergraph.core.TraditionalEdge;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
+package nl.knaw.huygens.hypercollate.collator;
 
 /*-
  * #%L
@@ -42,8 +20,29 @@ import java.util.function.Predicate;
  * #L%
  */
 
-public class HyperCollater {
-  private static final Logger LOG = LoggerFactory.getLogger(HyperCollater.class);
+import eu.interedition.collatex.Token;
+import eu.interedition.collatex.dekker.Tuple;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import nl.knaw.huygens.hypercollate.model.CollationGraph;
+import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+import nl.knaw.huygens.hypercollate.tools.CollationGraphRanking;
+import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
+import nl.knaw.huygens.hypercollate.tools.StreamUtil;
+import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
+import nl.knaw.huygens.hypergraph.core.TraditionalEdge;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
+
+public class HyperCollator {
+  private static final Logger LOG = LoggerFactory.getLogger(HyperCollator.class);
 
   private static final BiFunction<SimpleTokenVertex, SimpleTokenVertex, Boolean> matcher = //
       (stv1, stv2) -> {
@@ -59,12 +58,12 @@ public class HyperCollater {
         }
         return stv1.getNormalizedContent().equals(stv2.getNormalizedContent());
       };
-  private final OptimalMatchSetFinder optimalMatchSetFinder;
-
-  public HyperCollater(OptimalMatchSetFinder optimalMatchSetFinder) {
-    Preconditions.checkNotNull(optimalMatchSetFinder);
-    this.optimalMatchSetFinder = optimalMatchSetFinder;
-  }
+//  private final OptimalMatchSetFinder optimalMatchSetFinder;
+//
+//  public HyperCollater(OptimalMatchSetFinder optimalMatchSetFinder) {
+//    Preconditions.checkNotNull(optimalMatchSetFinder);
+//    this.optimalMatchSetFinder = optimalMatchSetFinder;
+//  }
 
   public CollationGraph collate(VariantWitnessGraph... graphs) {
     List<String> sigils = new ArrayList<>();
@@ -80,10 +79,9 @@ public class HyperCollater {
     CollationGraph collationGraph = new CollationGraph();
     Map<TokenVertex, CollationGraph.Node> collatedTokenVertexMap = new HashMap<>();
     VariantWitnessGraph first = witnesses.remove(0);
-    // List<CollatedMatch> collatedMatches = new ArrayList<>();
 
     Map<String, List<Match>> matchesSortedByRankPerWitness = sortAndFilterMatchesByWitness(matches, sigils);
-    initialize(collationGraph, collatedTokenVertexMap, /* collatedMatches , */ first, matchesSortedByRankPerWitness.get(first.getSigil()));
+    initialize(collationGraph, collatedTokenVertexMap, first);
 
     for (VariantWitnessGraph witnessGraph : witnesses) {
       visualize(collationGraph);
@@ -91,7 +89,6 @@ public class HyperCollater {
           witnessGraph, //
           matchesSortedByRankPerWitness.get(witnessGraph.getSigil()), //
           collatedTokenVertexMap);
-
     }
     return collationGraph;
   }
@@ -102,10 +99,8 @@ public class HyperCollater {
   }
 
   void initialize(CollationGraph collationGraph, //
-      Map<TokenVertex, Node> collatedTokenVertexMap, //
-      // List<CollatedMatch> collatedMatches, //
-      VariantWitnessGraph witnessGraph, //
-      List<Match> matches) {
+                  Map<TokenVertex, Node> collatedTokenVertexMap, //
+                  VariantWitnessGraph witnessGraph) {
     String sigil = witnessGraph.getSigil();
     collationGraph.getSigils().add(sigil);
     collatedTokenVertexMap.put(witnessGraph.getStartTokenVertex(), collationGraph.getRootNode());
@@ -113,18 +108,17 @@ public class HyperCollater {
         .filter(SimpleTokenVertex.class::isInstance)//
         .forEach(tokenVertex -> {
           Node node = collationGraph.addNodeWithTokens(tokenVertex.getToken());
+          node.addBranchPath(tokenVertex.getSigil(), tokenVertex.getBranchPath());
           collatedTokenVertexMap.put(tokenVertex, node);
         });
     Node endNode = collationGraph.addNodeWithTokens();
     collationGraph.setEndNode(endNode);
     collatedTokenVertexMap.put(witnessGraph.getEndTokenVertex(), endNode);
     addEdges(collationGraph, collatedTokenVertexMap);
-
-    // List<CollatedMatch> matchList = getCollatedMatches(collatedTokenVertexMap, matches, sigil);
-    // collatedMatches.addAll(matchList);
   }
 
-  private List<CollatedMatch> getCollatedMatches(Map<TokenVertex, Node> collatedTokenVertexMap, List<Match> matches, String sigil) {
+  private List<CollatedMatch> getCollatedMatches(Map<TokenVertex, Node> collatedTokenVertexMap,//
+                                                 List<Match> matches, String sigil) {
     return matches.stream()//
         .peek(System.out::println)//
         .map(match -> toCollatedMatch(match, sigil, collatedTokenVertexMap))//
@@ -132,16 +126,19 @@ public class HyperCollater {
   }
 
   private CollatedMatch toCollatedMatch(Match match, String sigil, Map<TokenVertex, Node> collatedTokenVertexMap) {
-    TokenVertex vertex = StreamUtil.stream(match.getTokenVertexList()).filter(tv -> !tv.getSigil().equals(sigil)).findFirst().orElseThrow(() -> new RuntimeException("No vertex!"));
+    TokenVertex vertex = StreamUtil.stream(match.getTokenVertexList())//
+        .filter(tv -> !tv.getSigil().equals(sigil))//
+        .findFirst()//
+        .orElseThrow(() -> new RuntimeException("No vertex!"));
     TokenVertex tokenVertexForWitness = match.getTokenVertexForWitness(sigil);
     Node node = collatedTokenVertexMap.get(vertex);
     return new CollatedMatch(node, tokenVertexForWitness).setVertexRank(match.getRankForWitness(sigil));
   }
 
   private void collate(CollationGraph collationGraph, //
-      VariantWitnessGraph witnessGraph, //
-      List<Match> sortedMatchesForWitness, //
-      Map<TokenVertex, CollationGraph.Node> collatedTokenVertexMap) {
+                       VariantWitnessGraph witnessGraph, //
+                       List<Match> sortedMatchesForWitness, //
+                       Map<TokenVertex, CollationGraph.Node> collatedTokenVertexMap) {
     Predicate<? super Match> matchesWithCollationGraph = m -> collationGraph.getSigils()//
         .stream()//
         .anyMatch(m::hasWitness);
@@ -152,7 +149,8 @@ public class HyperCollater {
         .filter(matchesWithCollationGraph)//
         .collect(toList());
 
-    List<CollatedMatch> matchList = getCollatedMatches(collatedTokenVertexMap, filteredSortedMatchesForWitness, witnessSigil).stream()//
+    List<CollatedMatch> matchList = getCollatedMatches(collatedTokenVertexMap, filteredSortedMatchesForWitness, witnessSigil)//
+        .stream()//
         .peek(System.out::println)//
         .map(m -> adjustRankForCollatedNode(m, baseRanking))//
         .distinct()//
@@ -170,12 +168,13 @@ public class HyperCollater {
       CollatedMatch match = optimalMatchList.remove(0);
       System.out.println(match);
       TokenVertex tokenVertexForWitnessGraph = match.getWitnessVertex();
-      advanceWitness(collationGraph, collatedTokenVertexMap, witnessSigil, witnessIterator, tokenVertexForWitnessGraph);
+      advanceWitness(collationGraph, collatedTokenVertexMap, witnessIterator, tokenVertexForWitnessGraph);
 
       Node matchingNode = match.getCollatedNode();
       Token token = tokenVertexForWitnessGraph.getToken();
       if (token != null) {
         matchingNode.addToken(token);
+        matchingNode.addBranchPath(tokenVertexForWitnessGraph.getSigil(), tokenVertexForWitnessGraph.getBranchPath());
       }
       collatedTokenVertexMap.put(tokenVertexForWitnessGraph, matchingNode);
     }
@@ -204,24 +203,10 @@ public class HyperCollater {
     LOG.info("collated={}", lines.stream().sorted().collect(joining("\n")));
   }
 
-  // private static void addEndNode(CollationGraph collationGraph, VariantWitnessGraph witness1, VariantWitnessGraph witness2, Map<TokenVertex, Node> collatedTokenVertexMap) {
-  // Node endNode = collationGraph.addNodeWithTokens();
-  // collatedTokenVertexMap.put(witness1.getEndTokenVertex(), endNode);
-  // collatedTokenVertexMap.put(witness2.getEndTokenVertex(), endNode);
-  // }
-
-  // private static void handleMatch(CollationGraph collationGraph, String sigil1, String sigil2, Map<TokenVertex, Node> collatedTokenVertexMap, TokenVertex tokenVertexForWitness1,
-  // TokenVertex tokenVertexForWitness2) {
-  // // System.out.println("> " + sigil1 + "+" + sigil2);
-  // Node newCollationNode = collationGraph.addNodeWithTokens(tokenVertexForWitness1.getToken(), tokenVertexForWitness2.getToken());
-  // collatedTokenVertexMap.put(tokenVertexForWitness1, newCollationNode);
-  // collatedTokenVertexMap.put(tokenVertexForWitness2, newCollationNode);
-  // }
-
   private static void advanceWitness(CollationGraph collationGraph, //
-      Map<TokenVertex, Node> collatedTokenVertexMap, //
-      String sigil, Iterator<TokenVertex> tokenVertexIterator, //
-      TokenVertex tokenVertexForWitness) {
+                                     Map<TokenVertex, Node> collatedTokenVertexMap, //
+                                     Iterator<TokenVertex> tokenVertexIterator, //
+                                     TokenVertex tokenVertexForWitness) {
     if (tokenVertexIterator.hasNext()) {
       TokenVertex nextWitnessVertex = tokenVertexIterator.next();
       while (tokenVertexIterator.hasNext() && !nextWitnessVertex.equals(tokenVertexForWitness)) {
@@ -261,59 +246,39 @@ public class HyperCollater {
   }
 
   private static void addCollationNode(CollationGraph collationGraph, //
-      Map<TokenVertex, CollationGraph.Node> collatedTokenMap, //
-      TokenVertex tokenVertex) {
+                                       Map<TokenVertex, CollationGraph.Node> collatedTokenMap, //
+                                       TokenVertex tokenVertex) {
     if (!collatedTokenMap.containsKey(tokenVertex)) {
       Node collationNode = collationGraph.addNodeWithTokens(tokenVertex.getToken());
+      collationNode.addBranchPath(tokenVertex.getSigil(), tokenVertex.getBranchPath());
       collatedTokenMap.put(tokenVertex, collationNode);
     }
   }
 
   Map<String, List<Match>> sortAndFilterMatchesByWitness(Set<Match> matches, List<String> sigils) {
     Map<String, List<Match>> map = new HashMap<>();
-    sigils.stream().forEach(s -> {
+    sigils.forEach(s -> {
       List<Match> sortedMatchesForWitness = filterAndSortMatchesForWitness(matches, s);
       map.put(s, sortedMatchesForWitness);
     });
     return map;
   }
 
-  private List<Match> filterAndSortMatchesForWitness(Set<Match> matches, String s) {
+  private List<Match> filterAndSortMatchesForWitness(Set<Match> matches, String sigil) {
     Comparator<Match> comparator = (match1, match2) -> {
-      Integer rank1 = match1.getRankForWitness(s);
-      Integer rank2 = match2.getRankForWitness(s);
+      Integer rank1 = match1.getRankForWitness(sigil);
+      Integer rank2 = match2.getRankForWitness(sigil);
       if (rank1.equals(rank2)) {
-        rank1 = match1.getLowestRankForWitnessesOtherThan(s);
-        rank2 = match2.getLowestRankForWitnessesOtherThan(s);
+        rank1 = match1.getLowestRankForWitnessesOtherThan(sigil);
+        rank2 = match2.getLowestRankForWitnessesOtherThan(sigil);
       }
       return rank1.compareTo(rank2);
     };
     return matches.stream()//
-        .filter(m -> m.hasWitness(s))//
+        .filter(m -> m.hasWitness(sigil))//
         .sorted(comparator)//
         .collect(toList());
   }
-
-  // private static List<Match> sortMatchesByWitness(Set<Match> matches, //
-  // List<String> sigils) {
-  // Comparator<Match> matchComparator = matchComparator(sigils.get(0), sigils.get(1));
-  // return matches.stream()//
-  // .sorted(matchComparator)//
-  // .collect(toList());
-  // }
-  //
-  // private static Comparator<Match> matchComparator(String sigil1, //
-  // String sigil2) {
-  // return (match1, match2) -> {
-  // Integer rank1 = match1.getRankForWitness(sigil1);
-  // Integer rank2 = match2.getRankForWitness(sigil1);
-  // if (rank1.equals(rank2)) {
-  // rank1 = match1.getRankForWitness(sigil2);
-  // rank2 = match2.getRankForWitness(sigil2);
-  // }
-  // return rank1.compareTo(rank2);
-  // };
-  // }
 
   Set<Match> getPotentialMatches(List<VariantWitnessGraph> witnesses, List<VariantWitnessGraphRanking> rankings) {
     Set<Match> allPotentialMatches = new HashSet<>();
@@ -336,16 +301,6 @@ public class HyperCollater {
       allPotentialMatches.add(endMatch);
     }
 
-    // TokenVertex[] endTokenVertices = witnesses.stream()//
-    // .map(VariantWitnessGraph::getEndTokenVertex)//
-    // .toArray(TokenVertex[]::new);
-    // Match endMatch = new Match(endTokenVertices);
-    // for (int i = 0; i < endTokenVertices.length; i++) {
-    // String sigil = witnesses.get(i).getSigil();
-    // Integer rank = rankings.get(i).apply(endTokenVertices[i]);
-    // endMatch.setRank(sigil, rank);
-    // }
-    // allPotentialMatches.add(endMatch);
     return allPotentialMatches;
   }
 
@@ -359,8 +314,10 @@ public class HyperCollater {
     return list;
   }
 
-  private void match(VariantWitnessGraph witness1, VariantWitnessGraph witness2, VariantWitnessGraphRanking ranking1, VariantWitnessGraphRanking ranking2, Set<Match> allPotentialMatches,
-      Map<TokenVertex, Match> vertexToMatch) {
+  private void match(VariantWitnessGraph witness1, VariantWitnessGraph witness2,//
+                     VariantWitnessGraphRanking ranking1, VariantWitnessGraphRanking ranking2,//
+                     Set<Match> allPotentialMatches,//
+                     Map<TokenVertex, Match> vertexToMatch) {
     VariantWitnessGraphTraversal traversal1 = VariantWitnessGraphTraversal.of(witness1);
     VariantWitnessGraphTraversal traversal2 = VariantWitnessGraphTraversal.of(witness2);
     String sigil1 = witness1.getSigil();
@@ -373,30 +330,18 @@ public class HyperCollater {
             .map(SimpleTokenVertex.class::cast)//
             .forEach(tv2 -> {
               if (matcher.apply(tv1, tv2)) {
-                // if (vertexToMatch.containsKey(tv1)) {
-                // vertexToMatch.get(tv1)//
-                // .addTokenVertex(tv2)//
-                // .setRank(tv2.getSigil(), ranking2.apply(tv2));
-                //
-                // } else if (vertexToMatch.containsKey(tv2)) {
-                // vertexToMatch.get(tv2)//
-                // .addTokenVertex(tv1)//
-                // .setRank(tv1.getSigil(), ranking1.apply(tv1));
-                //
-                // } else {
                 Match match = new Match(tv1, tv2)//
                     .setRank(sigil1, ranking1.apply(tv1))//
                     .setRank(sigil2, ranking2.apply(tv2));
                 allPotentialMatches.add(match);
                 vertexToMatch.put(tv1, match);
                 vertexToMatch.put(tv2, match);
-                // }
               }
             }));
   }
 
-  public String getOptimalMatchSetFinderName() {
-    return optimalMatchSetFinder.getName();
-  }
+//  public String getOptimalMatchSetFinderName() {
+//    return optimalMatchSetFinder.getName();
+//  }
 
 }
