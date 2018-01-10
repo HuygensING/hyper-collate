@@ -19,8 +19,13 @@ package nl.knaw.huygens.hypercollate.importer;
  * limitations under the License.
  * #L%
  */
+
+import static com.google.common.collect.Iterators.toArray;
 import eu.interedition.collatex.simple.SimplePatternTokenizer;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.joining;
 import nl.knaw.huygens.hypercollate.model.*;
+import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
 import org.apache.commons.io.FileUtils;
 
 import javax.xml.stream.XMLEventReader;
@@ -37,9 +42,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.joining;
-import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
 
 public class XMLImporter {
 
@@ -366,7 +368,9 @@ public class XMLImporter {
           .setParentXPath(parentXPath)//
           .setNormalizedContent(normalizer.apply(content));
       SimpleTokenVertex tokenVertex = new SimpleTokenVertex(token);
-      tokenVertex.setBranchPath(new ArrayList<>(branchIds));
+      Integer[] ascendingBranchIds = toArray(branchIds.descendingIterator(), Integer.class);
+      List<Integer> branchPath = asList(ascendingBranchIds);
+      tokenVertex.setBranchPath(branchPath);
       graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex);
 
       if (afterDel) { // del without add

@@ -22,6 +22,7 @@ package nl.knaw.huygens.hypercollate.collator;
 
 import eu.interedition.collatex.Token;
 import eu.interedition.collatex.dekker.Tuple;
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
@@ -63,11 +64,14 @@ public class HyperCollator {
     List<String> sigils = new ArrayList<>();
     List<VariantWitnessGraph> witnesses = new ArrayList<>();
     List<VariantWitnessGraphRanking> rankings = new ArrayList<>();
-    for (VariantWitnessGraph graph : graphs) {
-      sigils.add(graph.getSigil());
-      witnesses.add(graph);
-      rankings.add(VariantWitnessGraphRanking.of(graph));
-    }
+    Arrays.asList(graphs)//
+        .stream()//
+        .sorted(comparing(VariantWitnessGraph::getSigil))//
+        .forEach(graph -> {
+          sigils.add(graph.getSigil());
+          witnesses.add(graph);
+          rankings.add(VariantWitnessGraphRanking.of(graph));
+        });
 
     Set<Match> matches = getPotentialMatches(witnesses, rankings);
     CollationGraph collationGraph = new CollationGraph();
@@ -76,13 +80,15 @@ public class HyperCollator {
 
     Map<String, List<Match>> matchesSortedByRankPerWitness = sortAndFilterMatchesByWitness(matches, sigils);
     initialize(collationGraph, collatedTokenVertexMap, first);
+    visualize(collationGraph);
 
     for (VariantWitnessGraph witnessGraph : witnesses) {
-      visualize(collationGraph);
+      List<Match> sortedMatchesForWitness = matchesSortedByRankPerWitness.get(witnessGraph.getSigil());
       collate(collationGraph, //
           witnessGraph, //
-          matchesSortedByRankPerWitness.get(witnessGraph.getSigil()), //
+          sortedMatchesForWitness, //
           collatedTokenVertexMap);
+      visualize(collationGraph);
     }
     return collationGraph;
   }
@@ -279,23 +285,29 @@ public class HyperCollator {
     Map<TokenVertex, Match> vertexToMatch = new HashMap<>();
     for (Tuple<Integer> t : permute(witnesses.size())) {
       VariantWitnessGraph witness1 = witnesses.get(t.left);
-      VariantWitnessGraph witness2 = witnesses.get(t.right);
       VariantWitnessGraphRanking ranking1 = rankings.get(t.left);
+      VariantWitnessGraph witness2 = witnesses.get(t.right);
       VariantWitnessGraphRanking ranking2 = rankings.get(t.right);
       match(witness1, witness2, ranking1, ranking2, allPotentialMatches, vertexToMatch);
-      TokenVertex endTokenVertex1 = witness1.getEndTokenVertex();
-      TokenVertex endTokenVertex2 = witness2.getEndTokenVertex();
-      Match endMatch = new Match(endTokenVertex1, endTokenVertex2);
-      String sigil1 = witness1.getSigil();
-      Integer rank1 = ranking1.apply(endTokenVertex1);
-      endMatch.setRank(sigil1, rank1);
-      String sigil2 = witness2.getSigil();
-      Integer rank2 = ranking2.apply(endTokenVertex2);
-      endMatch.setRank(sigil2, rank2);
+
+      Match endMatch = getEndMatch(witness1, ranking1, witness2, ranking2);
       allPotentialMatches.add(endMatch);
     }
 
     return allPotentialMatches;
+  }
+
+  private Match getEndMatch(VariantWitnessGraph witness1, VariantWitnessGraphRanking ranking1, VariantWitnessGraph witness2, VariantWitnessGraphRanking ranking2) {
+    TokenVertex endTokenVertex1 = witness1.getEndTokenVertex();
+    TokenVertex endTokenVertex2 = witness2.getEndTokenVertex();
+    Match endMatch = new Match(endTokenVertex1, endTokenVertex2);
+    String sigil1 = witness1.getSigil();
+    Integer rank1 = ranking1.apply(endTokenVertex1);
+    endMatch.setRank(sigil1, rank1);
+    String sigil2 = witness2.getSigil();
+    Integer rank2 = ranking2.apply(endTokenVertex2);
+    endMatch.setRank(sigil2, rank2);
+    return endMatch;
   }
 
   List<Tuple<Integer>> permute(int max) {
