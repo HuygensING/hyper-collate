@@ -73,21 +73,21 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
   }
 
   @Override
-  protected boolean isGoal(QuantumCollatedMatchList matchSet) {
-    return matchSet.isDetermined();
+  protected boolean isGoal(QuantumCollatedMatchList matchList) {
+    return matchList.isDetermined();
   }
 
   @Override
-  protected Iterable<QuantumCollatedMatchList> neighborNodes(QuantumCollatedMatchList matchSet) {
+  protected Iterable<QuantumCollatedMatchList> neighborNodes(QuantumCollatedMatchList matchList) {
     Set<QuantumCollatedMatchList> nextPotentialMatches = new HashSet<>();
 
-    CollatedMatch firstPotentialMatch1 = getFirstPotentialMatch(this.matchesSortedByNode, matchSet);
-    addNeighborNodes(matchSet, nextPotentialMatches, firstPotentialMatch1);
+    CollatedMatch firstPotentialMatch1 = getFirstPotentialMatch(this.matchesSortedByNode, matchList);
+    addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1);
 
     List<CollatedMatch> matchesSortedByWitness = this.matchesSortedByWitness;
-    CollatedMatch firstPotentialMatch2 = getFirstPotentialMatch(matchesSortedByWitness, matchSet);
+    CollatedMatch firstPotentialMatch2 = getFirstPotentialMatch(matchesSortedByWitness, matchList);
     if (!firstPotentialMatch1.equals(firstPotentialMatch2)) {
-      addNeighborNodes(matchSet, nextPotentialMatches, firstPotentialMatch2);
+      addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch2);
     }
 
     return nextPotentialMatches;
@@ -107,13 +107,13 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
   }
 
   @Override
-  protected LostPotential heuristicCostEstimate(QuantumCollatedMatchList match) {
-    return new LostPotential(maxPotential - match.totalSize());
+  protected LostPotential heuristicCostEstimate(QuantumCollatedMatchList matchList) {
+    return new LostPotential(maxPotential - matchList.totalSize());
   }
 
   @Override
-  protected LostPotential distBetween(QuantumCollatedMatchList match, QuantumCollatedMatchList other) {
-    return new LostPotential(Math.abs(match.totalSize() - other.totalSize()));
+  protected LostPotential distBetween(QuantumCollatedMatchList matchList0, QuantumCollatedMatchList matchList1) {
+    return new LostPotential(Math.abs(matchList0.totalSize() - matchList1.totalSize()));
   }
 
 }
