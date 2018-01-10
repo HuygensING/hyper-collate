@@ -67,7 +67,7 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
 
   private static List<CollatedMatch> sortMatches(Collection<CollatedMatch> matches, Comparator<CollatedMatch> matchComparator) {
     return matches.stream()//
-        .peek(System.out::println)//
+//        .peek(System.out::println)//
         .sorted(matchComparator)//
         .collect(toList());
   }

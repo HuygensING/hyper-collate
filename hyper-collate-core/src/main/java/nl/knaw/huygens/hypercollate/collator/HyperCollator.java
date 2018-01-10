@@ -58,12 +58,6 @@ public class HyperCollator {
         }
         return stv1.getNormalizedContent().equals(stv2.getNormalizedContent());
       };
-//  private final OptimalMatchSetFinder optimalMatchSetFinder;
-//
-//  public HyperCollater(OptimalMatchSetFinder optimalMatchSetFinder) {
-//    Preconditions.checkNotNull(optimalMatchSetFinder);
-//    this.optimalMatchSetFinder = optimalMatchSetFinder;
-//  }
 
   public CollationGraph collate(VariantWitnessGraph... graphs) {
     List<String> sigils = new ArrayList<>();
@@ -120,7 +114,7 @@ public class HyperCollator {
   private List<CollatedMatch> getCollatedMatches(Map<TokenVertex, Node> collatedTokenVertexMap,//
                                                  List<Match> matches, String sigil) {
     return matches.stream()//
-        .peek(System.out::println)//
+//        .peek(System.out::println)//
         .map(match -> toCollatedMatch(match, sigil, collatedTokenVertexMap))//
         .collect(toList());
   }
@@ -151,7 +145,7 @@ public class HyperCollator {
 
     List<CollatedMatch> matchList = getCollatedMatches(collatedTokenVertexMap, filteredSortedMatchesForWitness, witnessSigil)//
         .stream()//
-        .peek(System.out::println)//
+//        .peek(System.out::println)//
         .map(m -> adjustRankForCollatedNode(m, baseRanking))//
         .distinct()//
         .collect(toList());
@@ -339,9 +333,5 @@ public class HyperCollator {
               }
             }));
   }
-
-//  public String getOptimalMatchSetFinderName() {
-//    return optimalMatchSetFinder.getName();
-//  }
 
 }

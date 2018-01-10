@@ -80,6 +80,10 @@ public class CollatedMatch {
     return sigils;
   }
 
+  public List<Integer> getBranchPath(String s) {
+    return branchPaths.get(s);
+  }
+
   @Override
   public String toString() {
     StringBuilder stringBuilder = new StringBuilder("<[")//
@@ -111,9 +115,5 @@ public class CollatedMatch {
 
     } else
       return false;
-  }
-
-  public List<Integer> getBranchPath(String s) {
-    return branchPaths.get(s);
   }
 }
