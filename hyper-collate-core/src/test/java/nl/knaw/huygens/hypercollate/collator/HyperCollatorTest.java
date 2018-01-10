@@ -35,6 +35,7 @@ import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
 import org.assertj.core.api.Assertions;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.assertj.core.util.Sets;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -416,6 +417,7 @@ public class HyperCollatorTest extends HyperCollateTest {
     testHyperCollation(wF, wQ, expected);
   }
 
+  @Ignore
   @Test
   public void testMaryShellyGodwinFrankensteinFragment() {
     XMLImporter importer = new XMLImporter();
