@@ -19,14 +19,14 @@ package nl.knaw.huygens.hypercollate.tools;
  * limitations under the License.
  * #L%
  */
+
 import eu.interedition.collatex.Token;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.model.*;
 import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
 
 import java.util.*;
-
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 public class DotFactory {
 

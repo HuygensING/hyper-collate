@@ -1,12 +1,5 @@
 package nl.knaw.huygens.hypercollate.tools;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
 /*-
  * #%L
  * hyper-collate-core
@@ -26,12 +19,15 @@ import java.util.stream.Collectors;
  * limitations under the License.
  * #L%
  */
-import nl.knaw.huygens.hypercollate.model.EndTokenVertex;
-import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.SimpleWitness;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+
+import nl.knaw.huygens.hypercollate.model.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 public class TokenMerger {
 
