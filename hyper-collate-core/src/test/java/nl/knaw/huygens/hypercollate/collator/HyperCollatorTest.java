@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.collater;
+package nl.knaw.huygens.hypercollate.collator;
 
 /*-
  * #%L
@@ -19,8 +19,11 @@ package nl.knaw.huygens.hypercollate.collater;
  * limitations under the License.
  * #L%
  */
+
 import com.google.common.base.Stopwatch;
 import eu.interedition.collatex.dekker.Tuple;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.*;
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
@@ -29,6 +32,8 @@ import nl.knaw.huygens.hypercollate.model.TokenVertex;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
+import org.assertj.core.api.Assertions;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.assertj.core.util.Sets;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -39,16 +44,10 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.*;
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class HyperCollaterTest extends HyperCollateTest {
+public class HyperCollatorTest extends HyperCollateTest {
   private static final Logger LOG = LoggerFactory.getLogger(HyperCollateTest.class);
 
-  final HyperCollater hyperCollater1 = new HyperCollater(new OptimalMatchSetAlgorithm1());
-  private final HyperCollater hyperCollater2 = new HyperCollater(new OptimalMatchSetAlgorithm2());
-  private final HyperCollater[] hyperCollaters = new HyperCollater[] { /* hyperCollater1, */hyperCollater2 };
+  final HyperCollator hyperCollator = new HyperCollator();
 
   @Test
   public void testHierarchyWith3Witnesses() {
@@ -543,7 +542,7 @@ public class HyperCollaterTest extends HyperCollateTest {
     CollationGraph collationGraph = new CollationGraph();
     Map<TokenVertex, Node> map = new HashMap<>();
     List<Match> matches = new ArrayList<>();
-    hyperCollater2.initialize(collationGraph, map, wF);
+    hyperCollator.initialize(collationGraph, map, wF);
     CollationGraph collation = CollationGraphNodeJoiner.join(collationGraph);
     String dot = CollationGraphVisualizer.toDot(collation);
     String expected = "digraph CollationGraph{\n" + "labelloc=b\n" + "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
@@ -559,17 +558,17 @@ public class HyperCollaterTest extends HyperCollateTest {
 
   @Test
   public void testPermute() {
-    List<Tuple<Integer>> permute1 = hyperCollater2.permute(3);
+    List<Tuple<Integer>> permute1 = hyperCollator.permute(3);
     LOG.info("permute={}", visualize(permute1));
     assertThat(Sets.newHashSet(permute1)).hasSameSizeAs(permute1);
     assertThat(permute1).hasSize(3);
 
-    List<Tuple<Integer>> permute2 = hyperCollater2.permute(4);
+    List<Tuple<Integer>> permute2 = hyperCollator.permute(4);
     LOG.info("permute={}", visualize(permute2));
     assertThat(Sets.newHashSet(permute2)).hasSameSizeAs(permute2);
     assertThat(permute2).hasSize(6);
 
-    List<Tuple<Integer>> permute3 = hyperCollater2.permute(10);
+    List<Tuple<Integer>> permute3 = hyperCollator.permute(10);
     LOG.info("permute={}", visualize(permute3));
     assertThat(Sets.newHashSet(permute3)).hasSameSizeAs(permute3);
     assertThat(permute3).hasSize(45);
@@ -588,7 +587,7 @@ public class HyperCollaterTest extends HyperCollateTest {
     List<VariantWitnessGraphRanking> rankings = witnesses.stream()//
         .map(VariantWitnessGraphRanking::of)//
         .collect(toList());
-    Set<Match> allPotentialMatches = hyperCollater2.getPotentialMatches(witnesses, rankings);
+    Set<Match> allPotentialMatches = hyperCollator.getPotentialMatches(witnesses, rankings);
     LOG.info("allPotentialMatches={}", allPotentialMatches);
     String match1 = "<A0,B0>";
     String match2 = "<A0,C0>";
@@ -598,11 +597,11 @@ public class HyperCollaterTest extends HyperCollateTest {
     String match6 = "<A:EndTokenVertex,B:EndTokenVertex>";
     String match7 = "<A:EndTokenVertex,C:EndTokenVertex>";
     String match8 = "<B:EndTokenVertex,C:EndTokenVertex>";
-    assertThat(allPotentialMatches).hasSize(8);
+    Assertions.assertThat(allPotentialMatches).hasSize(8);
     Set<String> matchStrings = allPotentialMatches.stream().map(Match::toString).collect(toSet());
     assertThat(matchStrings).contains(match1, match2, match3, match4, match5, match6, match7, match8);
 
-    Map<String, List<Match>> sortAndFilterMatchesByWitness = hyperCollater2.sortAndFilterMatchesByWitness(allPotentialMatches, asList(sigil1, sigil2, sigil3));
+    Map<String, List<Match>> sortAndFilterMatchesByWitness = hyperCollator.sortAndFilterMatchesByWitness(allPotentialMatches, asList(sigil1, sigil2, sigil3));
     LOG.info("sortAndFilterMatchesByWitness={}", sortAndFilterMatchesByWitness);
     assertThat(sortAndFilterMatchesByWitness).containsOnlyKeys(sigil1, sigil2, sigil3);
 
@@ -631,15 +630,11 @@ public class HyperCollaterTest extends HyperCollateTest {
 
   private void testHyperCollation(VariantWitnessGraph witness1, VariantWitnessGraph witness2, String expected) {
     Map<String, Long> collationDuration = new HashMap<>();
-    for (HyperCollater hypercollater : hyperCollaters) {
-      String name = hypercollater.getOptimalMatchSetFinderName();
-      LOG.info("Collating with {}", name);
       Stopwatch stopwatch = Stopwatch.createStarted();
-      CollationGraph collation0 = hypercollater.collate(witness1, witness2);
+    CollationGraph collation0 = hyperCollator.collate(witness1, witness2);
       stopwatch.stop();
       long duration = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-      LOG.info("Collating with {} took {} ms.", name, duration);
-      collationDuration.put(name, duration);
+    LOG.info("Collating took {} ms.", duration);
 
       CollationGraph collation = CollationGraphNodeJoiner.join(collation0);
 
@@ -650,32 +645,25 @@ public class HyperCollaterTest extends HyperCollateTest {
 
       String table = CollationGraphVisualizer.toTableASCII(collation);
       System.out.println(table);
-    }
-    collationDuration.forEach((name, duration) -> LOG.info("Collating with {} took {} ms.", name, duration));
   }
 
   private void testHyperCollation3(VariantWitnessGraph witness1, VariantWitnessGraph witness2, VariantWitnessGraph witness3, String expected) {
     Map<String, Long> collationDuration = new HashMap<>();
-    for (HyperCollater hypercollater : hyperCollaters) {
-      String name = hypercollater.getOptimalMatchSetFinderName();
-      LOG.info("Collating with {}", name);
-      Stopwatch stopwatch = Stopwatch.createStarted();
-      CollationGraph collation = hypercollater.collate(witness1, witness2, witness3);
-      stopwatch.stop();
-      long duration = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-      LOG.info("Collating with {} took {} ms.", name, duration);
-      collationDuration.put(name, duration);
+    Stopwatch stopwatch = Stopwatch.createStarted();
+    CollationGraph collation = hyperCollator.collate(witness1, witness2, witness3);
+    stopwatch.stop();
+    long duration = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+    LOG.info("Collating took {} ms.", duration);
 
-      collation = CollationGraphNodeJoiner.join(collation);
+    collation = CollationGraphNodeJoiner.join(collation);
 
-      String dot = CollationGraphVisualizer.toDot(collation);
-      System.out.println(dot);
-      writeGraph(dot, "graph");
-      assertThat(dot).isEqualTo(expected);
+    String dot = CollationGraphVisualizer.toDot(collation);
+    System.out.println(dot);
+    writeGraph(dot, "graph");
+    assertThat(dot).isEqualTo(expected);
 
-      String table = CollationGraphVisualizer.toTableASCII(collation);
-      System.out.println(table);
-    }
-    collationDuration.forEach((name, duration) -> LOG.info("Collating with {} took {} ms.", name, duration));
+    String table = CollationGraphVisualizer.toTableASCII(collation);
+    System.out.println(table);
+
   }
 }

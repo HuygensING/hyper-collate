@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.collater;
+package nl.knaw.huygens.hypercollate.collator;
 
 /*-
  * #%L
@@ -20,13 +20,12 @@ package nl.knaw.huygens.hypercollate.collater;
  * #L%
  */
 
+import static java.util.stream.Collectors.joining;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
 import java.util.*;
-
-import static java.util.stream.Collectors.joining;
 
 public class CollatedMatch {
 

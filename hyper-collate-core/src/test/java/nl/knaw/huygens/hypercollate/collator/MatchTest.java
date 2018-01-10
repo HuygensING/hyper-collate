@@ -1,15 +1,14 @@
-package nl.knaw.huygens.hypercollate.collater;
+package nl.knaw.huygens.hypercollate.collator;
 
 import eu.interedition.collatex.Token;
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /*-
  * #%L

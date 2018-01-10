@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.collater;
+package nl.knaw.huygens.hypercollate.collator;
 
 /*-
  * #%L
@@ -19,14 +19,32 @@ package nl.knaw.huygens.hypercollate.collater;
  * limitations under the License.
  * #L%
  */
+import eu.interedition.collatex.dekker.astar.Cost;
 
-import java.util.Collection;
-import java.util.List;
+public class LostPotential extends Cost<LostPotential> {
 
-interface OptimalCollatedMatchListFinder {
+  private final Integer cost;
 
-  List<CollatedMatch> getOptimalCollatedMatchList(Collection<CollatedMatch> allPotentialMatches);
+  public LostPotential(int cost) {
+    this.cost = cost;
+  }
 
-  String getName();
+  @Override
+  protected LostPotential plus(LostPotential other) {
+    return new LostPotential(cost + other.getCost());
+  }
 
+  @Override
+  public int compareTo(LostPotential other) {
+    return cost.compareTo(other.getCost());
+  }
+
+  private Integer getCost() {
+    return cost;
+  }
+
+  @Override
+  public String toString() {
+    return "LostPotential:" + cost;
+  }
 }

@@ -2,14 +2,13 @@ package nl.knaw.huygens.hypercollate.tools;
 
 import com.google.common.base.Preconditions;
 import eu.interedition.collatex.Token;
+import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
 import nl.knaw.huygens.hypergraph.core.TraditionalEdge;
 
 import java.util.*;
-
-import static java.util.stream.Collectors.toList;
 
 /*-
  * #%L

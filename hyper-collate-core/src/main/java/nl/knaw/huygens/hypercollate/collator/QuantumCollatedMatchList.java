@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.collater;
+package nl.knaw.huygens.hypercollate.collator;
 
 /*-
  * #%L
@@ -20,6 +20,8 @@ package nl.knaw.huygens.hypercollate.collater;
  * #L%
  */
 
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
@@ -27,9 +29,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.stream.Collectors.toList;
 
 public class QuantumCollatedMatchList {
 

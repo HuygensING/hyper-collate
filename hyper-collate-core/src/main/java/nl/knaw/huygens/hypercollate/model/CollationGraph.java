@@ -21,11 +21,10 @@ package nl.knaw.huygens.hypercollate.model;
  */
 
 import eu.interedition.collatex.Token;
+import static java.util.stream.Collectors.joining;
 import nl.knaw.huygens.hypergraph.core.DirectedAcyclicGraph;
 
 import java.util.*;
-
-import static java.util.stream.Collectors.joining;
 
 public class CollationGraph extends DirectedAcyclicGraph<CollationGraph.Node> {
 

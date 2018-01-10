@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.collater;
+package nl.knaw.huygens.hypercollate.collator;
 
 /*-
  * #%L
@@ -20,9 +20,10 @@ package nl.knaw.huygens.hypercollate.collater;
  * #L%
  */
 
-import com.google.common.base.Preconditions;
 import eu.interedition.collatex.Token;
 import eu.interedition.collatex.dekker.Tuple;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
@@ -31,6 +32,7 @@ import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphRanking;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
 import nl.knaw.huygens.hypercollate.tools.StreamUtil;
+import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
 import nl.knaw.huygens.hypergraph.core.TraditionalEdge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,12 +41,8 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
-
-public class HyperCollater {
-  private static final Logger LOG = LoggerFactory.getLogger(HyperCollater.class);
+public class HyperCollator {
+  private static final Logger LOG = LoggerFactory.getLogger(HyperCollator.class);
 
   private static final BiFunction<SimpleTokenVertex, SimpleTokenVertex, Boolean> matcher = //
       (stv1, stv2) -> {
@@ -60,12 +58,12 @@ public class HyperCollater {
         }
         return stv1.getNormalizedContent().equals(stv2.getNormalizedContent());
       };
-  private final OptimalMatchSetFinder optimalMatchSetFinder;
-
-  public HyperCollater(OptimalMatchSetFinder optimalMatchSetFinder) {
-    Preconditions.checkNotNull(optimalMatchSetFinder);
-    this.optimalMatchSetFinder = optimalMatchSetFinder;
-  }
+//  private final OptimalMatchSetFinder optimalMatchSetFinder;
+//
+//  public HyperCollater(OptimalMatchSetFinder optimalMatchSetFinder) {
+//    Preconditions.checkNotNull(optimalMatchSetFinder);
+//    this.optimalMatchSetFinder = optimalMatchSetFinder;
+//  }
 
   public CollationGraph collate(VariantWitnessGraph... graphs) {
     List<String> sigils = new ArrayList<>();
@@ -342,8 +340,8 @@ public class HyperCollater {
             }));
   }
 
-  public String getOptimalMatchSetFinderName() {
-    return optimalMatchSetFinder.getName();
-  }
+//  public String getOptimalMatchSetFinderName() {
+//    return optimalMatchSetFinder.getName();
+//  }
 
 }

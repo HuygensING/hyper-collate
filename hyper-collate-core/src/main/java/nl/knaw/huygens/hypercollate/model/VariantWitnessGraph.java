@@ -20,7 +20,7 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
-import nl.knaw.huygens.hypercollate.collater.VariantWitnessGraphTraversal;
+import nl.knaw.huygens.hypercollate.collator.VariantWitnessGraphTraversal;
 
 import java.util.*;
 import java.util.stream.Stream;

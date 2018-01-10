@@ -25,20 +25,19 @@ import de.vandermeer.asciitable.AsciiTable;
 import de.vandermeer.asciitable.CWC_LongestLine;
 import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
 import eu.interedition.collatex.Token;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
 
 import java.util.*;
 
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-
 public class CollationGraphVisualizer {
 
   private static final String NBSP = "\u00A0";
 
-  static class Cell {
+  public static class Cell {
     final List<String> layerNames = new ArrayList<>();
     final Map<String, String> layerContent = new HashMap<>();
 
