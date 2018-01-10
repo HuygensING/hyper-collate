@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Sets;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -426,11 +425,11 @@ public class HyperCollatorTest extends HyperCollateTest {
     testHyperCollation(wF, wQ, expected);
   }
 
-  @Ignore
+  // @Ignore
   @Test
   // This test fails when you do a 'mvn verify'or 'mvn integration-test', but passes when you call 'mvn test'
   // Probably because there are 2 possible collations, and something something determines which of those 2 is returned?
-  public void testMaryShellyGodwinFrankensteinFragment() {
+  public void testMaryShellyGodwinFrankensteinFragment1() {
     XMLImporter importer = new XMLImporter();
     String xmlN = "<text>\n" + //
         "<s>so destitute of every hope of consolation to live\n" + //

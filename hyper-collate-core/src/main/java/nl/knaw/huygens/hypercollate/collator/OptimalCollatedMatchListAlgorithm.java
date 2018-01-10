@@ -79,7 +79,7 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
 
   @Override
   protected Iterable<QuantumCollatedMatchList> neighborNodes(QuantumCollatedMatchList matchList) {
-    Set<QuantumCollatedMatchList> nextPotentialMatches = new HashSet<>();
+    Set<QuantumCollatedMatchList> nextPotentialMatches = new LinkedHashSet<>();
 
     CollatedMatch firstPotentialMatch1 = getFirstPotentialMatch(this.matchesSortedByNode, matchList);
     addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1);

@@ -155,8 +155,9 @@ public class HyperCollator {
         .map(m -> adjustRankForCollatedNode(m, baseRanking))//
         .distinct()//
         .collect(toList());
-
+    LOG.info("matchList={}", matchList);
     List<CollatedMatch> optimalMatchList = getOptimalMatchList(matchList);
+    LOG.info("optimalMatchList={}", optimalMatchList);
 
     Iterator<TokenVertex> witnessIterator = VariantWitnessGraphTraversal.of(witnessGraph).iterator();
     TokenVertex first = witnessIterator.next();
