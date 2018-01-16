@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.*;
-import static org.assertj.core.api.Assertions.assertThat;
+import static nl.knaw.huygens.hypercollate.Assertions.assertThat;
 
 /*-
  * #%L
@@ -699,5 +699,6 @@ public class HyperCollatorTest extends HyperCollateTest {
     String table = CollationGraphVisualizer.toTableASCII(collation);
     System.out.println(table);
 
+    assertThat(collation).isNotNull();
   }
 }
