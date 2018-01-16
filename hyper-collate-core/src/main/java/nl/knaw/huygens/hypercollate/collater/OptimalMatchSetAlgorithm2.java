@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.collater;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,23 +20,14 @@ package nl.knaw.huygens.hypercollate.collater;
  * #L%
  */
 
+import com.google.common.base.Stopwatch;
+import eu.interedition.collatex.dekker.astar.AstarAlgorithm;
 import static java.util.stream.Collectors.toList;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Stopwatch;
-
-import eu.interedition.collatex.dekker.astar.AstarAlgorithm;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class OptimalMatchSetAlgorithm2 extends AstarAlgorithm<QuantumMatchSet, LostPotential> implements OptimalMatchSetFinder {
   private static final Logger LOG = LoggerFactory.getLogger(OptimalMatchSetAlgorithm2.class);
@@ -69,22 +60,27 @@ public class OptimalMatchSetAlgorithm2 extends AstarAlgorithm<QuantumMatchSet, L
   }
 
   private static List<Match> sortMatchesByWitness(Collection<Match> matches, //
-      String sigil1, //
-      String sigil2) {
+                                                  String sigil1, //
+                                                  String sigil2) {
     Comparator<Match> matchComparator = matchComparator(sigil1, sigil2);
     return matches.stream()//
+        .peek(System.out::println)//
         .sorted(matchComparator)//
         .collect(toList());
   }
 
   private static Comparator<Match> matchComparator(String sigil1, //
-      String sigil2) {
+                                                   String sigil2) {
     return (match1, match2) -> {
       Integer rank1 = match1.getRankForWitness(sigil1);
       Integer rank2 = match2.getRankForWitness(sigil1);
-      if (rank1.equals(rank2)) {
+      LOG.info("match1={}, rank1={}", match1, rank1);
+      LOG.info("match2={}, rank2={}", match2, rank2);
+      if (rank1 == null || rank1.equals(rank2)) {
         rank1 = match1.getRankForWitness(sigil2);
         rank2 = match2.getRankForWitness(sigil2);
+        LOG.info("match1={}, rank1'={}", match1, rank1);
+        LOG.info("match2={}, rank2'={}", match2, rank2);
       }
       return rank1.compareTo(rank2);
     };
@@ -119,8 +115,7 @@ public class OptimalMatchSetAlgorithm2 extends AstarAlgorithm<QuantumMatchSet, L
   }
 
   private Match getFirstPotentialMatch(List<Match> matches, QuantumMatchSet matchSet) {
-    List<Match> potentialMatches = new ArrayList<>();
-    potentialMatches.addAll(matches);
+    List<Match> potentialMatches = new ArrayList<>(matches);
     potentialMatches.retainAll(matchSet.getPotentialMatches());
     return potentialMatches.get(0);
   }

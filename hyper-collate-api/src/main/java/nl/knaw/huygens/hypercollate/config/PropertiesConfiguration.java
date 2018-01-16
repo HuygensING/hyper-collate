@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.config;
  * #%L
  * hyper-collate-api
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,15 @@ package nl.knaw.huygens.hypercollate.config;
  * limitations under the License.
  * #L%
  */
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
-import java.util.MissingResourceException;
-import java.util.Optional;
-import java.util.PropertyResourceBundle;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.*;
 
 public class PropertiesConfiguration {
   private static final Logger LOG = LoggerFactory.getLogger(PropertiesConfiguration.class);

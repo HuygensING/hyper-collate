@@ -1,18 +1,20 @@
 package nl.knaw.huygens.hypercollate.tools;
 
+import com.google.common.base.Preconditions;
+import eu.interedition.collatex.Token;
 import static java.util.stream.Collectors.toList;
+import nl.knaw.huygens.hypercollate.model.CollationGraph;
+import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
+import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
+import nl.knaw.huygens.hypergraph.core.TraditionalEdge;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /*-
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +29,6 @@ import java.util.Set;
  * limitations under the License.
  * #L%
  */
-
-import com.google.common.base.Preconditions;
-
-import eu.interedition.collatex.Token;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
-import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
-import nl.knaw.huygens.hypergraph.core.TraditionalEdge;
 
 public class CollationGraphNodeJoiner {
 

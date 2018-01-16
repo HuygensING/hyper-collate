@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.model;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,12 @@ package nl.knaw.huygens.hypercollate.model;
  */
 
 import static java.util.stream.Collectors.toList;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-
-import org.junit.Test;
-
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.tools.DotFactory;
+import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import java.util.List;
 
 public class VariantWitnessGraphTest extends HyperCollateTest {
 

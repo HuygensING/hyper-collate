@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.collater;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,10 @@ package nl.knaw.huygens.hypercollate.collater;
  * #L%
  */
 
-import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Queue;
-
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+
+import java.util.*;
 
 public class VariantWitnessGraphTraversal implements Iterable<TokenVertex> {
   private final VariantWitnessGraph graph;

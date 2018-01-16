@@ -2,19 +2,16 @@ package nl.knaw.huygens.hypercollate.collater;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 /*-
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +26,6 @@ import java.util.stream.Stream;
  * limitations under the License.
  * #L%
  */
-
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
 public class QuantumMatchSet {
 
@@ -58,22 +53,19 @@ public class QuantumMatchSet {
 
     Set<Match> newChosen = cloneChosenMatches();
 
-    Set<Match> newPotential = new HashSet<>();
-    newPotential.addAll(potentialMatches);
+    Set<Match> newPotential = new HashSet<>(potentialMatches);
     newPotential.remove(match);
 
     return new QuantumMatchSet(newChosen, newPotential);
   }
 
   private Set<Match> cloneChosenMatches() {
-    Set<Match> newChosen = new HashSet<>();
-    newChosen.addAll(chosenMatches);
+    Set<Match> newChosen = new HashSet<>(chosenMatches);
     return newChosen;
   }
 
   private Set<Match> calculateNewPotential(Collection<Match> potentialMatches, Match match) {
-    Set<Match> newPotential = new HashSet<>();
-    newPotential.addAll(potentialMatches);
+    Set<Match> newPotential = new HashSet<>(potentialMatches);
     List<Match> invalidatedMatches = calculateInvalidatedMatches(potentialMatches, match);
     newPotential.removeAll(invalidatedMatches);
     return newPotential;

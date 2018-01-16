@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.collater;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,19 +20,13 @@ package nl.knaw.huygens.hypercollate.collater;
  * #L%
  */
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
+import com.google.common.base.Stopwatch;
+import eu.interedition.collatex.dekker.astar.AstarAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Stopwatch;
-
-import eu.interedition.collatex.dekker.astar.AstarAlgorithm;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class OptimalMatchSetAlgorithm1 extends AstarAlgorithm<QuantumMatchSet, LostPotential> implements OptimalMatchSetFinder {
   private static final Logger LOG = LoggerFactory.getLogger(OptimalMatchSetAlgorithm1.class);

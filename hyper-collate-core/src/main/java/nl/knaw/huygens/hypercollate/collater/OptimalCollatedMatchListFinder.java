@@ -1,8 +1,8 @@
-package nl.knaw.huygens.hypercollate.dropwizard.health;
+package nl.knaw.huygens.hypercollate.collater;
 
-/*
+/*-
  * #%L
- * hyper-collate-server
+ * hyper-collate-core
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
@@ -20,12 +20,13 @@ package nl.knaw.huygens.hypercollate.dropwizard.health;
  * #L%
  */
 
-import com.codahale.metrics.health.HealthCheck;
+import java.util.Collection;
+import java.util.List;
 
-public class ServerHealthCheck extends HealthCheck {
+interface OptimalCollatedMatchListFinder {
 
-  @Override
-  protected Result check() throws Exception {
-    return Result.healthy();
-  }
+  List<CollatedMatch> getOptimalCollatedMatchList(Collection<CollatedMatch> allPotentialMatches);
+
+  String getName();
+
 }

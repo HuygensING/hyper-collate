@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.dropwizard.api;
  * #%L
  * hyper-collate-server
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ package nl.knaw.huygens.hypercollate.dropwizard.api;
  * #L%
  */
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
 import nl.knaw.huygens.hypercollate.api.CollationInput;
 import nl.knaw.huygens.hypercollate.dropwizard.db.CollationInfo;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
+
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 public interface CollationStore {
 
