@@ -81,7 +81,8 @@ public class TokenMerger {
         .setWitness((SimpleWitness) originalToken.getWitness())//
         .setIndexNumber(tokenNumber);
 
-    SimpleTokenVertex mergedVertex = new SimpleTokenVertex(mergedToken);
+    SimpleTokenVertex mergedVertex = new SimpleTokenVertex(mergedToken)//
+        .setBranchPath(originalVertex.getBranchPath());
     originalGraph.getMarkupListForTokenVertex(originalVertex)//
         .forEach(markup -> mergedGraph.addMarkupToTokenVertex(mergedVertex, markup));
     originalToMergedMap.put(tokenNumber, mergedVertex);

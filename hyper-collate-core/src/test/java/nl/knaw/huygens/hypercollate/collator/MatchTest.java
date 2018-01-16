@@ -1,4 +1,14 @@
-package nl.knaw.huygens.hypercollate.collater;
+package nl.knaw.huygens.hypercollate.collator;
+
+import eu.interedition.collatex.Token;
+import nl.knaw.huygens.hypercollate.HyperCollateTest;
+import nl.knaw.huygens.hypercollate.model.TokenVertex;
+import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
 /*-
  * #%L
@@ -19,14 +29,6 @@ package nl.knaw.huygens.hypercollate.collater;
  * limitations under the License.
  * #L%
  */
-
-import eu.interedition.collatex.Token;
-import nl.knaw.huygens.hypercollate.HyperCollateTest;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import static org.assertj.core.api.Assertions.assertThat;
-import org.junit.Test;
-
-import java.util.stream.Stream;
 
 public class MatchTest extends HyperCollateTest {
   @Test
@@ -72,6 +74,11 @@ public class MatchTest extends HyperCollateTest {
       @Override
       public String getSigil() {
         return sigil;
+      }
+
+      @Override
+      public List<Integer> getBranchPath() {
+        return new ArrayList<>();
       }
     };
   }

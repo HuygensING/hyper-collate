@@ -29,8 +29,7 @@ import nl.knaw.huygens.hypercollate.api.CollationInput;
 import nl.knaw.huygens.hypercollate.api.ResourcePaths;
 import nl.knaw.huygens.hypercollate.api.UTF8MediaType;
 import nl.knaw.huygens.hypercollate.api.WitnessInput;
-import nl.knaw.huygens.hypercollate.collater.HyperCollater;
-import nl.knaw.huygens.hypercollate.collater.OptimalMatchSetAlgorithm2;
+import nl.knaw.huygens.hypercollate.collator.HyperCollator;
 import nl.knaw.huygens.hypercollate.dropwizard.ServerConfiguration;
 import nl.knaw.huygens.hypercollate.dropwizard.api.CollationStore;
 import nl.knaw.huygens.hypercollate.dropwizard.db.CollationInfo;
@@ -57,7 +56,7 @@ public class CollationsResource {
   public static final String APIPARAM_UUID = "collation UUID";
   public static final String APIPARAM_COLLATION_INPUT = "Collation input";
   private final ServerConfiguration configuration;
-  private final HyperCollater hypercollater = new HyperCollater(new OptimalMatchSetAlgorithm2());
+  private final HyperCollator hypercollator = new HyperCollator();
   private final CollationStore collationStore;
 
   public CollationsResource(ServerConfiguration configuration, CollationStore collationStore) {
@@ -132,7 +131,7 @@ public class CollationsResource {
     VariantWitnessGraph w1 = importer.importXML(wi1.getSigil(), wi1.getXml());
     VariantWitnessGraph w2 = importer.importXML(wi2.getSigil(), wi2.getXml());
     Stopwatch stopwatch = Stopwatch.createStarted();
-    CollationGraph collationGraph = hypercollater.collate(w1, w2);
+    CollationGraph collationGraph = hypercollator.collate(w1, w2);
     if (collationInput.getJoin()) {
       collationGraph = CollationGraphNodeJoiner.join(collationGraph);
     }
