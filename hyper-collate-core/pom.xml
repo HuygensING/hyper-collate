@@ -151,23 +151,23 @@
                     <!-- <skip>true</skip> -->
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-test-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>src/test/generated-assertions</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+			<!--<plugin>-->
+			<!--<groupId>org.codehaus.mojo</groupId>-->
+			<!--<artifactId>build-helper-maven-plugin</artifactId>-->
+			<!--<executions>-->
+			<!--<execution>-->
+			<!--<phase>generate-sources</phase>-->
+			<!--<goals>-->
+			<!--<goal>add-test-source</goal>-->
+			<!--</goals>-->
+			<!--<configuration>-->
+			<!--<sources>-->
+			<!--<source>src/test/generated-assertions</source>-->
+			<!--</sources>-->
+			<!--</configuration>-->
+			<!--</execution>-->
+			<!--</executions>-->
+			<!--</plugin>-->
         </plugins>
     </build>
 </project>
