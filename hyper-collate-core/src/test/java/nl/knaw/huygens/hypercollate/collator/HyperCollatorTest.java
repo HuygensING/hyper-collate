@@ -2,10 +2,15 @@ package nl.knaw.huygens.hypercollate.collator;
 
 import com.google.common.base.Stopwatch;
 import eu.interedition.collatex.dekker.Tuple;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.*;
+import static nl.knaw.huygens.hypercollate.HyperCollateAssertions.assertThat;
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
+import nl.knaw.huygens.hypercollate.model.CollationGraphAssert.NodeSketch;
+import static nl.knaw.huygens.hypercollate.model.CollationGraphAssert.nodeSketch;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
@@ -19,10 +24,6 @@ import org.slf4j.LoggerFactory;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.*;
-import static nl.knaw.huygens.hypercollate.Assertions.assertThat;
 
 /*-
  * #%L
@@ -65,23 +66,90 @@ public class HyperCollatorTest extends HyperCollateTest {
         "        Die dagen van ongewisheid vóór de liefelijke toestemming.</s>\n" + //
         "</text>");
 
-    String expected = "digraph CollationGraph{\n" + "labelloc=b\n" + "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
-        + "t002 [label=<F,Q,Z: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n" + "t003 [label=<F,Q: &#9251;<br/>F,Q: <i>/text/s</i>>]\n"
-        + "t004 [label=<F,Q,Z: een&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n" + "t005 [label=<F: vrouw<br/>Q: vrouw&#9251;<br/>Z: vrouw&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n"
-        + "t006 [label=<F: ,&#x21A9;<br/>&#9251;de&#9251;<br/>F: <i>/text/s</i>>]\n" + "t007 [label=<F,Z: ongewisheid&#9251;<br/>F,Z: <i>/text/s</i>>]\n"
-        + "t008 [label=<F,Q,Z: vóór&#9251;de&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n" + "t009 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n"
-        + "t010 [label=<F,Q,Z: liefelijke&#9251;toestemming<br/>F,Q,Z: <i>/text/s</i>>]\n" + "t011 [label=<F: !<br/>F: <i>/text/s</i>>]\n" + "t012 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n"
-        + "t013 [label=<F,Q: werven&#9251;om<br/>F,Q: <i>/text/s/del</i>>]\n"
-        + "t014 [label=<F: trachten&#9251;naar<br/>Q: trachten&#9251;naar<br/>Z: trachten&#9251;naar&#9251;<br/>F: <i>/text/s/add</i><br/>Q: <i>/text/s/add</i><br/>Z: <i>/text/s</i><br/>>]\n"
-        + "t015 [label=<Q: <br/>Q: <i>/text/s/lb</i>>]\n" + "t016 [label=<Q: !&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;<br/>Z: !Die&#9251;dagen&#9251;van&#9251;<br/>Q,Z: <i>/text/s</i>>]\n"
-        + "t017 [label=<Q: nerveuze&#9251;verwachting&#9251;<br/>Q: <i>/text/s</i>>]\n" + "t018 [label=<Q,Z: .<br/>Q,Z: <i>/text/s</i>>]\n" + "t000->t002[label=\"F,Q,Z\"]\n"
-        + "t002->t012[label=\"F\"]\n" + "t002->t013[label=\"Q\"]\n" + "t002->t014[label=\"Q,Z\"]\n" + "t003->t004[label=\"F,Q\"]\n" + "t004->t005[label=\"F,Z\"]\n" + "t004->t015[label=\"Q\"]\n"
-        + "t005->t006[label=\"F\"]\n" + "t005->t016[label=\"Q,Z\"]\n" + "t006->t007[label=\"F\"]\n" + "t007->t008[label=\"F,Z\"]\n" + "t008->t009[label=\"F\"]\n" + "t008->t010[label=\"Q,Z\"]\n"
-        + "t009->t010[label=\"F\"]\n" + "t010->t011[label=\"F\"]\n" + "t010->t018[label=\"Q,Z\"]\n" + "t011->t001[label=\"F\"]\n" + "t012->t013[label=\"F\"]\n" + "t012->t014[label=\"F\"]\n"
-        + "t013->t003[label=\"F,Q\"]\n" + "t014->t003[label=\"F,Q\"]\n" + "t014->t004[label=\"Z\"]\n" + "t015->t005[label=\"Q\"]\n" + "t016->t007[label=\"Z\"]\n" + "t016->t017[label=\"Q\"]\n"
-        + "t017->t008[label=\"Q\"]\n" + "t018->t001[label=\"Q,Z\"]\n" + "}";
+    String expected = "digraph CollationGraph{\n"//
+        + "labelloc=b\n"//
+        + "t000 [label=\"\";shape=doublecircle,rank=middle]\n"//
+        + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"//
+        + "t002 [label=<F,Q,Z: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n" //
+        + "t003 [label=<F,Q: &#9251;<br/>F,Q: <i>/text/s</i>>]\n"//
+        + "t004 [label=<F,Q,Z: een&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n" //
+        + "t005 [label=<F: vrouw<br/>Q: vrouw&#9251;<br/>Z: vrouw&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n"//
+        + "t006 [label=<F: ,&#x21A9;<br/>&#9251;de&#9251;<br/>F: <i>/text/s</i>>]\n" //
+        + "t007 [label=<F,Z: ongewisheid&#9251;<br/>F,Z: <i>/text/s</i>>]\n"//
+        + "t008 [label=<F,Q,Z: vóór&#9251;de&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n" //
+        + "t009 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n"//
+        + "t010 [label=<F,Q,Z: liefelijke&#9251;toestemming<br/>F,Q,Z: <i>/text/s</i>>]\n" //
+        + "t011 [label=<F: !<br/>F: <i>/text/s</i>>]\n" //
+        + "t012 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n"//
+        + "t013 [label=<F,Q: werven&#9251;om<br/>F,Q: <i>/text/s/del</i>>]\n"//
+        + "t014 [label=<F: trachten&#9251;naar<br/>Q: trachten&#9251;naar<br/>Z: trachten&#9251;naar&#9251;<br/>F: <i>/text/s/add</i><br/>Q: <i>/text/s/add</i><br/>Z: <i>/text/s</i><br/>>]\n"//
+        + "t015 [label=<Q: <br/>Q: <i>/text/s/lb</i>>]\n" //
+        + "t016 [label=<Q: !&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;<br/>Z: !Die&#9251;dagen&#9251;van&#9251;<br/>Q,Z: <i>/text/s</i>>]\n"//
+        + "t017 [label=<Q: nerveuze&#9251;verwachting&#9251;<br/>Q: <i>/text/s</i>>]\n" //
+        + "t018 [label=<Q,Z: .<br/>Q,Z: <i>/text/s</i>>]\n" //
+        + "t000->t002[label=\"F,Q,Z\"]\n"//
+        + "t002->t012[label=\"F\"]\n" //
+        + "t002->t013[label=\"Q\"]\n" //
+        + "t002->t014[label=\"Q,Z\"]\n" //
+        + "t003->t004[label=\"F,Q\"]\n" //
+        + "t004->t005[label=\"F,Z\"]\n" //
+        + "t004->t015[label=\"Q\"]\n"
+        + "t005->t006[label=\"F\"]\n" //
+        + "t005->t016[label=\"Q,Z\"]\n" //
+        + "t006->t007[label=\"F\"]\n" //
+        + "t007->t008[label=\"F,Z\"]\n" //
+        + "t008->t009[label=\"F\"]\n" //
+        + "t008->t010[label=\"Q,Z\"]\n"
+        + "t009->t010[label=\"F\"]\n" //
+        + "t010->t011[label=\"F\"]\n" //
+        + "t010->t018[label=\"Q,Z\"]\n" //
+        + "t011->t001[label=\"F\"]\n" //
+        + "t012->t013[label=\"F\"]\n" //
+        + "t012->t014[label=\"F\"]\n"
+        + "t013->t003[label=\"F,Q\"]\n" //
+        + "t014->t003[label=\"F,Q\"]\n" //
+        + "t014->t004[label=\"Z\"]\n" //
+        + "t015->t005[label=\"Q\"]\n" //
+        + "t016->t007[label=\"Z\"]\n" //
+        + "t016->t017[label=\"Q\"]\n"
+        + "t017->t008[label=\"Q\"]\n" //
+        + "t018->t001[label=\"Q,Z\"]\n" //
+        + "}";
 
-    testHyperCollation3(wF, wQ, wZ, expected);
+    CollationGraph collationGraph = testHyperCollation3(wF, wQ, wZ, expected);
+
+    // test matching tokens
+    NodeSketch n1 = nodeSketch()
+        .withWitnessSegmentSketch("F", "Hoe zoet moet nochtans zijn dit ")
+        .withWitnessSegmentSketch("Q", "Hoe zoet moet nochtans zijn dit ")
+        .withWitnessSegmentSketch("Z", "Hoe zoet moet nochtans zijn dit ");
+    NodeSketch n2 = nodeSketch()
+        .withWitnessSegmentSketch("F", " ")
+        .withWitnessSegmentSketch("Q", " ");
+    NodeSketch n3 = nodeSketch()
+        .withWitnessSegmentSketch("F", "een ")
+        .withWitnessSegmentSketch("Q", "een ")
+        .withWitnessSegmentSketch("Z", "een ");
+    NodeSketch n4 = nodeSketch()
+        .withWitnessSegmentSketch("F", "vrouw")
+        .withWitnessSegmentSketch("Q", "vrouw ")
+        .withWitnessSegmentSketch("Z", "vrouw ");
+    NodeSketch n5 = nodeSketch()
+        .withWitnessSegmentSketch("F", "ongewisheid ")
+        .withWitnessSegmentSketch("Z", "ongewisheid ");
+    NodeSketch n6 = nodeSketch()
+        .withWitnessSegmentSketch("F", "liefelijke toestemming")
+        .withWitnessSegmentSketch("Z", "liefelijke toestemming")
+        .withWitnessSegmentSketch("Q", "liefelijke toestemming");
+    NodeSketch n7 = nodeSketch()
+        .withWitnessSegmentSketch("F", "trachten naar")
+        .withWitnessSegmentSketch("Q", "trachten naar")
+        .withWitnessSegmentSketch("Z", "trachten naar ");
+    NodeSketch n8 = nodeSketch()
+        .withWitnessSegmentSketch("F", "werven om")
+        .withWitnessSegmentSketch("Q", "werven om");
+
+    assertThat(collationGraph).containsTextNodesMatching(n1, n2, n3, n4, n5, n6, n7, n8);
   }
 
   @Test
@@ -184,7 +252,33 @@ public class HyperCollatorTest extends HyperCollateTest {
         "t015->t001[label=\"Q\"]\n" + //
         "}";
 
-    testHyperCollation(wF, wQ, expected);
+    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
+
+    // test matching tokens
+
+    assertThat(collationGraph).containsTextNodesMatching(
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "Hoe zoet moet nochtans zijn dit ")
+            .withWitnessSegmentSketch("Q", "Hoe zoet moet nochtans zijn dit "),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "trachten naar")
+            .withWitnessSegmentSketch("Q", "trachten naar"),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "werven om")
+            .withWitnessSegmentSketch("Q", "werven om"),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", " een ")
+            .withWitnessSegmentSketch("Q", " een "),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "vrouw")
+            .withWitnessSegmentSketch("Q", "vrouw "),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "vóór de ")
+            .withWitnessSegmentSketch("Q", "vóór de "),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "liefelijke toestemming")
+            .withWitnessSegmentSketch("Q", "liefelijke toestemming")
+    );
   }
 
   @Test
@@ -269,7 +363,24 @@ public class HyperCollatorTest extends HyperCollateTest {
         "t009->t008[label=\"Q\"]\n" + //
         "}";
 
-    testHyperCollation(wF, wQ, expected);
+    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
+    assertThat(collationGraph).containsTextNodesMatching(
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "De vent was woedend en maakte ")
+            .withWitnessSegmentSketch("Q", "De vent was woedend en maakte "),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "Shiriar")
+            .withWitnessSegmentSketch("Q", "Shiriar"),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "den bedremmelden\n        ")
+            .withWitnessSegmentSketch("Q", "den bedremmelden "),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "Sultan ")
+            .withWitnessSegmentSketch("Q", "Sultan"),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "uit voor \"lompen boer\".")
+            .withWitnessSegmentSketch("Q", "uit voor \"lompen boer\".")
+    );
   }
 
   @Test
@@ -298,7 +409,25 @@ public class HyperCollatorTest extends HyperCollateTest {
         "t007->t004[label=\"B\"]\n" + //
         "}";
 
-    testHyperCollation(wF, wQ, expected);
+    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
+    assertThat(collationGraph).containsOnlyTextNodesMatching(
+        nodeSketch()
+            .withWitnessSegmentSketch("A", "The dog's ")
+            .withWitnessSegmentSketch("B", "The dog's "),
+        nodeSketch()
+            .withWitnessSegmentSketch("A", "big ")
+            .withWitnessSegmentSketch("B", "big "),
+        nodeSketch()
+            .withWitnessSegmentSketch("B", "black ears"),
+        nodeSketch()
+            .withWitnessSegmentSketch("B", "brown "),
+        nodeSketch()
+            .withWitnessSegmentSketch("A", "eyes")
+            .withWitnessSegmentSketch("B", "eyes"),
+        nodeSketch()
+            .withWitnessSegmentSketch("A", ".")
+            .withWitnessSegmentSketch("B", ".")
+    );
   }
 
   @Test
@@ -325,7 +454,18 @@ public class HyperCollatorTest extends HyperCollateTest {
         "t006->t001[label=\"B\"]\n" + //
         "}";
 
-    testHyperCollation(wF, wQ, expected);
+    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
+    assertThat(collationGraph).containsTextNodesMatching(
+        nodeSketch()
+            .withWitnessSegmentSketch("A", "b b b b b b b ")
+            .withWitnessSegmentSketch("B", "b b b b b b b ")
+    );
+    assertThat(collationGraph).doesNotContainTextNodesMatching(
+        nodeSketch()
+            .withWitnessSegmentSketch("A", "T ")
+            .withWitnessSegmentSketch("B", "X ")
+    );
+
   }
 
   @Test
@@ -359,7 +499,23 @@ public class HyperCollatorTest extends HyperCollateTest {
         "t009->t001[label=\"B\"]\n" + //
         "}";
 
-    testHyperCollation(wF, wQ, expected);
+    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
+    assertThat(collationGraph).containsTextNodesMatching(
+        nodeSketch()
+            .withWitnessSegmentSketch("A", "A ")
+            .withWitnessSegmentSketch("B", "A "),
+        nodeSketch()
+            .withWitnessSegmentSketch("A", "E C ")
+            .withWitnessSegmentSketch("B", "E C "),
+        nodeSketch()
+            .withWitnessSegmentSketch("A", "G ")
+            .withWitnessSegmentSketch("B", "G ")
+    );
+    assertThat(collationGraph).doesNotContainTextNodesMatching(
+        nodeSketch()
+            .withWitnessSegmentSketch("A", "H")
+            .withWitnessSegmentSketch("B", "H ")
+    );
   }
 
   @Test
@@ -414,12 +570,26 @@ public class HyperCollatorTest extends HyperCollateTest {
         "t009->t001[label=\"T\"]\n" + //
         "}";
 
-    testHyperCollation(wF, wQ, expected);
+    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
+    assertThat(collationGraph).containsTextNodesMatching(
+        nodeSketch()
+            .withWitnessSegmentSketch("H", "Leaning her bony breast on the hard thorn ")
+            .withWitnessSegmentSketch("T", "leaning her bony breast on the hard thorn"),
+        nodeSketch()
+            .withWitnessSegmentSketch("H", "her forgiveness")
+            .withWitnessSegmentSketch("T", "her forgiveness "),
+        nodeSketch()
+            .withWitnessSegmentSketch("H", ".Was it then that she had her consolations  ")
+            .withWitnessSegmentSketch("T", ".Was it then that she had her consolations ")
+    );
+    assertThat(collationGraph).doesNotContainTextNodesMatching(
+        nodeSketch()
+            .withWitnessSegmentSketch("H", ", ")
+            .withWitnessSegmentSketch("T", ", ")
+    );
   }
 
   @Test
-  // This test fails when you do a 'mvn verify'or 'mvn integration-test', but passes when you call 'mvn test'
-  // Probably because there are 2 possible collations, and something something determines which of those 2 is returned?
   public void testMaryShellyGodwinFrankensteinFragment1() {
     XMLImporter importer = new XMLImporter();
     String xmlN = "<text>\n" + //
@@ -503,7 +673,30 @@ public class HyperCollatorTest extends HyperCollateTest {
         "t012->t004[label=\"N\"]\n" + //
         "}";
 
-    testHyperCollation(wF, wQ, expected);
+    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
+    assertThat(collationGraph).containsTextNodesMatching(
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "so ")
+            .withWitnessSegmentSketch("N", "so "),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "destitute of every hope of consolation to live")
+            .withWitnessSegmentSketch("N", "destitute of every hope of consolation to live"),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", " ")
+            .withWitnessSegmentSketch("N", " "),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "?")
+            .withWitnessSegmentSketch("N", "?"),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "Oh")
+            .withWitnessSegmentSketch("N", "oh "),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "no")
+            .withWitnessSegmentSketch("N", "no "),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "... ")
+            .withWitnessSegmentSketch("N", "...\n")
+    );
   }
 
   @Test
@@ -563,7 +756,33 @@ public class HyperCollatorTest extends HyperCollateTest {
         "t014->t009[label=\"N\"]\n" + //
         "}";
 
-    testHyperCollation(wF, wQ, expected);
+    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
+    assertThat(collationGraph).containsTextNodesMatching(
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "Frankenstein discovered")
+            .withWitnessSegmentSketch("N", "Frankenstein discovered "),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "that I")
+            .withWitnessSegmentSketch("N", "that I "),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "or")
+            .withWitnessSegmentSketch("N", "or "),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "made notes concerning his history")
+            .withWitnessSegmentSketch("N", "made notes concerning his history "),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "he asked to see them ")
+            .withWitnessSegmentSketch("N", "he asked to see them "),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "himself corrected ")
+            .withWitnessSegmentSketch("N", "himself corrected\n"),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "and augmented ")
+            .withWitnessSegmentSketch("N", "and augmented"),
+        nodeSketch()
+            .withWitnessSegmentSketch("F", "them in many places\n")
+            .withWitnessSegmentSketch("N", "them in many places")
+    );
   }
 
   @Test
@@ -662,7 +881,7 @@ public class HyperCollatorTest extends HyperCollateTest {
         .collect(joining(""));
   }
 
-  private void testHyperCollation(VariantWitnessGraph witness1, VariantWitnessGraph witness2, String expected) {
+  private CollationGraph testHyperCollation(VariantWitnessGraph witness1, VariantWitnessGraph witness2, String expected) {
     Map<String, Long> collationDuration = new HashMap<>();
     Stopwatch stopwatch = Stopwatch.createStarted();
     CollationGraph collation0 = hyperCollator.collate(witness1, witness2);
@@ -679,9 +898,10 @@ public class HyperCollatorTest extends HyperCollateTest {
 
     String table = CollationGraphVisualizer.toTableASCII(collation);
     System.out.println(table);
+    return collation;
   }
 
-  private void testHyperCollation3(VariantWitnessGraph witness1, VariantWitnessGraph witness2, VariantWitnessGraph witness3, String expected) {
+  private CollationGraph testHyperCollation3(VariantWitnessGraph witness1, VariantWitnessGraph witness2, VariantWitnessGraph witness3, String expected) {
     Map<String, Long> collationDuration = new HashMap<>();
     Stopwatch stopwatch = Stopwatch.createStarted();
     CollationGraph collation = hyperCollator.collate(witness1, witness2, witness3);
@@ -700,5 +920,7 @@ public class HyperCollatorTest extends HyperCollateTest {
     System.out.println(table);
 
     assertThat(collation).isNotNull();
+    return collation;
   }
+
 }
