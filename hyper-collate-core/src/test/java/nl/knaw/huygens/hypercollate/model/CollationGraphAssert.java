@@ -42,7 +42,7 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
   @org.assertj.core.util.CheckReturnValue
   public CollationGraphAssert containsTextNodesMatching(NodeSketch... nodeSketches) {
     Set<NodeSketch> actualNodeSketches = getActualNodeSketches();
-    Set<NodeSketch> expectedNodeSketches = new HashSet<NodeSketch>(Arrays.asList(nodeSketches));
+    Set<NodeSketch> expectedNodeSketches = new HashSet<>(Arrays.asList(nodeSketches));
     expectedNodeSketches.removeAll(actualNodeSketches);
 
     String errorMessage = "\nNo nodes found matching %s;\nNodes found: %s";
@@ -57,7 +57,7 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
   public CollationGraphAssert doesNotContainTextNodesMatching(NodeSketch... nodeSketches) {
     Set<NodeSketch> actualNodeSketches = getActualNodeSketches();
     List<NodeSketch> nodeSketchList = Arrays.asList(nodeSketches);
-    Set<NodeSketch> unexpectedNodeSketches = new HashSet<NodeSketch>(nodeSketchList);
+    Set<NodeSketch> unexpectedNodeSketches = new HashSet<>(nodeSketchList);
     unexpectedNodeSketches.retainAll(actualNodeSketches);
 
     String errorMessage = "\nExpected %s not to match with any of %s, but found matches with %s";
@@ -71,7 +71,7 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
   @org.assertj.core.util.CheckReturnValue
   public CollationGraphAssert containsOnlyTextNodesMatching(NodeSketch... nodeSketches) {
     Set<NodeSketch> actualNodeSketches = getActualNodeSketches();
-    Set<NodeSketch> expectedNodeSketches = new HashSet<NodeSketch>(Arrays.asList(nodeSketches));
+    Set<NodeSketch> expectedNodeSketches = new HashSet<>(Arrays.asList(nodeSketches));
     Iterables.instance().assertContainsAll(info, actualNodeSketches, expectedNodeSketches);
     return myself;
   }
