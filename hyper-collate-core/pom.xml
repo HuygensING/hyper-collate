@@ -79,7 +79,7 @@
                 <executions>
                     <execution>
                         <goals>
-                            <goal>generate-assertions</goal>
+							<!--<goal>generate-assertions</goal>-->
                         </goals>
                     </execution>
                 </executions>
