@@ -99,7 +99,7 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
     public String toString() {
       return "[\n" + witnessTokenSegments.keySet()//
           .stream()//
-          .map(s -> "  (" + s + ":" + witnessTokenSegments.get(s).replace("\n", "\\n") + ")")//
+          .map(s -> String.format("  (%s:%s)", s, witnessTokenSegments.get(s).replace("\n", "\\n")))//
           .collect(joining(",\n"))//
           + "\n]";
     }
