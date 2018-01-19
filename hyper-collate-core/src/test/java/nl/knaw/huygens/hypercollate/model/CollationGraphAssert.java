@@ -130,6 +130,7 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
   }
 
   private Set<NodeSketch> getActualNodeSketches() {
+
     return actual.traverseTextNodes()//
         .stream()//
         .filter(n -> !n.getSigils().isEmpty())//

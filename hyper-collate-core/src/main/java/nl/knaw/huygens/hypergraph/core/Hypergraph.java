@@ -95,7 +95,8 @@ public class Hypergraph<N, H> {
     if (!targetNodes.containsKey(edge)) {
       throw new RuntimeException("unknown hyperedge " + edge);
     }
-    targetNodes.get(edge).addAll(asList(targets));
+    Collection<N> collection = targetNodes.get(edge);
+    asList(targets).forEach(collection::add);
     for (N target : targets) {
       incomingEdges.computeIfAbsent(target, mappingFunction).add(edge);
     }

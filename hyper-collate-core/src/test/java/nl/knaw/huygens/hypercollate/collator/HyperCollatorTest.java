@@ -26,12 +26,9 @@ import static java.util.stream.Collectors.*;
 import static nl.knaw.huygens.hypercollate.HyperCollateAssertions.assertThat;
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
+import nl.knaw.huygens.hypercollate.model.*;
 import nl.knaw.huygens.hypercollate.model.CollationGraphAssert.NodeSketch;
 import static nl.knaw.huygens.hypercollate.model.CollationGraphAssert.nodeSketch;
-import nl.knaw.huygens.hypercollate.model.TextNode;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
 import org.assertj.core.api.Assertions;
@@ -794,7 +791,8 @@ public class HyperCollatorTest extends HyperCollateTest {
     CollationGraph collationGraph = new CollationGraph();
     Map<TokenVertex, TextNode> map = new HashMap<>();
     List<Match> matches = new ArrayList<>();
-    hyperCollator.initialize(collationGraph, map, wF);
+    Map<Markup, MarkupNode> markupNodeIndex = new HashMap<>();
+    hyperCollator.initialize(collationGraph, map, markupNodeIndex, wF);
     CollationGraph collation = CollationGraphNodeJoiner.join(collationGraph);
     String dot = CollationGraphVisualizer.toDot(collation);
     String expected = "digraph CollationGraph{\n" + "labelloc=b\n" + "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
