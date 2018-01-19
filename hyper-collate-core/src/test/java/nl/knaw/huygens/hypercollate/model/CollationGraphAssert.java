@@ -109,7 +109,7 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
     return new NodeSketch();
   }
 
-  public NodeSketch toNodeSketch(CollationGraph.Node node) {
+  public NodeSketch toNodeSketch(TextNode node) {
     NodeSketch nodeSketch = nodeSketch();
     node.getSigils().forEach(s ->
         nodeSketch.withWitnessSegmentSketch(s, ((MarkedUpToken) node.getTokenForWitness(s)).getContent())
@@ -130,7 +130,7 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
   }
 
   private Set<NodeSketch> getActualNodeSketches() {
-    return actual.traverse()//
+    return actual.traverseTextNodes()//
         .stream()//
         .filter(n -> !n.getSigils().isEmpty())//
         .map(this::toNodeSketch)//

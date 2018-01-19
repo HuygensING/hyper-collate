@@ -28,8 +28,8 @@ import eu.interedition.collatex.Token;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
+import nl.knaw.huygens.hypercollate.model.TextNode;
 
 import java.util.*;
 
@@ -68,7 +68,7 @@ public class CollationGraphVisualizer {
 
     Map<String, Integer> maxLayers = new HashMap<>();
     sigils.forEach(sigil -> maxLayers.put(sigil, 1));
-    for (Set<Node> nodeSet : ranking) {
+    for (Set<TextNode> nodeSet : ranking) {
       if (isBorderNode(nodeSet, graph)) {
         // skip start and end nodes
         continue;
@@ -76,13 +76,16 @@ public class CollationGraphVisualizer {
       Map<String, List<MarkedUpToken>> nodeTokensPerWitness = new HashMap<>();
       sigils.forEach(sigil -> {
         nodeTokensPerWitness.put(sigil, new ArrayList<>());
-        nodeSet.forEach(node -> {
-          Token token = node.getTokenForWitness(sigil);
-          if (token != null) {
-            MarkedUpToken mToken = (MarkedUpToken) token;
-            nodeTokensPerWitness.get(sigil).add(mToken);
-          }
-        });
+        nodeSet.stream()//
+            .filter(TextNode.class::isInstance)//
+            .map(TextNode.class::cast)//
+            .forEach(node -> {
+              Token token = node.getTokenForWitness(sigil);
+              if (token != null) {
+                MarkedUpToken mToken = (MarkedUpToken) token;
+                nodeTokensPerWitness.get(sigil).add(mToken);
+              }
+            });
       });
       sigils.forEach(sigil -> {
         List<MarkedUpToken> tokens = nodeTokensPerWitness.get(sigil);
@@ -95,11 +98,11 @@ public class CollationGraphVisualizer {
     return asciiTable(graph.getSigils(), rowMap, maxLayers).render();
   }
 
-  private static boolean isBorderNode(Set<Node> nodeSet, CollationGraph graph) {
+  private static boolean isBorderNode(Set<TextNode> nodeSet, CollationGraph graph) {
     if (nodeSet.size() != 1) {
       return false;
     }
-    Node node = nodeSet.iterator().next();
+    TextNode node = nodeSet.iterator().next();
     Boolean hasNoIncomingEdges = graph.getIncomingEdges(node).isEmpty();
     Boolean hasNoOutgoingEdges = graph.getOutgoingEdges(node).isEmpty();
     return hasNoIncomingEdges || hasNoOutgoingEdges;

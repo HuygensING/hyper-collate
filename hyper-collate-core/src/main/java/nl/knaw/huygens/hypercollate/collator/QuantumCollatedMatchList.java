@@ -22,7 +22,7 @@ package nl.knaw.huygens.hypercollate.collator;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
+import nl.knaw.huygens.hypercollate.model.TextNode;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
 import java.util.ArrayList;
@@ -82,7 +82,7 @@ public class QuantumCollatedMatchList {
   }
 
   private List<CollatedMatch> calculateInvalidatedMatches(List<CollatedMatch> potentialMatches, CollatedMatch match) {
-    CollationGraph.Node node = match.getCollatedNode();
+    TextNode node = (TextNode) match.getCollatedNode();
     TokenVertex tokenVertexForWitness = match.getWitnessVertex();
     int minNodeRank = match.getNodeRank();
     int minVertexRank = match.getVertexRank();
@@ -95,7 +95,7 @@ public class QuantumCollatedMatchList {
         .collect(toList());
   }
 
-  private boolean hasSigilOverlap(CollatedMatch m, CollationGraph.Node node) {
+  private boolean hasSigilOverlap(CollatedMatch m, TextNode node) {
     Set<String> nodeSigils = node.getSigils();
     // m and node have witnesses in common
     // for those witnesses they have in common, the branchpath of one is the startsubpath otf the other.

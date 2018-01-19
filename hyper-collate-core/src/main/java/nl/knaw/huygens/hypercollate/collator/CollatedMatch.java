@@ -21,33 +21,36 @@ package nl.knaw.huygens.hypercollate.collator;
  */
 
 import static java.util.stream.Collectors.joining;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+import nl.knaw.huygens.hypercollate.model.TextNode;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
 import java.util.*;
 
 public class CollatedMatch {
 
-  private final CollationGraph.Node collatedNode;
+  private final TextNode collatedNode;
   private int nodeRank;
   private final TokenVertex witnessVertex;
   private int vertexRank;
   private final Set<String> sigils = new HashSet<>();
   private final Map<String, List<Integer>> branchPaths = new HashMap<>();
 
-  public CollatedMatch(CollationGraph.Node collatedNode, TokenVertex witnessVertex) {
+  public CollatedMatch(TextNode collatedNode, TokenVertex witnessVertex) {
     this.collatedNode = collatedNode;
     this.witnessVertex = witnessVertex;
     sigils.add(witnessVertex.getSigil());
-    sigils.addAll(collatedNode.getSigils());
     branchPaths.put(witnessVertex.getSigil(), witnessVertex.getBranchPath());
-    for (String s : collatedNode.getSigils()) {
-      branchPaths.put(s, collatedNode.getBranchPath(s));
+    if (collatedNode instanceof TextNode) {
+      TextNode textNode = (TextNode) collatedNode;
+      sigils.addAll(textNode.getSigils());
+      for (String s : textNode.getSigils()) {
+        branchPaths.put(s, textNode.getBranchPath(s));
+      }
     }
   }
 
-  public CollationGraph.Node getCollatedNode() {
+  public TextNode getCollatedNode() {
     return collatedNode;
   }
 
@@ -86,8 +89,12 @@ public class CollatedMatch {
 
   @Override
   public String toString() {
+    Set<String> sigils = collatedNode instanceof TextNode
+        ? ((TextNode) collatedNode).getSigils()
+        : this.sigils;
+    String sigilString = sigils.stream().sorted().collect(joining(","));
     StringBuilder stringBuilder = new StringBuilder("<[")//
-        .append(collatedNode.getSigils().stream().sorted().collect(joining(",")))//
+        .append(sigilString)//
         .append("]")//
         .append(nodeRank);
 

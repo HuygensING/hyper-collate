@@ -3,10 +3,7 @@ package nl.knaw.huygens.hypercollate.tools;
 import com.google.common.base.Preconditions;
 import eu.interedition.collatex.Token;
 import static java.util.stream.Collectors.toList;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
-import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
-import nl.knaw.huygens.hypergraph.core.TraditionalEdge;
+import nl.knaw.huygens.hypercollate.model.*;
 
 import java.util.*;
 
@@ -34,16 +31,16 @@ public class CollationGraphNodeJoiner {
 
   public static CollationGraph join(CollationGraph originalGraph) {
     CollationGraph mergedGraph = new CollationGraph(originalGraph.getSigils());
-    Map<Node, Node> originalToMerged = mergeNodes(originalGraph, mergedGraph);
+    Map<TextNode, TextNode> originalToMerged = mergeNodes(originalGraph, mergedGraph);
     copyIncomingEdges(originalGraph, originalToMerged, mergedGraph);
     return mergedGraph;
   }
 
-  private static Map<Node, Node> mergeNodes(CollationGraph originalGraph, CollationGraph mergedGraph) {
-    Map<Node, Node> originalToMerged = new HashMap<>();
-    Node mergedNode = mergedGraph.getRootNode();
+  private static Map<TextNode, TextNode> mergeNodes(CollationGraph originalGraph, CollationGraph mergedGraph) {
+    Map<TextNode, TextNode> originalToMerged = new HashMap<>();
+    TextNode mergedNode = mergedGraph.getTextStartNode();
     Boolean isRootNode = true;
-    for (Node originalNode : originalGraph.traverse()) {
+    for (TextNode originalNode : originalGraph.traverseTextNodes()) {
       if (isRootNode) {
         isRootNode = false;
         originalToMerged.put(originalNode, mergedNode);
@@ -61,16 +58,16 @@ public class CollationGraphNodeJoiner {
     return originalToMerged;
   }
 
-  private static boolean canMergeNodes(Node mergedNode, Node originalNode, CollationGraph originalGraph) {
-    Collection<TraditionalEdge> incomingEdges = originalGraph.getIncomingEdges(originalNode);
+  private static boolean canMergeNodes(TextNode mergedNode, TextNode originalNode, CollationGraph originalGraph) {
+    Collection<TextEdge> incomingEdges = originalGraph.getIncomingTextEdgeStream(originalNode).collect(toList());
     if (incomingEdges.size() != 1) {
       return false;
     }
     if (!mergedNode.getSigils().equals(originalNode.getSigils())) {
       return false;
     }
-    TraditionalEdge incomingEdge = incomingEdges.iterator().next();
-    Node prevNode = originalGraph.getSource(incomingEdge);
+    TextEdge incomingEdge = incomingEdges.iterator().next();
+    TextNode prevNode = (TextNode) originalGraph.getSource(incomingEdge);
     Boolean sigilsMatch = prevNode.getSigils().equals(mergedNode.getSigils());
     if (sigilsMatch) {
       Boolean parentXPathsMatch = true;
@@ -90,7 +87,7 @@ public class CollationGraphNodeJoiner {
     return false;
   }
 
-  private static void mergeNodeTokens(Node lastNode, Node originalNode) {
+  private static void mergeNodeTokens(TextNode lastNode, TextNode originalNode) {
     originalNode.getSigils().forEach(s -> lastNode.addBranchPath(s, originalNode.getBranchPath(s)));
     for (String s : lastNode.getSigils()) {
       MarkedUpToken tokenForWitness = (MarkedUpToken) lastNode.getTokenForWitness(s);
@@ -100,14 +97,14 @@ public class CollationGraphNodeJoiner {
     }
   }
 
-  private static Node copyNode(Node originalNode, CollationGraph mergedGraph) {
+  private static TextNode copyNode(TextNode originalNode, CollationGraph mergedGraph) {
     Token[] tokens = originalNode.getSigils()//
         .stream()//
         .map(originalNode::getTokenForWitness)//
         .map(CollationGraphNodeJoiner::cloneToken)//
         .collect(toList())//
         .toArray(new Token[]{});
-    Node newNode = mergedGraph.addNodeWithTokens(tokens);
+    TextNode newNode = mergedGraph.addTextNodeWithTokens(tokens);
     originalNode.getSigils().forEach(s -> newNode.addBranchPath(s, originalNode.getBranchPath(s)));
     return newNode;
   }
@@ -119,12 +116,12 @@ public class CollationGraphNodeJoiner {
     throw new RuntimeException("Can't clone token of type " + original.getClass());
   }
 
-  private static void copyIncomingEdges(CollationGraph originalGraph, Map<Node, Node> originalToMerged, CollationGraph mergedGraph) {
+  private static void copyIncomingEdges(CollationGraph originalGraph, Map<TextNode, TextNode> originalToMerged, CollationGraph mergedGraph) {
     Set<Node> linkedNodes = new HashSet<>();
-    originalGraph.traverse().forEach(node -> {
+    originalGraph.traverseTextNodes().forEach(node -> {
       Node mergedNode = originalToMerged.get(node);
       if (!linkedNodes.contains(mergedNode)) {
-        originalGraph.getIncomingEdges(node)//
+        originalGraph.getIncomingTextEdgeStream(node)//
             .forEach(e -> {
               Node oSource = originalGraph.getSource(e);
               Node mSource = originalToMerged.get(oSource);

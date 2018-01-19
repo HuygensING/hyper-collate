@@ -1,5 +1,24 @@
 package nl.knaw.huygens.hypercollate.collator;
 
+/*-
+ * #%L
+ * hyper-collate-core
+ * =======
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
+ * =======
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 import com.google.common.base.Stopwatch;
 import eu.interedition.collatex.dekker.Tuple;
 import static java.util.Arrays.asList;
@@ -8,9 +27,9 @@ import static nl.knaw.huygens.hypercollate.HyperCollateAssertions.assertThat;
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
 import nl.knaw.huygens.hypercollate.model.CollationGraphAssert.NodeSketch;
 import static nl.knaw.huygens.hypercollate.model.CollationGraphAssert.nodeSketch;
+import nl.knaw.huygens.hypercollate.model.TextNode;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
@@ -24,26 +43,6 @@ import org.slf4j.LoggerFactory;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-
-/*-
- * #%L
- * hyper-collate-core
- * =======
- * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
- * =======
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 public class HyperCollatorTest extends HyperCollateTest {
   private static final Logger LOG = LoggerFactory.getLogger(HyperCollateTest.class);
@@ -793,7 +792,7 @@ public class HyperCollatorTest extends HyperCollateTest {
         "        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>\n" + //
         "</text>");
     CollationGraph collationGraph = new CollationGraph();
-    Map<TokenVertex, Node> map = new HashMap<>();
+    Map<TokenVertex, TextNode> map = new HashMap<>();
     List<Match> matches = new ArrayList<>();
     hyperCollator.initialize(collationGraph, map, wF);
     CollationGraph collation = CollationGraphNodeJoiner.join(collationGraph);
