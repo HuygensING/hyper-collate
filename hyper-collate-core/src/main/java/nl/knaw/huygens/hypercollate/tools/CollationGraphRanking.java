@@ -21,6 +21,7 @@ package nl.knaw.huygens.hypercollate.tools;
  */
 
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
+import nl.knaw.huygens.hypercollate.model.TextEdge;
 import nl.knaw.huygens.hypercollate.model.TextNode;
 
 import java.util.*;
@@ -43,10 +44,11 @@ public class CollationGraphRanking implements Iterable<Set<TextNode>>, Function<
       AtomicInteger rank = new AtomicInteger(-1);
       graph.getIncomingEdges(node)//
           .stream()//
+          .filter(TextEdge.class::isInstance)//
           .map(graph::getSource)//
-          .forEach(incoming -> {
+          .forEach(incomingTextEdge -> {
             int currentRank = rank.get();
-            Integer incomingRank = ranking.byNode.get(incoming);
+            Integer incomingRank = ranking.byNode.get(incomingTextEdge);
             if (incomingRank == null) {
               // node has an incoming node that hasn't been ranked yet, so node can't be ranked yet either.
               canRank.set(false);

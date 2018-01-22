@@ -74,11 +74,14 @@ public class Hypergraph<N, H> {
     sourceNode.put(edge, source);
     // set targets
     if (GraphType.ORDERED == this.graphType) {
-      List<N> targetList = asList(targets);
+      List<N> targetList = new ArrayList<>();
+      targetList.addAll(asList(targets));
+
       targetNodes.put(edge, targetList);
     } else {
       // convert Array target to set
-      Set<N> targetSet = new HashSet<>(asList(targets));
+      Set<N> targetSet = new HashSet<>();
+      targetSet.addAll(asList(targets));
       targetNodes.put(edge, targetSet);
     }
     // set incoming

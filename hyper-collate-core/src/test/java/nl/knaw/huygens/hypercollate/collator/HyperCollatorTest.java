@@ -19,6 +19,7 @@ package nl.knaw.huygens.hypercollate.collator;
  * limitations under the License.
  * #L%
  */
+
 import com.google.common.base.Stopwatch;
 import eu.interedition.collatex.dekker.Tuple;
 import static java.util.Arrays.asList;
@@ -919,5 +920,6 @@ public class HyperCollatorTest extends HyperCollateTest {
     assertThat(collation).isNotNull();
     return collation;
   }
+
 
 }

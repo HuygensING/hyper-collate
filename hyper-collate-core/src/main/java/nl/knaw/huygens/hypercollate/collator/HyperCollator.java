@@ -148,13 +148,13 @@ public class HyperCollator {
         .anyMatch(m::hasWitness);
     CollationGraphRanking baseRanking = CollationGraphRanking.of(collationGraph);
 
-    String witnessSigil = witnessGraph.getSigil();
-    collationGraph.getSigils().add(witnessSigil);
-    addMarkupNodes(collationGraph, markupNodeIndex, witnessGraph);
-
     List<Match> filteredSortedMatchesForWitness = sortedMatchesForWitness.stream()//
         .filter(matchesWithCollationGraph)//
         .collect(toList());
+
+    String witnessSigil = witnessGraph.getSigil();
+    collationGraph.getSigils().add(witnessSigil);
+    addMarkupNodes(collationGraph, markupNodeIndex, witnessGraph);
 
     List<CollatedMatch> matchList = getCollatedMatches(collatedTokenVertexMap, filteredSortedMatchesForWitness, witnessSigil)//
         .stream()//
@@ -178,7 +178,7 @@ public class HyperCollator {
       TokenVertex tokenVertexForWitnessGraph = match.getWitnessVertex();
       advanceWitness(collationGraph, collatedTokenVertexMap, witnessIterator, tokenVertexForWitnessGraph, witnessGraph, markupNodeIndex);
 
-      TextNode matchingNode = (TextNode) match.getCollatedNode();
+      TextNode matchingNode = match.getCollatedNode();
       Token token = tokenVertexForWitnessGraph.getToken();
       if (token != null) {
         matchingNode.addToken(token);
