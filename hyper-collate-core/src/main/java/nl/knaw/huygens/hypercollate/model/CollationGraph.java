@@ -20,6 +20,7 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
+import com.google.common.base.Preconditions;
 import eu.interedition.collatex.Token;
 import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypergraph.core.Hypergraph;
@@ -53,8 +54,8 @@ public class CollationGraph extends Hypergraph<Node, Edge> {
     return newNode;
   }
 
-  public MarkupNode addMarkupNode(Markup markup) {
-    MarkupNode newNode = new MarkupNode(markup);
+  public MarkupNode addMarkupNode(String sigil, Markup markup) {
+    MarkupNode newNode = new MarkupNode(sigil, markup);
     addNode(newNode, MarkupNode.LABEL);
     markupNodeIndex.put(markup, newNode);
     return newNode;
@@ -144,4 +145,44 @@ public class CollationGraph extends Hypergraph<Node, Edge> {
         .filter(TextEdge.class::isInstance)
         .map(TextEdge.class::cast);
   }
+
+  public Stream<Markup> getMarkupStream() {
+    return markupNodeIndex.keySet().stream();
+  }
+
+  public Stream<MarkupNode> getMarkupNodeStream() {
+    return markupNodeIndex.values().stream();
+  }
+
+  public Stream<TextNode> getTextNodeStreamForMarkup(Markup markup) {
+    MarkupNode originalMarkupNode = getMarkupNode(markup);
+    List<MarkupHyperEdge> markupHyperEdges = getOutgoingEdges(originalMarkupNode)//
+        .stream()//
+        .filter(MarkupHyperEdge.class::isInstance)//
+        .map(MarkupHyperEdge.class::cast)//
+        .collect(toList());
+    Preconditions.checkArgument(markupHyperEdges.size() == 1);
+    return getTargets(markupHyperEdges.get(0))
+        .stream()
+        .filter(TextNode.class::isInstance)
+        .map(TextNode.class::cast);
+  }
+
+  public MarkupNode getMarkupNode(Markup markup) {
+    return getMarkupNode(markupNodeIndex.get(markup));
+  }
+
+  public Stream<Markup> getMarkupStreamForTextNode(TextNode textNode) {
+    return getIncomingEdges(textNode).stream()//
+        .filter(MarkupHyperEdge.class::isInstance)//
+        .map(MarkupHyperEdge.class::cast)//
+        .map(this::getSource)//
+        .map(MarkupNode.class::cast)//
+        .map(MarkupNode::getMarkup);
+  }
+
+  private MarkupNode getMarkupNode(Node markupNode) {
+    return (MarkupNode) markupNode;
+  }
+
 }

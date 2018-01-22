@@ -295,19 +295,19 @@ public class XMLImporter {
     }
 
     private boolean isApp(Markup markup) {
-      return "app".equals(markup.getTagname());
+      return "app".equals(markup.getTagName());
     }
 
     private boolean isRdg(Markup markup) {
-      return "rdg".equals(markup.getTagname());
+      return "rdg".equals(markup.getTagName());
     }
 
     private boolean isVariationStartingMarkup(Markup markup) {
-      return "del".equals(markup.getTagname());
+      return "del".equals(markup.getTagName());
     }
 
     private boolean isVariationEndingMarkup(Markup markup) {
-      return "add".equals(markup.getTagname());
+      return "add".equals(markup.getTagName());
     }
 
     void closeMarkup(Markup markup) {
@@ -325,8 +325,8 @@ public class XMLImporter {
       }
       openMarkup.pop();
       parentXPath = buildParentXPath();
-      String closingTag = markup.getTagname();
-      String expectedTag = firstToClose.getTagname();
+      String closingTag = markup.getTagName();
+      String expectedTag = firstToClose.getTagName();
       if (!expectedTag.equals(closingTag)) {
         throw new RuntimeException("XML error: expected </" + expectedTag + ">, got </" + closingTag + ">");
       }
@@ -421,7 +421,7 @@ public class XMLImporter {
     }
 
     private String buildParentXPath() {
-      return "/" + stream(openMarkup.descendingIterator()).map(Markup::getTagname).collect(joining("/"));
+      return "/" + stream(openMarkup.descendingIterator()).map(Markup::getTagName).collect(joining("/"));
     }
   }
 }

@@ -105,7 +105,7 @@ public class Hypergraph<N, H> {
     }
   }
 
-  protected Collection<N> getTargets(H e) {
+  public Collection<N> getTargets(H e) {
     return targetNodes.get(e);
   }
 

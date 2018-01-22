@@ -31,8 +31,11 @@ public class CollationGraphNodeJoiner {
 
   public static CollationGraph join(CollationGraph originalGraph) {
     CollationGraph mergedGraph = new CollationGraph(originalGraph.getSigils());
+    originalGraph.getMarkupNodeStream()//
+        .forEach(markupNode -> mergedGraph.addMarkupNode(markupNode.getSigil(), markupNode.getMarkup()));
     Map<TextNode, TextNode> originalToMerged = mergeNodes(originalGraph, mergedGraph);
     copyIncomingEdges(originalGraph, originalToMerged, mergedGraph);
+    copyMarkupHyperEdges(originalGraph, originalToMerged, mergedGraph);
     return mergedGraph;
   }
 
@@ -133,6 +136,16 @@ public class CollationGraphNodeJoiner {
             });
         linkedNodes.add(mergedNode);
       }
+    });
+  }
+
+  private static void copyMarkupHyperEdges(CollationGraph originalGraph, Map<TextNode, TextNode> originalToMerged, CollationGraph mergedGraph) {
+    originalGraph.getMarkupStream().forEach(m -> {
+      MarkupNode mergedMarkupNode = mergedGraph.getMarkupNode(m);
+      originalGraph.getTextNodeStreamForMarkup(m)//
+          .map(originalToMerged::get)//
+          .distinct()//
+          .forEach(mergedTextNode -> mergedGraph.linkMarkupToText(mergedMarkupNode, mergedTextNode));
     });
   }
 

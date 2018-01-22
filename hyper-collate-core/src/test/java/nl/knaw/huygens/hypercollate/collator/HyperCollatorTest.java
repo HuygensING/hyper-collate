@@ -907,7 +907,15 @@ public class HyperCollatorTest extends HyperCollateTest {
     long duration = stopwatch.elapsed(TimeUnit.MILLISECONDS);
     LOG.info("Collating took {} ms.", duration);
 
+    Set<Markup> markupBeforeJoin = collation.getMarkupStream().collect(toSet());
+    LOG.info("before join: collation markup = {}", collation.getMarkupStream().map(Markup::toString).sorted().collect(toList()));
+
     collation = CollationGraphNodeJoiner.join(collation);
+
+    Set<Markup> markupAfterJoin = collation.getMarkupStream().collect(toSet());
+    LOG.info("after join: collation markup = {}", collation.getMarkupStream().map(Markup::toString).sorted().collect(toList()));
+
+    assertThat(markupAfterJoin).containsExactlyElementsOf(markupBeforeJoin);
 
     String dot = CollationGraphVisualizer.toDot(collation);
     System.out.println(dot);

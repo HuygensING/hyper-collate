@@ -115,7 +115,7 @@ public class HyperCollator {
 
   private void addMarkupNodes(CollationGraph collationGraph, Map<Markup, MarkupNode> markupNodeIndex, VariantWitnessGraph witnessGraph) {
     witnessGraph.getMarkupStream().forEach(markup -> {
-      MarkupNode markupNode = collationGraph.addMarkupNode(markup);
+      MarkupNode markupNode = collationGraph.addMarkupNode(witnessGraph.getSigil(), markup);
       markupNodeIndex.put(markup, markupNode);
     });
   }

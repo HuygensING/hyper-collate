@@ -84,7 +84,7 @@ public class VariantWitnessGraphTraversalTest extends HyperCollateTest {
   private List<String> markupTags(VariantWitnessGraph witnessGraph, TokenVertex tokenVertex) {
     return witnessGraph.getMarkupListForTokenVertex(tokenVertex)//
         .stream()//
-        .map(Markup::getTagname)//
+        .map(Markup::getTagName)//
         .collect(toList());
   }
 
