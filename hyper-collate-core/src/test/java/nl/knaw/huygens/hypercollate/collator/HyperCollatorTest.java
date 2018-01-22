@@ -28,6 +28,7 @@ import static nl.knaw.huygens.hypercollate.HyperCollateAssertions.assertThat;
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.*;
+import nl.knaw.huygens.hypercollate.model.CollationGraphAssert.MarkupNodeSketch;
 import nl.knaw.huygens.hypercollate.model.CollationGraphAssert.TextNodeSketch;
 import static nl.knaw.huygens.hypercollate.model.CollationGraphAssert.markupNodeSketch;
 import static nl.knaw.huygens.hypercollate.model.CollationGraphAssert.textNodeSketch;
@@ -154,6 +155,10 @@ public class HyperCollatorTest extends HyperCollateTest {
         markupNodeSketch("Q","text"),//
         markupNodeSketch("Z","text")
     );
+
+    MarkupNodeSketch mn1 = markupNodeSketch("F","del");
+    assertThat(collationGraph).hasTextNodeMatching(n2).withMarkupNodesMatchingAnyOf(mn1);
+    assertThat(collationGraph).hasMarkupNodeMatching(mn1).withTextNodesMatchingAnyOf(n1);
   }
 
   @Test

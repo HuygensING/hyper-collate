@@ -30,6 +30,9 @@ import java.util.*;
 
 public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAssert, CollationGraph> {
 
+  private TextNodeSketch textNodeSketch;
+  private MarkupNodeSketch markupNodeSketch;
+
   /**
    * Creates a new <code>{@link CollationGraphAssert}</code> to make assertions on actual CollationGraph.
    *
@@ -49,7 +52,6 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
     if (!expectedTextNodeSketches.isEmpty()) {
       failWithMessage(errorMessage, expectedTextNodeSketches, actualTextNodeSketches);
     }
-
     return myself;
   }
 
@@ -81,6 +83,40 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
     Set<MarkupNodeSketch> actualMarkupNodeSketches = getActualMarkupNodeSketches();
     Set<MarkupNodeSketch> expectedMarkupNodeSketches = new HashSet<>(Arrays.asList(markupNodeSketches));
     Iterables.instance().assertContainsAll(info, actualMarkupNodeSketches, expectedMarkupNodeSketches);
+    return myself;
+  }
+
+  @org.assertj.core.util.CheckReturnValue
+  public CollationGraphAssert hasTextNodeMatching(TextNodeSketch textNodeSketch) {
+    Set<TextNodeSketch> actualTextNodeSketches = getActualTextNodeSketches();
+    Iterables.instance().assertContains(info, actualTextNodeSketches, new TextNodeSketch[]{textNodeSketch});
+    this.textNodeSketch = textNodeSketch;
+    return myself;
+  }
+
+  @org.assertj.core.util.CheckReturnValue
+  public CollationGraphAssert withMarkupNodesMatchingAnyOf(MarkupNodeSketch... markupNodeSketches) {
+    if (this.textNodeSketch == null) {
+      throw new RuntimeException("use hasTextNodeMatching to set the textNodeSketch to use first");
+    }
+    // TODO
+    return myself;
+  }
+
+  @org.assertj.core.util.CheckReturnValue
+  public CollationGraphAssert hasMarkupNodeMatching(MarkupNodeSketch markupNodeSketch) {
+    Set<MarkupNodeSketch> actualMarkupNodeSketches = getActualMarkupNodeSketches();
+    Iterables.instance().assertContains(info, actualMarkupNodeSketches, new MarkupNodeSketch[]{markupNodeSketch});
+    this.markupNodeSketch = markupNodeSketch;
+    return myself;
+  }
+
+  @org.assertj.core.util.CheckReturnValue
+  public CollationGraphAssert withTextNodesMatchingAnyOf(TextNodeSketch... textNodeSketches) {
+    if (this.markupNodeSketch == null) {
+      throw new RuntimeException("use hasMarkupNodeMatching to set the markupNodeSketch to use first");
+    }
+    // TODO
     return myself;
   }
 
