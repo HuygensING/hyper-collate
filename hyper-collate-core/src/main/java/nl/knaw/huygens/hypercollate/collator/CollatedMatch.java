@@ -42,7 +42,7 @@ public class CollatedMatch {
     sigils.add(witnessVertex.getSigil());
     branchPaths.put(witnessVertex.getSigil(), witnessVertex.getBranchPath());
     if (collatedNode instanceof TextNode) {
-      TextNode textNode = (TextNode) collatedNode;
+      TextNode textNode = collatedNode;
       sigils.addAll(textNode.getSigils());
       for (String s : textNode.getSigils()) {
         branchPaths.put(s, textNode.getBranchPath(s));
@@ -90,7 +90,7 @@ public class CollatedMatch {
   @Override
   public String toString() {
     Set<String> sigils = collatedNode instanceof TextNode
-        ? ((TextNode) collatedNode).getSigils()
+        ? collatedNode.getSigils()
         : this.sigils;
     String sigilString = sigils.stream().sorted().collect(joining(","));
     StringBuilder stringBuilder = new StringBuilder("<[")//

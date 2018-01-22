@@ -94,12 +94,13 @@ public class Hypergraph<N, H> {
     edgeLabels.put(edge, label);
   }
 
+  @SafeVarargs
   protected final void addTargetsToHyperEdge(H edge, N... targets) {
     if (!targetNodes.containsKey(edge)) {
       throw new RuntimeException("unknown hyperedge " + edge);
     }
     Collection<N> collection = targetNodes.get(edge);
-    asList(targets).forEach(collection::add);
+    collection.addAll(asList(targets));
     for (N target : targets) {
       incomingEdges.computeIfAbsent(target, mappingFunction).add(edge);
     }

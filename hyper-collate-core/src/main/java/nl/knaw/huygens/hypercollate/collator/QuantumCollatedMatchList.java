@@ -82,7 +82,7 @@ public class QuantumCollatedMatchList {
   }
 
   private List<CollatedMatch> calculateInvalidatedMatches(List<CollatedMatch> potentialMatches, CollatedMatch match) {
-    TextNode node = (TextNode) match.getCollatedNode();
+    TextNode node = match.getCollatedNode();
     TokenVertex tokenVertexForWitness = match.getWitnessVertex();
     int minNodeRank = match.getNodeRank();
     int minVertexRank = match.getVertexRank();

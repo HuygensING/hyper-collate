@@ -44,8 +44,8 @@ public class CollationGraph extends Hypergraph<Node, Edge> {
   public CollationGraph(List<String> sigils) {
     super(GraphType.ORDERED);
     this.sigils = sigils;
-    textStartNode.setSigils(sigils);
-    textEndNode.setSigils(sigils);
+//    textStartNode.setSigils(sigils);
+//    textEndNode.setSigils(sigils);
   }
 
   public TextNode addTextNodeWithTokens(Token... tokens) {

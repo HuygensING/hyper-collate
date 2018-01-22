@@ -20,12 +20,25 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
-import java.util.List;
-
 public class TextDelimiterNode extends TextNode {
-  private List<String> sigils;
 
-  public void setSigils(List<String> sigils) {
-    this.sigils = sigils;
-  }
+//  private Set<String> sigils = new HashSet<>();
+//
+//  public void setSigils(List<String> sigils) {
+//    this.sigils = new HashSet<>(sigils);
+//  }
+//
+//  @Override
+//  public Set<String> getSigils() {
+//    return sigils;
+//  }
+//
+//  @Override
+//  public String toString() {
+//    String tokensString = getSigils()//
+//        .stream()//
+//        .sorted()//
+//        .collect(joining(", "));
+//    return "(" + tokensString + ")";
+//  }
 }
