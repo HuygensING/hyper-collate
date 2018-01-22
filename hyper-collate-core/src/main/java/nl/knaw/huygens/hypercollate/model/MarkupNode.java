@@ -36,5 +36,4 @@ public class MarkupNode implements Node {
   public Markup getMarkup() {
     return markup;
   }
-
 }

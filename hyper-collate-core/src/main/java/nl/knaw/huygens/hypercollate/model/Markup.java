@@ -49,4 +49,8 @@ public class Markup {
   public String toString() {
     return String.format("<%s %s>", tagName, attributeMap);
   }
+
+  public Map<String, String> getAttributeMap() {
+    return attributeMap;
+  }
 }

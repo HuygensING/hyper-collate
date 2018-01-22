@@ -28,8 +28,9 @@ import static nl.knaw.huygens.hypercollate.HyperCollateAssertions.assertThat;
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.*;
-import nl.knaw.huygens.hypercollate.model.CollationGraphAssert.NodeSketch;
-import static nl.knaw.huygens.hypercollate.model.CollationGraphAssert.nodeSketch;
+import nl.knaw.huygens.hypercollate.model.CollationGraphAssert.TextNodeSketch;
+import static nl.knaw.huygens.hypercollate.model.CollationGraphAssert.markupNodeSketch;
+import static nl.knaw.huygens.hypercollate.model.CollationGraphAssert.textNodeSketch;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
 import org.assertj.core.api.Assertions;
@@ -116,37 +117,43 @@ public class HyperCollatorTest extends HyperCollateTest {
     CollationGraph collationGraph = testHyperCollation3(wF, wQ, wZ, expected);
 
     // test matching tokens
-    NodeSketch n1 = nodeSketch()
+    TextNodeSketch n1 = textNodeSketch()
         .withWitnessSegmentSketch("F", "Hoe zoet moet nochtans zijn dit ")
         .withWitnessSegmentSketch("Q", "Hoe zoet moet nochtans zijn dit ")
         .withWitnessSegmentSketch("Z", "Hoe zoet moet nochtans zijn dit ");
-    NodeSketch n2 = nodeSketch()
+    TextNodeSketch n2 = textNodeSketch()
         .withWitnessSegmentSketch("F", " ")
         .withWitnessSegmentSketch("Q", " ");
-    NodeSketch n3 = nodeSketch()
+    TextNodeSketch n3 = textNodeSketch()
         .withWitnessSegmentSketch("F", "een ")
         .withWitnessSegmentSketch("Q", "een ")
         .withWitnessSegmentSketch("Z", "een ");
-    NodeSketch n4 = nodeSketch()
+    TextNodeSketch n4 = textNodeSketch()
         .withWitnessSegmentSketch("F", "vrouw")
         .withWitnessSegmentSketch("Q", "vrouw ")
         .withWitnessSegmentSketch("Z", "vrouw ");
-    NodeSketch n5 = nodeSketch()
+    TextNodeSketch n5 = textNodeSketch()
         .withWitnessSegmentSketch("F", "ongewisheid ")
         .withWitnessSegmentSketch("Z", "ongewisheid ");
-    NodeSketch n6 = nodeSketch()
+    TextNodeSketch n6 = textNodeSketch()
         .withWitnessSegmentSketch("F", "liefelijke toestemming")
         .withWitnessSegmentSketch("Z", "liefelijke toestemming")
         .withWitnessSegmentSketch("Q", "liefelijke toestemming");
-    NodeSketch n7 = nodeSketch()
+    TextNodeSketch n7 = textNodeSketch()
         .withWitnessSegmentSketch("F", "trachten naar")
         .withWitnessSegmentSketch("Q", "trachten naar")
         .withWitnessSegmentSketch("Z", "trachten naar ");
-    NodeSketch n8 = nodeSketch()
+    TextNodeSketch n8 = textNodeSketch()
         .withWitnessSegmentSketch("F", "werven om")
         .withWitnessSegmentSketch("Q", "werven om");
 
     assertThat(collationGraph).containsTextNodesMatching(n1, n2, n3, n4, n5, n6, n7, n8);
+
+    assertThat(collationGraph).containsMarkupNodesMatching(//
+        markupNodeSketch("F","text"),//
+        markupNodeSketch("Q","text"),//
+        markupNodeSketch("Z","text")
+    );
   }
 
   @Test
@@ -254,25 +261,25 @@ public class HyperCollatorTest extends HyperCollateTest {
     // test matching tokens
 
     assertThat(collationGraph).containsTextNodesMatching(
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "Hoe zoet moet nochtans zijn dit ")
             .withWitnessSegmentSketch("Q", "Hoe zoet moet nochtans zijn dit "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "trachten naar")
             .withWitnessSegmentSketch("Q", "trachten naar"),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "werven om")
             .withWitnessSegmentSketch("Q", "werven om"),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", " een ")
             .withWitnessSegmentSketch("Q", " een "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "vrouw")
             .withWitnessSegmentSketch("Q", "vrouw "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "vóór de ")
             .withWitnessSegmentSketch("Q", "vóór de "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "liefelijke toestemming")
             .withWitnessSegmentSketch("Q", "liefelijke toestemming")
     );
@@ -362,19 +369,19 @@ public class HyperCollatorTest extends HyperCollateTest {
 
     CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
     assertThat(collationGraph).containsTextNodesMatching(
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "De vent was woedend en maakte ")
             .withWitnessSegmentSketch("Q", "De vent was woedend en maakte "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "Shiriar")
             .withWitnessSegmentSketch("Q", "Shiriar"),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "den bedremmelden\n        ")
             .withWitnessSegmentSketch("Q", "den bedremmelden "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "Sultan ")
             .withWitnessSegmentSketch("Q", "Sultan"),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "uit voor \"lompen boer\".")
             .withWitnessSegmentSketch("Q", "uit voor \"lompen boer\".")
     );
@@ -408,20 +415,20 @@ public class HyperCollatorTest extends HyperCollateTest {
 
     CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
     assertThat(collationGraph).containsOnlyTextNodesMatching(
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("A", "The dog's ")
             .withWitnessSegmentSketch("B", "The dog's "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("A", "big ")
             .withWitnessSegmentSketch("B", "big "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("B", "black ears"),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("B", "brown "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("A", "eyes")
             .withWitnessSegmentSketch("B", "eyes"),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("A", ".")
             .withWitnessSegmentSketch("B", ".")
     );
@@ -453,12 +460,12 @@ public class HyperCollatorTest extends HyperCollateTest {
 
     CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
     assertThat(collationGraph).containsTextNodesMatching(
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("A", "b b b b b b b ")
             .withWitnessSegmentSketch("B", "b b b b b b b ")
     );
     assertThat(collationGraph).doesNotContainTextNodesMatching(
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("A", "T ")
             .withWitnessSegmentSketch("B", "X ")
     );
@@ -498,18 +505,18 @@ public class HyperCollatorTest extends HyperCollateTest {
 
     CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
     assertThat(collationGraph).containsTextNodesMatching(
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("A", "A ")
             .withWitnessSegmentSketch("B", "A "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("A", "E C ")
             .withWitnessSegmentSketch("B", "E C "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("A", "G ")
             .withWitnessSegmentSketch("B", "G ")
     );
     assertThat(collationGraph).doesNotContainTextNodesMatching(
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("A", "H")
             .withWitnessSegmentSketch("B", "H ")
     );
@@ -569,18 +576,18 @@ public class HyperCollatorTest extends HyperCollateTest {
 
     CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
     assertThat(collationGraph).containsTextNodesMatching(
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("H", "Leaning her bony breast on the hard thorn ")
             .withWitnessSegmentSketch("T", "leaning her bony breast on the hard thorn"),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("H", "her forgiveness")
             .withWitnessSegmentSketch("T", "her forgiveness "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("H", ".Was it then that she had her consolations  ")
             .withWitnessSegmentSketch("T", ".Was it then that she had her consolations ")
     );
     assertThat(collationGraph).doesNotContainTextNodesMatching(
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("H", ", ")
             .withWitnessSegmentSketch("T", ", ")
     );
@@ -672,25 +679,25 @@ public class HyperCollatorTest extends HyperCollateTest {
 
     CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
     assertThat(collationGraph).containsTextNodesMatching(
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "so ")
             .withWitnessSegmentSketch("N", "so "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "destitute of every hope of consolation to live")
             .withWitnessSegmentSketch("N", "destitute of every hope of consolation to live"),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", " ")
             .withWitnessSegmentSketch("N", " "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "?")
             .withWitnessSegmentSketch("N", "?"),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "Oh")
             .withWitnessSegmentSketch("N", "oh "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "no")
             .withWitnessSegmentSketch("N", "no "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "... ")
             .withWitnessSegmentSketch("N", "...\n")
     );
@@ -755,28 +762,28 @@ public class HyperCollatorTest extends HyperCollateTest {
 
     CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
     assertThat(collationGraph).containsTextNodesMatching(
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "Frankenstein discovered")
             .withWitnessSegmentSketch("N", "Frankenstein discovered "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "that I")
             .withWitnessSegmentSketch("N", "that I "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "or")
             .withWitnessSegmentSketch("N", "or "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "made notes concerning his history")
             .withWitnessSegmentSketch("N", "made notes concerning his history "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "he asked to see them ")
             .withWitnessSegmentSketch("N", "he asked to see them "),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "himself corrected ")
             .withWitnessSegmentSketch("N", "himself corrected\n"),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "and augmented ")
             .withWitnessSegmentSketch("N", "and augmented"),
-        nodeSketch()
+        textNodeSketch()
             .withWitnessSegmentSketch("F", "them in many places\n")
             .withWitnessSegmentSketch("N", "them in many places")
     );

@@ -40,46 +40,54 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
   }
 
   @org.assertj.core.util.CheckReturnValue
-  public CollationGraphAssert containsTextNodesMatching(NodeSketch... nodeSketches) {
-    Set<NodeSketch> actualNodeSketches = getActualNodeSketches();
-    Set<NodeSketch> expectedNodeSketches = new HashSet<>(Arrays.asList(nodeSketches));
-    expectedNodeSketches.removeAll(actualNodeSketches);
+  public CollationGraphAssert containsTextNodesMatching(TextNodeSketch... textNodeSketches) {
+    Set<TextNodeSketch> actualTextNodeSketches = getActualTextNodeSketches();
+    Set<TextNodeSketch> expectedTextNodeSketches = new HashSet<>(Arrays.asList(textNodeSketches));
+    expectedTextNodeSketches.removeAll(actualTextNodeSketches);
 
     String errorMessage = "\nNo nodes found matching %s;\nNodes found: %s";
-    if (!expectedNodeSketches.isEmpty()) {
-      failWithMessage(errorMessage, expectedNodeSketches, actualNodeSketches);
+    if (!expectedTextNodeSketches.isEmpty()) {
+      failWithMessage(errorMessage, expectedTextNodeSketches, actualTextNodeSketches);
     }
 
     return myself;
   }
 
   @org.assertj.core.util.CheckReturnValue
-  public CollationGraphAssert doesNotContainTextNodesMatching(NodeSketch... nodeSketches) {
-    Set<NodeSketch> actualNodeSketches = getActualNodeSketches();
-    List<NodeSketch> nodeSketchList = Arrays.asList(nodeSketches);
-    Set<NodeSketch> unexpectedNodeSketches = new HashSet<>(nodeSketchList);
-    unexpectedNodeSketches.retainAll(actualNodeSketches);
+  public CollationGraphAssert doesNotContainTextNodesMatching(TextNodeSketch... textNodeSketches) {
+    Set<TextNodeSketch> actualTextNodeSketches = getActualTextNodeSketches();
+    List<TextNodeSketch> textNodeSketchList = Arrays.asList(textNodeSketches);
+    Set<TextNodeSketch> unexpectedTextNodeSketches = new HashSet<>(textNodeSketchList);
+    unexpectedTextNodeSketches.retainAll(actualTextNodeSketches);
 
     String errorMessage = "\nExpected %s not to match with any of %s, but found matches with %s";
-    if (!unexpectedNodeSketches.isEmpty()) {
-      failWithMessage(errorMessage, actualNodeSketches, nodeSketchList, unexpectedNodeSketches);
+    if (!unexpectedTextNodeSketches.isEmpty()) {
+      failWithMessage(errorMessage, actualTextNodeSketches, textNodeSketchList, unexpectedTextNodeSketches);
     }
 
     return myself;
   }
 
   @org.assertj.core.util.CheckReturnValue
-  public CollationGraphAssert containsOnlyTextNodesMatching(NodeSketch... nodeSketches) {
-    Set<NodeSketch> actualNodeSketches = getActualNodeSketches();
-    Set<NodeSketch> expectedNodeSketches = new HashSet<>(Arrays.asList(nodeSketches));
-    Iterables.instance().assertContainsAll(info, actualNodeSketches, expectedNodeSketches);
+  public CollationGraphAssert containsOnlyTextNodesMatching(TextNodeSketch... textNodeSketches) {
+    Set<TextNodeSketch> actualTextNodeSketches = getActualTextNodeSketches();
+    Set<TextNodeSketch> expectedTextNodeSketches = new HashSet<>(Arrays.asList(textNodeSketches));
+    Iterables.instance().assertContainsAll(info, actualTextNodeSketches, expectedTextNodeSketches);
     return myself;
   }
 
-  public static class NodeSketch {
+  @org.assertj.core.util.CheckReturnValue
+  public CollationGraphAssert containsMarkupNodesMatching(MarkupNodeSketch... markupNodeSketches) {
+    Set<MarkupNodeSketch> actualMarkupNodeSketches = getActualMarkupNodeSketches();
+    Set<MarkupNodeSketch> expectedMarkupNodeSketches = new HashSet<>(Arrays.asList(markupNodeSketches));
+    Iterables.instance().assertContainsAll(info, actualMarkupNodeSketches, expectedMarkupNodeSketches);
+    return myself;
+  }
+
+  public static class TextNodeSketch {
     Map<String, String> witnessTokenSegments = new OrderedHashMap<>();
 
-    public NodeSketch withWitnessSegmentSketch(String sigil, String mergedtokens) {
+    public TextNodeSketch withWitnessSegmentSketch(String sigil, String mergedtokens) {
       witnessTokenSegments.put(sigil, mergedtokens);
       return this;
     }
@@ -91,8 +99,8 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
 
     @Override
     public boolean equals(Object obj) {
-      return obj instanceof NodeSketch
-          && ((NodeSketch) obj).witnessTokenSegments.equals(witnessTokenSegments);
+      return obj instanceof TextNodeSketch
+          && ((TextNodeSketch) obj).witnessTokenSegments.equals(witnessTokenSegments);
     }
 
     @Override
@@ -105,16 +113,20 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
     }
   }
 
-  public static NodeSketch nodeSketch() {
-    return new NodeSketch();
+  public static TextNodeSketch textNodeSketch() {
+    return new TextNodeSketch();
   }
 
-  public NodeSketch toNodeSketch(TextNode node) {
-    NodeSketch nodeSketch = nodeSketch();
+  public TextNodeSketch toTextNodeSketch(TextNode node) {
+    TextNodeSketch textNodeSketch = textNodeSketch();
     node.getSigils().forEach(s ->
-        nodeSketch.withWitnessSegmentSketch(s, ((MarkedUpToken) node.getTokenForWitness(s)).getContent())
+        textNodeSketch.withWitnessSegmentSketch(s, ((MarkedUpToken) node.getTokenForWitness(s)).getContent())
     );
-    return nodeSketch;
+    return textNodeSketch;
+  }
+
+  public MarkupNodeSketch toMarkupNodeSketch(MarkupNode node) {
+    return markupNodeSketch(node.getSigil(), node.getMarkup().getTagName(), node.getMarkup().getAttributeMap());
   }
 
   /**
@@ -129,12 +141,50 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
     return new CollationGraphAssert(actual);
   }
 
-  private Set<NodeSketch> getActualNodeSketches() {
+  public static class MarkupNodeSketch {
+    private final String sigil;
+    private final String tag;
+    private final Map<String, String> attributes;
 
+    MarkupNodeSketch(String sigil, String tag, Map<String, String> attributes) {
+      this.sigil = sigil;
+      this.tag = tag;
+      this.attributes = attributes;
+    }
+
+    @Override
+    public int hashCode() {
+      return sigil.hashCode() + tag.hashCode() + attributes.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      return obj instanceof MarkupNodeSketch
+          && ((MarkupNodeSketch) obj).sigil.equals(sigil)
+          && ((MarkupNodeSketch) obj).tag.equals(tag)
+          && ((MarkupNodeSketch) obj).attributes.equals(attributes);
+    }
+  }
+
+  public static MarkupNodeSketch markupNodeSketch(String sigil, String tag, Map<String, String> attributes) {
+    return new MarkupNodeSketch(sigil, tag, attributes);
+  }
+
+  public static MarkupNodeSketch markupNodeSketch(String sigil, String tag) {
+    return markupNodeSketch(sigil, tag, new HashMap<>());
+  }
+
+  private Set<TextNodeSketch> getActualTextNodeSketches() {
     return actual.traverseTextNodes()//
         .stream()//
         .filter(n -> !n.getSigils().isEmpty())//
-        .map(this::toNodeSketch)//
+        .map(this::toTextNodeSketch)//
+        .collect(toSet());
+  }
+
+  private Set<MarkupNodeSketch> getActualMarkupNodeSketches() {
+    return actual.getMarkupNodeStream()//
+        .map(this::toMarkupNodeSketch)//
         .collect(toSet());
   }
 
