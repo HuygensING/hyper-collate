@@ -21,11 +21,13 @@ package nl.knaw.huygens.hypergraph.core;
  */
 
 /*
-* Generic Hypergraph definition
-* Directed, labelled, hyperedges (one to many)
-* Are we going to make the child nodes ordered?
-* @author: Ronald Haentjens Dekker
-*/
+ * Generic Hypergraph definition
+ * Directed, labelled, hyperedges (one to many)
+ * Are we going to make the child nodes ordered?
+ * @author: Ronald Haentjens Dekker
+ */
+
+import static java.util.Arrays.asList;
 
 import java.util.*;
 import java.util.function.Function;
@@ -41,7 +43,7 @@ public class Hypergraph<N, H> {
   private final Map<H, String> edgeLabels;
   private final Map<N, String> nodeLabels;
 
-  Hypergraph(GraphType graphType) {
+  protected Hypergraph(GraphType graphType) {
     this.graphType = graphType;
     this.nodes = new HashSet<>();
     this.incomingEdges = new HashMap<>();
@@ -58,13 +60,13 @@ public class Hypergraph<N, H> {
     }
   }
 
-  void addNode(N node, String label) {
+  protected void addNode(N node, String label) {
     this.nodes.add(node);
     this.nodeLabels.put(node, label);
   }
 
   @SafeVarargs
-  final void addDirectedHyperedge(H edge, String label, N source, N... targets) {
+  protected final void addDirectedHyperEdge(H edge, String label, N source, N... targets) {
     // TODO: check whether source node is in nodes
     // NOTE: The way it is done now, is that nodes are not added explicitly to the graph
     // NOTE: but rather indirectly through the edges.
@@ -72,11 +74,14 @@ public class Hypergraph<N, H> {
     sourceNode.put(edge, source);
     // set targets
     if (GraphType.ORDERED == this.graphType) {
-      List<N> targetList = Arrays.asList(targets);
+      List<N> targetList = new ArrayList<>();
+      targetList.addAll(asList(targets));
+
       targetNodes.put(edge, targetList);
     } else {
       // convert Array target to set
-      Set<N> targetSet = new HashSet<>(Arrays.asList(targets));
+      Set<N> targetSet = new HashSet<>();
+      targetSet.addAll(asList(targets));
       targetNodes.put(edge, targetSet);
     }
     // set incoming
@@ -89,7 +94,19 @@ public class Hypergraph<N, H> {
     edgeLabels.put(edge, label);
   }
 
-  Collection<N> getTargets(H e) {
+  @SafeVarargs
+  protected final void addTargetsToHyperEdge(H edge, N... targets) {
+    if (!targetNodes.containsKey(edge)) {
+      throw new RuntimeException("unknown hyperedge " + edge);
+    }
+    Collection<N> collection = targetNodes.get(edge);
+    collection.addAll(asList(targets));
+    for (N target : targets) {
+      incomingEdges.computeIfAbsent(target, mappingFunction).add(edge);
+    }
+  }
+
+  public Collection<N> getTargets(H e) {
     return targetNodes.get(e);
   }
 

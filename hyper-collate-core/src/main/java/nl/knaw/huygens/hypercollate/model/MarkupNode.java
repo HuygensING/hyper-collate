@@ -19,38 +19,21 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
+public class MarkupNode implements Node {
+  public static final String LABEL = "Markup";
+  private String sigil;
+  private final Markup markup;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
-
-public class Markup {
-  private final String tagName;
-  private final Map<String, String> attributeMap = new TreeMap<>();
-
-  public Markup(String tagName) {
-    this.tagName = tagName;
+  MarkupNode(String sigil, Markup markup) {
+    this.sigil = sigil;
+    this.markup = markup;
   }
 
-  public Markup addAttribute(String key, String value) {
-    attributeMap.put(key, value);
-    return this;
+  public String getSigil() {
+    return sigil;
   }
 
-  public Optional<String> getAttributeValue(String key) {
-    return Optional.ofNullable(attributeMap.get(key));
-  }
-
-  public String getTagName() {
-    return this.tagName;
-  }
-
-  @Override
-  public String toString() {
-    return String.format("<%s %s>", tagName, attributeMap);
-  }
-
-  public Map<String, String> getAttributeMap() {
-    return attributeMap;
+  public Markup getMarkup() {
+    return markup;
   }
 }

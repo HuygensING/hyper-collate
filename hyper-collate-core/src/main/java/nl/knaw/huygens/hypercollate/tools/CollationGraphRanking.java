@@ -21,32 +21,34 @@ package nl.knaw.huygens.hypercollate.tools;
  */
 
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
+import nl.knaw.huygens.hypercollate.model.TextEdge;
+import nl.knaw.huygens.hypercollate.model.TextNode;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-public class CollationGraphRanking implements Iterable<Set<Node>>, Function<Node, Integer> {
-  private final Map<Node, Integer> byNode = new HashMap<>();
-  private final SortedMap<Integer, Set<Node>> byRank = new TreeMap<>();
+public class CollationGraphRanking implements Iterable<Set<TextNode>>, Function<TextNode, Integer> {
+  private final Map<TextNode, Integer> byNode = new HashMap<>();
+  private final SortedMap<Integer, Set<TextNode>> byRank = new TreeMap<>();
 
   public static CollationGraphRanking of(CollationGraph graph) {
     final CollationGraphRanking ranking = new CollationGraphRanking();
-    // Set<Node> nodesRanked = new HashSet<>();
-    List<Node> nodesToRank = new ArrayList<>();
-    nodesToRank.add(graph.getRootNode());
+    // Set<TextNode> nodesRanked = new HashSet<>();
+    List<TextNode> nodesToRank = new ArrayList<>();
+    nodesToRank.add(graph.getTextStartNode());
     while (!nodesToRank.isEmpty()) {
-      Node node = nodesToRank.remove(0);
+      TextNode node = nodesToRank.remove(0);
       AtomicBoolean canRank = new AtomicBoolean(true);
       AtomicInteger rank = new AtomicInteger(-1);
       graph.getIncomingEdges(node)//
           .stream()//
+          .filter(TextEdge.class::isInstance)//
           .map(graph::getSource)//
-          .forEach(incoming -> {
+          .forEach(incomingTextEdge -> {
             int currentRank = rank.get();
-            Integer incomingRank = ranking.byNode.get(incoming);
+            Integer incomingRank = ranking.byNode.get(incomingTextEdge);
             if (incomingRank == null) {
               // node has an incoming node that hasn't been ranked yet, so node can't be ranked yet either.
               canRank.set(false);
@@ -55,9 +57,9 @@ public class CollationGraphRanking implements Iterable<Set<Node>>, Function<Node
               rank.set(max);
             }
           });
-      graph.getOutgoingEdges(node)//
-          .stream()//
+      graph.getOutgoingTextEdgeStream(node)//
           .map(graph::getTarget)//
+          .map(TextNode.class::cast)//
           .forEach(nodesToRank::add);
       if (canRank.get()) {
         rank.getAndIncrement();
@@ -70,11 +72,11 @@ public class CollationGraphRanking implements Iterable<Set<Node>>, Function<Node
     return ranking;
   }
 
-  public Map<Node, Integer> getByNode() {
+  public Map<TextNode, Integer> getByNode() {
     return Collections.unmodifiableMap(this.byNode);
   }
 
-  public Map<Integer, Set<Node>> getByRank() {
+  public Map<Integer, Set<TextNode>> getByRank() {
     return Collections.unmodifiableMap(this.byRank);
   }
 
@@ -83,16 +85,16 @@ public class CollationGraphRanking implements Iterable<Set<Node>>, Function<Node
   }
 
   @Override
-  public Iterator<Set<Node>> iterator() {
+  public Iterator<Set<TextNode>> iterator() {
     return byRank.values().iterator();
   }
 
   @Override
-  public Integer apply(Node node) {
+  public Integer apply(TextNode node) {
     return byNode.get(node);
   }
 
-  public Comparator<Node> comparator() {
+  public Comparator<TextNode> comparator() {
     return Comparator.comparingInt(byNode::get);
   }
 

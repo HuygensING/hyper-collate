@@ -20,34 +20,35 @@ package nl.knaw.huygens.hypercollate.collator;
  * #L%
  */
 
-import static java.util.stream.Collectors.joining;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
+import nl.knaw.huygens.hypercollate.model.TextNode;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
 import java.util.*;
 
+import static java.util.stream.Collectors.joining;
+
 public class CollatedMatch {
 
-  private final CollationGraph.Node collatedNode;
+  private final TextNode collatedNode;
   private int nodeRank;
   private final TokenVertex witnessVertex;
   private int vertexRank;
   private final Set<String> sigils = new HashSet<>();
   private final Map<String, List<Integer>> branchPaths = new HashMap<>();
 
-  public CollatedMatch(CollationGraph.Node collatedNode, TokenVertex witnessVertex) {
+  public CollatedMatch(TextNode collatedNode, TokenVertex witnessVertex) {
     this.collatedNode = collatedNode;
     this.witnessVertex = witnessVertex;
     sigils.add(witnessVertex.getSigil());
-    sigils.addAll(collatedNode.getSigils());
     branchPaths.put(witnessVertex.getSigil(), witnessVertex.getBranchPath());
+    sigils.addAll(collatedNode.getSigils());
     for (String s : collatedNode.getSigils()) {
       branchPaths.put(s, collatedNode.getBranchPath(s));
     }
   }
 
-  public CollationGraph.Node getCollatedNode() {
+  public TextNode getCollatedNode() {
     return collatedNode;
   }
 
@@ -86,8 +87,12 @@ public class CollatedMatch {
 
   @Override
   public String toString() {
+    Set<String> sigils = collatedNode instanceof TextNode
+        ? collatedNode.getSigils()
+        : this.sigils;
+    String sigilString = sigils.stream().sorted().collect(joining(","));
     StringBuilder stringBuilder = new StringBuilder("<[")//
-        .append(collatedNode.getSigils().stream().sorted().collect(joining(",")))//
+        .append(sigilString)//
         .append("]")//
         .append(nodeRank);
 

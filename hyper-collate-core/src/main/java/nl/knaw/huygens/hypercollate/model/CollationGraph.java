@@ -20,44 +20,71 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
+import com.google.common.base.Preconditions;
 import eu.interedition.collatex.Token;
-import static java.util.stream.Collectors.joining;
-import nl.knaw.huygens.hypergraph.core.DirectedAcyclicGraph;
+import nl.knaw.huygens.hypergraph.core.Hypergraph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Stream;
 
-public class CollationGraph extends DirectedAcyclicGraph<CollationGraph.Node> {
+import static java.util.stream.Collectors.toList;
 
+public class CollationGraph extends Hypergraph<Node, Edge> {
+  private static final Logger LOG = LoggerFactory.getLogger(CollationGraph.class);
   private final List<String> sigils;
-  private Node endNode;
-
-  public CollationGraph(List<String> sigils) {
-    this.sigils = sigils;
-    setRootNode(new Node());
-  }
+  private TextDelimiterNode textStartNode = new TextDelimiterNode();
+  private TextDelimiterNode textEndNode = new TextDelimiterNode();
+  Map<Markup, MarkupNode> markupNodeIndex = new HashMap<>();
 
   public CollationGraph() {
-    this.sigils = new ArrayList<>();
-    setRootNode(new Node());
+    this(new ArrayList<>());
   }
 
-  public Node addNodeWithTokens(Token... tokens) {
-    Node newNode = new Node(tokens);
-    addNode(newNode, "");
-    // System.out.println("adding " + newNode);
+  public CollationGraph(List<String> sigils) {
+    super(GraphType.ORDERED);
+    this.sigils = sigils;
+//    textStartNode.setSigils(sigils);
+//    textEndNode.setSigils(sigils);
+  }
+
+  public TextNode addTextNodeWithTokens(Token... tokens) {
+    TextNode newNode = new TextNode(tokens);
+    addNode(newNode, TextNode.LABEL);
     return newNode;
   }
 
-  public Node getRootNode() {
-    return traverse().iterator().next();
+  public MarkupNode addMarkupNode(String sigil, Markup markup) {
+    MarkupNode newNode = new MarkupNode(sigil, markup);
+    addNode(newNode, MarkupNode.LABEL);
+    markupNodeIndex.put(markup, newNode);
+    return newNode;
   }
 
-  public void setEndNode(Node endNode) {
-    this.endNode = endNode;
+  public void linkMarkupToText(MarkupNode markupNode, TextNode textNode) {
+    List<MarkupHyperEdge> markupHyperEdges = getOutgoingEdges(markupNode).stream()
+        .filter(MarkupHyperEdge.class::isInstance)
+        .map(MarkupHyperEdge.class::cast)
+        .collect(toList());
+    if (markupHyperEdges.isEmpty()) {
+      MarkupHyperEdge newEdge = new MarkupHyperEdge();
+      addDirectedHyperEdge(newEdge, MarkupHyperEdge.LABEL, markupNode, textNode);
+    } else {
+      if (markupHyperEdges.size() != 1) {
+        throw new RuntimeException("MarkupNode " + markupNode + " should have exactly 1 MarkupHyperEdge, but has " + markupHyperEdges.size());
+      }
+      MarkupHyperEdge edge = markupHyperEdges.get(0);
+      addTargetsToHyperEdge(edge, textNode);
+    }
   }
 
-  public Node getEndNode() {
-    return this.endNode;
+  public TextDelimiterNode getTextStartNode() {
+    return textStartNode;
+  }
+
+  public TextDelimiterNode getTextEndNode() {
+    return textEndNode;
   }
 
   public boolean isEmpty() {
@@ -68,48 +95,94 @@ public class CollationGraph extends DirectedAcyclicGraph<CollationGraph.Node> {
     return sigils;
   }
 
-  public static class Node {
-    final Map<String, Token> tokenMap = new HashMap<>();
-    private final Map<String, List<Integer>> branchPaths = new HashMap<>();
+  public TextNode getTarget(TextEdge edge) {
+    Collection<Node> nodes = getTargets(edge);
+    if (nodes.size() != 1) {
+      throw new RuntimeException("trouble!");
+    }
+    return (TextNode) nodes.iterator().next();
+  }
 
-    Node(Token... tokens) {
-      for (Token token : tokens) {
-        addToken(token);
+  public void addDirectedEdge(Node source, Node target, Set<String> sigils) {
+    TextEdge edge = new TextEdge(sigils);
+    super.addDirectedHyperEdge(edge, TextEdge.LABEL, source, target);
+  }
+
+  public Stream<TextEdge> getOutgoingTextEdgeStream(Node source) {
+    return this.getOutgoingEdges(source)
+        .stream()//
+        .filter(TextEdge.class::isInstance)
+        .map(TextEdge.class::cast);
+  }
+
+  public List<TextNode> traverseTextNodes() {
+    Set<Node> visitedNodes = new HashSet<>();
+    Stack<Node> nodesToVisit = new Stack<>();
+    nodesToVisit.add(textStartNode);
+    List<TextNode> result = new ArrayList<>();
+    while (!nodesToVisit.isEmpty()) {
+      Node pop = nodesToVisit.pop();
+      if (!visitedNodes.contains(pop)) {
+        if (pop instanceof TextNode) {
+          result.add((TextNode) pop);
+        }
+        visitedNodes.add(pop);
+        getOutgoingTextEdgeStream(pop).forEach(e -> {
+          Node target = this.getTarget(e);
+          if (target == null) {
+            throw new RuntimeException("edge target is null for edge " + pop + "->");
+          }
+          nodesToVisit.add(target);
+        });
+      } else {
+        LOG.debug("revisiting node {}", pop);
       }
     }
+    return result;
+  }
 
-    public void addToken(Token token) {
-      if (token != null && token.getWitness() != null) {
-        tokenMap.put(token.getWitness().getSigil(), token);
-      }
-    }
+  public Stream<TextEdge> getIncomingTextEdgeStream(TextNode node) {
+    return getIncomingEdges(node).stream()
+        .filter(TextEdge.class::isInstance)
+        .map(TextEdge.class::cast);
+  }
 
-    public Token getTokenForWitness(String sigil) {
-      return tokenMap.get(sigil);
-    }
+  public Stream<Markup> getMarkupStream() {
+    return markupNodeIndex.keySet().stream();
+  }
 
-    public Set<String> getSigils() {
-      return tokenMap.keySet();
-    }
+  public Stream<MarkupNode> getMarkupNodeStream() {
+    return markupNodeIndex.values().stream();
+  }
 
-    @Override
-    public String toString() {
-      String tokensString = getSigils()//
-          .stream()//
-          .sorted()//
-          .map(tokenMap::get)//
-          .map(Token::toString)//
-          .collect(joining(", "));
-      return "(" + tokensString + ")";
-    }
+  public Stream<TextNode> getTextNodeStreamForMarkup(Markup markup) {
+    MarkupNode originalMarkupNode = getMarkupNode(markup);
+    List<MarkupHyperEdge> markupHyperEdges = getOutgoingEdges(originalMarkupNode)//
+        .stream()//
+        .filter(MarkupHyperEdge.class::isInstance)//
+        .map(MarkupHyperEdge.class::cast)//
+        .collect(toList());
+    Preconditions.checkArgument(markupHyperEdges.size() == 1);
+    return getTargets(markupHyperEdges.get(0))
+        .stream()
+        .filter(TextNode.class::isInstance)
+        .map(TextNode.class::cast);
+  }
 
-    public List<Integer> getBranchPath(String s) {
-      return branchPaths.get(s);
-    }
+  public MarkupNode getMarkupNode(Markup markup) {
+    return getMarkupNode(markupNodeIndex.get(markup));
+  }
 
-    public void addBranchPath(String sigil, List<Integer> branchPath) {
-      branchPaths.put(sigil, branchPath);
-    }
+  public Stream<MarkupNode> getMarkupNodeStreamForTextNode(TextNode textNode) {
+    return getIncomingEdges(textNode).stream()//
+        .filter(MarkupHyperEdge.class::isInstance)//
+        .map(MarkupHyperEdge.class::cast)//
+        .map(this::getSource)//
+        .map(MarkupNode.class::cast);
+  }
+
+  private MarkupNode getMarkupNode(Node markupNode) {
+    return (MarkupNode) markupNode;
   }
 
 }

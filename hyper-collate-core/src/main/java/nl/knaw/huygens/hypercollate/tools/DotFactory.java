@@ -24,7 +24,6 @@ import eu.interedition.collatex.Token;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.model.*;
-import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
 
 import java.util.*;
 
@@ -90,16 +89,16 @@ public class DotFactory {
     return null;
   }
 
-  private static final Comparator<Node> BY_NODE = Comparator.comparing(Node::toString);
+  private static final Comparator<TextNode> BY_NODE = Comparator.comparing(TextNode::toString);
 
   public static String fromCollationGraph(CollationGraph collation) {
     StringBuilder dotBuilder = new StringBuilder("digraph CollationGraph{\nlabelloc=b\n");
-    Map<Node, String> nodeIdentifiers = new HashMap<>();
+    Map<TextNode, String> nodeIdentifiers = new HashMap<>();
 
-    List<Node> nodes = collation.traverse();
+    List<TextNode> nodes = collation.traverseTextNodes();
     nodes.sort(BY_NODE);
     for (int i = 0; i < nodes.size(); i++) {
-      Node node = nodes.get(i);
+      TextNode node = nodes.get(i);
       String nodeId = "t" + String.format("%03d", i);
       nodeIdentifiers.put(node, nodeId);
       appendNodeLine(dotBuilder, node, nodeId);
@@ -110,10 +109,10 @@ public class DotFactory {
     return dotBuilder.toString();
   }
 
-  private static void appendEdgeLines(StringBuilder dotBuilder, CollationGraph collation, Map<Node, String> nodeIdentifiers, List<Node> nodes) {
+  private static void appendEdgeLines(StringBuilder dotBuilder, CollationGraph collation, Map<TextNode, String> nodeIdentifiers, List<TextNode> nodes) {
     Set<String> edgeLines = new TreeSet<>();
-    for (Node node : nodes) {
-      collation.getIncomingEdges(node)//
+    for (TextNode node : nodes) {
+      collation.getIncomingTextEdgeStream(node)//
           .forEach(e -> {
             Node source = collation.getSource(e);
             Node target = collation.getTarget(e);
@@ -125,7 +124,7 @@ public class DotFactory {
     edgeLines.forEach(dotBuilder::append);
   }
 
-  private static void appendNodeLine(StringBuilder dotBuilder, Node node, String nodeId) {
+  private static void appendNodeLine(StringBuilder dotBuilder, TextNode node, String nodeId) {
     String labelString = generateNodeLabel(node);
     if (labelString.isEmpty()) {
       dotBuilder.append(nodeId)//
@@ -139,7 +138,7 @@ public class DotFactory {
     }
   }
 
-  private static String generateNodeLabel(Node node) {
+  private static String generateNodeLabel(TextNode node) {
     StringBuilder label = new StringBuilder();
     Map<String, String> contentLabel = new HashMap<>();
     Map<String, String> markupLabel = new HashMap<>();
@@ -154,7 +153,7 @@ public class DotFactory {
     return label.toString();
   }
 
-  private static void prepare(Node node, Map<String, String> contentLabel, Map<String, String> markupLabel, List<String> sortedSigils) {
+  private static void prepare(TextNode node, Map<String, String> contentLabel, Map<String, String> markupLabel, List<String> sortedSigils) {
     sortedSigils.forEach(s -> {
       Token token = node.getTokenForWitness(s);
       if (token != null) {

@@ -20,37 +20,21 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.Set;
 
-public class Markup {
-  private final String tagName;
-  private final Map<String, String> attributeMap = new TreeMap<>();
+public class TextEdge implements Edge {
+  public static final String LABEL = "NextTextNode";
+  private Set<String> sigils;
 
-  public Markup(String tagName) {
-    this.tagName = tagName;
+  TextEdge(Set<String> sigils) {
+    this.sigils = sigils;
   }
 
-  public Markup addAttribute(String key, String value) {
-    attributeMap.put(key, value);
-    return this;
+  public Set<String> getSigils() {
+    return sigils;
   }
 
-  public Optional<String> getAttributeValue(String key) {
-    return Optional.ofNullable(attributeMap.get(key));
-  }
-
-  public String getTagName() {
-    return this.tagName;
-  }
-
-  @Override
-  public String toString() {
-    return String.format("<%s %s>", tagName, attributeMap);
-  }
-
-  public Map<String, String> getAttributeMap() {
-    return attributeMap;
+  public void addSigil(String sigil) {
+    sigils.add(sigil);
   }
 }

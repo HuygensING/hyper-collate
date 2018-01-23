@@ -68,4 +68,106 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-assertions-generator-maven-plugin</artifactId>
+                <version>${assertj-assertions-generator.version}</version>
+                <!-- Generate assertions at every build -->
+                <executions>
+                    <execution>
+                        <goals>
+							<!--<goal>generate-assertions</goal>-->
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- List the package of classes you want to generate assertions
+                      for -->
+                    <packages>
+                        <param>nl.knaw.huygens.hypercollate.collater</param>
+                        <param>nl.knaw.huygens.hypercollate.importer</param>
+                        <param>nl.knaw.huygens.hypercollate.model</param>
+                        <param>nl.knaw.huygens.hypercollate.tools</param>
+                        <param>nl.knaw.huygens.hypergraph.core</param>
+                    </packages>
+                    <!-- List the classes you want to generate assertions for -->
+                    <!-- <classes> <param>nl.knaw.huygens.hypercollate</param> </classes> -->
+                    <!-- Whether generated assertions classes can be inherited with
+                      consistent assertion chaining -->
+                    <hierarchical>true</hierarchical>
+
+                    <!-- If true, generate assertions for all fields whatever their
+                      visibility is (including private). Default to false which means assertions
+                      are only generated for public fields. -->
+                    <generateAssertionsForAllFields>false</generateAssertionsForAllFields>
+
+                    <!-- Where to generate assertions entry point classes -->
+                    <entryPointClassPackage>nl.knaw.huygens.hypercollate</entryPointClassPackage>
+
+                    <!-- Restrict classes to generate assertions for with regex -->
+                    <!-- <includes> <param>org\.assertj\.examples\.rpg.*</param> </includes> -->
+                    <!-- Exclude classes matching the regex from generation -->
+                    <!-- <excludes> <param>.*google.*HostSpecifier</param> <param>.*google.*Headers</param>
+                      <param>.*google.*MediaType</param> <param>.*google.*Escaper.*</param> <param>.*Examples.*</param>
+                      </excludes> -->
+
+                    <!-- Sets the base directory where to generate assertions -->
+                    <targetDir>${project.basedir}/src/test/generated-assertions</targetDir>
+
+                    <!-- If true, all files in targetDir are removed before generating
+                      new ones (default to false) -->
+                    <cleanTargetDir>true</cleanTargetDir>
+
+                    <!-- Set the package where assertion classes are generated, combine
+                      it with targetDir to get the path to assertions classes. Ex: com.nba.Player
+                      -> src/test/generated-assertions/my/assertions/PlayerAssert If not set, each
+                      assertion class is generated in the package of the class to assert. Ex: com.nba.Player
+                      -> src/test/generated-assertions/com/nba/PlayerAssert -->
+                    <!-- <generateAssertionsInPackage>nl.knaw.huygens.hypercollate.assertions</generateAssertionsInPackage> -->
+
+                    <!-- Select which assertions entry point classes to generate -->
+                    <generateAssertions>true</generateAssertions>
+                    <generateBddAssertions>true</generateBddAssertions>
+                    <generateSoftAssertions>true</generateSoftAssertions>
+                    <generateJUnitSoftAssertions>true</generateJUnitSoftAssertions>
+
+                    <!-- Set the scope of generated sources when added to the maven
+                      build. Value must be 'test' or 'compile' to and defaults to 'test'. -->
+                    <!-- <generatedSourcesScope>compile</generatedSourcesScope> -->
+
+                    <!-- If true, the plugin does not produce any logs (default to
+                      false) -->
+                    <!-- <quiet>true</quiet> -->
+
+                    <!-- The generated assertions report is written to the given file.
+                      The base directory containing the report file is where the plugin is executed. -->
+                    <writeReportInFile>assertions-generation-report.txt</writeReportInFile>
+
+                    <!-- If true, do not generate assertions, it's a way to disable
+                      the plugin -->
+                    <!-- <skip>true</skip> -->
+                </configuration>
+            </plugin>
+			<!--<plugin>-->
+			<!--<groupId>org.codehaus.mojo</groupId>-->
+			<!--<artifactId>build-helper-maven-plugin</artifactId>-->
+			<!--<executions>-->
+			<!--<execution>-->
+			<!--<phase>generate-sources</phase>-->
+			<!--<goals>-->
+			<!--<goal>add-test-source</goal>-->
+			<!--</goals>-->
+			<!--<configuration>-->
+			<!--<sources>-->
+			<!--<source>src/test/generated-assertions</source>-->
+			<!--</sources>-->
+			<!--</configuration>-->
+			<!--</execution>-->
+			<!--</executions>-->
+			<!--</plugin>-->
+        </plugins>
+    </build>
 </project>
