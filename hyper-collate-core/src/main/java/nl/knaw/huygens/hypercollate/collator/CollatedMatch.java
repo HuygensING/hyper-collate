@@ -20,12 +20,13 @@ package nl.knaw.huygens.hypercollate.collator;
  * #L%
  */
 
-import static java.util.stream.Collectors.joining;
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
 import nl.knaw.huygens.hypercollate.model.TextNode;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
 import java.util.*;
+
+import static java.util.stream.Collectors.joining;
 
 public class CollatedMatch {
 
@@ -41,12 +42,9 @@ public class CollatedMatch {
     this.witnessVertex = witnessVertex;
     sigils.add(witnessVertex.getSigil());
     branchPaths.put(witnessVertex.getSigil(), witnessVertex.getBranchPath());
-    if (collatedNode instanceof TextNode) {
-      TextNode textNode = collatedNode;
-      sigils.addAll(textNode.getSigils());
-      for (String s : textNode.getSigils()) {
-        branchPaths.put(s, textNode.getBranchPath(s));
-      }
+    sigils.addAll(collatedNode.getSigils());
+    for (String s : collatedNode.getSigils()) {
+      branchPaths.put(s, collatedNode.getBranchPath(s));
     }
   }
 
