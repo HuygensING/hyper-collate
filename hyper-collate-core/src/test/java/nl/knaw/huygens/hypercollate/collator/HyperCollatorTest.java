@@ -22,16 +22,11 @@ package nl.knaw.huygens.hypercollate.collator;
 
 import com.google.common.base.Stopwatch;
 import eu.interedition.collatex.dekker.Tuple;
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.*;
-import static nl.knaw.huygens.hypercollate.HyperCollateAssertions.assertThat;
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.*;
 import nl.knaw.huygens.hypercollate.model.CollationGraphAssert.MarkupNodeSketch;
 import nl.knaw.huygens.hypercollate.model.CollationGraphAssert.TextNodeSketch;
-import static nl.knaw.huygens.hypercollate.model.CollationGraphAssert.markupNodeSketch;
-import static nl.knaw.huygens.hypercollate.model.CollationGraphAssert.textNodeSketch;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
 import org.assertj.core.api.Assertions;
@@ -43,6 +38,12 @@ import org.slf4j.LoggerFactory;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.*;
+import static nl.knaw.huygens.hypercollate.HyperCollateAssertions.assertThat;
+import static nl.knaw.huygens.hypercollate.model.CollationGraphAssert.markupNodeSketch;
+import static nl.knaw.huygens.hypercollate.model.CollationGraphAssert.textNodeSketch;
 
 public class HyperCollatorTest extends HyperCollateTest {
   private static final Logger LOG = LoggerFactory.getLogger(HyperCollateTest.class);
@@ -140,15 +141,15 @@ public class HyperCollatorTest extends HyperCollateTest {
         .withWitnessSegmentSketch("F", "liefelijke toestemming")
         .withWitnessSegmentSketch("Z", "liefelijke toestemming")
         .withWitnessSegmentSketch("Q", "liefelijke toestemming");
-    TextNodeSketch n7 = textNodeSketch()
+    TextNodeSketch trachten_naar = textNodeSketch()
         .withWitnessSegmentSketch("F", "trachten naar")
         .withWitnessSegmentSketch("Q", "trachten naar")
         .withWitnessSegmentSketch("Z", "trachten naar ");
-    TextNodeSketch n8 = textNodeSketch()
+    TextNodeSketch werven_om = textNodeSketch()
         .withWitnessSegmentSketch("F", "werven om")
         .withWitnessSegmentSketch("Q", "werven om");
 
-    assertThat(collationGraph).containsTextNodesMatching(n1, n2, n3, n4, n5, n6, n7, n8);
+    assertThat(collationGraph).containsTextNodesMatching(n1, n2, n3, n4, n5, n6, trachten_naar, werven_om);
 
     assertThat(collationGraph).containsMarkupNodesMatching(//
         markupNodeSketch("F","text"),//
@@ -156,9 +157,10 @@ public class HyperCollatorTest extends HyperCollateTest {
         markupNodeSketch("Z","text")
     );
 
-    MarkupNodeSketch mn1 = markupNodeSketch("F","del");
-    assertThat(collationGraph).hasTextNodeMatching(n2).withMarkupNodesMatchingAnyOf(mn1);
-    assertThat(collationGraph).hasMarkupNodeMatching(mn1).withTextNodesMatchingAnyOf(n1);
+    MarkupNodeSketch f_del = markupNodeSketch("F","del");
+    MarkupNodeSketch q_add = markupNodeSketch("Q","add");
+    assertThat(collationGraph).hasTextNodeMatching(werven_om).withMarkupNodesMatching(f_del);
+    assertThat(collationGraph).hasMarkupNodeMatching(q_add).withTextNodesMatching(trachten_naar);
   }
 
   @Test

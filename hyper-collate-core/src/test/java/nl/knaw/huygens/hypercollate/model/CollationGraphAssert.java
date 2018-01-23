@@ -20,18 +20,19 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toSet;
 import org.antlr.v4.misc.OrderedHashMap;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.internal.Iterables;
 
 import java.util.*;
 
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toSet;
+
 public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAssert, CollationGraph> {
 
-  private TextNodeSketch textNodeSketch;
-  private MarkupNodeSketch markupNodeSketch;
+  private MarkupNode markupNode;
+  private TextNode textNode;
 
   /**
    * Creates a new <code>{@link CollationGraphAssert}</code> to make assertions on actual CollationGraph.
@@ -90,16 +91,27 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
   public CollationGraphAssert hasTextNodeMatching(TextNodeSketch textNodeSketch) {
     Set<TextNodeSketch> actualTextNodeSketches = getActualTextNodeSketches();
     Iterables.instance().assertContains(info, actualTextNodeSketches, new TextNodeSketch[]{textNodeSketch});
-    this.textNodeSketch = textNodeSketch;
+    this.textNode = actual.traverseTextNodes()//
+        .stream()//
+        .filter(n -> !n.getSigils().isEmpty())//
+        .filter(n -> {
+          TextNodeSketch actualTextNodeSketch = toTextNodeSketch(n);
+          return textNodeSketch.equals(actualTextNodeSketch);
+        })
+        .findAny()
+        .get();
     return myself;
   }
 
   @org.assertj.core.util.CheckReturnValue
-  public CollationGraphAssert withMarkupNodesMatchingAnyOf(MarkupNodeSketch... markupNodeSketches) {
-    if (this.textNodeSketch == null) {
+  public CollationGraphAssert withMarkupNodesMatching(MarkupNodeSketch... markupNodeSketches) {
+    if (this.textNode == null) {
       throw new RuntimeException("use hasTextNodeMatching to set the textNodeSketch to use first");
     }
-    // TODO
+    Set<MarkupNodeSketch> actualMarkupNodeSketchesForTextNode = actual.getMarkupNodeStreamForTextNode(textNode)//
+        .map(this::toMarkupNodeSketch)//
+        .collect(toSet());
+    Iterables.instance().assertContains(info, actualMarkupNodeSketchesForTextNode, markupNodeSketches);
     return myself;
   }
 
@@ -107,16 +119,25 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
   public CollationGraphAssert hasMarkupNodeMatching(MarkupNodeSketch markupNodeSketch) {
     Set<MarkupNodeSketch> actualMarkupNodeSketches = getActualMarkupNodeSketches();
     Iterables.instance().assertContains(info, actualMarkupNodeSketches, new MarkupNodeSketch[]{markupNodeSketch});
-    this.markupNodeSketch = markupNodeSketch;
+    this.markupNode = actual.getMarkupNodeStream()//
+        .filter(n -> {
+          MarkupNodeSketch actualMarkupNodeSketch = toMarkupNodeSketch(n);
+          return actualMarkupNodeSketch.equals(markupNodeSketch);
+        })//
+        .findAny()
+        .get();
     return myself;
   }
 
   @org.assertj.core.util.CheckReturnValue
-  public CollationGraphAssert withTextNodesMatchingAnyOf(TextNodeSketch... textNodeSketches) {
-    if (this.markupNodeSketch == null) {
+  public CollationGraphAssert withTextNodesMatching(TextNodeSketch... textNodeSketches) {
+    if (this.markupNode == null) {
       throw new RuntimeException("use hasMarkupNodeMatching to set the markupNodeSketch to use first");
     }
-    // TODO
+    Set<TextNodeSketch> actualTextNodeSkethesForMarkupNode = actual.getTextNodeStreamForMarkup(markupNode.getMarkup())//
+        .map(this::toTextNodeSketch)//
+        .collect(toSet());
+    Iterables.instance().assertContains(info, actualTextNodeSkethesForMarkupNode, textNodeSketches);
     return myself;
   }
 
@@ -199,6 +220,11 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
           && ((MarkupNodeSketch) obj).sigil.equals(sigil)
           && ((MarkupNodeSketch) obj).tag.equals(tag)
           && ((MarkupNodeSketch) obj).attributes.equals(attributes);
+    }
+
+    @Override
+    public String toString() {
+      return String.format("MarkupNodeSketch(%s:%s %s)", sigil, tag, attributes);
     }
   }
 

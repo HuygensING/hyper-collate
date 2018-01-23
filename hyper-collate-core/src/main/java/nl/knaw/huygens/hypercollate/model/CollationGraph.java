@@ -22,13 +22,14 @@ package nl.knaw.huygens.hypercollate.model;
 
 import com.google.common.base.Preconditions;
 import eu.interedition.collatex.Token;
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypergraph.core.Hypergraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 public class CollationGraph extends Hypergraph<Node, Edge> {
   private static final Logger LOG = LoggerFactory.getLogger(CollationGraph.class);
@@ -172,13 +173,12 @@ public class CollationGraph extends Hypergraph<Node, Edge> {
     return getMarkupNode(markupNodeIndex.get(markup));
   }
 
-  public Stream<Markup> getMarkupStreamForTextNode(TextNode textNode) {
+  public Stream<MarkupNode> getMarkupNodeStreamForTextNode(TextNode textNode) {
     return getIncomingEdges(textNode).stream()//
         .filter(MarkupHyperEdge.class::isInstance)//
         .map(MarkupHyperEdge.class::cast)//
         .map(this::getSource)//
-        .map(MarkupNode.class::cast)//
-        .map(MarkupNode::getMarkup);
+        .map(MarkupNode.class::cast);
   }
 
   private MarkupNode getMarkupNode(Node markupNode) {
