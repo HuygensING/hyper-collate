@@ -922,12 +922,12 @@ public class HyperCollatorTest extends HyperCollateTest {
     LOG.info("Collating took {} ms.", duration);
 
     Set<Markup> markupBeforeJoin = collation.getMarkupStream().collect(toSet());
-    LOG.info("before join: collation markup = {}", collation.getMarkupStream().map(Markup::toString).sorted().collect(toList()));
+//    LOG.info("before join: collation markup = {}", collation.getMarkupStream().map(Markup::toString).sorted().collect(toList()));
 
     collation = CollationGraphNodeJoiner.join(collation);
 
     Set<Markup> markupAfterJoin = collation.getMarkupStream().collect(toSet());
-    LOG.info("after join: collation markup = {}", collation.getMarkupStream().map(Markup::toString).sorted().collect(toList()));
+//    LOG.info("after join: collation markup = {}", collation.getMarkupStream().map(Markup::toString).sorted().collect(toList()));
 
     assertThat(markupAfterJoin).containsExactlyElementsOf(markupBeforeJoin);
 

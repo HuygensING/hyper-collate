@@ -27,4 +27,5 @@ public class ResourcePaths {
   public static final String COLLATIONS_DOT = "dot";
   public static final String COLLATIONS_ASCII_TABLE = "ascii_table";
   public static final String COLLATIONS_HTML_TABLE = "html_table";
+  public static final String WITNESSES = "witnesses";
 }

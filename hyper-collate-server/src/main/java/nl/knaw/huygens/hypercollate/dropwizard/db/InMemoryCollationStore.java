@@ -23,6 +23,7 @@ package nl.knaw.huygens.hypercollate.dropwizard.db;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import nl.knaw.huygens.hypercollate.api.CollationInput;
+import nl.knaw.huygens.hypercollate.api.WitnessInput;
 import nl.knaw.huygens.hypercollate.dropwizard.ServerConfiguration;
 import nl.knaw.huygens.hypercollate.dropwizard.api.CollationStore;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
@@ -72,6 +73,17 @@ public class InMemoryCollationStore implements CollationStore {
     CollationInfoCache.put(collationId, docInfo);
 
     uuids.add(collationId);
+  }
+
+  @Override
+  public void addWitness(UUID collationId, String sigil, String xml) {
+    CollationInput collationInput = new CollationInput();
+    CollationInfo docInfo = getCollationInfo(collationId)//
+        .orElseGet(() -> newCollationInfo(collationId, collationInput));
+    WitnessInput witnessInput = new WitnessInput().setSigil(sigil).setXml(xml);
+    docInfo.getInput().addWitness(witnessInput);
+    docInfo.setModified(Instant.now());
+    CollationInfoCache.put(collationId, docInfo);
   }
 
   @Override

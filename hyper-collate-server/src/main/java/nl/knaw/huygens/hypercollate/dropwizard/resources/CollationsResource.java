@@ -54,6 +54,7 @@ import java.util.stream.Collectors;
 @Produces(UTF8MediaType.APPLICATION_JSON)
 public class CollationsResource {
   public static final String APIPARAM_UUID = "collation UUID";
+  public static final String APIPARAM_SIGIL = "Witness sigil";
   public static final String APIPARAM_COLLATION_INPUT = "Collation input";
   private final ServerConfiguration configuration;
   private final HyperCollator hypercollator = new HyperCollator();
@@ -89,6 +90,18 @@ public class CollationsResource {
       e.printStackTrace();
       throw new BadRequestException(e.getMessage());
     }
+  }
+
+  @PUT
+  @Path("{uuid}/" + ResourcePaths.WITNESSES + "/{sigil}")
+  @Timed
+  @Consumes(UTF8MediaType.TEXT_XML)
+  @ApiOperation(value = "Add a witness to the collation")
+  public Response addXMLWitness(@ApiParam(APIPARAM_UUID) @PathParam("uuid") final UUID uuid,
+                                @ApiParam(APIPARAM_SIGIL) @PathParam("sigil") final String sigil) {
+    CollationGraph collation = getExistingCollationGraph(uuid);
+
+    return Response.noContent().build();
   }
 
   @GET

@@ -32,6 +32,8 @@ public interface CollationStore {
 
   void setCollation(UUID uuid, CollationGraph collationGraph, CollationInput collationInput, long collationDuration);
 
+  void addWitness(UUID uuid, String sigil, String xml);
+
   Set<UUID> getCollationUUIDs();
 
   Optional<CollationGraph> getCollationGraph(UUID uuid);
