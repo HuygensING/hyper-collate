@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 import java.util.SortedMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-class ServerApplication extends Application<ServerConfiguration> {
+public class ServerApplication extends Application<ServerConfiguration> {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
 
   public static void main(final String[] args) throws Exception {
