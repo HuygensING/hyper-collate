@@ -57,7 +57,7 @@
 		<dependency>
 			<groupId>de.vandermeer</groupId>
 			<artifactId>asciitable</artifactId>
-			<version>0.3.2</version>
+			<version>${asciitable.version}</version>
 		</dependency>
 
 		<!-- Test dependencies -->
