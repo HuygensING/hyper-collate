@@ -19,17 +19,19 @@ package nl.knaw.huygens.hypercollate.dropwizard.db;
  * limitations under the License.
  * #L%
  */
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import nl.knaw.huygens.hypercollate.api.ResourcePaths;
-
 import java.net.URI;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import nl.knaw.huygens.hypercollate.api.ResourcePaths;
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
 @JsonInclude(Include.NON_NULL)
 public class CollationInfo {
@@ -44,6 +46,7 @@ public class CollationInfo {
   private final String uriBase;
   private Long collationDuration;
   private Map<String, String> witnesses = new HashMap<>();
+  private Map<String, VariantWitnessGraph> witnessGraphs = new HashMap<>();
   private State collationState = State.needs_witness;
   private boolean join = true;
 
@@ -66,6 +69,15 @@ public class CollationInfo {
 
   public Map<String, String> getWitnesses() {
     return witnesses;
+  }
+
+  public void addWitnessGraph(String sigil, VariantWitnessGraph variantWitnessGraph) {
+    witnessGraphs.put(sigil, variantWitnessGraph);
+  }
+
+  @JsonIgnore
+  public Map<String, VariantWitnessGraph> getWitnessGraphMap() {
+    return witnessGraphs;
   }
 
   public CollationInfo setCreated(Instant created) {

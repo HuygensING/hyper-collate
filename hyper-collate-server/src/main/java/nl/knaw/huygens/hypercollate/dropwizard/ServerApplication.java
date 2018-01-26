@@ -19,8 +19,14 @@ package nl.knaw.huygens.hypercollate.dropwizard;
  * limitations under the License.
  * #L%
  */
+import java.util.SortedMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.health.HealthCheck;
+
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -34,11 +40,8 @@ import nl.knaw.huygens.hypercollate.dropwizard.health.ServerHealthCheck;
 import nl.knaw.huygens.hypercollate.dropwizard.resources.AboutResource;
 import nl.knaw.huygens.hypercollate.dropwizard.resources.CollationsResource;
 import nl.knaw.huygens.hypercollate.dropwizard.resources.HomePageResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.SortedMap;
-import java.util.concurrent.atomic.AtomicBoolean;
+import nl.knaw.huygens.hypercollate.dropwizard.resources.RuntimeExceptionMapper;
+import nl.knaw.huygens.hypercollate.dropwizard.resources.XMLStreamExceptionMapper;
 
 class ServerApplication extends Application<ServerConfiguration> {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -73,6 +76,8 @@ class ServerApplication extends Application<ServerConfiguration> {
     environment.jersey().register(new AboutResource(getName()));
     CollationStore collationStore = new InMemoryCollationStore(configuration);
     environment.jersey().register(new CollationsResource(configuration, collationStore));
+    environment.jersey().register(new XMLStreamExceptionMapper());
+    environment.jersey().register(new RuntimeExceptionMapper());
 
     environment.healthChecks().register("server", new ServerHealthCheck());
 
