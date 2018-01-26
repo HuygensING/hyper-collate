@@ -20,24 +20,52 @@ package nl.knaw.huygens.hypercollate.dropwizard.db;
  * #L%
  */
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import nl.knaw.huygens.hypercollate.api.CollationInput;
 import nl.knaw.huygens.hypercollate.api.ResourcePaths;
 
 import java.net.URI;
 import java.time.Instant;
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
+@JsonInclude(Include.NON_NULL)
 public class CollationInfo {
+
+  public enum State {
+    needs_witness, ready_to_collate, is_collated
+  }
+
+  private String id;
   private Instant created;
   private Instant modified;
   private final String uriBase;
-  private final CollationInput input;
-  private long collationDuration;
+  private Long collationDuration;
+  private Map<String, String> witnesses = new HashMap<>();
+  private State collationState = State.needs_witness;
+  private boolean join = true;
 
-  public CollationInfo(UUID documentId, String baseURL, CollationInput input) {
-    this.input = input;
-    this.uriBase = baseURL + "/" + ResourcePaths.COLLATIONS + "/" + documentId + "/";
+  public CollationInfo(String collationId, String baseURL) {
+    this.id = collationId;
+    this.uriBase = baseURL + "/" + ResourcePaths.COLLATIONS + "/" + collationId + "/";
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public CollationInfo addWitness(String sigil, String xml) {
+    witnesses.put(sigil, xml);
+    collationState = State.ready_to_collate;
+    collationDuration = null;
+    setModified(Instant.now());
+    return this;
+  }
+
+  public Map<String, String> getWitnesses() {
+    return witnesses;
   }
 
   public CollationInfo setCreated(Instant created) {
@@ -58,8 +86,8 @@ public class CollationInfo {
     return modified.toString();
   }
 
-  public CollationInput getInput() {
-    return this.input;
+  public State getCollationState() {
+    return collationState;
   }
 
   @JsonProperty("^dot")
@@ -74,10 +102,27 @@ public class CollationInfo {
 
   public void setCollationDurationInMilliseconds(long collationDuration) {
     this.collationDuration = collationDuration;
+    this.collationState = State.is_collated;
   }
 
-  public long getCollationDurationInMilliseconds() {
+  public Long getCollationDurationInMilliseconds() {
     return this.collationDuration;
+  }
+
+  public Optional<String> getWitness(String sigil) {
+    return Optional.ofNullable(witnesses.get(sigil));
+  }
+
+  public boolean getJoin() {
+    return join;
+  }
+
+  public boolean isJoin() {
+    return join;
+  }
+
+  public void setJoin(boolean join) {
+    this.join = join;
   }
 
 }

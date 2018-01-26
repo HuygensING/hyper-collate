@@ -31,7 +31,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>hyper-collate-api</artifactId>
+            <artifactId>hyper-collate-test</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -56,26 +56,31 @@
             <artifactId>activation</artifactId>
             <version>${activation.version}</version>
         </dependency>
-<!--        <dependency>
-            <groupId>org.lucee</groupId>
-            <artifactId>jdom</artifactId>
-            <version>${jdom.version}</version>
-        </dependency>
         <dependency>
-            <groupId>jaxen</groupId>
-            <artifactId>jaxen</artifactId>
-            <version>${jaxen.version}</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>RELEASE</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.tomcat</groupId>
-            <artifactId>tomcat-jsp-api</artifactId>
-            <version>${tomcat-jsp-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>groovy</groupId>
-            <artifactId>groovy</artifactId>
-            <version>${groovy.version}</version>
-        </dependency>-->
+        <!--        <dependency>
+                    <groupId>org.lucee</groupId>
+                    <artifactId>jdom</artifactId>
+                    <version>${jdom.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>jaxen</groupId>
+                    <artifactId>jaxen</artifactId>
+                    <version>${jaxen.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.tomcat</groupId>
+                    <artifactId>tomcat-jsp-api</artifactId>
+                    <version>${tomcat-jsp-api.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>groovy</groupId>
+                    <artifactId>groovy</artifactId>
+                    <version>${groovy.version}</version>
+                </dependency>-->
     </dependencies>
 
 </project>

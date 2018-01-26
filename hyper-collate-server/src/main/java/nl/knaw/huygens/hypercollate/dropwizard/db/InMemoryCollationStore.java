@@ -22,34 +22,36 @@ package nl.knaw.huygens.hypercollate.dropwizard.db;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import nl.knaw.huygens.hypercollate.api.CollationInput;
-import nl.knaw.huygens.hypercollate.api.WitnessInput;
 import nl.knaw.huygens.hypercollate.dropwizard.ServerConfiguration;
 import nl.knaw.huygens.hypercollate.dropwizard.api.CollationStore;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 public class InMemoryCollationStore implements CollationStore {
-  private final Set<UUID> uuids = new LinkedHashSet<>();
+  private final Set<String> names = new LinkedHashSet<>();
   private static String baseURI;
+  private static final Cache<String, CollationInfo> CollationInfoCache = CacheBuilder.newBuilder()//
+      .maximumSize(100)//
+      .build();
+  private static final Cache<String, CollationGraph> CollationGraphCache = CacheBuilder.newBuilder()//
+      .maximumSize(100)//
+      .build();
 
   public InMemoryCollationStore(ServerConfiguration config) {
     baseURI = config.getBaseURI();
   }
 
-  private static final Cache<UUID, CollationGraph> CollationGraphCache = CacheBuilder.newBuilder()//
-      .maximumSize(100)//
-      .build();
-
   @Override
-  public Optional<CollationGraph> getCollationGraph(UUID uuid) {
-    if (uuids.contains(uuid)) {
+  public Optional<CollationGraph> getCollationGraph(String collationId) {
+    if (names.contains(collationId)) {
       try {
-        CollationGraph document = CollationGraphCache.get(uuid, readCollationGraph(uuid));
+        CollationGraph document = CollationGraphCache.get(collationId, readCollationGraph(collationId));
         return Optional.of(document);
       } catch (ExecutionException e) {
         e.printStackTrace();
@@ -58,48 +60,41 @@ public class InMemoryCollationStore implements CollationStore {
     return Optional.empty();
   }
 
-  private static Callable<CollationGraph> readCollationGraph(UUID uuid) {
-    return () -> null;
+  @Override
+  public void addCollation(String collationId) {
+    CollationInfo collationInfo = getCollationInfo(collationId)//
+        .orElseGet(() -> newCollationInfo(collationId));
+    collationInfo.setModified(Instant.now());
+    CollationInfoCache.put(collationId, collationInfo);
+    names.add(collationId);
   }
 
   @Override
-  public void setCollation(UUID collationId, CollationGraph collationGraph, CollationInput collationInput, long collationDurationInMilliseconds) {
+  public void setCollation(CollationInfo collationInfo, CollationGraph collationGraph) {
+    String collationId = collationInfo.getId();
     CollationGraphCache.put(collationId, collationGraph);
+    collationInfo.setModified(Instant.now());
+    CollationInfoCache.put(collationId, collationInfo);
+  }
 
-    CollationInfo docInfo = getCollationInfo(collationId)//
-        .orElseGet(() -> newCollationInfo(collationId, collationInput));
-    docInfo.setModified(Instant.now());
-    docInfo.setCollationDurationInMilliseconds(collationDurationInMilliseconds);
-    CollationInfoCache.put(collationId, docInfo);
+//  public void addWitness(String name, String sigil, String xml) {
+//    CollationInfo docInfo = getCollationInfo(name)//
+//        .orElseGet(() -> newCollationInfo(name));
+//    docInfo.addWitness(sigil, xml);
+//    docInfo.setModified(Instant.now());
+//    CollationInfoCache.put(name, docInfo);
+//  }
 
-    uuids.add(collationId);
+  @Override
+  public Set<String> getCollationIds() {
+    return names;
   }
 
   @Override
-  public void addWitness(UUID collationId, String sigil, String xml) {
-    CollationInput collationInput = new CollationInput();
-    CollationInfo docInfo = getCollationInfo(collationId)//
-        .orElseGet(() -> newCollationInfo(collationId, collationInput));
-    WitnessInput witnessInput = new WitnessInput().setSigil(sigil).setXml(xml);
-    docInfo.getInput().addWitness(witnessInput);
-    docInfo.setModified(Instant.now());
-    CollationInfoCache.put(collationId, docInfo);
-  }
-
-  @Override
-  public Set<UUID> getCollationUUIDs() {
-    return uuids;
-  }
-
-  private static final Cache<UUID, CollationInfo> CollationInfoCache = CacheBuilder.newBuilder()//
-      .maximumSize(100)//
-      .build();
-
-  @Override
-  public Optional<CollationInfo> getCollationInfo(UUID uuid) {
-    if (uuids.contains(uuid)) {
+  public Optional<CollationInfo> getCollationInfo(String collationId) {
+    if (names.contains(collationId)) {
       try {
-        CollationInfo CollationInfo = CollationInfoCache.get(uuid, () -> null);
+        CollationInfo CollationInfo = CollationInfoCache.get(collationId, () -> null);
         return Optional.ofNullable(CollationInfo);
       } catch (ExecutionException e) {
         e.printStackTrace();
@@ -108,18 +103,17 @@ public class InMemoryCollationStore implements CollationStore {
     return Optional.empty();
   }
 
-  // private static Callable<? extends CollationInfo> readCollationInfo(UUID uuid, CollationInput collationInput) {
-  // return () -> newCollationInfo(uuid, collationInput);
-  // }
+  @Override
+  public void persist() {
+  }
 
-  private static CollationInfo newCollationInfo(UUID uuid, CollationInput collationInput) {
-    return new CollationInfo(uuid, baseURI, collationInput)//
+  private static CollationInfo newCollationInfo(String name) {
+    return new CollationInfo(name, baseURI)//
         .setCreated(Instant.now())//
         .setModified(Instant.now());
   }
 
-  public Collection<UUID> getDocumentUUIDs() {
-    return uuids;
+  private static Callable<CollationGraph> readCollationGraph(String name) {
+    return () -> null;
   }
-
 }
