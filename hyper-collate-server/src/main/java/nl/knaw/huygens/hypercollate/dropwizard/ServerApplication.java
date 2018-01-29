@@ -35,7 +35,7 @@ import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import nl.knaw.huygens.hypercollate.dropwizard.api.CollationStore;
-import nl.knaw.huygens.hypercollate.dropwizard.db.InMemoryCollationStore;
+import nl.knaw.huygens.hypercollate.dropwizard.db.CachedCollationStore;
 import nl.knaw.huygens.hypercollate.dropwizard.health.ServerHealthCheck;
 import nl.knaw.huygens.hypercollate.dropwizard.resources.AboutResource;
 import nl.knaw.huygens.hypercollate.dropwizard.resources.CollationsResource;
@@ -74,7 +74,7 @@ class ServerApplication extends Application<ServerConfiguration> {
   public void run(final ServerConfiguration configuration, final Environment environment) {
     environment.jersey().register(new HomePageResource());
     environment.jersey().register(new AboutResource(configuration, getName()));
-    CollationStore collationStore = new InMemoryCollationStore(configuration);
+    CollationStore collationStore = new CachedCollationStore(configuration);
     environment.jersey().register(new CollationsResource(configuration, collationStore));
     environment.jersey().register(new XMLStreamExceptionMapper());
     environment.jersey().register(new RuntimeExceptionMapper());

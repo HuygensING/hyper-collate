@@ -19,6 +19,7 @@ package nl.knaw.huygens.hypercollate.dropwizard.db;
  * limitations under the License.
  * #L%
  */
+
 import java.io.File;
 import java.time.Instant;
 import java.util.LinkedHashSet;
@@ -41,7 +42,7 @@ import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
-public class InMemoryCollationStore implements CollationStore {
+public class CachedCollationStore implements CollationStore {
   private final Set<String> names = new LinkedHashSet<>();
   private static String baseURI;
   private static final Cache<String, CollationInfo> CollationInfoCache = CacheBuilder.newBuilder()//
@@ -53,7 +54,7 @@ public class InMemoryCollationStore implements CollationStore {
   private final File projectDir;
   private final File collationsDir;
 
-  public InMemoryCollationStore(ServerConfiguration config) {
+  public CachedCollationStore(ServerConfiguration config) {
     baseURI = config.getBaseURI();
     projectDir = config.getProjectDir();
     collationsDir = config.getCollationsDir();
@@ -80,7 +81,7 @@ public class InMemoryCollationStore implements CollationStore {
     collationInfo.setModified(Instant.now());
     CollationInfoCache.put(collationId, collationInfo);
     names.add(collationId);
-    persist();
+    persist(collationId);
   }
 
   @Override
@@ -89,7 +90,7 @@ public class InMemoryCollationStore implements CollationStore {
     CollationGraphCache.put(collationId, collationGraph);
     collationInfo.setModified(Instant.now());
     CollationInfoCache.put(collationId, collationInfo);
-    persist();
+    persist(collationId);
   }
 
   // public void addWitness(String name, String sigil, String xml) {
@@ -119,11 +120,12 @@ public class InMemoryCollationStore implements CollationStore {
   }
 
   @Override
-  public void persist() {
+  public void persist(String collationId) {
     storeCollationIds();
-    CollationInfoCache.asMap()//
-        .values()//
-        .forEach(this::storeCollationInfo);
+    storeCollationInfo(getCollationInfo(collationId).get());
+    // CollationInfoCache.asMap()//
+    // .values()//
+    // .forEach(this::storeCollationInfo);
   }
 
   private void storeCollationIds() {

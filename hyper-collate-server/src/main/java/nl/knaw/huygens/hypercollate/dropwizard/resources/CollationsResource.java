@@ -1,5 +1,23 @@
 package nl.knaw.huygens.hypercollate.dropwizard.resources;
 
+import static java.util.stream.Collectors.toList;
+
+import java.net.URI;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
+
 /*-
  * #%L
  * hyper-collate-server
@@ -22,10 +40,10 @@ package nl.knaw.huygens.hypercollate.dropwizard.resources;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Stopwatch;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.api.ResourcePaths;
 import nl.knaw.huygens.hypercollate.api.UTF8MediaType;
 import nl.knaw.huygens.hypercollate.collator.HyperCollator;
@@ -37,14 +55,6 @@ import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Api(ResourcePaths.COLLATIONS)
 @Path(ResourcePaths.COLLATIONS)
@@ -112,14 +122,14 @@ public class CollationsResource {
   @Timed
   @Consumes(UTF8MediaType.TEXT_XML)
   @ApiOperation(value = "Add a witness to the collation")
-  public Response addXMLWitness(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) @NotNull final String name,//
-                                @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) @NotNull final String sigil,//
-                                @ApiParam(APIPARAM_XML) @NotNull @Valid String xml) {
+  public Response addXMLWitness(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) @NotNull final String name, //
+      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) @NotNull final String sigil, //
+      @ApiParam(APIPARAM_XML) @NotNull @Valid String xml) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     VariantWitnessGraph variantWitnessGraph = new XMLImporter().importXML(sigil, xml);
     collationInfo.addWitness(sigil, xml);
     collationInfo.addWitnessGraph(sigil, variantWitnessGraph);
-    collationStore.persist();
+    collationStore.persist(name);
     return Response.noContent().build();
   }
 
@@ -128,8 +138,8 @@ public class CollationsResource {
   @Timed
   @Produces(UTF8MediaType.TEXT_XML)
   @ApiOperation(value = "Return the XML source of the witness")
-  public Response getWitnessXML(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,//
-                                @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil) {
+  public Response getWitnessXML(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name, //
+      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     String xml = collationInfo.getWitness(sigil).orElseThrow(NotFoundException::new);
     return Response.ok(xml).build();
@@ -183,7 +193,7 @@ public class CollationsResource {
     Stopwatch stopwatch = Stopwatch.createStarted();
     VariantWitnessGraph[] variantWitnessGraphs = collationInfo.getWitnessGraphMap()//
         .values()//
-        .toArray(new VariantWitnessGraph[]{});
+        .toArray(new VariantWitnessGraph[] {});
 
     CollationGraph collationGraph = hypercollator.collate(variantWitnessGraphs);
     if (collationInfo.getJoin()) {
