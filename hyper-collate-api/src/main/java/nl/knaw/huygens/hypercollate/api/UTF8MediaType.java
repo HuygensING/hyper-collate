@@ -25,5 +25,7 @@ import javax.ws.rs.core.MediaType;
 public class UTF8MediaType {
   private static final String CHARSET_UTF8 = "; charset=UTF-8";
   public static final String TEXT_PLAIN = MediaType.TEXT_PLAIN + CHARSET_UTF8;
+  public static final String TEXT_XML = MediaType.TEXT_XML + CHARSET_UTF8;
   public static final String APPLICATION_JSON = MediaType.APPLICATION_JSON + CHARSET_UTF8;
+
 }

@@ -20,7 +20,7 @@
   "witnesses": [
     {
       "sigil": "H",
-      "xml": "<text><div n=\"2\">...<s> ... or the <del>hum far away in the fields of some</del> some hum rising <del>far away in the</del> in <del>the fields</del>; <del>whether</del>some throb;<del>some pulse</del>. &amp; then gently<del>mak</del> muffling &amp; folding the house again.</s>…</div></text>"
+      "xml": "<text><div n=\"2\">...<s> ... or the <del>hum far away in the fields of some</del> some hum rising <del>far away in the</del> in <del>the fields</del>; <del>whether</del>some throb;<del>some pulse</del>. &amp; then gently<del>mak</del> muffling &amp; folding the house again.</s>â€¦</div></text>"
     },
     {
       "sigil": "T",
@@ -39,7 +39,7 @@
     },
     {
       "sigil": "N3",
-      "xml": "<text>…<s>Frankenstein discovered <del rend=\"strikethrough\">or</del><add place=\"superlinear\">that I</add> made notes concerning his history; he asked to see them and then himself <del rend=\"strikethrough\">a</del> corrected and augmented them in many places, ... </s></text>"
+      "xml": "<text>â€¦<s>Frankenstein discovered <del rend=\"strikethrough\">or</del><add place=\"superlinear\">that I</add> made notes concerning his history; he asked to see them and then himself <del rend=\"strikethrough\">a</del> corrected and augmented them in many places, ... </s></text>"
     }
   ]
 }

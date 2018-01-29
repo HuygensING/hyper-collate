@@ -1,8 +1,8 @@
-package nl.knaw.huygens.hypercollate.api;
+package nl.knaw.huygens.hypercollate.dropwizard.resources;
 
-/*
+/*-
  * #%L
- * hyper-collate-api
+ * hyper-collate-server
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
@@ -20,12 +20,22 @@ package nl.knaw.huygens.hypercollate.api;
  * #L%
  */
 
-public class ResourcePaths {
-  public static final String ABOUT = "about";
-  public static final String DOCUMENTS = "documents";
-  public static final String COLLATIONS = "collations";
-  public static final String COLLATIONS_DOT = "dot";
-  public static final String COLLATIONS_ASCII_TABLE = "ascii_table";
-  public static final String COLLATIONS_HTML_TABLE = "html_table";
-  public static final String WITNESSES = "witnesses";
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
+import javax.xml.stream.XMLStreamException;
+
+@Provider
+public class XMLStreamExceptionMapper implements ExceptionMapper<XMLStreamException> {
+
+  @Override
+  public Response toResponse(XMLStreamException exception) {
+    return Response.status(Status.BAD_REQUEST)//
+        .entity(exception.getMessage())//
+        .type(MediaType.TEXT_PLAIN)//
+        .build();
+  }
+
 }

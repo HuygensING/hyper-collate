@@ -19,8 +19,14 @@ package nl.knaw.huygens.hypercollate.dropwizard;
  * limitations under the License.
  * #L%
  */
+import java.util.SortedMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.health.HealthCheck;
+
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -29,16 +35,13 @@ import io.dropwizard.setup.Environment;
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import nl.knaw.huygens.hypercollate.dropwizard.api.CollationStore;
-import nl.knaw.huygens.hypercollate.dropwizard.db.InMemoryCollationStore;
+import nl.knaw.huygens.hypercollate.dropwizard.db.CachedCollationStore;
 import nl.knaw.huygens.hypercollate.dropwizard.health.ServerHealthCheck;
 import nl.knaw.huygens.hypercollate.dropwizard.resources.AboutResource;
 import nl.knaw.huygens.hypercollate.dropwizard.resources.CollationsResource;
 import nl.knaw.huygens.hypercollate.dropwizard.resources.HomePageResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.SortedMap;
-import java.util.concurrent.atomic.AtomicBoolean;
+import nl.knaw.huygens.hypercollate.dropwizard.resources.RuntimeExceptionMapper;
+import nl.knaw.huygens.hypercollate.dropwizard.resources.XMLStreamExceptionMapper;
 
 class ServerApplication extends Application<ServerConfiguration> {
   private final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -70,9 +73,11 @@ class ServerApplication extends Application<ServerConfiguration> {
   @Override
   public void run(final ServerConfiguration configuration, final Environment environment) {
     environment.jersey().register(new HomePageResource());
-    environment.jersey().register(new AboutResource(getName()));
-    CollationStore collationStore = new InMemoryCollationStore(configuration);
+    environment.jersey().register(new AboutResource(configuration, getName()));
+    CollationStore collationStore = new CachedCollationStore(configuration);
     environment.jersey().register(new CollationsResource(configuration, collationStore));
+    environment.jersey().register(new XMLStreamExceptionMapper());
+    environment.jersey().register(new RuntimeExceptionMapper());
 
     environment.healthChecks().register("server", new ServerHealthCheck());
 

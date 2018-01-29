@@ -1,8 +1,8 @@
-package nl.knaw.huygens.hypercollate.api;
+package nl.knaw.huygens.hypercollate.dropwizard.resources;
 
-/*
+/*-
  * #%L
- * hyper-collate-api
+ * hyper-collate-server
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
@@ -19,13 +19,15 @@ package nl.knaw.huygens.hypercollate.api;
  * limitations under the License.
  * #L%
  */
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import org.junit.Test;
 
-public class ResourcePaths {
-  public static final String ABOUT = "about";
-  public static final String DOCUMENTS = "documents";
-  public static final String COLLATIONS = "collations";
-  public static final String COLLATIONS_DOT = "dot";
-  public static final String COLLATIONS_ASCII_TABLE = "ascii_table";
-  public static final String COLLATIONS_HTML_TABLE = "html_table";
-  public static final String WITNESSES = "witnesses";
+public class HomePageResourceTest {
+  @Test
+  public void testNoRobots() {
+    HomePageResource resource = new HomePageResource();
+    String noRobots = resource.noRobots();
+    assertThat(noRobots).isEqualTo("User-agent: *\n" +
+        "Disallow: /\n");
+  }
 }

@@ -19,23 +19,23 @@ package nl.knaw.huygens.hypercollate.dropwizard.api;
  * limitations under the License.
  * #L%
  */
+import java.util.Optional;
+import java.util.Set;
 
-import nl.knaw.huygens.hypercollate.api.CollationInput;
 import nl.knaw.huygens.hypercollate.dropwizard.db.CollationInfo;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
 public interface CollationStore {
 
-  void setCollation(UUID uuid, CollationGraph collationGraph, CollationInput collationInput, long collationDuration);
+  void addCollation(String collationId);
 
-  Set<UUID> getCollationUUIDs();
+  void setCollation(CollationInfo collationInfo, CollationGraph collationGraph);
 
-  Optional<CollationGraph> getCollationGraph(UUID uuid);
+  void persist(String collationId);
 
-  Optional<CollationInfo> getCollationInfo(UUID uuid);
+  Set<String> getCollationIds();
 
+  Optional<CollationGraph> getCollationGraph(String collationId);
+
+  Optional<CollationInfo> getCollationInfo(String collationId);
 }
