@@ -73,7 +73,7 @@ class ServerApplication extends Application<ServerConfiguration> {
   @Override
   public void run(final ServerConfiguration configuration, final Environment environment) {
     environment.jersey().register(new HomePageResource());
-    environment.jersey().register(new AboutResource(getName()));
+    environment.jersey().register(new AboutResource(configuration, getName()));
     CollationStore collationStore = new InMemoryCollationStore(configuration);
     environment.jersey().register(new CollationsResource(configuration, collationStore));
     environment.jersey().register(new XMLStreamExceptionMapper());

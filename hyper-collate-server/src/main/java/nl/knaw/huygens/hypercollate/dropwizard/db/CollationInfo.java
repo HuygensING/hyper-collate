@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -34,6 +35,7 @@ import nl.knaw.huygens.hypercollate.api.ResourcePaths;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
 @JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(value = { "^dot", "^ascii_table" }, allowGetters = true) // to make these fields read-only
 public class CollationInfo {
 
   public enum State {
@@ -43,16 +45,23 @@ public class CollationInfo {
   private String id;
   private Instant created;
   private Instant modified;
-  private final String uriBase;
+  private String uriBase;
   private Long collationDuration;
   private Map<String, String> witnesses = new HashMap<>();
   private Map<String, VariantWitnessGraph> witnessGraphs = new HashMap<>();
-  private State collationState = State.needs_witness;
+  State collationState = State.needs_witness;
   private boolean join = true;
+
+  CollationInfo() {
+  }
 
   public CollationInfo(String collationId, String baseURL) {
     this.id = collationId;
-    this.uriBase = baseURL + "/" + ResourcePaths.COLLATIONS + "/" + collationId + "/";
+    setUriBase(baseURL);
+  }
+
+  void setUriBase(String baseURL) {
+    this.uriBase = baseURL + "/" + ResourcePaths.COLLATIONS + "/" + this.id + "/";
   }
 
   public String getId() {
@@ -102,12 +111,12 @@ public class CollationInfo {
     return collationState;
   }
 
-  @JsonProperty("^dot")
+  @JsonProperty(value = "^dot"/* , access = JsonProperty.Access.READ_ONLY */)
   public URI getDotURI() {
     return URI.create(uriBase + ResourcePaths.COLLATIONS_DOT);
   }
 
-  @JsonProperty("^ascii_table")
+  @JsonProperty(value = "^ascii_table"/* , access = JsonProperty.Access.READ_ONLY */)
   public URI getAsciiTableURI() {
     return URI.create(uriBase + ResourcePaths.COLLATIONS_ASCII_TABLE);
   }

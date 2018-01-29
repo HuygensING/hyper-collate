@@ -116,8 +116,7 @@ public class CollationsResource {
                                 @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) @NotNull final String sigil,//
                                 @ApiParam(APIPARAM_XML) @NotNull @Valid String xml) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
-    XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph variantWitnessGraph = importer.importXML(sigil, xml);
+    VariantWitnessGraph variantWitnessGraph = new XMLImporter().importXML(sigil, xml);
     collationInfo.addWitness(sigil, xml);
     collationInfo.addWitnessGraph(sigil, variantWitnessGraph);
     collationStore.persist();
@@ -171,7 +170,7 @@ public class CollationsResource {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     CollationInfo.State collationState = collationInfo.getCollationState();
     if (collationState.equals(CollationInfo.State.needs_witness)) {
-      throw new BadRequestException("This collation has no witnesses yet. Add them first;");
+      throw new BadRequestException("This collation has no witnesses yet. Please add them first.");
     }
     if (collationState.equals(CollationInfo.State.ready_to_collate)) {
       collate(collationInfo);

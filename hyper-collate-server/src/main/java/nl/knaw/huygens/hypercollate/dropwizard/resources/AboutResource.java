@@ -1,6 +1,6 @@
 package nl.knaw.huygens.hypercollate.dropwizard.resources;
 
-/*
+/*-
  * #%L
  * hyper-collate-server
  * =======
@@ -19,19 +19,21 @@ package nl.knaw.huygens.hypercollate.dropwizard.resources;
  * limitations under the License.
  * #L%
  */
-
-import com.codahale.metrics.annotation.Timed;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import nl.knaw.huygens.hypercollate.api.AboutInfo;
-import nl.knaw.huygens.hypercollate.api.ResourcePaths;
-import nl.knaw.huygens.hypercollate.config.PropertiesConfiguration;
+import java.time.Instant;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.time.Instant;
+
+import com.codahale.metrics.annotation.Timed;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import nl.knaw.huygens.hypercollate.api.AboutInfo;
+import nl.knaw.huygens.hypercollate.api.ResourcePaths;
+import nl.knaw.huygens.hypercollate.config.PropertiesConfiguration;
+import nl.knaw.huygens.hypercollate.dropwizard.ServerConfiguration;
 
 @Api(ResourcePaths.ABOUT)
 @Path(ResourcePaths.ABOUT)
@@ -41,18 +43,15 @@ public class AboutResource {
 
   private final AboutInfo about = new AboutInfo();
 
-  public AboutResource() {
-    this("appName");
-  }
-
-  public AboutResource(String appName) {
+  public AboutResource(ServerConfiguration configuration, String appName) {
     PropertiesConfiguration properties = new PropertiesConfiguration(PROPERTIES_FILE, true);
-    about.setAppName(appName)
-        .setStartedAt(Instant.now().toString())
-        .setBuildDate(properties.getProperty("buildDate").orElse("no buildDate set in about.properties"))
-        .setCommitId(properties.getProperty("commitId").orElse("no commitId set in about.properties"))
-        .setScmBranch(properties.getProperty("scmBranch").orElse("no scmBranch set in about.properties"))
-        .setVersion(properties.getProperty("version").orElse("no version set in about.properties"))
+    about.setAppName(appName)//
+        .setStartedAt(Instant.now().toString())//
+        .setBuildDate(properties.getProperty("buildDate").orElse("no buildDate set in about.properties"))//
+        .setCommitId(properties.getProperty("commitId").orElse("no commitId set in about.properties"))//
+        .setScmBranch(properties.getProperty("scmBranch").orElse("no scmBranch set in about.properties"))//
+        .setVersion(properties.getProperty("version").orElse("no version set in about.properties"))//
+        .setProjectDir(configuration.getProjectDir());
     ;
   }
 

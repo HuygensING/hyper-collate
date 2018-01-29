@@ -19,19 +19,27 @@ package nl.knaw.huygens.hypercollate.dropwizard.db;
  * limitations under the License.
  * #L%
  */
-
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import nl.knaw.huygens.hypercollate.dropwizard.ServerConfiguration;
-import nl.knaw.huygens.hypercollate.dropwizard.api.CollationStore;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-
+import java.io.File;
 import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
+import nl.knaw.huygens.hypercollate.dropwizard.ServerConfiguration;
+import nl.knaw.huygens.hypercollate.dropwizard.api.CollationStore;
+import nl.knaw.huygens.hypercollate.dropwizard.db.CollationInfo.State;
+import nl.knaw.huygens.hypercollate.importer.XMLImporter;
+import nl.knaw.huygens.hypercollate.model.CollationGraph;
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
 public class InMemoryCollationStore implements CollationStore {
   private final Set<String> names = new LinkedHashSet<>();
@@ -42,9 +50,14 @@ public class InMemoryCollationStore implements CollationStore {
   private static final Cache<String, CollationGraph> CollationGraphCache = CacheBuilder.newBuilder()//
       .maximumSize(100)//
       .build();
+  private final File projectDir;
+  private final File collationsDir;
 
   public InMemoryCollationStore(ServerConfiguration config) {
     baseURI = config.getBaseURI();
+    projectDir = config.getProjectDir();
+    collationsDir = config.getCollationsDir();
+    readCollationIds();
   }
 
   @Override
@@ -67,6 +80,7 @@ public class InMemoryCollationStore implements CollationStore {
     collationInfo.setModified(Instant.now());
     CollationInfoCache.put(collationId, collationInfo);
     names.add(collationId);
+    persist();
   }
 
   @Override
@@ -75,15 +89,16 @@ public class InMemoryCollationStore implements CollationStore {
     CollationGraphCache.put(collationId, collationGraph);
     collationInfo.setModified(Instant.now());
     CollationInfoCache.put(collationId, collationInfo);
+    persist();
   }
 
-//  public void addWitness(String name, String sigil, String xml) {
-//    CollationInfo docInfo = getCollationInfo(name)//
-//        .orElseGet(() -> newCollationInfo(name));
-//    docInfo.addWitness(sigil, xml);
-//    docInfo.setModified(Instant.now());
-//    CollationInfoCache.put(name, docInfo);
-//  }
+  // public void addWitness(String name, String sigil, String xml) {
+  // CollationInfo docInfo = getCollationInfo(name)//
+  // .orElseGet(() -> newCollationInfo(name));
+  // docInfo.addWitness(sigil, xml);
+  // docInfo.setModified(Instant.now());
+  // CollationInfoCache.put(name, docInfo);
+  // }
 
   @Override
   public Set<String> getCollationIds() {
@@ -94,7 +109,7 @@ public class InMemoryCollationStore implements CollationStore {
   public Optional<CollationInfo> getCollationInfo(String collationId) {
     if (names.contains(collationId)) {
       try {
-        CollationInfo CollationInfo = CollationInfoCache.get(collationId, () -> null);
+        CollationInfo CollationInfo = CollationInfoCache.get(collationId, () -> readCollationInfo(collationId).orElse(null));
         return Optional.ofNullable(CollationInfo);
       } catch (ExecutionException e) {
         e.printStackTrace();
@@ -105,6 +120,81 @@ public class InMemoryCollationStore implements CollationStore {
 
   @Override
   public void persist() {
+    storeCollationIds();
+    CollationInfoCache.asMap()//
+        .values()//
+        .forEach(this::storeCollationInfo);
+  }
+
+  private void storeCollationIds() {
+    try {
+      File file = getCollationIndexFile();
+      new ObjectMapper().writeValue(file, names);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
+  }
+
+  private File getCollationIndexFile() {
+    return new File(projectDir, "collationIds.json");
+  }
+
+  private void readCollationIds() {
+    File file = getCollationIndexFile();
+    if (file.exists()) {
+      try {
+        names.addAll(objectMapper().readValue(file, Set.class));
+      } catch (Exception e) {
+        e.printStackTrace();
+        throw new RuntimeException(e);
+      }
+    }
+  }
+
+  private ObjectMapper objectMapper() {
+    return new ObjectMapper()//
+        .registerModule(new ParameterNamesModule())//
+        .registerModule(new Jdk8Module())//
+        .registerModule(new JavaTimeModule());
+  }
+
+  private void storeCollationInfo(CollationInfo collationInfo) {
+    try {
+      File file = getCollationInfoFile(collationInfo.getId());
+      objectMapper().writeValue(file, collationInfo);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
+  }
+
+  private Optional<CollationInfo> readCollationInfo(String id) {
+    File file = getCollationInfoFile(id);
+    try {
+      CollationInfo collationInfo = objectMapper().readValue(file, CollationInfo.class);
+      initialize(collationInfo);
+      return Optional.of(collationInfo);
+    } catch (Exception e) {
+      e.printStackTrace();
+      // throw new RuntimeException(e);
+    }
+    return Optional.empty();
+  }
+
+  private void initialize(CollationInfo collationInfo) {
+    collationInfo.setUriBase(baseURI);
+    if (collationInfo.getCollationState().equals(State.is_collated)) {
+      collationInfo.collationState = State.ready_to_collate;
+    }
+    collationInfo.getWitnesses().forEach((sigil, xml) -> {
+      VariantWitnessGraph variantWitnessGraph = new XMLImporter().importXML(sigil, xml);
+      collationInfo.addWitnessGraph(sigil, variantWitnessGraph);
+    });
+  }
+
+  private File getCollationInfoFile(String id) {
+    return new File(collationsDir, id + ".json");
   }
 
   private static CollationInfo newCollationInfo(String name) {
