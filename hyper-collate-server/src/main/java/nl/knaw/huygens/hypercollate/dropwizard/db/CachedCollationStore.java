@@ -20,6 +20,19 @@ package nl.knaw.huygens.hypercollate.dropwizard.db;
  * #L%
  */
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import nl.knaw.huygens.hypercollate.dropwizard.ServerConfiguration;
+import nl.knaw.huygens.hypercollate.dropwizard.api.CollationStore;
+import nl.knaw.huygens.hypercollate.dropwizard.db.CollationInfo.State;
+import nl.knaw.huygens.hypercollate.importer.XMLImporter;
+import nl.knaw.huygens.hypercollate.model.CollationGraph;
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+
 import java.io.File;
 import java.time.Instant;
 import java.util.LinkedHashSet;
@@ -27,20 +40,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-
-import nl.knaw.huygens.hypercollate.dropwizard.ServerConfiguration;
-import nl.knaw.huygens.hypercollate.dropwizard.api.CollationStore;
-import nl.knaw.huygens.hypercollate.dropwizard.db.CollationInfo.State;
-import nl.knaw.huygens.hypercollate.importer.XMLImporter;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
 public class CachedCollationStore implements CollationStore {
   private final Set<String> names = new LinkedHashSet<>();

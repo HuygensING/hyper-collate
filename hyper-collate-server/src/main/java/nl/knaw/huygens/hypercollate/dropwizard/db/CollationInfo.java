@@ -19,20 +19,20 @@ package nl.knaw.huygens.hypercollate.dropwizard.db;
  * limitations under the License.
  * #L%
  */
-import java.net.URI;
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import nl.knaw.huygens.hypercollate.api.ResourcePaths;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+
+import java.net.URI;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(value = { "^dot", "^ascii_table" }, allowGetters = true) // to make these fields read-only

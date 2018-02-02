@@ -20,14 +20,13 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toSet;
 import org.antlr.v4.misc.OrderedHashMap;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.internal.Iterables;
 
 import java.util.*;
-
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toSet;
 
 public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAssert, CollationGraph> {
 
