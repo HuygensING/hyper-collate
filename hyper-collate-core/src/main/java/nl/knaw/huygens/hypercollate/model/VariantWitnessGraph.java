@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 public class VariantWitnessGraph {
 
   private String sigil = "";
-  private final List<TokenVertex> vertexList = new ArrayList<>();
   private final List<Markup> markupList = new ArrayList<>();
 
   private final TokenVertex startTokenVertex;

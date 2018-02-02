@@ -9,9 +9,9 @@ package nl.knaw.huygens.hypercollate.collator;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,7 @@ import nl.knaw.huygens.hypercollate.model.*;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphRanking;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
 import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -163,7 +164,12 @@ public class HyperCollator {
         .distinct()//
         .collect(toList());
     LOG.info("matchList={}", matchList);
-    List<CollatedMatch> optimalMatchList = getOptimalMatchList(matchList);
+//    List<CollatedMatch> optimalMatchList = getOptimalMatchList(matchList);
+    OptimalCollatedMatchListAlgorithm optimalCollatedMatchListAlgorithm = new OptimalCollatedMatchListAlgorithm();
+    List<CollatedMatch> optimalMatchList = optimalCollatedMatchListAlgorithm.getOptimalCollatedMatchList(matchList);
+//    DecisionTreeNode decisionTreeRootNode = optimalCollatedMatchListAlgorithm.getDecisionTreeRootNode();
+//    visualize(decisionTreeRootNode);
+
     LOG.info("optimalMatchList={}", optimalMatchList);
 
     Iterator<TokenVertex> witnessIterator = VariantWitnessGraphTraversal.of(witnessGraph).iterator();
@@ -236,8 +242,11 @@ public class HyperCollator {
     collatedTokenVertexMap.keySet().forEach(tv -> tv.getIncomingTokenVertexStream().forEach(itv -> {
       TextNode source = collatedTokenVertexMap.get(itv);
       TextNode target = collatedTokenVertexMap.get(tv);
-      if (source == null || target == null) {
-        throw new RuntimeException("source or target is null!");
+      if (source == null) {
+        throw new RuntimeException("source=null, target=" + target);
+      }
+      if (target == null) {
+        throw new RuntimeException("target=null, source=" + source);
       }
       List<TextNode> existingTargetNodes = collationGraph.getOutgoingTextEdgeStream(source)
           .map(collationGraph::getTarget)//
@@ -308,8 +317,8 @@ public class HyperCollator {
       VariantWitnessGraphRanking ranking2 = rankings.get(t.right);
       match(witness1, witness2, ranking1, ranking2, allPotentialMatches, vertexToMatch);
 
-      Match endMatch = getEndMatch(witness1, ranking1, witness2, ranking2);
-      allPotentialMatches.add(endMatch);
+//      Match endMatch = getEndMatch(witness1, ranking1, witness2, ranking2);
+//      allPotentialMatches.add(endMatch);
     }
 
     return allPotentialMatches;
@@ -363,5 +372,19 @@ public class HyperCollator {
               }
             }));
   }
+
+  private void visualize(DecisionTreeNode decisionTreeRootNode) {
+    int indent = 0;
+    visualize(decisionTreeRootNode, indent);
+  }
+
+  private void visualize(DecisionTreeNode decisionTreeNode, int indent) {
+    String tab = indent == 0 ? "" : StringUtils.repeat("| ", indent - 1) + "|-";
+    System.out.println(tab + decisionTreeNode.getQuantumCollatedMatchList().toString());
+    for (DecisionTreeNode treeNode : decisionTreeNode.getChildNodes()) {
+      visualize(treeNode, indent + 1);
+    }
+  }
+
 
 }

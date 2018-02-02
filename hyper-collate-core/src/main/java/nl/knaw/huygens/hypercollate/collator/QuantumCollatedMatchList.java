@@ -120,7 +120,7 @@ public class QuantumCollatedMatchList {
 
   @Override
   public String toString() {
-    return "(" + chosenMatches + " | " + potentialMatches + ")";
+    return String.format("(%s | %s)", chosenMatches, potentialMatches);
   }
 
   public List<CollatedMatch> getPotentialMatches() {

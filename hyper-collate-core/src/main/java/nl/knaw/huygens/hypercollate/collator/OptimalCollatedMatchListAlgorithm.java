@@ -9,9 +9,9 @@ package nl.knaw.huygens.hypercollate.collator;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,8 @@ package nl.knaw.huygens.hypercollate.collator;
  * limitations under the License.
  * #L%
  */
+
+import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import eu.interedition.collatex.dekker.astar.AstarAlgorithm;
 import static java.util.stream.Collectors.toList;
@@ -34,6 +36,9 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
   private List<CollatedMatch> matchesSortedByNode;
   private List<CollatedMatch> matchesSortedByWitness;
   private Integer maxPotential;
+
+  private Map<QuantumCollatedMatchList, Set<QuantumCollatedMatchList>> neighborNodeMap = new HashMap<>();
+  private QuantumCollatedMatchList rootNode;
 
   @Override
   public String getName() {
@@ -79,6 +84,10 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
 
   @Override
   protected Iterable<QuantumCollatedMatchList> neighborNodes(QuantumCollatedMatchList matchList) {
+    if (rootNode == null) {
+      rootNode = matchList;
+    }
+
     Set<QuantumCollatedMatchList> nextPotentialMatches = new LinkedHashSet<>();
 
     CollatedMatch firstPotentialMatch1 = getFirstPotentialMatch(this.matchesSortedByNode, matchList);
@@ -89,6 +98,8 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
     if (!firstPotentialMatch1.equals(firstPotentialMatch2)) {
       addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch2);
     }
+
+    neighborNodeMap.put(matchList, nextPotentialMatches);
 
     return nextPotentialMatches;
   }
@@ -114,6 +125,20 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
   @Override
   protected LostPotential distBetween(QuantumCollatedMatchList matchList0, QuantumCollatedMatchList matchList1) {
     return new LostPotential(Math.abs(matchList0.totalSize() - matchList1.totalSize()));
+  }
+
+  public DecisionTreeNode getDecisionTreeRootNode() {
+    Preconditions.checkNotNull(rootNode, "aStart() needs to be called first.");
+    return getConnectedDecisionTreeNode(rootNode);
+  }
+
+  private DecisionTreeNode getConnectedDecisionTreeNode(QuantumCollatedMatchList node) {
+    DecisionTreeNode decisionTreeNode = DecisionTreeNode.of(node);
+    neighborNodeMap.getOrDefault(node, Collections.emptySet())//
+        .stream()//
+        .map(this::getConnectedDecisionTreeNode)//
+        .forEach(decisionTreeNode::addChildNode);
+    return decisionTreeNode;
   }
 
 }
