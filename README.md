@@ -31,7 +31,7 @@ Interaction with the server is through REST calls.
 This can be done in the computer language of your choice, with the `curl` tool, or with the built-in API explorer at 
 the `/swagger` endpoint of the server.
 
-- Create a new Collation with a given name:  
+- **Create a new Collation with a given name:**    
   `PUT /collations/{name}`  
   This should return response code 201 - created,  
   with a URL to the collation in the `location` header.  
@@ -39,7 +39,7 @@ the `/swagger` endpoint of the server.
   curl example:  
     `curl -X PUT --header 'Content-Type: application/json' --header 'Accept: text/plain; charset=UTF-8' 'http://localhost:8080/collations/testcollation'` 
   
-- Add witnesses to the collation:  
+- **Add witnesses to the collation:**  
   `PUT /collations/{name}/witnesses/{sigil}`
   This should return response code 204 - no content  
   Repeat this step for the other witness(es)
@@ -50,7 +50,7 @@ the `/swagger` endpoint of the server.
     `curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in Spain falls mainly on the <del>street</del><add>plain</add>.</xml>' 'http://localhost:8080/collations/testcollation/witnesses/B'` 
   
 
-- Get an ASCII table visualization of the collation graph:  
+- **Get an ASCII table visualization of the collation graph:**  
   `GET /collations/{name}/ascii_table`   
   This should return response code 200 - OK  
   The response body has a table of the collated text using ASCII.  
@@ -68,10 +68,10 @@ the `/swagger` endpoint of the server.
     │   │The_rain_in_│Spain_      │ │falls_mainly_on_the_│[-] street│.│
     └───┴────────────┴────────────┴─┴────────────────────┴──────────┴─┘</pre>
     In this table the `<del>`eted text is indicated with `[-]`, and the `<add>`ed text with `[+]`
-    Whitespace in the witnesses is indicated with `_`
+    Significant whitespace in the witnesses is indicated with `_`
     
 
-- Get a .dot visualization of the collation graph:  
+- **Get a .dot visualization of the collation graph:**  
   `GET /collations/{name}/dot`   
   This should return response code 200 - OK  
   The response body has the .dot representation of the collation graph.  
@@ -79,9 +79,9 @@ the `/swagger` endpoint of the server.
   curl example:  
     `curl -X GET --header 'Accept: text/plain' 'http://localhost:8080/collations/testcollation/dot'`
       
-    This should return the response body
+    This should return the response body:
 
-```xml
+```
 digraph CollationGraph{
 labelloc=b
 t000 [label="";shape=doublecircle,rank=middle]
@@ -109,9 +109,9 @@ t009->t004[label="B"]
 }
 ```
   
-  Which, when rendered as png using the dot tool from [Graphviz](https://www.graphviz.org/) or using [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/) gives:
+  Which, when rendered as png using the dot tool from [Graphviz](https://www.graphviz.org/) or using [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/), gives:
   
-  ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/testcollation.png?raw=true)
+   ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/testcollation.png?raw=true)
   
   In this representation, significant whitespace in the witnesses is represented as `␣`
   
