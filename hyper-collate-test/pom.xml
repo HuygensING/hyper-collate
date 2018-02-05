@@ -7,6 +7,7 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
   <artifactId>hyper-collate-test</artifactId>
+  <name>HyperCollate test module</name>
 
   <dependencies>
     <dependency>

@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 /*-
  * #%L
- * hyper-collate-core
+ * HyperCollate core
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======

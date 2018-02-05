@@ -2,7 +2,7 @@ package nl.knaw.huygens.hypercollate.dropwizard.resources;
 
 /*
  * #%L
- * hyper-collate-server
+ * HyperCollate server
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
@@ -40,7 +40,7 @@ public class HomePageResource {
    * Shows the homepage for the backend
    *
    * @return HTML representation of the homepage
-   * @throws IOException
+   * @throws IOException When there is a problem reading resources.
    */
 
   @GET

@@ -2,7 +2,7 @@ package nl.knaw.huygens.hypercollate.dropwizard;
 
 /*-
  * #%L
- * hyper-collate-server
+ * HyperCollate server
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
@@ -19,14 +19,8 @@ package nl.knaw.huygens.hypercollate.dropwizard;
  * limitations under the License.
  * #L%
  */
-import java.util.SortedMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.codahale.metrics.health.HealthCheck;
-
 import io.dropwizard.Application;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
@@ -37,11 +31,12 @@ import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import nl.knaw.huygens.hypercollate.dropwizard.api.CollationStore;
 import nl.knaw.huygens.hypercollate.dropwizard.db.CachedCollationStore;
 import nl.knaw.huygens.hypercollate.dropwizard.health.ServerHealthCheck;
-import nl.knaw.huygens.hypercollate.dropwizard.resources.AboutResource;
-import nl.knaw.huygens.hypercollate.dropwizard.resources.CollationsResource;
-import nl.knaw.huygens.hypercollate.dropwizard.resources.HomePageResource;
-import nl.knaw.huygens.hypercollate.dropwizard.resources.RuntimeExceptionMapper;
-import nl.knaw.huygens.hypercollate.dropwizard.resources.XMLStreamExceptionMapper;
+import nl.knaw.huygens.hypercollate.dropwizard.resources.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.SortedMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 class ServerApplication extends Application<ServerConfiguration> {
   private final Logger LOG = LoggerFactory.getLogger(getClass());

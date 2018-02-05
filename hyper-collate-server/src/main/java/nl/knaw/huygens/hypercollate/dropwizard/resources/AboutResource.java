@@ -2,7 +2,7 @@ package nl.knaw.huygens.hypercollate.dropwizard.resources;
 
 /*-
  * #%L
- * hyper-collate-server
+ * HyperCollate server
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
@@ -19,21 +19,20 @@ package nl.knaw.huygens.hypercollate.dropwizard.resources;
  * limitations under the License.
  * #L%
  */
-import java.time.Instant;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 
 import com.codahale.metrics.annotation.Timed;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import nl.knaw.huygens.hypercollate.api.AboutInfo;
 import nl.knaw.huygens.hypercollate.api.ResourcePaths;
 import nl.knaw.huygens.hypercollate.config.PropertiesConfiguration;
 import nl.knaw.huygens.hypercollate.dropwizard.ServerConfiguration;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import java.time.Instant;
 
 @Api(ResourcePaths.ABOUT)
 @Path(ResourcePaths.ABOUT)

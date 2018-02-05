@@ -2,7 +2,7 @@ package nl.knaw.huygens.hypercollate.api;
 
 /*
  * #%L
- * hyper-collate-api
+ * HyperCollate API
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
