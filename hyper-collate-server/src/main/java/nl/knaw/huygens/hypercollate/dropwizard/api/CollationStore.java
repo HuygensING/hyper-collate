@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.dropwizard.api;
  * #%L
  * hyper-collate-server
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,23 +19,23 @@ package nl.knaw.huygens.hypercollate.dropwizard.api;
  * limitations under the License.
  * #L%
  */
-
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
-import nl.knaw.huygens.hypercollate.api.CollationInput;
 import nl.knaw.huygens.hypercollate.dropwizard.db.CollationInfo;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 
 public interface CollationStore {
 
-  void setCollation(UUID uuid, CollationGraph collationGraph, CollationInput collationInput, long collationDuration);
+  void addCollation(String collationId);
 
-  Set<UUID> getCollationUUIDs();
+  void setCollation(CollationInfo collationInfo, CollationGraph collationGraph);
 
-  Optional<CollationGraph> getCollationGraph(UUID uuid);
+  void persist(String collationId);
 
-  Optional<CollationInfo> getCollationInfo(UUID uuid);
+  Set<String> getCollationIds();
 
+  Optional<CollationGraph> getCollationGraph(String collationId);
+
+  Optional<CollationInfo> getCollationInfo(String collationId);
 }

@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.api;
  * #%L
  * hyper-collate-api
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,16 +25,18 @@ public class WitnessInput {
   private String sigil;
   private String xml;
 
-  public void setSigil(String sigil) {
+  public WitnessInput setSigil(String sigil) {
     this.sigil = sigil;
+    return this;
   }
 
   public String getSigil() {
     return this.sigil;
   }
 
-  public void setXml(String xml) {
+  public WitnessInput setXml(String xml) {
     this.xml = xml;
+    return this;
   }
 
   public String getXml() {

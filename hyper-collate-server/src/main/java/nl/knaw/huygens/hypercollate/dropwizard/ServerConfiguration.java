@@ -1,12 +1,22 @@
 package nl.knaw.huygens.hypercollate.dropwizard;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.dropwizard.Configuration;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+import org.apache.commons.io.FileUtils;
 import org.hibernate.validator.constraints.NotEmpty;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /*
  * #%L
  * hyper-collate-server
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +32,23 @@ import org.hibernate.validator.constraints.NotEmpty;
  * #L%
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.dropwizard.Configuration;
-import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
-
 public class ServerConfiguration extends Configuration {
   @NotEmpty
   private String baseURI;
+
+  private final File projectDir;
+  private final File collationsDir;
+
+  ServerConfiguration() {
+    super();
+    projectDir = Paths.get(System.getProperty("user.home"), ".hypercollate").toFile();
+    collationsDir = new File(projectDir,"collations");
+    try {
+      Files.createDirectories(collationsDir.toPath());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   public void setBaseURI(String baseURI) {
     this.baseURI = baseURI.replaceFirst("/$", "");
@@ -42,4 +61,11 @@ public class ServerConfiguration extends Configuration {
   @JsonProperty("swagger")
   public SwaggerBundleConfiguration swaggerBundleConfiguration;
 
+  public File getProjectDir() {
+    return this.projectDir;
+  }
+
+  public File getCollationsDir() {
+    return collationsDir;
+  }
 }

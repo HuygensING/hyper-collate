@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.dropwizard.db;
  * #%L
  * hyper-collate-server
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,26 +19,74 @@ package nl.knaw.huygens.hypercollate.dropwizard.db;
  * limitations under the License.
  * #L%
  */
-
 import java.net.URI;
 import java.time.Instant;
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import nl.knaw.huygens.hypercollate.api.CollationInput;
 import nl.knaw.huygens.hypercollate.api.ResourcePaths;
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
+@JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(value = { "^dot", "^ascii_table" }, allowGetters = true) // to make these fields read-only
 public class CollationInfo {
+
+  public enum State {
+    needs_witness, ready_to_collate, is_collated
+  }
+
+  private String id;
   private Instant created;
   private Instant modified;
-  private final String uriBase;
-  private final CollationInput input;
-  private long collationDuration;
+  private String uriBase;
+  private Long collationDuration;
+  private Map<String, String> witnesses = new HashMap<>();
+  private Map<String, VariantWitnessGraph> witnessGraphs = new HashMap<>();
+  State collationState = State.needs_witness;
+  private boolean join = true;
 
-  public CollationInfo(UUID documentId, String baseURL, CollationInput input) {
-    this.input = input;
-    this.uriBase = baseURL + "/" + ResourcePaths.COLLATIONS + "/" + documentId + "/";
+  CollationInfo() {
+  }
+
+  public CollationInfo(String collationId, String baseURL) {
+    this.id = collationId;
+    setUriBase(baseURL);
+  }
+
+  void setUriBase(String baseURL) {
+    this.uriBase = baseURL + "/" + ResourcePaths.COLLATIONS + "/" + this.id + "/";
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public CollationInfo addWitness(String sigil, String xml) {
+    witnesses.put(sigil, xml);
+    collationState = State.ready_to_collate;
+    collationDuration = null;
+    setModified(Instant.now());
+    return this;
+  }
+
+  public Map<String, String> getWitnesses() {
+    return witnesses;
+  }
+
+  public void addWitnessGraph(String sigil, VariantWitnessGraph variantWitnessGraph) {
+    witnessGraphs.put(sigil, variantWitnessGraph);
+  }
+
+  @JsonIgnore
+  public Map<String, VariantWitnessGraph> getWitnessGraphMap() {
+    return witnessGraphs;
   }
 
   public CollationInfo setCreated(Instant created) {
@@ -59,26 +107,43 @@ public class CollationInfo {
     return modified.toString();
   }
 
-  public CollationInput getInput() {
-    return this.input;
+  public State getCollationState() {
+    return collationState;
   }
 
-  @JsonProperty("^dot")
+  @JsonProperty(value = "^dot"/* , access = JsonProperty.Access.READ_ONLY */)
   public URI getDotURI() {
     return URI.create(uriBase + ResourcePaths.COLLATIONS_DOT);
   }
 
-  @JsonProperty("^ascii_table")
+  @JsonProperty(value = "^ascii_table"/* , access = JsonProperty.Access.READ_ONLY */)
   public URI getAsciiTableURI() {
     return URI.create(uriBase + ResourcePaths.COLLATIONS_ASCII_TABLE);
   }
 
   public void setCollationDurationInMilliseconds(long collationDuration) {
     this.collationDuration = collationDuration;
+    this.collationState = State.is_collated;
   }
 
-  public long getCollationDurationInMilliseconds() {
+  public Long getCollationDurationInMilliseconds() {
     return this.collationDuration;
+  }
+
+  public Optional<String> getWitness(String sigil) {
+    return Optional.ofNullable(witnesses.get(sigil));
+  }
+
+  public boolean getJoin() {
+    return join;
+  }
+
+  public boolean isJoin() {
+    return join;
+  }
+
+  public void setJoin(boolean join) {
+    this.join = join;
   }
 
 }

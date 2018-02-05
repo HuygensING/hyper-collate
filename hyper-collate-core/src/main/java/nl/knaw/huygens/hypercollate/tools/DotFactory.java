@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.tools;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,29 +20,12 @@ package nl.knaw.huygens.hypercollate.tools;
  * #L%
  */
 
+import eu.interedition.collatex.Token;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import nl.knaw.huygens.hypercollate.model.*;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
-import eu.interedition.collatex.Token;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
-import nl.knaw.huygens.hypercollate.model.EndTokenVertex;
-import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.StartTokenVertex;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+import java.util.*;
 
 public class DotFactory {
 
@@ -106,16 +89,16 @@ public class DotFactory {
     return null;
   }
 
-  private static final Comparator<Node> BY_NODE = Comparator.comparing(Node::toString);
+  private static final Comparator<TextNode> BY_NODE = Comparator.comparing(TextNode::toString);
 
   public static String fromCollationGraph(CollationGraph collation) {
     StringBuilder dotBuilder = new StringBuilder("digraph CollationGraph{\nlabelloc=b\n");
-    Map<Node, String> nodeIdentifiers = new HashMap<>();
+    Map<TextNode, String> nodeIdentifiers = new HashMap<>();
 
-    List<Node> nodes = collation.traverse();
+    List<TextNode> nodes = collation.traverseTextNodes();
     nodes.sort(BY_NODE);
     for (int i = 0; i < nodes.size(); i++) {
-      Node node = nodes.get(i);
+      TextNode node = nodes.get(i);
       String nodeId = "t" + String.format("%03d", i);
       nodeIdentifiers.put(node, nodeId);
       appendNodeLine(dotBuilder, node, nodeId);
@@ -126,10 +109,10 @@ public class DotFactory {
     return dotBuilder.toString();
   }
 
-  private static void appendEdgeLines(StringBuilder dotBuilder, CollationGraph collation, Map<Node, String> nodeIdentifiers, List<Node> nodes) {
+  private static void appendEdgeLines(StringBuilder dotBuilder, CollationGraph collation, Map<TextNode, String> nodeIdentifiers, List<TextNode> nodes) {
     Set<String> edgeLines = new TreeSet<>();
-    for (Node node : nodes) {
-      collation.getIncomingEdges(node)//
+    for (TextNode node : nodes) {
+      collation.getIncomingTextEdgeStream(node)//
           .forEach(e -> {
             Node source = collation.getSource(e);
             Node target = collation.getTarget(e);
@@ -141,7 +124,7 @@ public class DotFactory {
     edgeLines.forEach(dotBuilder::append);
   }
 
-  private static void appendNodeLine(StringBuilder dotBuilder, Node node, String nodeId) {
+  private static void appendNodeLine(StringBuilder dotBuilder, TextNode node, String nodeId) {
     String labelString = generateNodeLabel(node);
     if (labelString.isEmpty()) {
       dotBuilder.append(nodeId)//
@@ -155,7 +138,7 @@ public class DotFactory {
     }
   }
 
-  private static String generateNodeLabel(Node node) {
+  private static String generateNodeLabel(TextNode node) {
     StringBuilder label = new StringBuilder();
     Map<String, String> contentLabel = new HashMap<>();
     Map<String, String> markupLabel = new HashMap<>();
@@ -170,7 +153,7 @@ public class DotFactory {
     return label.toString();
   }
 
-  private static void prepare(Node node, Map<String, String> contentLabel, Map<String, String> markupLabel, List<String> sortedSigils) {
+  private static void prepare(TextNode node, Map<String, String> contentLabel, Map<String, String> markupLabel, List<String> sortedSigils) {
     sortedSigils.forEach(s -> {
       Token token = node.getTokenForWitness(s);
       if (token != null) {
@@ -215,7 +198,8 @@ public class DotFactory {
   }
 
   private static String asLabel(String content) {
-    return content.replaceAll("\n", "&#x21A9;<br/>")//
+    return content.replaceAll("&", "&amp;")//
+        .replaceAll("\n", "&#x21A9;<br/>")//
         .replaceAll(" +", "&#9251;");
   }
 

@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.api;
  * #%L
  * hyper-collate-api
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,5 +25,7 @@ import javax.ws.rs.core.MediaType;
 public class UTF8MediaType {
   private static final String CHARSET_UTF8 = "; charset=UTF-8";
   public static final String TEXT_PLAIN = MediaType.TEXT_PLAIN + CHARSET_UTF8;
+  public static final String TEXT_XML = MediaType.TEXT_XML + CHARSET_UTF8;
   public static final String APPLICATION_JSON = MediaType.APPLICATION_JSON + CHARSET_UTF8;
+
 }

@@ -1,10 +1,28 @@
 package nl.knaw.huygens.hypercollate.dropwizard.resources;
 
+import static java.util.stream.Collectors.toList;
+
+import java.net.URI;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
+
 /*-
  * #%L
  * hyper-collate-server
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,36 +38,15 @@ package nl.knaw.huygens.hypercollate.dropwizard.resources;
  * #L%
  */
 
-import java.net.URI;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
-
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Stopwatch;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import nl.knaw.huygens.hypercollate.api.CollationInput;
 import nl.knaw.huygens.hypercollate.api.ResourcePaths;
 import nl.knaw.huygens.hypercollate.api.UTF8MediaType;
-import nl.knaw.huygens.hypercollate.api.WitnessInput;
-import nl.knaw.huygens.hypercollate.collater.HyperCollater;
-import nl.knaw.huygens.hypercollate.collater.OptimalMatchSetAlgorithm2;
+import nl.knaw.huygens.hypercollate.collator.HyperCollator;
 import nl.knaw.huygens.hypercollate.dropwizard.ServerConfiguration;
 import nl.knaw.huygens.hypercollate.dropwizard.api.CollationStore;
 import nl.knaw.huygens.hypercollate.dropwizard.db.CollationInfo;
@@ -63,10 +60,19 @@ import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
 @Path(ResourcePaths.COLLATIONS)
 @Produces(UTF8MediaType.APPLICATION_JSON)
 public class CollationsResource {
-  public static final String APIPARAM_UUID = "collation UUID";
-  public static final String APIPARAM_COLLATION_INPUT = "Collation input";
+  private static final String PATHPARAM_NAME = "name";
+  private static final String PATHPARAM_SIGIL = "sigil";
+
+  private static final String COLLATION_ASCII_TABLE_PATH = "{" + PATHPARAM_NAME + "}/" + ResourcePaths.COLLATIONS_ASCII_TABLE;
+  private static final String COLLATION_DOT_PATH = "{" + PATHPARAM_NAME + "}/" + ResourcePaths.COLLATIONS_DOT;
+  private static final String COLLATION_PATH = "{" + PATHPARAM_NAME + "}";
+  private static final String COLLATION_WITNESS_PATH = "{" + PATHPARAM_NAME + "}/" + ResourcePaths.WITNESSES + "/{" + PATHPARAM_SIGIL + "}";
+
+  private static final String APIPARAM_NAME = "Collation name";
+  private static final String APIPARAM_SIGIL = "Witness sigil";
+  private static final String APIPARAM_XML = "Witness Source (XML)";
   private final ServerConfiguration configuration;
-  private final HyperCollater hypercollater = new HyperCollater(new OptimalMatchSetAlgorithm2());
+  private final HyperCollator hypercollator = new HyperCollator();
   private final CollationStore collationStore;
 
   public CollationsResource(ServerConfiguration configuration, CollationStore collationStore) {
@@ -76,24 +82,24 @@ public class CollationsResource {
 
   @GET
   @Timed
-  @ApiOperation(value = "List all collation URIs")
-  public List<URI> getCollationURIs() {
-    return collationStore.getCollationUUIDs()//
+  @ApiOperation(value = "List all collation names")
+  public List<String> getCollationNames() {
+    return collationStore.getCollationIds()//
         .stream()//
-        .map(this::documentURI)//
-        .collect(Collectors.toList());
+        .map(id -> String.format("%s/%s/%s", configuration.getBaseURI(), ResourcePaths.COLLATIONS, id))//
+        .sorted()//
+        .collect(toList());
   }
 
-  @POST
-  @Consumes(UTF8MediaType.APPLICATION_JSON)
+  @PUT
   @Timed
-  @ApiOperation(value = "Create a new collation")
+  @Path(COLLATION_PATH)
+  @ApiOperation(value = "Create a new collation with the given name")
   @Produces(UTF8MediaType.TEXT_PLAIN)
-  public Response addCollation(@ApiParam(APIPARAM_COLLATION_INPUT) @NotNull @Valid CollationInput collationInput) {
-    UUID collationId = UUID.randomUUID();
+  public Response addCollation(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name) {
     try {
-      process(collationInput, collationId);
-      return Response.created(documentURI(collationId)).build();
+      collationStore.addCollation(name);
+      return Response.created(documentURI(name)).build();
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -102,65 +108,100 @@ public class CollationsResource {
   }
 
   @GET
-  @Path("{uuid}")
+  @Path(COLLATION_PATH)
   @Timed
   @Produces(UTF8MediaType.APPLICATION_JSON)
   @ApiOperation(value = "Get information about the collation")
-  public Response getCollationInfo(@ApiParam(APIPARAM_UUID) @PathParam("uuid") final UUID uuid) {
-    CollationInfo collationInfo = getExistingCollationInfo(uuid);
+  public Response getCollationInfo(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name) {
+    CollationInfo collationInfo = getExistingCollationInfo(name);
     return Response.ok(collationInfo).build();
   }
 
+  @PUT
+  @Path(COLLATION_WITNESS_PATH)
+  @Timed
+  @Consumes(UTF8MediaType.TEXT_XML)
+  @ApiOperation(value = "Add a witness to the collation")
+  public Response addXMLWitness(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) @NotNull final String name, //
+      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) @NotNull final String sigil, //
+      @ApiParam(APIPARAM_XML) @NotNull @Valid String xml) {
+    CollationInfo collationInfo = getExistingCollationInfo(name);
+    VariantWitnessGraph variantWitnessGraph = new XMLImporter().importXML(sigil, xml);
+    collationInfo.addWitness(sigil, xml);
+    collationInfo.addWitnessGraph(sigil, variantWitnessGraph);
+    collationStore.persist(name);
+    return Response.noContent().build();
+  }
+
   @GET
-  @Path("{uuid}/" + ResourcePaths.COLLATIONS_DOT)
+  @Path(COLLATION_WITNESS_PATH)
+  @Timed
+  @Produces(UTF8MediaType.TEXT_XML)
+  @ApiOperation(value = "Return the XML source of the witness")
+  public Response getWitnessXML(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name, //
+      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil) {
+    CollationInfo collationInfo = getExistingCollationInfo(name);
+    String xml = collationInfo.getWitness(sigil).orElseThrow(NotFoundException::new);
+    return Response.ok(xml).build();
+  }
+
+  @GET
+  @Path(COLLATION_DOT_PATH)
   @Timed
   @Produces(UTF8MediaType.TEXT_PLAIN)
   @ApiOperation(value = "Get a .dot visualization of the collation graph")
-  public Response getDotVisualization(@ApiParam(APIPARAM_UUID) @PathParam("uuid") final UUID uuid) {
-    CollationGraph collation = getExistingCollationGraph(uuid);
+  public Response getDotVisualization(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name) {
+    CollationGraph collation = getExistingCollationGraph(name);
     String dot = CollationGraphVisualizer.toDot(collation);
     return Response.ok(dot).build();
   }
 
   @GET
-  @Path("{uuid}/" + ResourcePaths.COLLATIONS_ASCII_TABLE)
+  @Path(COLLATION_ASCII_TABLE_PATH)
   @Timed
   @Produces(UTF8MediaType.TEXT_PLAIN)
   @ApiOperation(value = "Get an ASCII table visualization of the collation graph")
-  public Response getAsciiTableVisualization(@ApiParam(APIPARAM_UUID) @PathParam("uuid") final UUID uuid) {
-    CollationGraph collation = getExistingCollationGraph(uuid);
+  public Response getAsciiTableVisualization(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name) {
+    CollationGraph collation = getExistingCollationGraph(name);
     String table = CollationGraphVisualizer.toTableASCII(collation);
     return Response.ok(table).build();
   }
 
-  private void process(CollationInput collationInput, UUID collationId) {
-    List<WitnessInput> witnesses = collationInput.getWitnesses();
-    WitnessInput wi1 = witnesses.get(0);
-    WitnessInput wi2 = witnesses.get(1);
-    XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph w1 = importer.importXML(wi1.getSigil(), wi1.getXml());
-    VariantWitnessGraph w2 = importer.importXML(wi2.getSigil(), wi2.getXml());
+  private URI documentURI(String collationId) {
+    return URI.create(String.format("%s/%s/%s", configuration.getBaseURI(), ResourcePaths.COLLATIONS, collationId));
+  }
+
+  private CollationInfo getExistingCollationInfo(final String name) {
+    return collationStore.getCollationInfo(name)//
+        .orElseThrow(NotFoundException::new);
+  }
+
+  private CollationGraph getExistingCollationGraph(final String name) {
+    CollationInfo collationInfo = getExistingCollationInfo(name);
+    CollationInfo.State collationState = collationInfo.getCollationState();
+    if (collationState.equals(CollationInfo.State.needs_witness)) {
+      throw new BadRequestException("This collation has no witnesses yet. Please add them first.");
+    }
+    if (collationState.equals(CollationInfo.State.ready_to_collate)) {
+      collate(collationInfo);
+    }
+    return collationStore.getCollationGraph(name)//
+        .orElseThrow(NotFoundException::new);
+  }
+
+  private void collate(CollationInfo collationInfo) {
     Stopwatch stopwatch = Stopwatch.createStarted();
-    CollationGraph collationGraph = hypercollater.collate(w1, w2);
-    if (collationInput.getJoin()) {
+    VariantWitnessGraph[] variantWitnessGraphs = collationInfo.getWitnessGraphMap()//
+        .values()//
+        .toArray(new VariantWitnessGraph[] {});
+
+    CollationGraph collationGraph = hypercollator.collate(variantWitnessGraphs);
+    if (collationInfo.getJoin()) {
       collationGraph = CollationGraphNodeJoiner.join(collationGraph);
     }
     stopwatch.stop();
-    collationStore.setCollation(collationId, collationGraph, collationInput, stopwatch.elapsed(TimeUnit.MILLISECONDS));
-  }
-
-  private URI documentURI(UUID collationId) {
-    return URI.create(configuration.getBaseURI() + "/" + ResourcePaths.COLLATIONS + "/" + collationId);
-  }
-
-  private CollationGraph getExistingCollationGraph(final UUID uuid) {
-    return collationStore.getCollationGraph(uuid)//
-        .orElseThrow(NotFoundException::new);
-  }
-
-  private CollationInfo getExistingCollationInfo(final UUID uuid) {
-    return collationStore.getCollationInfo(uuid)//
-        .orElseThrow(NotFoundException::new);
+    collationInfo.setCollationDurationInMilliseconds(stopwatch.elapsed(TimeUnit.MILLISECONDS));
+    collationStore.setCollation(collationInfo, collationGraph);
   }
 
 }

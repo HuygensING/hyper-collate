@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.model;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ public class SimpleTokenVertex implements TokenVertex, Comparable<SimpleTokenVer
   private final MarkedUpToken token;
   private final List<TokenVertex> incomingVertices = new ArrayList<>();
   private final List<TokenVertex> outgoingVertices = new ArrayList<>();
+  private List<Integer> branchPath;
 
   public SimpleTokenVertex(MarkedUpToken token) {
     this.token = token;
@@ -66,6 +67,16 @@ public class SimpleTokenVertex implements TokenVertex, Comparable<SimpleTokenVer
     return token.getWitness().getSigil();
   }
 
+  public SimpleTokenVertex setBranchPath(List<Integer> branchPath) {
+    this.branchPath = branchPath;
+    return this;
+  }
+
+  @Override
+  public List<Integer> getBranchPath() {
+    return branchPath;
+  }
+
   public String getContent() {
     return token.getContent();
   }
@@ -86,4 +97,5 @@ public class SimpleTokenVertex implements TokenVertex, Comparable<SimpleTokenVer
   public Long getIndexNumber() {
     return token.getIndexNumber();
   }
+
 }

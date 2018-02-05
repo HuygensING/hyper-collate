@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.importer;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,12 @@ package nl.knaw.huygens.hypercollate.importer;
  * #L%
  */
 
+import static com.google.common.collect.Iterators.toArray;
 import eu.interedition.collatex.simple.SimplePatternTokenizer;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.joining;
 import nl.knaw.huygens.hypercollate.model.*;
+import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
 import org.apache.commons.io.FileUtils;
 
 import javax.xml.stream.XMLEventReader;
@@ -31,13 +35,13 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.joining;
-import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
 
 public class XMLImporter {
 
@@ -225,34 +229,95 @@ public class XMLImporter {
     private final Function<String, String> normalizer;
     private final SimpleWitness witness;
     private String parentXPath;
+    private Boolean afterDel = false;
+    private final AtomicInteger branchCounter = new AtomicInteger(0);
+    private final Deque<Integer> branchIds = new LinkedList<>();
+
+    private final Deque<Boolean> inAppStack = new LinkedList<>();
+    private final Deque<Boolean> ignoreRdgStack = new LinkedList<>();
+    private final Deque<Boolean> afterAppStack = new LinkedList<>();
+    private final Deque<List<TokenVertex>> unconnectedRdgVerticesStack = new LinkedList<>();
 
     Context(VariantWitnessGraph graph, Function<String, String> normalizer, SimpleWitness witness) {
       this.graph = graph;
       this.normalizer = normalizer;
       this.lastTokenVertex = graph.getStartTokenVertex();
       this.witness = witness;
+      afterAppStack.push(false);
+      ignoreRdgStack.push(false);
+      inAppStack.push(false);
+      unconnectedRdgVerticesStack.push(new ArrayList<>());
+      branchIds.push(nextBranchId());
+    }
+
+    private Integer nextBranchId() {
+      return branchCounter.getAndIncrement();
     }
 
     void openMarkup(Markup markup) {
+      if (ignoreRdgStack.peek()) {
+        return;
+      }
+
       graph.addMarkup(markup);
       openMarkup.push(markup);
       parentXPath = buildParentXPath();
-      if (isVariationStartingMarkup(markup)) {
+      if (!inAppStack.peek() && isVariationStartingMarkup(markup)) { // del
         variationStartVertices.push(lastTokenVertex);
-      } else if (isVariationEndingMarkup(markup)) {
-        lastTokenVertex = variationStartVertices.pop();
+        branchIds.push(nextBranchId());
+
+      } else if (!inAppStack.peek() && isVariationEndingMarkup(markup)) { // add
+        if (afterDel) {
+          lastTokenVertex = variationStartVertices.pop();
+
+        } else { // add without immediately preceding del
+          unconnectedVertices.push(lastTokenVertex); // add link from vertex preceding the <add> to vertex following </add>
+
+        }
+        afterDel = false;
+        branchIds.push(nextBranchId());
+
+      } else if (isApp(markup)) { // app
+        variationStartVertices.push(lastTokenVertex);
+        inAppStack.push(true);
+        unconnectedRdgVerticesStack.push(new ArrayList<>());
+
+      } else if (isRdg(markup)) { // rdg
+        if (isLitRdg(markup)) {
+          ignoreRdgStack.push(true);
+
+        } else {
+          lastTokenVertex = variationStartVertices.peek();
+          branchIds.push(nextBranchId());
+        }
+
       }
     }
 
+    private boolean isApp(Markup markup) {
+      return "app".equals(markup.getTagName());
+    }
+
+    private boolean isRdg(Markup markup) {
+      return "rdg".equals(markup.getTagName());
+    }
+
     private boolean isVariationStartingMarkup(Markup markup) {
-      return "del".equals(markup.getTagname());
+      return "del".equals(markup.getTagName());
     }
 
     private boolean isVariationEndingMarkup(Markup markup) {
-      return "add".equals(markup.getTagname());
+      return "add".equals(markup.getTagName());
     }
 
     void closeMarkup(Markup markup) {
+      if (ignoreRdgStack.peek()) {
+        if (isRdg(markup) && isLitRdg(openMarkup.pop())) {
+          ignoreRdgStack.pop();
+        }
+        return;
+      }
+
       Markup firstToClose = openMarkup.peek();
       if (graph.getTokenVertexListForMarkup(firstToClose).isEmpty()) {
         // add milestone
@@ -260,19 +325,42 @@ public class XMLImporter {
       }
       openMarkup.pop();
       parentXPath = buildParentXPath();
-      String closingTag = markup.getTagname();
-      String expectedTag = firstToClose.getTagname();
+      String closingTag = markup.getTagName();
+      String expectedTag = firstToClose.getTagName();
       if (!expectedTag.equals(closingTag)) {
         throw new RuntimeException("XML error: expected </" + expectedTag + ">, got </" + closingTag + ">");
       }
-      if (isVariationStartingMarkup(markup)) {
+
+      if (!inAppStack.peek() && isVariationStartingMarkup(markup)) {
         unconnectedVertices.push(lastTokenVertex);
-      } else if (isVariationEndingMarkup(markup)) {
+        branchIds.pop();
+        afterDel = true;
+
+      } else if (!inAppStack.peek() && isVariationEndingMarkup(markup)) {
         variationEndVertices.push(lastTokenVertex);
+        branchIds.pop();
+
+      } else if (isApp(markup)) {
+        variationStartVertices.pop();
+        inAppStack.pop();
+        afterAppStack.push(true);
+
+      } else if (isRdg(markup)) {
+        unconnectedRdgVerticesStack.peek().add(lastTokenVertex);
+        branchIds.pop();
+
       }
     }
 
+    private boolean isLitRdg(Markup markup) {
+      return "lit".equals(markup.getAttributeValue("type").orElse(""));
+    }
+
     void addNewToken(String content) {
+      if (ignoreRdgStack.peek()) {
+        return;
+      }
+
       MarkedUpToken token = new MarkedUpToken()//
           .setContent(content)//
           .setWitness(witness)//
@@ -280,7 +368,25 @@ public class XMLImporter {
           .setParentXPath(parentXPath)//
           .setNormalizedContent(normalizer.apply(content));
       SimpleTokenVertex tokenVertex = new SimpleTokenVertex(token);
+      Integer[] ascendingBranchIds = toArray(branchIds.descendingIterator(), Integer.class);
+      List<Integer> branchPath = asList(ascendingBranchIds);
+      tokenVertex.setBranchPath(branchPath);
       graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex);
+
+      if (afterDel) { // del without add
+        // add link from vertex preceding the <del> to vertex following </del>
+        graph.addOutgoingTokenVertexToTokenVertex(variationStartVertices.pop(), tokenVertex);
+        unconnectedVertices.pop();
+        afterDel = false;
+      }
+
+      while (afterAppStack.peek()) {
+        unconnectedRdgVerticesStack.pop().stream()//
+            .filter(v -> !v.equals(lastTokenVertex))//
+            .forEach(v -> graph.addOutgoingTokenVertexToTokenVertex(v, tokenVertex));
+        afterAppStack.pop();
+      }
+
       this.openMarkup.descendingIterator()//
           .forEachRemaining(markup -> graph.addMarkupToTokenVertex(tokenVertex, markup));
       checkUnconnectedVertices(tokenVertex);
@@ -290,18 +396,32 @@ public class XMLImporter {
     private void checkUnconnectedVertices(SimpleTokenVertex tokenVertex) {
       if (!variationEndVertices.isEmpty() && lastTokenVertex.equals(variationEndVertices.peek())) {
         variationEndVertices.pop();
-        TokenVertex unconnectedVertex = unconnectedVertices.pop();
-        graph.addOutgoingTokenVertexToTokenVertex(unconnectedVertex, tokenVertex);
-        checkUnconnectedVertices(tokenVertex);
+        if (!unconnectedVertices.isEmpty()) {
+          TokenVertex unconnectedVertex = unconnectedVertices.pop();
+          graph.addOutgoingTokenVertexToTokenVertex(unconnectedVertex, tokenVertex);
+          checkUnconnectedVertices(tokenVertex);
+        }
       }
     }
 
     void closeDocument() {
-      graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, graph.getEndTokenVertex());
+      TokenVertex endTokenVertex = graph.getEndTokenVertex();
+      graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, endTokenVertex);
+      while (!unconnectedVertices.isEmpty()) {
+        // add link from vertex preceding the <add> to end vertex
+        TokenVertex unconnectedVertex = unconnectedVertices.pop();
+        if (!unconnectedVertex.equals(lastTokenVertex)) {
+          graph.addOutgoingTokenVertexToTokenVertex(unconnectedVertex, endTokenVertex);
+        }
+      }
+      while (!variationStartVertices.isEmpty()) {
+        // add link from vertex preceding the <del> to end vertex
+        graph.addOutgoingTokenVertexToTokenVertex(variationStartVertices.pop(), endTokenVertex);
+      }
     }
 
     private String buildParentXPath() {
-      return "/" + stream(openMarkup.descendingIterator()).map(Markup::getTagname).collect(joining("/"));
+      return "/" + stream(openMarkup.descendingIterator()).map(Markup::getTagName).collect(joining("/"));
     }
   }
 }

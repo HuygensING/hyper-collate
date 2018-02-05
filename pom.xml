@@ -47,8 +47,10 @@
         <groovy.version>1.0-jsr-05-1</groovy.version>
 
         <assertj.version>3.8.0</assertj.version>
+        <assertj-assertions-generator.version>2.1.0</assertj-assertions-generator.version>
         <junit.version>4.12</junit.version>
         <junitparams.version>1.0.5</junitparams.version>
+        <mockito.version>2.13.0</mockito.version>
 
         <buildnumber-maven.version>1.4</buildnumber-maven.version>
         <build-helper-maven.version>3.0.0</build-helper-maven.version>

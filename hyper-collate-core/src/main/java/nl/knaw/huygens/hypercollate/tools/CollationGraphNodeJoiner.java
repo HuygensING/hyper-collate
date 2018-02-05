@@ -1,18 +1,17 @@
 package nl.knaw.huygens.hypercollate.tools;
 
+import com.google.common.base.Preconditions;
+import eu.interedition.collatex.Token;
 import static java.util.stream.Collectors.toList;
+import nl.knaw.huygens.hypercollate.model.*;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /*-
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,28 +27,23 @@ import java.util.Set;
  * #L%
  */
 
-import com.google.common.base.Preconditions;
-
-import eu.interedition.collatex.Token;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.CollationGraph.Node;
-import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
-import nl.knaw.huygens.hypergraph.core.TraditionalEdge;
-
 public class CollationGraphNodeJoiner {
 
   public static CollationGraph join(CollationGraph originalGraph) {
     CollationGraph mergedGraph = new CollationGraph(originalGraph.getSigils());
-    Map<Node, Node> originalToMerged = mergeNodes(originalGraph, mergedGraph);
+    originalGraph.getMarkupNodeStream()//
+        .forEach(markupNode -> mergedGraph.addMarkupNode(markupNode.getSigil(), markupNode.getMarkup()));
+    Map<TextNode, TextNode> originalToMerged = mergeNodes(originalGraph, mergedGraph);
     copyIncomingEdges(originalGraph, originalToMerged, mergedGraph);
+    copyMarkupHyperEdges(originalGraph, originalToMerged, mergedGraph);
     return mergedGraph;
   }
 
-  private static Map<Node, Node> mergeNodes(CollationGraph originalGraph, CollationGraph mergedGraph) {
-    Map<Node, Node> originalToMerged = new HashMap<>();
-    Node mergedNode = mergedGraph.getRootNode();
+  private static Map<TextNode, TextNode> mergeNodes(CollationGraph originalGraph, CollationGraph mergedGraph) {
+    Map<TextNode, TextNode> originalToMerged = new HashMap<>();
+    TextNode mergedNode = mergedGraph.getTextStartNode();
     Boolean isRootNode = true;
-    for (Node originalNode : originalGraph.traverse()) {
+    for (TextNode originalNode : originalGraph.traverseTextNodes()) {
       if (isRootNode) {
         isRootNode = false;
         originalToMerged.put(originalNode, mergedNode);
@@ -67,16 +61,16 @@ public class CollationGraphNodeJoiner {
     return originalToMerged;
   }
 
-  private static boolean canMergeNodes(Node mergedNode, Node originalNode, CollationGraph originalGraph) {
-    Collection<TraditionalEdge> incomingEdges = originalGraph.getIncomingEdges(originalNode);
+  private static boolean canMergeNodes(TextNode mergedNode, TextNode originalNode, CollationGraph originalGraph) {
+    Collection<TextEdge> incomingEdges = originalGraph.getIncomingTextEdgeStream(originalNode).collect(toList());
     if (incomingEdges.size() != 1) {
       return false;
     }
     if (!mergedNode.getSigils().equals(originalNode.getSigils())) {
       return false;
     }
-    TraditionalEdge incomingEdge = incomingEdges.iterator().next();
-    Node prevNode = originalGraph.getSource(incomingEdge);
+    TextEdge incomingEdge = incomingEdges.iterator().next();
+    TextNode prevNode = (TextNode) originalGraph.getSource(incomingEdge);
     Boolean sigilsMatch = prevNode.getSigils().equals(mergedNode.getSigils());
     if (sigilsMatch) {
       Boolean parentXPathsMatch = true;
@@ -96,7 +90,8 @@ public class CollationGraphNodeJoiner {
     return false;
   }
 
-  private static void mergeNodeTokens(Node lastNode, Node originalNode) {
+  private static void mergeNodeTokens(TextNode lastNode, TextNode originalNode) {
+    originalNode.getSigils().forEach(s -> lastNode.addBranchPath(s, originalNode.getBranchPath(s)));
     for (String s : lastNode.getSigils()) {
       MarkedUpToken tokenForWitness = (MarkedUpToken) lastNode.getTokenForWitness(s);
       MarkedUpToken tokenToMerge = (MarkedUpToken) originalNode.getTokenForWitness(s);
@@ -105,14 +100,16 @@ public class CollationGraphNodeJoiner {
     }
   }
 
-  private static Node copyNode(Node originalNode, CollationGraph mergedGraph) {
+  private static TextNode copyNode(TextNode originalNode, CollationGraph mergedGraph) {
     Token[] tokens = originalNode.getSigils()//
         .stream()//
         .map(originalNode::getTokenForWitness)//
         .map(CollationGraphNodeJoiner::cloneToken)//
         .collect(toList())//
-        .toArray(new Token[] {});
-    return mergedGraph.addNodeWithTokens(tokens);
+        .toArray(new Token[]{});
+    TextNode newNode = mergedGraph.addTextNodeWithTokens(tokens);
+    originalNode.getSigils().forEach(s -> newNode.addBranchPath(s, originalNode.getBranchPath(s)));
+    return newNode;
   }
 
   private static Token cloneToken(Token original) {
@@ -122,12 +119,12 @@ public class CollationGraphNodeJoiner {
     throw new RuntimeException("Can't clone token of type " + original.getClass());
   }
 
-  private static void copyIncomingEdges(CollationGraph originalGraph, Map<Node, Node> originalToMerged, CollationGraph mergedGraph) {
+  private static void copyIncomingEdges(CollationGraph originalGraph, Map<TextNode, TextNode> originalToMerged, CollationGraph mergedGraph) {
     Set<Node> linkedNodes = new HashSet<>();
-    originalGraph.traverse().forEach(node -> {
+    originalGraph.traverseTextNodes().forEach(node -> {
       Node mergedNode = originalToMerged.get(node);
       if (!linkedNodes.contains(mergedNode)) {
-        originalGraph.getIncomingEdges(node)//
+        originalGraph.getIncomingTextEdgeStream(node)//
             .forEach(e -> {
               Node oSource = originalGraph.getSource(e);
               Node mSource = originalToMerged.get(oSource);
@@ -139,6 +136,16 @@ public class CollationGraphNodeJoiner {
             });
         linkedNodes.add(mergedNode);
       }
+    });
+  }
+
+  private static void copyMarkupHyperEdges(CollationGraph originalGraph, Map<TextNode, TextNode> originalToMerged, CollationGraph mergedGraph) {
+    originalGraph.getMarkupStream().forEach(m -> {
+      MarkupNode mergedMarkupNode = mergedGraph.getMarkupNode(m);
+      originalGraph.getTextNodeStreamForMarkup(m)//
+          .map(originalToMerged::get)//
+          .distinct()//
+          .forEach(mergedTextNode -> mergedGraph.linkMarkupToText(mergedMarkupNode, mergedTextNode));
     });
   }
 

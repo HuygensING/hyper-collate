@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.model;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@ import java.util.Optional;
 import java.util.TreeMap;
 
 public class Markup {
-  private final String tagname;
+  private final String tagName;
   private final Map<String, String> attributeMap = new TreeMap<>();
 
   public Markup(String tagName) {
-    this.tagname = tagName;
+    this.tagName = tagName;
   }
 
   public Markup addAttribute(String key, String value) {
@@ -41,8 +41,16 @@ public class Markup {
     return Optional.ofNullable(attributeMap.get(key));
   }
 
-  public String getTagname() {
-    return this.tagname;
+  public String getTagName() {
+    return this.tagName;
   }
 
+  @Override
+  public String toString() {
+    return String.format("<%s %s>", tagName, attributeMap);
+  }
+
+  public Map<String, String> getAttributeMap() {
+    return attributeMap;
+  }
 }
