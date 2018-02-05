@@ -42,8 +42,8 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
 
   @Override
   public String getName() {
-    return "Four-Neighbours";
-  }
+    return "Max-Four-Neighbours";
+  } // Because each decision node has at most 4 neighbour nodes
 
   @Override
   public List<CollatedMatch> getOptimalCollatedMatchList(Collection<CollatedMatch> allPotentialMatches) {
@@ -91,17 +91,39 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
     Set<QuantumCollatedMatchList> nextPotentialMatches = new LinkedHashSet<>();
 
     CollatedMatch firstPotentialMatch1 = getFirstPotentialMatch(this.matchesSortedByNode, matchList);
-    addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1);
-
     List<CollatedMatch> matchesSortedByWitness = this.matchesSortedByWitness;
     CollatedMatch firstPotentialMatch2 = getFirstPotentialMatch(matchesSortedByWitness, matchList);
-    if (!firstPotentialMatch1.equals(firstPotentialMatch2)) {
+
+    addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1);
+    if (firstPotentialMatch1.equals(firstPotentialMatch2)) {
+      QuantumCollatedMatchList quantumCollatedMatchList = matchList;
+      boolean goOn = true;
+      while (goOn) {
+        quantumCollatedMatchList = quantumCollatedMatchList.chooseMatch(firstPotentialMatch1);
+        if (quantumCollatedMatchList.isDetermined()) {
+          goOn = false;
+        } else {
+          firstPotentialMatch1 = getFirstPotentialMatch(this.matchesSortedByNode, quantumCollatedMatchList);
+          firstPotentialMatch2 = getFirstPotentialMatch(this.matchesSortedByWitness, quantumCollatedMatchList);
+          goOn = firstPotentialMatch1.equals(firstPotentialMatch2);
+        }
+      }
+      nextPotentialMatches.add(quantumCollatedMatchList);
+
+    } else {
+      addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1);
       addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch2);
     }
 
     neighborNodeMap.put(matchList, nextPotentialMatches);
 
     return nextPotentialMatches;
+  }
+
+  private CollatedMatch getFirstPotentialMatch(List<CollatedMatch> matches, QuantumCollatedMatchList matchSet) {
+    List<CollatedMatch> potentialMatches = new ArrayList<>(matches);
+    potentialMatches.retainAll(matchSet.getPotentialMatches());
+    return potentialMatches.get(0);
   }
 
   private void addNeighborNodes(QuantumCollatedMatchList matchList, Set<QuantumCollatedMatchList> nextPotentialMatches, CollatedMatch firstPotentialMatch) {
@@ -111,11 +133,6 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
     nextPotentialMatches.add(quantumMatchSet2);
   }
 
-  private CollatedMatch getFirstPotentialMatch(List<CollatedMatch> matches, QuantumCollatedMatchList matchSet) {
-    List<CollatedMatch> potentialMatches = new ArrayList<>(matches);
-    potentialMatches.retainAll(matchSet.getPotentialMatches());
-    return potentialMatches.get(0);
-  }
 
   @Override
   protected LostPotential heuristicCostEstimate(QuantumCollatedMatchList matchList) {

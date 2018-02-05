@@ -683,14 +683,14 @@ public class HyperCollatorTest extends HyperCollateTest {
         "t012->t004[label=\"N\"]\n" + //
         "}";
 
-    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
+    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected1);
     assertThat(collationGraph).containsTextNodesMatching(
+//        textNodeSketch()
+//            .withWitnessSegmentSketch("F", "so ")
+//            .withWitnessSegmentSketch("N", "so "),
         textNodeSketch()
-            .withWitnessSegmentSketch("F", "so ")
-            .withWitnessSegmentSketch("N", "so "),
-        textNodeSketch()
-            .withWitnessSegmentSketch("F", "destitute of every hope of consolation to live")
-            .withWitnessSegmentSketch("N", "destitute of every hope of consolation to live"),
+            .withWitnessSegmentSketch("F", "so destitute of every hope of consolation to live")
+            .withWitnessSegmentSketch("N", "so destitute of every hope of consolation to live"),
         textNodeSketch()
             .withWitnessSegmentSketch("F", " ")
             .withWitnessSegmentSketch("N", " "),

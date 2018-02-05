@@ -239,34 +239,36 @@ public class HyperCollator {
   }
 
   private static void addEdges(CollationGraph collationGraph, Map<TokenVertex, TextNode> collatedTokenVertexMap) {
-    collatedTokenVertexMap.keySet().forEach(tv -> tv.getIncomingTokenVertexStream().forEach(itv -> {
-      TextNode source = collatedTokenVertexMap.get(itv);
-      TextNode target = collatedTokenVertexMap.get(tv);
-      if (source == null) {
-        throw new RuntimeException("source=null, target=" + target);
-      }
-      if (target == null) {
-        throw new RuntimeException("target=null, source=" + source);
-      }
-      List<TextNode> existingTargetNodes = collationGraph.getOutgoingTextEdgeStream(source)
-          .map(collationGraph::getTarget)//
-          .map(TextNode.class::cast)//
-          .collect(toList());
-      String sigil = tv.getSigil();
-      if (!existingTargetNodes.contains(target)) {
-        Set<String> sigils = new HashSet<>();
-        sigils.add(sigil);
-        collationGraph.addDirectedEdge(source, target, sigils);
-        // System.out.println("> " + source + " -> " + target);
-      } else {
-        TextEdge edge = collationGraph.getOutgoingTextEdgeStream(source)
-            .filter(e -> target.equals(collationGraph.getTarget(e)))//
-            .findFirst()//
-            .orElseThrow(() -> new RuntimeException("There should be an edge!"));
-        edge.addSigil(sigil);
-        // System.err.println("duplicate edge: " + source + " -> " + target);
-      }
-    }));
+    collatedTokenVertexMap.keySet()
+        .forEach(tv -> tv.getIncomingTokenVertexStream()
+            .forEach(itv -> {
+              TextNode source = collatedTokenVertexMap.get(itv);
+              TextNode target = collatedTokenVertexMap.get(tv);
+              if (source == null) {
+                throw new RuntimeException("source=null, target=" + target);
+              }
+              if (target == null) {
+                throw new RuntimeException("target=null, source=" + source);
+              }
+              List<TextNode> existingTargetNodes = collationGraph.getOutgoingTextEdgeStream(source)
+                  .map(collationGraph::getTarget)//
+                  .map(TextNode.class::cast)//
+                  .collect(toList());
+              String sigil = tv.getSigil();
+              if (!existingTargetNodes.contains(target)) {
+                Set<String> sigils = new HashSet<>();
+                sigils.add(sigil);
+                collationGraph.addDirectedEdge(source, target, sigils);
+                // System.out.println("> " + source + " -> " + target);
+              } else {
+                TextEdge edge = collationGraph.getOutgoingTextEdgeStream(source)
+                    .filter(e -> target.equals(collationGraph.getTarget(e)))//
+                    .findFirst()//
+                    .orElseThrow(() -> new RuntimeException("There should be an edge!"));
+                edge.addSigil(sigil);
+                // System.err.println("duplicate edge: " + source + " -> " + target);
+              }
+            }));
   }
 
   private void addCollationNode(CollationGraph collationGraph, //
@@ -317,8 +319,8 @@ public class HyperCollator {
       VariantWitnessGraphRanking ranking2 = rankings.get(t.right);
       match(witness1, witness2, ranking1, ranking2, allPotentialMatches, vertexToMatch);
 
-//      Match endMatch = getEndMatch(witness1, ranking1, witness2, ranking2);
-//      allPotentialMatches.add(endMatch);
+      Match endMatch = getEndMatch(witness1, ranking1, witness2, ranking2);
+      allPotentialMatches.add(endMatch);
     }
 
     return allPotentialMatches;
