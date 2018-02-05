@@ -8,7 +8,7 @@ To work with the server, you can either download the latest prebuilt jar, or clo
 ### Option 1 - download the prebuilt
 
 - Download the jar from <https://cdn.huygens.knaw.nl/hyper-collate-server.jar> to the current directory.
-- Download an example config file from <https://github.com/HuygensING/hyper-collate/blob/master/hyper-collate-server/config.yml> to the same directory.
+- Download an example config file from <https://raw.githubusercontent.com/HuygensING/hyper-collate/master/hyper-collate-server/config.yml> to the same directory.
 - Change the `baseURI` in `config.yml` as needed.
 - `java -jar hyper-collate-server.jar server config.yml`
 - In your browser, go to the `baseURI` URL from `config.yml`.
