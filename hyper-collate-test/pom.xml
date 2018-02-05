@@ -10,12 +10,12 @@
   <name>HyperCollate test module</name>
 
   <dependencies>
-    <dependency>
-      <groupId>nl.knaw.huygens</groupId>
-      <artifactId>log</artifactId>
-      <version>${log.version}</version>
-      <scope>test</scope>
-    </dependency>
+    <!--<dependency>-->
+      <!--<groupId>nl.knaw.huygens</groupId>-->
+      <!--<artifactId>log</artifactId>-->
+      <!--<version>${log.version}</version>-->
+      <!--<scope>test</scope>-->
+    <!--</dependency>-->
 
     <dependency>
       <groupId>junit</groupId>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  #%L
+  HyperCollate
+  =======
+  Copyright (C) 2017 - 2018 Huygens ING (KNAW)
+  =======
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  
+       http://www.apache.org/licenses/LICENSE-2.0
+  
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  #L%
+  -->
+
+<project xmlns="http://maven.apache.org/DECORATION/1.4.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/DECORATION/1.4.0 http://maven.apache.org/xsd/decoration-1.4.0.xsd">
+
+    <publishDate position="bottom"/>
+    <version position="bottom"/>
+
+    <bannerLeft>
+        <name><![CDATA[<span class="color-highlight">HyperCollate</span> Layered Text Collation]]>
+        </name>
+        <href>http://HuygensING.github.io/hyper-collate</href>
+    </bannerLeft>
+
+    <skin>
+        <groupId>lt.velykis.maven.skins</groupId>
+        <artifactId>reflow-maven-skin</artifactId>
+        <version>1.1.1</version>
+    </skin>
+    
+    <body>
+        <links>
+            <item name="GitHub project" href="http://github.com/HuygensING/hyper-collate/"/>
+        </links>
+
+        <breadcrumbs>
+            <item name="HyperCollate" href="/"/>
+        </breadcrumbs>
+
+        <menu name="Main" inherit="top">
+            <item name="Home" href="./"/>
+            <item name="GitHub project" href="http://github.com/HuygensING/hyper-collate/"/>
+            <item name="Release notes" href="release-notes.html"/>
+        </menu>
+        <menu name="Download" inherit="top">
+            <item name="Download" href="download.html"/>
+            <item name="License" href="license.html"/>
+        </menu>
+        <menu name="Maven documentation" ref="reports" inherit="bottom"/>
+    </body>
+
+    <custom>
+        <reflowSkin>
+            <protocolRelativeURLs>false</protocolRelativeURLs>
+            <smoothScroll>true</smoothScroll>
+            <!--<theme>bootswatch-spacelab</theme>-->
+            <theme>default</theme>
+            <highlightJs>true</highlightJs>
+            <highlightJsTheme>github</highlightJsTheme>
+            <brand>
+                <name>
+                    <![CDATA[<span class="color-highlight">HyperCollate</span>]]>
+                </name>
+                <href>http://hyper-collate.huygens.knaw.nl</href>
+            </brand>
+            <slogan></slogan>
+            <titleTemplate>%2$s | %1$s</titleTemplate>
+            <toc>top</toc>
+            <tocTopMax>6</tocTopMax>
+            <topNav>Documentation|Download</topNav>
+            <bottomNav>
+                <column>Main</column>
+                <column>Download</column>
+                <column>Documentation</column>
+                <column>reports</column>
+            </bottomNav>
+            <bottomDescription>
+                <![CDATA[<span class="color-highlight">HyperCollate</span>]]>
+            </bottomDescription>
+            <pages>
+                <index project="hyper-collate">
+                    <shortTitle>Welcome</shortTitle>
+                    <breadcrumbs>false</breadcrumbs>
+                    <markPageHeader>false</markPageHeader>
+                    <toc>false</toc>
+                    <sections>
+                        <!--<carousel/>-->
+                        <body/>
+                        <!--<sidebar/>-->
+                        <!--<thumbs>2</thumbs>-->
+                        <!--<columns>3</columns>-->
+                    </sections>
+                </index>
+                <!-- Disable source highlighting for Maven reports -->
+                <source-repository>
+                    <highlightJs>false</highlightJs>
+                </source-repository>
+                <issue-tracking>
+                    <highlightJs>false</highlightJs>
+                    <toc>false</toc>
+                </issue-tracking>
+                <license>
+                    <highlightJs>false</highlightJs>
+                    <toc>false</toc>
+                </license>
+                <!-- Disable ToC for some Maven reports -->
+                <project-info>
+                    <toc>true</toc>
+                </project-info>
+                <github-report>
+                    <toc>true</toc>
+                </github-report>
+                <dependencies>
+                    <tocTopMax>4</tocTopMax>
+                </dependencies>
+            </pages>
+        </reflowSkin>
+    </custom>
+</project>
