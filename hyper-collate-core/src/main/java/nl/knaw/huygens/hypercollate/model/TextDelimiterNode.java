@@ -20,25 +20,45 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
+import eu.interedition.collatex.Token;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 public class TextDelimiterNode extends TextNode {
 
-//  private Set<String> sigils = new HashSet<>();
-//
-//  public void setSigils(List<String> sigils) {
-//    this.sigils = new HashSet<>(sigils);
-//  }
-//
-//  @Override
-//  public Set<String> getSigils() {
-//    return sigils;
-//  }
-//
-//  @Override
-//  public String toString() {
-//    String tokensString = getSigils()//
-//        .stream()//
-//        .sorted()//
-//        .collect(joining(", "));
-//    return "(" + tokensString + ")";
-//  }
+  TextDelimiterNode() {
+    super();
+  }
+
+  @Override
+  public void addToken(Token token) {
+    throw new RuntimeException("TextDelimiterNodes don't have tokens.");
+  }
+
+  @Override
+  public Token getTokenForWitness(String sigil) {
+    throw new RuntimeException("TextDelimiterNodes don't have tokens.");
+  }
+
+  @Override
+  public Set<String> getSigils() {
+    return Collections.emptySet();
+  }
+
+  @Override
+  public String toString() {
+    return "()";
+  }
+
+  @Override
+  public List<Integer> getBranchPath(String s) {
+    throw new RuntimeException("TextDelimiterNodes don't have a branchPath");
+  }
+
+  @Override
+  public void addBranchPath(String sigil, List<Integer> branchPath) {
+    throw new RuntimeException("TextDelimiterNodes don't have a branchPath");
+  }
 }

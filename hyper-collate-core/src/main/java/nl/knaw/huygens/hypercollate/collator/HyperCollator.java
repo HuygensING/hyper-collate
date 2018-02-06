@@ -22,13 +22,9 @@ package nl.knaw.huygens.hypercollate.collator;
 
 import eu.interedition.collatex.Token;
 import eu.interedition.collatex.dekker.Tuple;
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.model.*;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphRanking;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
-import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +32,11 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
+
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
 
 public class HyperCollator {
   private static final Logger LOG = LoggerFactory.getLogger(HyperCollator.class);
@@ -164,7 +165,6 @@ public class HyperCollator {
         .distinct()//
         .collect(toList());
     LOG.info("matchList={}", matchList);
-//    List<CollatedMatch> optimalMatchList = getOptimalMatchList(matchList);
     OptimalCollatedMatchListAlgorithm optimalCollatedMatchListAlgorithm = new OptimalCollatedMatchListAlgorithm();
     List<CollatedMatch> optimalMatchList = optimalCollatedMatchListAlgorithm.getOptimalCollatedMatchList(matchList);
 //    DecisionTreeNode decisionTreeRootNode = optimalCollatedMatchListAlgorithm.getDecisionTreeRootNode();
@@ -358,10 +358,10 @@ public class HyperCollator {
     String sigil1 = witness1.getSigil();
     String sigil2 = witness2.getSigil();
     stream(traversal1)//
-        .filter(tv -> tv instanceof SimpleTokenVertex)//
+        .filter(SimpleTokenVertex.class::isInstance)//
         .map(SimpleTokenVertex.class::cast)//
         .forEach(tv1 -> stream(traversal2)//
-            .filter(tv -> tv instanceof SimpleTokenVertex)//
+            .filter(SimpleTokenVertex.class::isInstance)//
             .map(SimpleTokenVertex.class::cast)//
             .forEach(tv2 -> {
               if (matcher.apply(tv1, tv2)) {

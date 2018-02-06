@@ -20,8 +20,7 @@ package nl.knaw.huygens.hypercollate.collator;
  * #L%
  */
 
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.stream.Collectors.toList;
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
 import nl.knaw.huygens.hypercollate.model.TextNode;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
@@ -29,6 +28,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.stream.Collectors.toList;
 
 public class QuantumCollatedMatchList {
 
@@ -98,7 +100,7 @@ public class QuantumCollatedMatchList {
   private boolean hasSigilOverlap(CollatedMatch m, TextNode node) {
     Set<String> nodeSigils = node.getSigils();
     // m and node have witnesses in common
-    // for those witnesses they have in common, the branchpath of one is the startsubpath otf the other.
+    // for those witnesses they have in common, the branchpath of one is the startsubpath of the other.
     return m.getSigils().stream().filter(nodeSigils::contains).anyMatch(s ->
         branchPathsOverlap(m.getBranchPath(s), node.getBranchPath(s))
     );
@@ -120,7 +122,13 @@ public class QuantumCollatedMatchList {
 
   @Override
   public String toString() {
-    return String.format("(%s | %s)", chosenMatches, potentialMatches);
+    List<CollatedMatch> chosenTextNodeMatches = chosenMatches.stream()//
+        .filter(cm -> cm.getWitnessVertex() instanceof SimpleTokenVertex)//
+        .collect(toList());
+    List<CollatedMatch> potentialTextNodeMatches = potentialMatches.stream()//
+        .filter(cm -> cm.getWitnessVertex() instanceof SimpleTokenVertex)//
+        .collect(toList());
+    return String.format("(%s | %s)", chosenTextNodeMatches, potentialTextNodeMatches);
   }
 
   public List<CollatedMatch> getPotentialMatches() {

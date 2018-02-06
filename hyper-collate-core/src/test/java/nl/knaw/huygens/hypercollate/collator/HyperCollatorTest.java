@@ -22,16 +22,11 @@ package nl.knaw.huygens.hypercollate.collator;
 
 import com.google.common.base.Stopwatch;
 import eu.interedition.collatex.dekker.Tuple;
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.*;
-import static nl.knaw.huygens.hypercollate.HyperCollateAssertions.assertThat;
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.*;
 import nl.knaw.huygens.hypercollate.model.CollationGraphAssert.MarkupNodeSketch;
 import nl.knaw.huygens.hypercollate.model.CollationGraphAssert.TextNodeSketch;
-import static nl.knaw.huygens.hypercollate.model.CollationGraphAssert.markupNodeSketch;
-import static nl.knaw.huygens.hypercollate.model.CollationGraphAssert.textNodeSketch;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
 import org.assertj.core.api.Assertions;
@@ -43,6 +38,12 @@ import org.slf4j.LoggerFactory;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.*;
+import static nl.knaw.huygens.hypercollate.HyperCollateAssertions.assertThat;
+import static nl.knaw.huygens.hypercollate.model.CollationGraphAssert.markupNodeSketch;
+import static nl.knaw.huygens.hypercollate.model.CollationGraphAssert.textNodeSketch;
 
 public class HyperCollatorTest extends HyperCollateTest {
   private static final Logger LOG = LoggerFactory.getLogger(HyperCollateTest.class);
@@ -685,9 +686,6 @@ public class HyperCollatorTest extends HyperCollateTest {
 
     CollationGraph collationGraph = testHyperCollation(wF, wQ, expected1);
     assertThat(collationGraph).containsTextNodesMatching(
-//        textNodeSketch()
-//            .withWitnessSegmentSketch("F", "so ")
-//            .withWitnessSegmentSketch("N", "so "),
         textNodeSketch()
             .withWitnessSegmentSketch("F", "so destitute of every hope of consolation to live")
             .withWitnessSegmentSketch("N", "so destitute of every hope of consolation to live"),
@@ -804,7 +802,6 @@ public class HyperCollatorTest extends HyperCollateTest {
         "</text>");
     CollationGraph collationGraph = new CollationGraph();
     Map<TokenVertex, TextNode> map = new HashMap<>();
-    List<Match> matches = new ArrayList<>();
     Map<Markup, MarkupNode> markupNodeIndex = new HashMap<>();
     hyperCollator.initialize(collationGraph, map, markupNodeIndex, wF);
     CollationGraph collation = CollationGraphNodeJoiner.join(collationGraph);
