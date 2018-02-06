@@ -51,7 +51,6 @@ public class AboutResource {
         .setScmBranch(properties.getProperty("scmBranch").orElse("no scmBranch set in about.properties"))//
         .setVersion(properties.getProperty("version").orElse("no version set in about.properties"))//
         .setProjectDir(configuration.getProjectDir());
-    ;
   }
 
   @GET

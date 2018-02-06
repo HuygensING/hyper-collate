@@ -21,23 +21,29 @@ package nl.knaw.huygens.hypercollate.tools;
  */
 
 import eu.interedition.collatex.Token;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.model.*;
 
 import java.util.*;
 
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+
 public class DotFactory {
+
+  private final String whitespaceCharacter;
+
+  public DotFactory(boolean emphasizeWhitespace) {
+    this.whitespaceCharacter = emphasizeWhitespace ? "&#9251;" : "&nbsp;";
+  }
 
   /**
    * Generates a .dot format string for visualizing a variant witness graph.
    *
-   * @param graph
-   *          The variant witness graph for which we are generating a dot file.
+   * @param graph The variant witness graph for which we are generating a dot file.
    * @return A string containing the contents of a .dot representation of the
-   *         variant witness graph.
+   * variant witness graph.
    */
-  public static String fromVariantWitnessGraph(VariantWitnessGraph graph) {
+  public String fromVariantWitnessGraph(VariantWitnessGraph graph) {
     StringBuilder dotBuilder = new StringBuilder("digraph VariantWitnessGraph{\ngraph [rankdir=LR]\nlabelloc=b\n");
 
     List<String> edges = new ArrayList<>();
@@ -53,7 +59,7 @@ public class DotFactory {
           String markup = graph.getSigil() + ": " + stv.getParentXPath();
           dotBuilder.append(tokenVariable)//
               .append(" [label=<")//
-              .append(asLabel(stv.getContent()))//
+              .append(asLabel(stv.getContent(), whitespaceCharacter))//
               .append("<br/><i>")//
               .append(markup)//
               .append("</i>")//
@@ -75,7 +81,7 @@ public class DotFactory {
     return dotBuilder.toString();
   }
 
-  private static String vertexVariable(TokenVertex tokenVertex) {
+  private String vertexVariable(TokenVertex tokenVertex) {
     if (tokenVertex instanceof SimpleTokenVertex) {
       MarkedUpToken token = (MarkedUpToken) tokenVertex.getToken();
       return token.getWitness().getSigil() + "_" + String.format("%03d", token.getIndexNumber());
@@ -89,9 +95,9 @@ public class DotFactory {
     return null;
   }
 
-  private static final Comparator<TextNode> BY_NODE = Comparator.comparing(TextNode::toString);
+  private final Comparator<TextNode> BY_NODE = Comparator.comparing(TextNode::toString);
 
-  public static String fromCollationGraph(CollationGraph collation) {
+  public String fromCollationGraph(CollationGraph collation) {
     StringBuilder dotBuilder = new StringBuilder("digraph CollationGraph{\nlabelloc=b\n");
     Map<TextNode, String> nodeIdentifiers = new HashMap<>();
 
@@ -109,7 +115,7 @@ public class DotFactory {
     return dotBuilder.toString();
   }
 
-  private static void appendEdgeLines(StringBuilder dotBuilder, CollationGraph collation, Map<TextNode, String> nodeIdentifiers, List<TextNode> nodes) {
+  private void appendEdgeLines(StringBuilder dotBuilder, CollationGraph collation, Map<TextNode, String> nodeIdentifiers, List<TextNode> nodes) {
     Set<String> edgeLines = new TreeSet<>();
     for (TextNode node : nodes) {
       collation.getIncomingTextEdgeStream(node)//
@@ -117,14 +123,15 @@ public class DotFactory {
             Node source = collation.getSource(e);
             Node target = collation.getTarget(e);
             String edgeLabel = e.getSigils().stream().sorted().collect(joining(","));
-            String line = nodeIdentifiers.get(source) + "->" + nodeIdentifiers.get(target) + "[label=\"" + edgeLabel + "\"]\n";
+            String line = String.format("%s->%s[label=\"%s\"]\n",//
+                nodeIdentifiers.get(source), nodeIdentifiers.get(target), edgeLabel);
             edgeLines.add(line);
           });
     }
     edgeLines.forEach(dotBuilder::append);
   }
 
-  private static void appendNodeLine(StringBuilder dotBuilder, TextNode node, String nodeId) {
+  private void appendNodeLine(StringBuilder dotBuilder, TextNode node, String nodeId) {
     String labelString = generateNodeLabel(node);
     if (labelString.isEmpty()) {
       dotBuilder.append(nodeId)//
@@ -138,7 +145,7 @@ public class DotFactory {
     }
   }
 
-  private static String generateNodeLabel(TextNode node) {
+  private String generateNodeLabel(TextNode node) {
     StringBuilder label = new StringBuilder();
     Map<String, String> contentLabel = new HashMap<>();
     Map<String, String> markupLabel = new HashMap<>();
@@ -153,19 +160,19 @@ public class DotFactory {
     return label.toString();
   }
 
-  private static void prepare(TextNode node, Map<String, String> contentLabel, Map<String, String> markupLabel, List<String> sortedSigils) {
+  private void prepare(TextNode node, Map<String, String> contentLabel, Map<String, String> markupLabel, List<String> sortedSigils) {
     sortedSigils.forEach(s -> {
       Token token = node.getTokenForWitness(s);
       if (token != null) {
         MarkedUpToken mToken = (MarkedUpToken) token;
         String markup = mToken.getParentXPath();
-        contentLabel.put(s, asLabel(mToken.getContent()));
+        contentLabel.put(s, asLabel(mToken.getContent(), whitespaceCharacter));
         markupLabel.put(s, markup);
       }
     });
   }
 
-  private static void appendMarkup(StringBuilder label, Map<String, String> markupLabel, List<String> sortedSigils, String joinedSigils) {
+  private void appendMarkup(StringBuilder label, Map<String, String> markupLabel, List<String> sortedSigils, String joinedSigils) {
     Set<String> markupLabelSet = new HashSet<>(markupLabel.values());
     if (markupLabelSet.size() == 1) {
       label.append(joinedSigils)//
@@ -181,7 +188,7 @@ public class DotFactory {
     }
   }
 
-  private static void appendContent(StringBuilder label, Map<String, String> contentLabel, List<String> sortedSigils, String joinedSigils) {
+  private void appendContent(StringBuilder label, Map<String, String> contentLabel, List<String> sortedSigils, String joinedSigils) {
     Set<String> contentLabelSet = new HashSet<>(contentLabel.values());
     if (contentLabelSet.size() == 1) {
       label.append(joinedSigils)//
@@ -197,10 +204,10 @@ public class DotFactory {
     }
   }
 
-  private static String asLabel(String content) {
+  private String asLabel(String content, String whitespaceCharacter) {
     return content.replaceAll("&", "&amp;")//
         .replaceAll("\n", "&#x21A9;<br/>")//
-        .replaceAll(" +", "&#9251;");
+        .replaceAll(" +", whitespaceCharacter);
   }
 
 }

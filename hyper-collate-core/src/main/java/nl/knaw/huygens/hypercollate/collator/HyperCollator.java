@@ -60,8 +60,7 @@ public class HyperCollator {
     List<String> sigils = new ArrayList<>();
     List<VariantWitnessGraph> witnesses = new ArrayList<>();
     List<VariantWitnessGraphRanking> rankings = new ArrayList<>();
-    Arrays.asList(graphs)//
-        .stream()//
+    Arrays.stream(graphs)//
         .sorted(comparing(VariantWitnessGraph::getSigil))//
         .forEach(graph -> {
           sigils.add(graph.getSigil());
@@ -93,7 +92,7 @@ public class HyperCollator {
   }
 
   private void visualize(CollationGraph collationGraph) {
-    String dot = CollationGraphVisualizer.toDot(collationGraph);
+    String dot = CollationGraphVisualizer.toDot(collationGraph, true);
     System.out.println(dot);
   }
 
@@ -202,7 +201,6 @@ public class HyperCollator {
 
   private void addMarkupHyperEdges(CollationGraph collationGraph, VariantWitnessGraph witnessGraph, Map<Markup, MarkupNode> markupNodeIndex, TokenVertex tokenVertexForWitnessGraph, TextNode matchingNode) {
     witnessGraph.getMarkupListForTokenVertex(tokenVertexForWitnessGraph)//
-        .stream()//
         .forEach(markup -> collationGraph.linkMarkupToText(markupNodeIndex.get(markup), matchingNode));
   }
 

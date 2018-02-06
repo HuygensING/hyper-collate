@@ -19,12 +19,12 @@ package nl.knaw.huygens.hypercollate.dropwizard.resources;
  * limitations under the License.
  * #L%
  */
+
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Stopwatch;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.api.ResourcePaths;
 import nl.knaw.huygens.hypercollate.api.UTF8MediaType;
 import nl.knaw.huygens.hypercollate.collator.HyperCollator;
@@ -45,6 +45,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static java.util.stream.Collectors.toList;
+
 @Api(ResourcePaths.COLLATIONS)
 @Path(ResourcePaths.COLLATIONS)
 @Produces(UTF8MediaType.APPLICATION_JSON)
@@ -60,6 +62,7 @@ public class CollationsResource {
   private static final String APIPARAM_NAME = "Collation name";
   private static final String APIPARAM_SIGIL = "Witness sigil";
   private static final String APIPARAM_XML = "Witness Source (XML)";
+  private static final String EMPHASIZE_WHITESPACE = "emphasize-whitespace";
   private final ServerConfiguration configuration;
   private final HyperCollator hypercollator = new HyperCollator();
   private final CollationStore collationStore;
@@ -112,8 +115,8 @@ public class CollationsResource {
   @Consumes(UTF8MediaType.TEXT_XML)
   @ApiOperation(value = "Add a witness to the collation")
   public Response addXMLWitness(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) @NotNull final String name, //
-      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) @NotNull final String sigil, //
-      @ApiParam(APIPARAM_XML) @NotNull @Valid String xml) {
+                                @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) @NotNull final String sigil, //
+                                @ApiParam(APIPARAM_XML) @NotNull @Valid String xml) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     VariantWitnessGraph variantWitnessGraph = new XMLImporter().importXML(sigil, xml);
     collationInfo.addWitness(sigil, xml);
@@ -128,7 +131,7 @@ public class CollationsResource {
   @Produces(UTF8MediaType.TEXT_XML)
   @ApiOperation(value = "Return the XML source of the witness")
   public Response getWitnessXML(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name, //
-      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil) {
+                                @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     String xml = collationInfo.getWitness(sigil).orElseThrow(NotFoundException::new);
     return Response.ok(xml).build();
@@ -138,10 +141,13 @@ public class CollationsResource {
   @Path(COLLATION_DOT_PATH)
   @Timed
   @Produces(UTF8MediaType.TEXT_PLAIN)
-  @ApiOperation(value = "Get a .dot visualization of the collation graph")
-  public Response getDotVisualization(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name) {
+  @ApiOperation(value = "Get a .dot visualization of the collation graph, with optional emphasizing of whitespace.")
+  public Response getDotVisualization(
+      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,//
+      @DefaultValue("false") @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace//
+  ) {
     CollationGraph collation = getExistingCollationGraph(name);
-    String dot = CollationGraphVisualizer.toDot(collation);
+    String dot = CollationGraphVisualizer.toDot(collation, emphasizeWhitespace);
     return Response.ok(dot).build();
   }
 
@@ -149,10 +155,13 @@ public class CollationsResource {
   @Path(COLLATION_ASCII_TABLE_PATH)
   @Timed
   @Produces(UTF8MediaType.TEXT_PLAIN)
-  @ApiOperation(value = "Get an ASCII table visualization of the collation graph")
-  public Response getAsciiTableVisualization(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name) {
+  @ApiOperation(value = "Get an ASCII table visualization of the collation graph, with optional emphasizing of whitespace.")
+  public Response getAsciiTableVisualization(
+      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,//
+      @DefaultValue("false") @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace//
+  ) {
     CollationGraph collation = getExistingCollationGraph(name);
-    String table = CollationGraphVisualizer.toTableASCII(collation);
+    String table = CollationGraphVisualizer.toTableASCII(collation, emphasizeWhitespace);
     return Response.ok(table).build();
   }
 
@@ -182,7 +191,7 @@ public class CollationsResource {
     Stopwatch stopwatch = Stopwatch.createStarted();
     VariantWitnessGraph[] variantWitnessGraphs = collationInfo.getWitnessGraphMap()//
         .values()//
-        .toArray(new VariantWitnessGraph[] {});
+        .toArray(new VariantWitnessGraph[]{});
 
     CollationGraph collationGraph = hypercollator.collate(variantWitnessGraphs);
     if (collationInfo.getJoin()) {
