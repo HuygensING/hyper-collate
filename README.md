@@ -109,10 +109,14 @@ t009->t004[label="B"]
 }
 ```
   
-  Which, when rendered as png using the dot tool from [Graphviz](https://www.graphviz.org/) or using [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/), gives:
+  Which, when rendered as png using the dot tool from [Graphviz](https://www.graphviz.org/)
+   or using [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/), gives:
   
    ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/testcollation.png?raw=true)
   
-  In this representation, significant whitespace in the witnesses is represented as `␣`
+  In this representation, significant whitespace in the witnesses is represented as `␣`  
+  The markup of the witnesses is represented as separate lines in the node with, per witness, the xpath to the text.  
+  For example, the first text node in the collation graph with `( A,B: The_rain_in_ / A,B: /xml )` indicates that
+   the matched text `"The rain in "` has markup `xml` in both witnesses.
   
 -------------------
