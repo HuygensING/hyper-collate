@@ -1,0 +1,11 @@
+digraph G {
+ rankdir=LR;
+
+ start [label="#", shape=circle]
+ end [label="#", shape=circle]
+ start->had
+ had->intercourse
+ intercourse->{with,between}
+ {with,between}->them
+ them->end
+}

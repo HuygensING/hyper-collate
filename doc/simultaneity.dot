@@ -1,0 +1,15 @@
+digraph G {
+ rankdir=LR;
+
+ x [label=";"]
+ start [label="#", shape=circle]
+ end [label="#", shape=circle]
+ start->a
+ a->board
+ board->creaks
+ creaks->{on,x}
+ on->the
+ the->{landg,landing}
+ {landg,landing}->x
+ x->end
+}

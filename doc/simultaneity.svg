@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="282.57388mm"
+   height="129.85844mm"
+   viewBox="0 0 282.57389 129.85846"
+   version="1.1"
+   id="svg4771"
+   sodipodi:docname="simultaneity.svg"
+   inkscape:version="0.92.2 (5c3e80d, 2017-08-06)">
+  <defs
+     id="defs4765" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="448.70144"
+     inkscape:cy="180.62246"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     showborder="false" />
+  <metadata
+     id="metadata4768">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-6.5131133,-109.52768)">
+    <g
+       transform="matrix(0.3525797,0,0,0.3525797,7.9234321,196.11493)"
+       class="graph"
+       id="graph0"
+       inkscape:export-xdpi="96"
+       inkscape:export-ydpi="96">
+      <title
+         id="title4933">G</title>
+      <polygon
+         id="polygon4935"
+         points="797.4468,4 -4,4 -4,-117 797.4468,-117 "
+         stroke="transparent"
+         style="fill:#ffffff" />
+      <!-- x -->
+      <g
+         class="node"
+         id="node1">
+        <title
+           id="title4937">x</title>
+        <ellipse
+           id="ellipse4939"
+           ry="18"
+           rx="27"
+           cy="-72"
+           cx="694.44678"
+           style="fill:none;stroke:#000000" />
+        <text
+           id="text4941"
+           font-size="14.00"
+           y="-67.800003"
+           x="694.44678"
+           style="font-size:14px;font-family:Times, serif;text-anchor:middle;fill:#000000">;</text>
+      </g>
+      <!-- end -->
+      <g
+         class="node"
+         id="node3">
+        <title
+           id="title4944">end</title>
+        <circle
+           id="ellipse4946"
+           cy="-72"
+           cx="775.44678"
+           r="18"
+           style="fill:none;stroke:#000000" />
+        <text
+           id="text4948"
+           font-size="14.00"
+           y="-67.800003"
+           x="775.44678"
+           style="font-size:14px;font-family:Times, serif;text-anchor:middle;fill:#000000">#</text>
+      </g>
+      <!-- x&#45;&gt;end -->
+      <g
+         class="edge"
+         id="edge11">
+        <title
+           id="title4951">x-&gt;end</title>
+        <path
+           id="path4953"
+           d="m 721.8697,-72 c 8.0418,0 16.8543,0 24.968,0"
+           inkscape:connector-curvature="0"
+           style="fill:none;stroke:#000000" />
+        <polygon
+           id="polygon4955"
+           points="746.978,-75.5001 756.978,-72 746.9779,-68.5001 "
+           style="fill:#000000;stroke:#000000" />
+      </g>
+      <!-- start -->
+      <g
+         class="node"
+         id="node2">
+        <title
+           id="title4958">start</title>
+        <circle
+           id="ellipse4960"
+           cy="-95"
+           cx="18"
+           r="18"
+           style="fill:none;stroke:#000000" />
+        <text
+           id="text4962"
+           font-size="14.00"
+           y="-90.800003"
+           x="18"
+           style="font-size:14px;font-family:Times, serif;text-anchor:middle;fill:#000000">#</text>
+      </g>
+      <!-- a -->
+      <g
+         class="node"
+         id="node4">
+        <title
+           id="title4965">a</title>
+        <ellipse
+           id="ellipse4967"
+           ry="18"
+           rx="27"
+           cy="-95"
+           cx="99"
+           style="fill:none;stroke:#000000" />
+        <text
+           id="text4969"
+           font-size="14.00"
+           y="-90.800003"
+           x="99"
+           style="font-size:14px;font-family:Times, serif;text-anchor:middle;fill:#000000">a</text>
+      </g>
+      <!-- start&#45;&gt;a -->
+      <g
+         class="edge"
+         id="edge1">
+        <title
+           id="title4972">start-&gt;a</title>
+        <path
+           id="path4974"
+           d="m 36.3802,-95 c 7.5149,0 16.4955,0 25.277,0"
+           inkscape:connector-curvature="0"
+           style="fill:none;stroke:#000000" />
+        <polygon
+           id="polygon4976"
+           points="61.7747,-98.5001 71.7746,-95 61.7746,-91.5001 "
+           style="fill:#000000;stroke:#000000" />
+      </g>
+      <!-- board -->
+      <g
+         class="node"
+         id="node5">
+        <title
+           id="title4979">board</title>
+        <ellipse
+           id="ellipse4981"
+           ry="18"
+           rx="33.046902"
+           cy="-95"
+           cx="195.02341"
+           style="fill:none;stroke:#000000" />
+        <text
+           id="text4983"
+           font-size="14.00"
+           y="-90.800003"
+           x="195.02341"
+           style="font-size:14px;font-family:Times, serif;text-anchor:middle;fill:#000000">board</text>
+      </g>
+      <!-- a&#45;&gt;board -->
+      <g
+         class="edge"
+         id="edge2">
+        <title
+           id="title4986">a-&gt;board</title>
+        <path
+           id="path4988"
+           d="m 126.0034,-95 c 7.974,0 16.9111,0 25.6419,0"
+           inkscape:connector-curvature="0"
+           style="fill:none;stroke:#000000" />
+        <polygon
+           id="polygon4990"
+           points="151.7297,-98.5001 161.7296,-95 151.7296,-91.5001 "
+           style="fill:#000000;stroke:#000000" />
+      </g>
+      <!-- creaks -->
+      <g
+         class="node"
+         id="node6">
+        <title
+           id="title4993">creaks</title>
+        <ellipse
+           id="ellipse4995"
+           ry="18"
+           rx="35.892101"
+           cy="-95"
+           cx="299.7424"
+           style="fill:none;stroke:#000000" />
+        <text
+           id="text4997"
+           font-size="14.00"
+           y="-90.800003"
+           x="299.7424"
+           style="font-size:14px;font-family:Times, serif;text-anchor:middle;fill:#000000">creaks</text>
+      </g>
+      <!-- board&#45;&gt;creaks -->
+      <g
+         class="edge"
+         id="edge3">
+        <title
+           id="title5000">board-&gt;creaks</title>
+        <path
+           id="path5002"
+           d="m 228.1572,-95 c 8.1829,0 17.0933,0 25.7611,0"
+           inkscape:connector-curvature="0"
+           style="fill:none;stroke:#000000" />
+        <polygon
+           id="polygon5004"
+           points="253.9238,-98.5001 263.9238,-95 253.9238,-91.5001 "
+           style="fill:#000000;stroke:#000000" />
+      </g>
+      <!-- creaks&#45;&gt;x -->
+      <g
+         class="edge"
+         id="edge4">
+        <title
+           id="title5007">creaks-&gt;x</title>
+        <path
+           id="path5009"
+           d="m 334.101,-100.1758 c 60.7355,-8.0998 190.7203,-20.7099 297.3458,1.1758 11.1303,2.2846 22.7221,6.6211 32.8828,11.1611"
+           inkscape:connector-curvature="0"
+           style="fill:none;stroke:#000000" />
+        <polygon
+           id="polygon5011"
+           points="666.017,-90.913 673.571,-83.4842 663.0331,-84.5808 "
+           style="fill:#000000;stroke:#000000" />
+      </g>
+      <!-- on -->
+      <g
+         class="node"
+         id="node7">
+        <title
+           id="title5014">on</title>
+        <ellipse
+           id="ellipse5016"
+           ry="18"
+           rx="27"
+           cy="-72"
+           cx="398.4379"
+           style="fill:none;stroke:#000000" />
+        <text
+           id="text5018"
+           font-size="14.00"
+           y="-67.800003"
+           x="398.4379"
+           style="font-size:14px;font-family:Times, serif;text-anchor:middle;fill:#000000">on</text>
+      </g>
+      <!-- creaks&#45;&gt;on -->
+      <g
+         class="edge"
+         id="edge5">
+        <title
+           id="title5021">creaks-&gt;on</title>
+        <path
+           id="path5023"
+           d="m 332.3325,-87.4052 c 9.7514,2.2725 20.4933,4.7758 30.4319,7.0918"
+           inkscape:connector-curvature="0"
+           style="fill:none;stroke:#000000" />
+        <polygon
+           id="polygon5025"
+           points="363.8108,-83.6634 372.7554,-77.985 362.222,-76.846 "
+           style="fill:#000000;stroke:#000000" />
+      </g>
+      <!-- the -->
+      <g
+         class="node"
+         id="node8">
+        <title
+           id="title5028">the</title>
+        <ellipse
+           id="ellipse5030"
+           ry="18"
+           rx="27"
+           cy="-72"
+           cx="488.4379"
+           style="fill:none;stroke:#000000" />
+        <text
+           id="text5032"
+           font-size="14.00"
+           y="-67.800003"
+           x="488.4379"
+           style="font-size:14px;font-family:Times, serif;text-anchor:middle;fill:#000000">the</text>
+      </g>
+      <!-- on&#45;&gt;the -->
+      <g
+         class="edge"
+         id="edge6">
+        <title
+           id="title5035">on-&gt;the</title>
+        <path
+           id="path5037"
+           d="m 425.4409,-72 c 8.0247,0 16.9636,0 25.5279,0"
+           inkscape:connector-curvature="0"
+           style="fill:none;stroke:#000000" />
+        <polygon
+           id="polygon5039"
+           points="451.143,-75.5001 461.1429,-72 451.1429,-68.5001 "
+           style="fill:#000000;stroke:#000000" />
+      </g>
+      <!-- landg -->
+      <g
+         class="node"
+         id="node9">
+        <title
+           id="title5042">landg</title>
+        <ellipse
+           id="ellipse5044"
+           ry="18"
+           rx="32.4846"
+           cy="-72"
+           cx="591.44238"
+           style="fill:none;stroke:#000000" />
+        <text
+           id="text5046"
+           font-size="14.00"
+           y="-67.800003"
+           x="591.44238"
+           style="font-size:14px;font-family:Times, serif;text-anchor:middle;fill:#000000">landg</text>
+      </g>
+      <!-- the&#45;&gt;landg -->
+      <g
+         class="edge"
+         id="edge7">
+        <title
+           id="title5049">the-&gt;landg</title>
+        <path
+           id="path5051"
+           d="m 515.5011,-72 c 10.1312,0 21.905,0 33.1142,0"
+           inkscape:connector-curvature="0"
+           style="fill:none;stroke:#000000" />
+        <polygon
+           id="polygon5053"
+           points="548.6875,-75.5001 558.6875,-72 548.6874,-68.5001 "
+           style="fill:#000000;stroke:#000000" />
+      </g>
+      <!-- landing -->
+      <g
+         class="node"
+         id="node10">
+        <title
+           id="title5056">landing</title>
+        <ellipse
+           id="ellipse5058"
+           ry="18"
+           rx="40.0089"
+           cy="-18"
+           cx="591.44238"
+           style="fill:none;stroke:#000000" />
+        <text
+           id="text5060"
+           font-size="14.00"
+           y="-13.8"
+           x="591.44238"
+           style="font-size:14px;font-family:Times, serif;text-anchor:middle;fill:#000000">landing</text>
+      </g>
+      <!-- the&#45;&gt;landing -->
+      <g
+         class="edge"
+         id="edge8">
+        <title
+           id="title5063">the-&gt;landing</title>
+        <path
+           id="path5065"
+           d="m 509.7805,-60.8112 c 13.3709,7.0097 30.9293,16.2147 46.3375,24.2924"
+           inkscape:connector-curvature="0"
+           style="fill:none;stroke:#000000" />
+        <polygon
+           id="polygon5067"
+           points="558.1456,-39.4077 565.3772,-31.6646 554.8954,-33.208 "
+           style="fill:#000000;stroke:#000000" />
+      </g>
+      <!-- landg&#45;&gt;x -->
+      <g
+         class="edge"
+         id="edge9">
+        <title
+           id="title5070">landg-&gt;x</title>
+        <path
+           id="path5072"
+           d="m 624.0336,-72 c 10.541,0 22.3093,0 33.1614,0"
+           inkscape:connector-curvature="0"
+           style="fill:none;stroke:#000000" />
+        <polygon
+           id="polygon5074"
+           points="657.2489,-75.5001 667.2489,-72 657.2488,-68.5001 "
+           style="fill:#000000;stroke:#000000" />
+      </g>
+      <!-- landing&#45;&gt;x -->
+      <g
+         class="edge"
+         id="edge10">
+        <title
+           id="title5077">landing-&gt;x</title>
+        <path
+           id="path5079"
+           d="m 617.7012,-31.7662 c 14.0817,-7.3823 31.5082,-16.5181 46.1947,-24.2175"
+           inkscape:connector-curvature="0"
+           style="fill:none;stroke:#000000" />
+        <polygon
+           id="polygon5081"
+           points="662.6067,-59.2596 673.0886,-60.803 665.857,-53.0599 "
+           style="fill:#000000;stroke:#000000" />
+      </g>
+    </g>
+    <ellipse
+       style="fill:none;fill-opacity:0;stroke:#ec0000;stroke-width:0.49990135;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.94472363;paint-order:fill markers stroke"
+       id="path5182"
+       ry="33.007835"
+       rx="124.14674"
+       cy="172.85332"
+       cx="145.26099" />
+    <ellipse
+       style="fill:none;fill-opacity:0;stroke:#ce00ce;stroke-width:0.56698263;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.94472363;paint-order:fill markers stroke"
+       id="path5182-4"
+       ry="43.264175"
+       rx="121.84142"
+       cy="174.18965"
+       cx="144.45918" />
+    <ellipse
+       style="fill:none;fill-opacity:0;stroke:#eedb00;stroke-width:0.62809902;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.94472363;paint-order:fill markers stroke"
+       id="path5182-5"
+       ry="52.588051"
+       rx="123.01358"
+       cy="174.18964"
+       cx="144.32555" />
+    <ellipse
+       style="fill:none;fill-opacity:0;stroke:#d9f20a;stroke-width:0.70157564;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.94472363;paint-order:fill markers stroke"
+       id="path5182-47"
+       ry="64.578438"
+       rx="124.98135"
+       cy="174.45691"
+       cx="145.52826" />
+    <ellipse
+       style="fill:none;fill-opacity:0;stroke:#00f100;stroke-width:0.5;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.94472363;paint-order:fill markers stroke"
+       id="path5182-0"
+       ry="27.628195"
+       rx="53.820606"
+       cy="179.53506"
+       cx="188.29138" />
+    <ellipse
+       style="fill:none;fill-opacity:0;stroke:#0000da;stroke-width:0.6612041;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.94472363;paint-order:fill markers stroke"
+       id="path5182-2"
+       ry="33.764633"
+       rx="22.138407"
+       cy="180.60413"
+       cx="216.75558" />
+    <ellipse
+       style="fill:none;fill-opacity:0;stroke:#00e767;stroke-width:0.57211882;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.94472363;paint-order:fill markers stroke"
+       id="path5182-1"
+       ry="10.190068"
+       rx="18.208149"
+       cy="168.71068"
+       cx="216.22105" />
+    <ellipse
+       style="fill:none;fill-opacity:0;stroke:#00e3c5;stroke-width:0.61396933;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.94472363;paint-order:fill markers stroke"
+       id="path5182-1-2"
+       ry="12.038101"
+       rx="19.254374"
+       cy="190.894"
+       cx="216.22104" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#d9f20a;stroke-width:0.26458332;stroke-opacity:0.94509804"
+       x="140.20013"
+       y="114.57124"
+       id="text5795"><tspan
+         sodipodi:role="line"
+         id="tspan5793"
+         x="140.20013"
+         y="114.57124"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke:#d9f20a;stroke-width:0.26458332;stroke-opacity:0.94509804">TEI</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#eedb00;stroke-width:0.26458332;stroke-opacity:0.94509804"
+       x="139.9496"
+       y="127.04665"
+       id="text5795-9"><tspan
+         sodipodi:role="line"
+         id="tspan5815"
+         x="139.9496"
+         y="127.04665">text</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#ce00ce;stroke-width:0.26458332;stroke-opacity:0.94509804"
+       x="142.61374"
+       y="135.22591"
+       id="text5795-9-3"><tspan
+         sodipodi:role="line"
+         id="tspan5835"
+         x="142.61374"
+         y="135.22591">p</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#ec0000;stroke-width:0.26458332;stroke-opacity:0.94509804"
+       x="142.34468"
+       y="143.6488"
+       id="text5795-9-3-6"><tspan
+         sodipodi:role="line"
+         id="tspan5855"
+         x="142.34468"
+         y="143.6488">s</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#00f100;stroke-width:0.26458332;stroke-opacity:0.94509804"
+       x="179.85344"
+       y="155.93367"
+       id="text5795-9-3-6-4"><tspan
+         sodipodi:role="line"
+         id="tspan5897"
+         x="179.85344"
+         y="155.93367">add</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#00e767;stroke-width:0.26458332;stroke-opacity:0.94509804"
+       x="213.79669"
+       y="162.34814"
+       id="text5795-9-3-6-44"><tspan
+         sodipodi:role="line"
+         id="tspan5885"
+         x="213.79669"
+         y="162.34814">sic</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#00e3c5;stroke-width:0.26458332;stroke-opacity:0.94509804"
+       x="203.37314"
+       y="198.9641"
+       id="text5795-9-3-6-9"><tspan
+         sodipodi:role="line"
+         id="tspan5895"
+         x="203.37314"
+         y="198.9641">corr</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.23333311px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#0000da;stroke-width:0.26458332;stroke-opacity:0.94509804"
+       x="211.26907"
+       y="152.75415"
+       id="text5795-9-3-6-4-7"><tspan
+         sodipodi:role="line"
+         id="tspan5917"
+         x="211.26907"
+         y="152.75415">choice</tspan></text>
+  </g>
+</svg>
