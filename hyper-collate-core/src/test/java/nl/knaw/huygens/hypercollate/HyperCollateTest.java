@@ -8,7 +8,6 @@ import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 import nl.knaw.huygens.hypercollate.tools.DotFactory;
 import nl.knaw.huygens.hypercollate.tools.TokenMerger;
 import org.apache.commons.io.FileUtils;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,6 +15,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /*-
  * #%L
@@ -47,7 +48,7 @@ public class HyperCollateTest {
     VariantWitnessGraph wg = TokenMerger.merge(variantWitnessGraph);
     // VariantWitnessGraph wg = variantWitnessGraph;
 
-    String dot = DotFactory.fromVariantWitnessGraph(wg);
+    String dot = new DotFactory(true).fromVariantWitnessGraph(wg);
     // System.out.println(dot);
     writeGraph(dot, name);
     assertThat(dot).isEqualTo(expectedDot);

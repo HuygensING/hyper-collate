@@ -25,13 +25,14 @@ import de.vandermeer.asciitable.AsciiTable;
 import de.vandermeer.asciitable.CWC_LongestLine;
 import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
 import eu.interedition.collatex.Token;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
 import nl.knaw.huygens.hypercollate.model.TextNode;
 
 import java.util.*;
+
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public class CollationGraphVisualizer {
 
@@ -59,8 +60,9 @@ public class CollationGraphVisualizer {
     }
   }
 
-  public static String toTableASCII(CollationGraph graph) {
+  public static String toTableASCII(CollationGraph graph, boolean emphasizeWhitespace) {
     List<String> sigils = graph.getSigils();
+    String whitespaceCharacter = emphasizeWhitespace ? "_" : " ";
     Map<String, List<Cell>> rowMap = new HashMap<>();
     sigils.forEach(sigil -> rowMap.put(sigil, new ArrayList<>()));
 
@@ -90,7 +92,7 @@ public class CollationGraphVisualizer {
       sigils.forEach(sigil -> {
         List<MarkedUpToken> tokens = nodeTokensPerWitness.get(sigil);
         maxLayers.put(sigil, Math.max(maxLayers.get(sigil), tokens.size()));
-        Cell cell = newCell(tokens);
+        Cell cell = newCell(tokens, whitespaceCharacter);
         rowMap.get(sigil).add(cell);
       });
     }
@@ -108,7 +110,7 @@ public class CollationGraphVisualizer {
     return hasNoIncomingEdges || hasNoOutgoingEdges;
   }
 
-  private static Cell newCell(List<MarkedUpToken> tokens) {
+  private static Cell newCell(List<MarkedUpToken> tokens, String whitespaceCharacter) {
     Cell cell = new Cell();
     if (tokens.isEmpty()) {
       setCellLayer(cell, "", " ");
@@ -116,7 +118,7 @@ public class CollationGraphVisualizer {
       tokens.forEach(token -> {
         String content = token.getContent()//
             .replaceAll("\n", " ")//
-            .replaceAll(" +", "_");
+            .replaceAll(" +", whitespaceCharacter);
         String parentXPath = token.getParentXPath();
         if (content.isEmpty()) {
           content = "<" + parentXPath.replaceAll(".*/", "") + "/>";
@@ -192,8 +194,8 @@ public class CollationGraphVisualizer {
     return "";
   }
 
-  public static String toDot(CollationGraph graph) {
-    return DotFactory.fromCollationGraph(graph);
+  public static String toDot(CollationGraph graph, boolean emphasizeWhitespace) {
+    return new DotFactory(emphasizeWhitespace).fromCollationGraph(graph);
   }
 
 }
