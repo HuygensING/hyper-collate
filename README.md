@@ -1,5 +1,8 @@
 # HyperCollate
 
+## General
+This is a prototype that takes care of intradocumentary variation. The code dealing with collation of structure is in the "Prioritised XML Collation" [codebase](https://github.com/bleekere/prioritised_xml_collation_java) (java). Also take a look at the [Jupyter Notebook](https://github.com/HuygensING/hyper-collate-python-proxy/blob/master/hyper-collate-example.ipynb). The two codebases will be merged in the near future.
+
 ## Server
 
 There is a HyperCollate server with a REST-based API to interact with the HyperCollate algorithm.
