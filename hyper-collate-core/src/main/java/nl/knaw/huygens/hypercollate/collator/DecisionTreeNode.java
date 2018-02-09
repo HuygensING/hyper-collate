@@ -25,6 +25,8 @@ import java.util.List;
 public class DecisionTreeNode {
   private QuantumCollatedMatchList quantumCollatedMatchList;
   private List<DecisionTreeNode> childNodes = new ArrayList<>();
+  private Integer cost;
+  private Integer number;
 
   public DecisionTreeNode(QuantumCollatedMatchList qcml) {
     this.quantumCollatedMatchList = qcml;
@@ -46,4 +48,21 @@ public class DecisionTreeNode {
     return childNodes;
   }
 
+  public DecisionTreeNode setCost(Integer cost) {
+    this.cost = cost;
+    return this;
+  }
+
+  public Integer getCost() {
+    return cost;
+  }
+
+  public DecisionTreeNode setNumber(Integer number) {
+    this.number = number;
+    return this;
+  }
+
+  public Integer getNumber() {
+    return number;
+  }
 }
