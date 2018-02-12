@@ -19,16 +19,19 @@ package nl.knaw.huygens.hypercollate.dropwizard.resources;
  * limitations under the License.
  * #L%
  */
+
 import com.codahale.metrics.annotation.Timed;
 import com.google.common.base.Stopwatch;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.api.ResourcePaths;
 import nl.knaw.huygens.hypercollate.api.UTF8MediaType;
 import nl.knaw.huygens.hypercollate.collator.HyperCollator;
 import nl.knaw.huygens.hypercollate.dropwizard.ServerConfiguration;
 import nl.knaw.huygens.hypercollate.dropwizard.api.CollationStore;
+import nl.knaw.huygens.hypercollate.dropwizard.core.DotEngine;
 import nl.knaw.huygens.hypercollate.dropwizard.db.CollationInfo;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
@@ -40,11 +43,10 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import static java.util.stream.Collectors.toList;
 
 @Api(ResourcePaths.COLLATIONS)
 @Path(ResourcePaths.COLLATIONS)
@@ -53,10 +55,14 @@ public class CollationsResource {
   private static final String PATHPARAM_NAME = "name";
   private static final String PATHPARAM_SIGIL = "sigil";
 
-  private static final String COLLATION_ASCII_TABLE_PATH = "{" + PATHPARAM_NAME + "}/" + ResourcePaths.COLLATIONS_ASCII_TABLE;
-  private static final String COLLATION_DOT_PATH = "{" + PATHPARAM_NAME + "}/" + ResourcePaths.COLLATIONS_DOT;
   private static final String COLLATION_PATH = "{" + PATHPARAM_NAME + "}";
-  private static final String COLLATION_WITNESS_PATH = "{" + PATHPARAM_NAME + "}/" + ResourcePaths.WITNESSES + "/{" + PATHPARAM_SIGIL + "}";
+  private static final String COLLATION_SUBPATH = COLLATION_PATH + "/";
+  private static final String COLLATION_FORMATPATH = COLLATION_PATH + ".";
+  private static final String COLLATION_ASCII_TABLE_PATH = COLLATION_SUBPATH + ResourcePaths.COLLATIONS_ASCII_TABLE;
+  private static final String COLLATION_DOT_PATH = COLLATION_FORMATPATH + ResourcePaths.COLLATIONS_DOT;
+  private static final String COLLATION_SVG_PATH = COLLATION_FORMATPATH + ResourcePaths.COLLATIONS_SVG;
+  private static final String COLLATION_PNG_PATH = COLLATION_FORMATPATH + ResourcePaths.COLLATIONS_PNG;
+  private static final String COLLATION_WITNESS_PATH = COLLATION_SUBPATH + ResourcePaths.WITNESSES + "/{" + PATHPARAM_SIGIL + "}";
 
   private static final String APIPARAM_NAME = "Collation name";
   private static final String APIPARAM_SIGIL = "Witness sigil";
@@ -65,10 +71,12 @@ public class CollationsResource {
   private final ServerConfiguration configuration;
   private final HyperCollator hypercollator = new HyperCollator();
   private final CollationStore collationStore;
+  private final DotEngine dotEngine;
 
   public CollationsResource(ServerConfiguration configuration, CollationStore collationStore) {
     this.configuration = configuration;
     this.collationStore = collationStore;
+    this.dotEngine = new DotEngine(configuration.getPathToDotExecutable());
   }
 
   @GET
@@ -90,7 +98,7 @@ public class CollationsResource {
   public Response addCollation(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name) {
     try {
       collationStore.addCollation(name);
-      return Response.created(documentURI(name)).build();
+      return Response.created(collationURI(name)).build();
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -145,9 +153,43 @@ public class CollationsResource {
       @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,//
       @DefaultValue("false") @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace//
   ) {
-    CollationGraph collation = getExistingCollationGraph(name);
-    String dot = CollationGraphVisualizer.toDot(collation, emphasizeWhitespace);
+    String dot = getDot(name, emphasizeWhitespace);
     return Response.ok(dot).build();
+  }
+
+  private String getDot(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) String name, @DefaultValue("false") @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace) {
+    CollationGraph collation = getExistingCollationGraph(name);
+    return CollationGraphVisualizer.toDot(collation, emphasizeWhitespace);
+  }
+
+  @GET
+  @Path(COLLATION_SVG_PATH)
+  @Timed
+  @Produces("image/svg+xml")
+  @ApiOperation(value = "Get an SVG visualization of the collation graph, with optional emphasizing of whitespace.")
+  public Response getSVGVisualization(
+      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,//
+      @DefaultValue("false") @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace//
+  ) {
+    String dot = getDot(name, emphasizeWhitespace);
+    StreamingOutput stream = outputStream ->
+        dotEngine.renderAs("svg", dot, outputStream);
+    return Response.ok(stream).build();
+  }
+
+  @GET
+  @Path(COLLATION_PNG_PATH)
+  @Timed
+  @Produces("image/png")
+  @ApiOperation(value = "Get a PNG visualization of the collation graph, with optional emphasizing of whitespace.")
+  public Response getPNGVisualization(
+      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,//
+      @DefaultValue("false") @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace//
+  ) {
+    String dot = getDot(name, emphasizeWhitespace);
+    StreamingOutput stream = outputStream ->
+        dotEngine.renderAs("png", dot, outputStream);
+    return Response.ok(stream).build();
   }
 
   @GET
@@ -164,7 +206,7 @@ public class CollationsResource {
     return Response.ok(table).build();
   }
 
-  private URI documentURI(String collationId) {
+  private URI collationURI(String collationId) {
     return URI.create(String.format("%s/%s/%s", configuration.getBaseURI(), ResourcePaths.COLLATIONS, collationId));
   }
 

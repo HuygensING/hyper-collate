@@ -19,7 +19,8 @@ package nl.knaw.huygens.hypercollate.api;
  * limitations under the License.
  * #L%
  */
-import java.io.File;
+
+import java.net.URI;
 
 public class AboutInfo {
   private String appName;
@@ -28,7 +29,7 @@ public class AboutInfo {
   private String buildDate;
   private String commitId;
   private String scmBranch;
-  private File projectDir;
+  private URI projectDir;
 
   public AboutInfo setAppName(String appName) {
     this.appName = appName;
@@ -84,12 +85,12 @@ public class AboutInfo {
     return scmBranch;
   }
 
-  public AboutInfo setProjectDir(File projectDir) {
+  public AboutInfo setProjectDirURI(URI projectDir) {
     this.projectDir = projectDir;
     return this;
   }
 
-  public File getProjectDir() {
+  public URI getProjectDirURI() {
     return projectDir;
   }
 }

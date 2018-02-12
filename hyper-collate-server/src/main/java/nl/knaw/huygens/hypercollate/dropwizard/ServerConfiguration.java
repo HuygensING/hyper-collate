@@ -34,6 +34,8 @@ public class ServerConfiguration extends Configuration {
   @NotEmpty
   private String baseURI;
 
+  private String pathToDotExecutable;
+
   private final File projectDir;
   private final File collationsDir;
 
@@ -65,5 +67,13 @@ public class ServerConfiguration extends Configuration {
 
   public File getCollationsDir() {
     return collationsDir;
+  }
+
+  public String getPathToDotExecutable() {
+    return pathToDotExecutable;
+  }
+
+  public void setPathToDotExecutable(String pathToDotExecutable) {
+    this.pathToDotExecutable = pathToDotExecutable;
   }
 }
