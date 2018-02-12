@@ -1,11 +1,15 @@
+# The base URI with ip name/address and port for the server to run on
+baseURI: http://127.0.0.1:8080/
+
+# optional path to dot executable for rendering dot to svg/png
+# comment out when no dot executable available
+pathToDotExecutable: C:/Program Files (x86)/Graphviz2.38/bin/dot.exe
+
 logging:
   level: INFO
   loggers:
     nl.knaw.huygens: DEBUG
 
+# DO NOT CHANGE THESE SETTINGS:
 swagger:
   resourcePackage: nl.knaw.huygens.hypercollate.dropwizard.resources
-  
-baseURI: http://127.0.0.1:8080/
-
-pathToDotExecutable: C:/Program Files (x86)/Graphviz2.38/bin/dot.exe
