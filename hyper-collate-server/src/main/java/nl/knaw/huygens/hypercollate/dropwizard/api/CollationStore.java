@@ -34,9 +34,13 @@ public interface CollationStore {
 
   void persist(String collationId);
 
+  boolean idInUse(String collationId);
+
   Set<String> getCollationIds();
 
   Optional<CollationGraph> getCollationGraph(String collationId);
 
   Optional<CollationInfo> getCollationInfo(String collationId);
+
+  void removeCollation(String collationId);
 }

@@ -34,13 +34,15 @@ public class ServerConfiguration extends Configuration {
   @NotEmpty
   private String baseURI;
 
+  private String pathToDotExecutable;
+
   private final File projectDir;
   private final File collationsDir;
 
   ServerConfiguration() {
     super();
     projectDir = Paths.get(System.getProperty("user.home"), ".hypercollate").toFile();
-    collationsDir = new File(projectDir,"collations");
+    collationsDir = new File(projectDir, "collations");
     try {
       Files.createDirectories(collationsDir.toPath());
     } catch (IOException e) {
@@ -65,5 +67,17 @@ public class ServerConfiguration extends Configuration {
 
   public File getCollationsDir() {
     return collationsDir;
+  }
+
+  public String getPathToDotExecutable() {
+    return pathToDotExecutable;
+  }
+
+  public void setPathToDotExecutable(String pathToDotExecutable) {
+    this.pathToDotExecutable = pathToDotExecutable;
+  }
+
+  public boolean hasPathToDotExecutable() {
+    return pathToDotExecutable != null;
   }
 }
