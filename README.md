@@ -72,12 +72,12 @@ the `/swagger` endpoint of the server.
     
 
 - **Get a .dot visualization of the collation graph:**  
-  `GET /collations/{name}/dot`   
+  `GET /collations/{name}.dot`   
   This should return response code 200 - OK  
   The response body has the .dot representation of the collation graph.  
 
   curl example:  
-    `curl -X GET --header 'Accept: text/plain' 'http://localhost:8080/collations/testcollation/dot'`
+    `curl -X GET --header 'Accept: text/plain' 'http://localhost:8080/collations/testcollation.dot'`
       
     This should return the response body:
 
