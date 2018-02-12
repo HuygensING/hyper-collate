@@ -35,7 +35,9 @@ import java.util.Map;
 import java.util.Optional;
 
 @JsonInclude(Include.NON_NULL)
-@JsonIgnoreProperties(value = {"^dot", "^ascii_table"}, allowGetters = true) // to make these fields read-only
+
+// to make these fields read-only
+@JsonIgnoreProperties(value = {"^dot", "^png", "^svg", "^ascii_table"}, allowGetters = true)
 public class CollationInfo {
 
   public enum State {

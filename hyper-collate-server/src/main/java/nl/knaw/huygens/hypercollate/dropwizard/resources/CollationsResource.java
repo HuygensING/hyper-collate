@@ -90,12 +90,11 @@ public class CollationsResource {
   public CollationsResource(ServerConfiguration configuration, CollationStore collationStore) {
     this.configuration = configuration;
     this.collationStore = collationStore;
-    String pathToDotExecutable = configuration.getPathToDotExecutable();
-    if (pathToDotExecutable == null) {
+    if (configuration.hasPathToDotExecutable()) {
       this.dotEngine = null;
       this.dotEngineAvailable = false;
     } else {
-      this.dotEngine = new DotEngine(pathToDotExecutable);
+      this.dotEngine = new DotEngine(configuration.getPathToDotExecutable());
       this.dotEngineAvailable = true;
     }
   }
@@ -187,10 +186,24 @@ public class CollationsResource {
   }
 
   @GET
+  @Path(COLLATION_WITNESS_DOT_PATH)
+  @Timed
+  @Produces(UTF8MediaType.TEXT_PLAIN)
+  @ApiOperation(value = "Get a .dot visualization of the witness graph, with optional emphasizing of whitespace.")
+  public Response getWitnessDot(
+      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,//
+      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,//
+      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace//
+  ) {
+    String dot = getDot(name, sigil, emphasizeWhitespace);
+    return Response.ok(dot).build();
+  }
+
+  @GET
   @Path(COLLATION_WITNESS_SVG_PATH)
   @Timed
   @Produces(IMAGE_SVG)
-  @ApiOperation(value = "Return an SVG visualization of the witness graph")
+  @ApiOperation(value = "Return an SVG visualization of the witness graph, with optional emphasizing of whitespace.")
   public Response getWitnessSVG(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name, //
                                 @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,//
                                 @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace) {
@@ -201,7 +214,7 @@ public class CollationsResource {
   @Path(COLLATION_WITNESS_PNG_PATH)
   @Timed
   @Produces(IMAGE_PNG)
-  @ApiOperation(value = "Return a PNG visualization of the witness graph")
+  @ApiOperation(value = "Return a PNG visualization of the witness graph, with optional emphasizing of whitespace.")
   public Response getWitnessPNG(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name, //
                                 @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,//
                                 @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace) {
@@ -319,16 +332,19 @@ public class CollationsResource {
     return Response.ok(stream).build();
   }
 
-  private String getDot(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) String name,
-                        @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace) {
+  private String getDot(String name, boolean emphasizeWhitespace) {
     CollationGraph collation = getExistingCollationGraph(name);
     return CollationGraphVisualizer.toDot(collation, emphasizeWhitespace);
   }
 
-  private Response renderWitnessGraphAs(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) String name, @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) String sigil, @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace, String format) {
+  private Response renderWitnessGraphAs(String name, String sigil, boolean emphasizeWhitespace, String format) {
+    String dot = getDot(name, sigil, emphasizeWhitespace);
+    return renderDotAs(dot, format);
+  }
+
+  private String getDot(String name, String sigil, boolean emphasizeWhitespace) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     VariantWitnessGraph variantWitnessGraph = collationInfo.getWitnessGraphMap().get(sigil);
-    String dot = new DotFactory(emphasizeWhitespace).fromVariantWitnessGraph(variantWitnessGraph);
-    return renderDotAs(dot, format);
+    return new DotFactory(emphasizeWhitespace).fromVariantWitnessGraph(variantWitnessGraph);
   }
 }

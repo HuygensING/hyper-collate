@@ -50,7 +50,9 @@ public class AboutResource {
         .setCommitId(properties.getProperty("commitId").orElse("no commitId set in about.properties"))//
         .setScmBranch(properties.getProperty("scmBranch").orElse("no scmBranch set in about.properties"))//
         .setVersion(properties.getProperty("version").orElse("no version set in about.properties"))//
-        .setProjectDirURI(configuration.getProjectDir().toURI());
+        .setProjectDirURI(configuration.getProjectDir().toURI())//
+        .setDotRendering(configuration.hasPathToDotExecutable());
+    ;
   }
 
   @GET

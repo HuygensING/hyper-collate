@@ -30,6 +30,7 @@ public class AboutInfo {
   private String commitId;
   private String scmBranch;
   private URI projectDir;
+  private boolean dotRendering;
 
   public AboutInfo setAppName(String appName) {
     this.appName = appName;
@@ -92,5 +93,14 @@ public class AboutInfo {
 
   public URI getProjectDirURI() {
     return projectDir;
+  }
+
+  public boolean isDotRendering() {
+    return dotRendering;
+  }
+
+  public AboutInfo setDotRendering(boolean dotRendering) {
+    this.dotRendering = dotRendering;
+    return this;
   }
 }
