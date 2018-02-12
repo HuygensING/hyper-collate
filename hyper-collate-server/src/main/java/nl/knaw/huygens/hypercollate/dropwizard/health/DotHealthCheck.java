@@ -36,6 +36,9 @@ public class DotHealthCheck extends HealthCheck {
 
   @Override
   protected Result check() throws Exception {
+    if (dotPath==null){
+      return Result.healthy();
+    }
     File dotFile = new File(dotPath);
     if (!dotFile.exists()) {
       return Result.unhealthy("%s not found.", dotPath);

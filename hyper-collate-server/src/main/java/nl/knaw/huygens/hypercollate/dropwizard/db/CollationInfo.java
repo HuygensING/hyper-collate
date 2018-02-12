@@ -19,23 +19,23 @@ package nl.knaw.huygens.hypercollate.dropwizard.db;
  * limitations under the License.
  * #L%
  */
-import java.net.URI;
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import nl.knaw.huygens.hypercollate.api.ResourcePaths;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 
+import java.net.URI;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 @JsonInclude(Include.NON_NULL)
-@JsonIgnoreProperties(value = { "^dot", "^ascii_table" }, allowGetters = true) // to make these fields read-only
+@JsonIgnoreProperties(value = {"^dot", "^ascii_table"}, allowGetters = true) // to make these fields read-only
 public class CollationInfo {
 
   public enum State {
@@ -61,7 +61,7 @@ public class CollationInfo {
   }
 
   void setUriBase(String baseURL) {
-    this.uriBase = baseURL + "/" + ResourcePaths.COLLATIONS + "/" + this.id + "/";
+    this.uriBase = baseURL + "/" + ResourcePaths.COLLATIONS + "/" + this.id;
   }
 
   public String getId() {
@@ -111,14 +111,24 @@ public class CollationInfo {
     return collationState;
   }
 
+  @JsonProperty(value = "^png"/* , access = JsonProperty.Access.READ_ONLY */)
+  public URI getPNGURI() {
+    return URI.create(uriBase + "." + ResourcePaths.COLLATIONS_PNG);
+  }
+
+  @JsonProperty(value = "^svg"/* , access = JsonProperty.Access.READ_ONLY */)
+  public URI getSVGURI() {
+    return URI.create(uriBase + "." + ResourcePaths.COLLATIONS_SVG);
+  }
+
   @JsonProperty(value = "^dot"/* , access = JsonProperty.Access.READ_ONLY */)
   public URI getDotURI() {
-    return URI.create(uriBase + ResourcePaths.COLLATIONS_DOT);
+    return URI.create(uriBase + "." + ResourcePaths.COLLATIONS_DOT);
   }
 
   @JsonProperty(value = "^ascii_table"/* , access = JsonProperty.Access.READ_ONLY */)
   public URI getAsciiTableURI() {
-    return URI.create(uriBase + ResourcePaths.COLLATIONS_ASCII_TABLE);
+    return URI.create(uriBase + "/" + ResourcePaths.COLLATIONS_ASCII_TABLE);
   }
 
   public void setCollationDurationInMilliseconds(long collationDuration) {

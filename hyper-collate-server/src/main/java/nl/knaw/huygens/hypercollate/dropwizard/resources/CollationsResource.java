@@ -42,6 +42,7 @@ import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.net.URI;
@@ -72,11 +73,19 @@ public class CollationsResource {
   private final HyperCollator hypercollator = new HyperCollator();
   private final CollationStore collationStore;
   private final DotEngine dotEngine;
+  private final boolean dotEngineAvailable;
 
   public CollationsResource(ServerConfiguration configuration, CollationStore collationStore) {
     this.configuration = configuration;
     this.collationStore = collationStore;
-    this.dotEngine = new DotEngine(configuration.getPathToDotExecutable());
+    String pathToDotExecutable = configuration.getPathToDotExecutable();
+    if (pathToDotExecutable == null) {
+      this.dotEngine = null;
+      this.dotEngineAvailable = false;
+    } else {
+      this.dotEngine = new DotEngine(pathToDotExecutable);
+      this.dotEngineAvailable = true;
+    }
   }
 
   @GET
@@ -96,9 +105,30 @@ public class CollationsResource {
   @ApiOperation(value = "Create a new collation with the given name")
   @Produces(UTF8MediaType.TEXT_PLAIN)
   public Response addCollation(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name) {
+    if (collationStore.idInUse(name)) {
+      throw new BadRequestException(String.format("%s '%s' is already in use.", APIPARAM_NAME, name));
+    }
     try {
       collationStore.addCollation(name);
       return Response.created(collationURI(name)).build();
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new BadRequestException(e.getMessage());
+    }
+  }
+
+  @DELETE
+  @Timed
+  @Path(COLLATION_PATH)
+  @ApiOperation(value = "Delete the collation with the given name")
+  public Response deleteCollation(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name) {
+    if (!collationStore.idInUse(name)) {
+      throw collationNotFoundException(name);
+    }
+    try {
+      collationStore.removeCollation(name);
+      return Response.noContent().build();
 
     } catch (Exception e) {
       e.printStackTrace();
@@ -157,7 +187,8 @@ public class CollationsResource {
     return Response.ok(dot).build();
   }
 
-  private String getDot(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) String name, @DefaultValue("false") @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace) {
+  private String getDot(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) String name,
+                        @DefaultValue("false") @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace) {
     CollationGraph collation = getExistingCollationGraph(name);
     return CollationGraphVisualizer.toDot(collation, emphasizeWhitespace);
   }
@@ -171,10 +202,7 @@ public class CollationsResource {
       @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,//
       @DefaultValue("false") @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace//
   ) {
-    String dot = getDot(name, emphasizeWhitespace);
-    StreamingOutput stream = outputStream ->
-        dotEngine.renderAs("svg", dot, outputStream);
-    return Response.ok(stream).build();
+    return getVisualization(name, emphasizeWhitespace, "svg");
   }
 
   @GET
@@ -186,10 +214,7 @@ public class CollationsResource {
       @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,//
       @DefaultValue("false") @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace//
   ) {
-    String dot = getDot(name, emphasizeWhitespace);
-    StreamingOutput stream = outputStream ->
-        dotEngine.renderAs("png", dot, outputStream);
-    return Response.ok(stream).build();
+    return getVisualization(name, emphasizeWhitespace, "png");
   }
 
   @GET
@@ -225,7 +250,11 @@ public class CollationsResource {
       collate(collationInfo);
     }
     return collationStore.getCollationGraph(name)//
-        .orElseThrow(NotFoundException::new);
+        .orElseThrow(() -> collationNotFoundException(name));
+  }
+
+  private NotFoundException collationNotFoundException(String name) {
+    return new NotFoundException(String.format("No collation '%s' found.", name));
   }
 
   private void collate(CollationInfo collationInfo) {
@@ -241,6 +270,21 @@ public class CollationsResource {
     stopwatch.stop();
     collationInfo.setCollationDurationInMilliseconds(stopwatch.elapsed(TimeUnit.MILLISECONDS));
     collationStore.setCollation(collationInfo, collationGraph);
+  }
+
+  private Response getVisualization(String name, boolean emphasizeWhitespace, String format) {
+    if (!dotEngineAvailable) {
+      return Response.status(Response.Status.BAD_REQUEST)//
+          .entity("Cannot render, pathToDotExecutable not set in server config file.")//
+          .type(MediaType.TEXT_PLAIN)//
+          .build();
+    }
+
+    String dot = getDot(name, emphasizeWhitespace);
+    StreamingOutput stream = outputStream -> {
+      dotEngine.renderAs(format, dot, outputStream);
+    };
+    return Response.ok(stream).build();
   }
 
 }
