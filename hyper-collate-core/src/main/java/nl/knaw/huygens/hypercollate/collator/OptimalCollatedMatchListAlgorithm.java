@@ -24,11 +24,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import eu.interedition.collatex.dekker.astar.AstarAlgorithm;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCollatedMatchList, LostPotential> implements OptimalCollatedMatchListFinder {
   private static final Logger LOG = LoggerFactory.getLogger(OptimalCollatedMatchListAlgorithm.class);
@@ -82,10 +84,14 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
     return matchList.isDetermined();
   }
 
+  AtomicInteger decisionTreeNodeCounter = new AtomicInteger();
+  Map<QuantumCollatedMatchList, Integer> decisionTreeNodeNumberMap = new HashMap<>();
+
   @Override
   protected Iterable<QuantumCollatedMatchList> neighborNodes(QuantumCollatedMatchList matchList) {
     if (rootNode == null) {
       rootNode = matchList;
+      decisionTreeNodeNumberMap.put(matchList, decisionTreeNodeCounter.getAndIncrement());
     }
 
     Set<QuantumCollatedMatchList> nextPotentialMatches = new LinkedHashSet<>();
@@ -115,9 +121,14 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
       addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch2);
     }
 
-    neighborNodeMap.put(matchList, nextPotentialMatches);
+    Set<QuantumCollatedMatchList> newPotentialMatches = nextPotentialMatches.stream()//
+        .filter(m -> !neighborNodeMap.containsKey(m))//
+        .collect(toSet());
 
-    return nextPotentialMatches;
+    neighborNodeMap.put(matchList, newPotentialMatches);
+    newPotentialMatches.forEach(l -> decisionTreeNodeNumberMap.putIfAbsent(l, decisionTreeNodeCounter.getAndIncrement()));
+
+    return newPotentialMatches;
   }
 
   private CollatedMatch getFirstPotentialMatch(List<CollatedMatch> matches, QuantumCollatedMatchList matchSet) {
@@ -150,7 +161,9 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
   }
 
   private DecisionTreeNode getConnectedDecisionTreeNode(QuantumCollatedMatchList node) {
-    DecisionTreeNode decisionTreeNode = DecisionTreeNode.of(node);
+    DecisionTreeNode decisionTreeNode = DecisionTreeNode.of(node)
+        .setCost(heuristicCostEstimate(node).getCost())
+        .setNumber(decisionTreeNodeNumberMap.get(node));
     neighborNodeMap.getOrDefault(node, Collections.emptySet())//
         .stream()//
         .map(this::getConnectedDecisionTreeNode)//

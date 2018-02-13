@@ -22,21 +22,20 @@ package nl.knaw.huygens.hypercollate.collator;
 
 import eu.interedition.collatex.Token;
 import eu.interedition.collatex.dekker.Tuple;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.*;
 import nl.knaw.huygens.hypercollate.model.*;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphRanking;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
+import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
-
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
 
 public class HyperCollator {
   private static final Logger LOG = LoggerFactory.getLogger(HyperCollator.class);
@@ -166,8 +165,7 @@ public class HyperCollator {
     LOG.info("matchList={}", matchList);
     OptimalCollatedMatchListAlgorithm optimalCollatedMatchListAlgorithm = new OptimalCollatedMatchListAlgorithm();
     List<CollatedMatch> optimalMatchList = optimalCollatedMatchListAlgorithm.getOptimalCollatedMatchList(matchList);
-//    DecisionTreeNode decisionTreeRootNode = optimalCollatedMatchListAlgorithm.getDecisionTreeRootNode();
-//    visualize(decisionTreeRootNode);
+//    visualizeDecisionTree(filteredSortedMatchesForWitness, witnessSigil, optimalCollatedMatchListAlgorithm);
 
     LOG.info("optimalMatchList={}", optimalMatchList);
 
@@ -197,6 +195,16 @@ public class HyperCollator {
     logCollated(collatedTokenVertexMap);
     addEdges(collationGraph, collatedTokenVertexMap);
     logCollated(collatedTokenVertexMap);
+  }
+
+  private void visualizeDecisionTree(List<Match> filteredSortedMatchesForWitness, String witnessSigil, OptimalCollatedMatchListAlgorithm optimalCollatedMatchListAlgorithm) {
+    DecisionTreeNode decisionTreeRootNode = optimalCollatedMatchListAlgorithm.getDecisionTreeRootNode();
+
+    List<Token> matchedWitnessTokens = filteredSortedMatchesForWitness.stream()//
+        .map(m -> m.getTokenVertexForWitness(witnessSigil))//
+        .map(TokenVertex::getToken)//
+        .collect(toList());
+    visualize(decisionTreeRootNode, matchedWitnessTokens);
   }
 
   private void addMarkupHyperEdges(CollationGraph collationGraph, VariantWitnessGraph witnessGraph, Map<Markup, MarkupNode> markupNodeIndex, TokenVertex tokenVertexForWitnessGraph, TextNode matchingNode) {
@@ -373,16 +381,73 @@ public class HyperCollator {
             }));
   }
 
-  private void visualize(DecisionTreeNode decisionTreeRootNode) {
+  private void visualize(DecisionTreeNode decisionTreeRootNode, List<Token> matchedWitnessTokens) {
     int indent = 0;
-    visualize(decisionTreeRootNode, indent);
+    AtomicInteger nodeCounter = new AtomicInteger(0);
+    visualize(decisionTreeRootNode, indent, nodeCounter, nodeCounter.getAndIncrement(), matchedWitnessTokens);
   }
 
-  private void visualize(DecisionTreeNode decisionTreeNode, int indent) {
-    String tab = indent == 0 ? "" : StringUtils.repeat("| ", indent - 1) + "|-";
-    System.out.println(tab + decisionTreeNode.getQuantumCollatedMatchList().toString());
-    for (DecisionTreeNode treeNode : decisionTreeNode.getChildNodes()) {
-      visualize(treeNode, indent + 1);
+  private void visualize(DecisionTreeNode decisionTreeNode, int indent, AtomicInteger nodeCounter, int nodeNum, List<Token> matchedWitnessTokens) {
+    String tab = (indent == 0)//
+        ? "" //
+        : StringUtils.repeat("| ", indent - 1) + "|-";
+
+    QuantumCollatedMatchList quantumCollatedMatchList = decisionTreeNode.getQuantumCollatedMatchList();
+//    System.out.println(tab + quantumCollatedMatchList.toString());
+
+    List<DecisionTreeNode> childNodes = decisionTreeNode.getChildNodes();
+    List<CollatedMatch> chosenTextNodeMatches = quantumCollatedMatchList.getChosenMatches().stream()//
+        .filter(cm -> cm.getWitnessVertex() instanceof SimpleTokenVertex)//
+        .collect(toList());
+    List<CollatedMatch> potentialTextNodeMatches = quantumCollatedMatchList.getPotentialMatches().stream()//
+        .filter(cm -> cm.getWitnessVertex() instanceof SimpleTokenVertex)//
+        .collect(toList());
+
+    Set<MarkedUpToken> chosenMatchedWitnessTokens = quantumCollatedMatchList.getChosenMatches()//
+        .stream()//
+        .map(CollatedMatch::getWitnessVertex)//
+        .filter(SimpleTokenVertex.class::isInstance)//
+        .map(SimpleTokenVertex.class::cast)//
+        .map(SimpleTokenVertex::getToken)
+        .map(MarkedUpToken.class::cast)//
+        .collect(toSet());
+
+    Set<MarkedUpToken> potentialMatchedWitnessTokens = quantumCollatedMatchList.getPotentialMatches()//
+        .stream()//
+        .map(CollatedMatch::getWitnessVertex)//
+        .filter(SimpleTokenVertex.class::isInstance)//
+        .map(SimpleTokenVertex.class::cast)//
+        .map(SimpleTokenVertex::getToken)
+        .map(MarkedUpToken.class::cast)//
+        .collect(toSet());
+
+
+    String fillColor = childNodes.isEmpty()//
+        ? decisionTreeNode.getQuantumCollatedMatchList().isDetermined() ? "#78b259" : "#f46349"//
+        : "white";
+//    System.out.printf("n%s[label=\"chosen:%s\\npotential:%s\",fillcolor=\"%s\"]%n",//
+//        nodeNum, chosenTextNodeMatches, potentialTextNodeMatches, fillColor);
+    String witnessMatchTokens = matchedWitnessTokens.stream()//
+        .filter(MarkedUpToken.class::isInstance)//
+        .map(MarkedUpToken.class::cast)//
+        .map(st -> {
+          String content = st.getContent();
+          if (chosenMatchedWitnessTokens.contains(st)) {
+            return String.format("<b><u>%s</u></b>", content); // highlight chosen token
+          }
+          if (potentialMatchedWitnessTokens.contains(st)) {
+            return content; // show potential token
+          }
+          return String.format("<s>%s</s>", content); // cross out discarded token
+        })//
+        .collect(joining("|"));
+    System.out.printf("n%s[label=<%s:%s>,fillcolor=\"%s\"]%n",//
+        nodeNum, decisionTreeNode.getNumber(), witnessMatchTokens, fillColor);
+
+    for (DecisionTreeNode treeNode : childNodes) {
+      int childNodeNum = nodeCounter.getAndIncrement();
+      visualize(treeNode, indent + 1, nodeCounter, childNodeNum, matchedWitnessTokens);
+      System.out.printf("n%s->n%s[label=\"%s\"]%n", nodeNum, childNodeNum, treeNode.getCost());
     }
   }
 
