@@ -327,9 +327,7 @@ public class CollationsResource {
           .build();
     }
 
-    StreamingOutput stream = outputStream -> {
-      dotEngine.renderAs(format, dot, outputStream);
-    };
+    StreamingOutput stream = outputStream -> dotEngine.renderAs(format, dot, outputStream);
     return Response.ok(stream).build();
   }
 

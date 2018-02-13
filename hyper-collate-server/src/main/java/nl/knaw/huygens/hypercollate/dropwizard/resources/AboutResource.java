@@ -52,7 +52,6 @@ public class AboutResource {
         .setVersion(properties.getProperty("version").orElse("no version set in about.properties"))//
         .setProjectDirURI(configuration.getProjectDir().toURI())//
         .setDotRendering(configuration.hasPathToDotExecutable());
-    ;
   }
 
   @GET
