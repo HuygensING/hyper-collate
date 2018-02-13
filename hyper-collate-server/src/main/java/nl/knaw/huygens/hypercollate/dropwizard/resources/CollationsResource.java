@@ -25,7 +25,6 @@ import com.google.common.base.Stopwatch;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.api.ResourcePaths;
 import nl.knaw.huygens.hypercollate.api.UTF8MediaType;
 import nl.knaw.huygens.hypercollate.collator.HyperCollator;
@@ -49,6 +48,8 @@ import javax.ws.rs.core.StreamingOutput;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.stream.Collectors.toList;
 
 @Api(ResourcePaths.COLLATIONS)
 @Path(ResourcePaths.COLLATIONS)
@@ -75,11 +76,11 @@ public class CollationsResource {
   private static final String APIPARAM_XML = "Witness Source (XML)";
   private static final String EMPHASIZE_WHITESPACE = "emphasize-whitespace";
 
-  public static final String IMAGE_PNG = "image/png";
-  public static final String IMAGE_SVG = "image/svg+xml";
-  public static final String PNG = "png";
-  public static final String SVG = "svg";
-  public static final String FALSE = "false";
+  private static final String IMAGE_PNG = "image/png";
+  private static final String IMAGE_SVG = "image/svg+xml";
+  private static final String PNG = "png";
+  private static final String SVG = "svg";
+  private static final String FALSE = "false";
 
   private final ServerConfiguration configuration;
   private final HyperCollator hypercollator = new HyperCollator();
@@ -91,11 +92,11 @@ public class CollationsResource {
     this.configuration = configuration;
     this.collationStore = collationStore;
     if (configuration.hasPathToDotExecutable()) {
-      this.dotEngine = null;
-      this.dotEngineAvailable = false;
-    } else {
       this.dotEngine = new DotEngine(configuration.getPathToDotExecutable());
       this.dotEngineAvailable = true;
+    } else {
+      this.dotEngine = null;
+      this.dotEngineAvailable = false;
     }
   }
 
