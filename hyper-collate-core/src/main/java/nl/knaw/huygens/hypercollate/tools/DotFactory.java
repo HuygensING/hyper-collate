@@ -51,15 +51,10 @@ public class DotFactory {
         .append("node [style=\"filled\";fillcolor=\"white\"]\n");
 
     List<String> edges = new ArrayList<>();
-    Deque<TokenVertex> nextTokens = new LinkedList<>();
-    nextTokens.add(graph.getStartTokenVertex());
-    Set<TokenVertex> verticesDone = new HashSet<>();
     Set<Markup> openMarkup = new HashSet<>();
     AtomicInteger clusterCounter = new AtomicInteger();
     ColorContext colorContext = new ColorContext();
-    while (!nextTokens.isEmpty()) {
-      TokenVertex tokenVertex = nextTokens.pop();
-
+    for (TokenVertex tokenVertex : graph.vertices()) {
       List<Markup> markupListForTokenVertex = graph.getMarkupListForTokenVertex(tokenVertex);
       Set<Markup> opened = new HashSet<>();
       opened.addAll(openMarkup);
@@ -79,25 +74,21 @@ public class DotFactory {
       openMarkup.removeAll(markupToClose);
       openMarkup.addAll(markupToOpen);
 
-      if (!verticesDone.contains(tokenVertex)) {
-        String tokenVariable = vertexVariable(tokenVertex);
-        if (tokenVertex instanceof SimpleTokenVertex) {
-          SimpleTokenVertex stv = (SimpleTokenVertex) tokenVertex;
-          dotBuilder.append(tokenVariable)//
-              .append(" [label=<")//
-              .append(asLabel(stv.getContent(), whitespaceCharacter))//
-              .append(">]\n");
-        } else {
-          dotBuilder.append(tokenVariable)//
-              .append(" [label=\"\";shape=doublecircle,rank=middle]\n");
-        }
-        tokenVertex.getOutgoingTokenVertexStream().forEach(ot -> {
-          String vertexVariable = vertexVariable(ot);
-          edges.add(tokenVariable + "->" + vertexVariable);
-          nextTokens.add(ot);
-        });
-        verticesDone.add(tokenVertex);
+      String tokenVariable = vertexVariable(tokenVertex);
+      if (tokenVertex instanceof SimpleTokenVertex) {
+        SimpleTokenVertex stv = (SimpleTokenVertex) tokenVertex;
+        dotBuilder.append(tokenVariable)//
+            .append(" [label=<")//
+            .append(asLabel(stv.getContent(), whitespaceCharacter))//
+            .append(">]\n");
+      } else {
+        dotBuilder.append(tokenVariable)//
+            .append(" [label=\"\";shape=doublecircle,rank=middle]\n");
       }
+      tokenVertex.getOutgoingTokenVertexStream().forEach(ot -> {
+        String vertexVariable = vertexVariable(ot);
+        edges.add(tokenVariable + "->" + vertexVariable);
+      });
     }
     edges.stream().sorted().forEach(e -> dotBuilder.append(e).append("\n"));
     dotBuilder.append("}");

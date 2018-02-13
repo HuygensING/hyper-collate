@@ -23,10 +23,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ColorContext {
-  Map<String, String> assignedColors = new HashMap<>();
-  String[] colors = {"yellow", "orange", "#9aed7d", "lightblue", "grey", "#4286f4", "#ef10eb",
+  private Map<String, String> assignedColors = new HashMap<>();
+  private String[] colors = {"yellow", "orange", "#9aed7d", "lightblue", "grey", "#4286f4", "#ef10eb",
       "#9091D4", "#B190D4", "#B3D490", "#D49091", "#E62023", "#86E620", "#8020E6", "#20E6E3"};
-  int colorIndex = 0;
+  private int colorIndex = 0;
 
   public String colorFor(String tagName) {
     if (assignedColors.containsKey(tagName)) {
