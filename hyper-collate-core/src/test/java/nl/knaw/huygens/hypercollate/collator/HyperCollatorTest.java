@@ -894,7 +894,7 @@ public class HyperCollatorTest extends HyperCollateTest {
   }
 
   private CollationGraph testHyperCollation(VariantWitnessGraph witness1, VariantWitnessGraph witness2, String expected) {
-    Map<String, Long> collationDuration = new HashMap<>();
+//    Map<String, Long> collationDuration = new HashMap<>();
     Stopwatch stopwatch = Stopwatch.createStarted();
     CollationGraph collation0 = hyperCollator.collate(witness1, witness2);
     stopwatch.stop();
@@ -914,7 +914,7 @@ public class HyperCollatorTest extends HyperCollateTest {
   }
 
   private CollationGraph testHyperCollation3(VariantWitnessGraph witness1, VariantWitnessGraph witness2, VariantWitnessGraph witness3, String expected) {
-    Map<String, Long> collationDuration = new HashMap<>();
+//    Map<String, Long> collationDuration = new HashMap<>();
     Stopwatch stopwatch = Stopwatch.createStarted();
     CollationGraph collation = hyperCollator.collate(witness1, witness2, witness3);
     stopwatch.stop();

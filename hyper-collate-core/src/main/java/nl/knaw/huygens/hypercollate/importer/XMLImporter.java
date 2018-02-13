@@ -155,7 +155,7 @@ public class XMLImporter {
 
   private void handleStartElement(StartElement startElement, Context context) {
     String tagName = startElement.getName().toString();
-    Markup markup = new Markup(tagName);
+    Markup markup = new Markup(tagName).setDepth(context.openMarkup.size());
     startElement.getAttributes().forEachRemaining((Object object) -> {
       Attribute attribute = (Attribute) object;
       String attributeName = attribute.getName().toString();

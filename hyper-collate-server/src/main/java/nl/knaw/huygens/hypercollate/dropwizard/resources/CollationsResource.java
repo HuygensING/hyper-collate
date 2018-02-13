@@ -346,6 +346,6 @@ public class CollationsResource {
   private String getDot(String name, String sigil, boolean emphasizeWhitespace) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     VariantWitnessGraph variantWitnessGraph = collationInfo.getWitnessGraphMap().get(sigil);
-    return new DotFactory(emphasizeWhitespace).fromVariantWitnessGraph(variantWitnessGraph);
+    return new DotFactory(emphasizeWhitespace).fromVariantWitnessGraphColored(variantWitnessGraph);
   }
 }

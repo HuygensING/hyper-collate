@@ -48,7 +48,7 @@ public class HyperCollateTest {
     VariantWitnessGraph wg = TokenMerger.merge(variantWitnessGraph);
     // VariantWitnessGraph wg = variantWitnessGraph;
 
-    String dot = new DotFactory(true).fromVariantWitnessGraph(wg);
+    String dot = new DotFactory(true).fromVariantWitnessGraphSimple(wg);
     // System.out.println(dot);
     writeGraph(dot, name);
     assertThat(dot).isEqualTo(expectedDot);

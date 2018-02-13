@@ -81,7 +81,7 @@ public class VariantWitnessGraphTest extends HyperCollateTest {
     List<TokenVertex> incoming = mtv5.getIncomingTokenVertexStream().collect(toList());
     assertThat(incoming).containsOnly(mtv3, mtv4);
 
-    String dot = new DotFactory(false).fromVariantWitnessGraph(vwg1);
+    String dot = new DotFactory(false).fromVariantWitnessGraphSimple(vwg1);
     System.out.println(dot);
     String expected = "digraph VariantWitnessGraph{\n" +//
         "graph [rankdir=LR]\n" +//

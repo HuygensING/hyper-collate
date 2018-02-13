@@ -24,7 +24,9 @@ import eu.interedition.collatex.Token;
 import nl.knaw.huygens.hypercollate.model.*;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -43,7 +45,77 @@ public class DotFactory {
    * @return A string containing the contents of a .dot representation of the
    * variant witness graph.
    */
-  public String fromVariantWitnessGraph(VariantWitnessGraph graph) {
+  public String fromVariantWitnessGraphColored(VariantWitnessGraph graph) {
+    StringBuilder dotBuilder = new StringBuilder("digraph VariantWitnessGraph{\n")
+        .append("graph [rankdir=LR]\n") //
+        .append("node [style=\"filled\";fillcolor=\"white\"]\n");
+
+    List<String> edges = new ArrayList<>();
+    Deque<TokenVertex> nextTokens = new LinkedList<>();
+    nextTokens.add(graph.getStartTokenVertex());
+    Set<TokenVertex> verticesDone = new HashSet<>();
+    Set<Markup> openMarkup = new HashSet<>();
+    AtomicInteger clusterCounter = new AtomicInteger();
+    ColorContext colorContext = new ColorContext();
+    while (!nextTokens.isEmpty()) {
+      TokenVertex tokenVertex = nextTokens.pop();
+
+      List<Markup> markupListForTokenVertex = graph.getMarkupListForTokenVertex(tokenVertex);
+      Set<Markup> opened = new HashSet<>();
+      opened.addAll(openMarkup);
+
+      List<Markup> markupToClose = new ArrayList<>();
+      markupToClose.addAll(opened);
+      markupToClose.removeAll(markupListForTokenVertex);
+      markupToClose.sort(comparingInt(Markup::getDepth));
+      markupToClose.forEach(m -> closeMarkup(m, dotBuilder));
+
+      List<Markup> markupToOpen = new ArrayList<>();
+      markupToOpen.addAll(markupListForTokenVertex);
+      markupToOpen.removeAll(opened);
+      markupToOpen.sort(comparingInt(Markup::getDepth));
+      markupToOpen.forEach(m -> openMarkup(m, dotBuilder, clusterCounter.getAndIncrement(), colorContext));
+
+      openMarkup.removeAll(markupToClose);
+      openMarkup.addAll(markupToOpen);
+
+      if (!verticesDone.contains(tokenVertex)) {
+        String tokenVariable = vertexVariable(tokenVertex);
+        if (tokenVertex instanceof SimpleTokenVertex) {
+          SimpleTokenVertex stv = (SimpleTokenVertex) tokenVertex;
+          dotBuilder.append(tokenVariable)//
+              .append(" [label=<")//
+              .append(asLabel(stv.getContent(), whitespaceCharacter))//
+              .append(">]\n");
+        } else {
+          dotBuilder.append(tokenVariable)//
+              .append(" [label=\"\";shape=doublecircle,rank=middle]\n");
+        }
+        tokenVertex.getOutgoingTokenVertexStream().forEach(ot -> {
+          String vertexVariable = vertexVariable(ot);
+          edges.add(tokenVariable + "->" + vertexVariable);
+          nextTokens.add(ot);
+        });
+        verticesDone.add(tokenVertex);
+      }
+    }
+    edges.stream().sorted().forEach(e -> dotBuilder.append(e).append("\n"));
+    dotBuilder.append("}");
+    return dotBuilder.toString();
+  }
+
+  private void openMarkup(Markup m, StringBuilder dotBuilder, int clusterNum, ColorContext colorContext) {
+    String color = colorContext.colorFor(m.getTagName());
+    dotBuilder.append("subgraph cluster_").append(clusterNum).append(" {\n")//
+        .append("label=<<i><b>").append(m.getTagName()).append("</b></i>>\n")//
+        .append("graph[style=\"rounded,filled\";fillcolor=\"").append(color).append("\"]\n");
+  }
+
+  private void closeMarkup(Markup m, StringBuilder dotBuilder) {
+    dotBuilder.append("}\n");
+  }
+
+  public String fromVariantWitnessGraphSimple(VariantWitnessGraph graph) {
     StringBuilder dotBuilder = new StringBuilder("digraph VariantWitnessGraph{\ngraph [rankdir=LR]\nlabelloc=b\n");
 
     List<String> edges = new ArrayList<>();
