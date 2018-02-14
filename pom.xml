@@ -17,6 +17,7 @@
         <module>hyper-collate-core</module>
         <module>hyper-collate-api</module>
         <module>hyper-collate-test</module>
+        <module>hyper-collate-war</module>
     </modules>
 
     <properties>
@@ -51,6 +52,7 @@
         <junit.version>4.12</junit.version>
         <junitparams.version>1.0.5</junitparams.version>
         <mockito.version>2.13.0</mockito.version>
+        <servlet-api.version>4.0.0-b01</servlet-api.version>
 
         <buildnumber-maven.version>1.4</buildnumber-maven.version>
         <build-helper-maven.version>3.0.0</build-helper-maven.version>
@@ -61,6 +63,7 @@
         <maven-source.version>3.0.1</maven-source.version>
         <wagon-ssh.version>2.7</wagon-ssh.version>
         <maven-javadoc.version>3.0.0-M1</maven-javadoc.version>
+        <maven-war.version>3.2.0</maven-war.version>
         <maven-project-info-reports.version>2.9</maven-project-info-reports.version>
         <logback-classic.version>1.2.3</logback-classic.version>
         <graphviz-java.version>0.2.2</graphviz-java.version>
@@ -174,6 +177,8 @@
                                 <exclude>META-INF/*.SF</exclude>
                                 <exclude>META-INF/*.DSA</exclude>
                                 <exclude>META-INF/*.RSA</exclude>
+                                <exclude>license/**</exclude>
+                                <exclude>license/</exclude>
                             </excludes>
                         </filter>
                     </filters>

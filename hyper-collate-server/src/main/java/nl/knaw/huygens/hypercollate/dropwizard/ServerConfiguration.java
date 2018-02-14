@@ -39,7 +39,7 @@ public class ServerConfiguration extends Configuration {
   private final File projectDir;
   private final File collationsDir;
 
-  ServerConfiguration() {
+  public ServerConfiguration() {
     super();
     projectDir = Paths.get(System.getProperty("user.home"), ".hypercollate").toFile();
     collationsDir = new File(projectDir, "collations");
