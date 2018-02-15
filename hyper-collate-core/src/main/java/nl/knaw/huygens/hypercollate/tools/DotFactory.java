@@ -21,12 +21,11 @@ package nl.knaw.huygens.hypercollate.tools;
  */
 
 import eu.interedition.collatex.Token;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.model.*;
 
 import java.util.*;
-
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 public class DotFactory {
 
@@ -45,7 +44,12 @@ public class DotFactory {
    */
   public String fromVariantWitnessGraph(VariantWitnessGraph graph) {
     StringBuilder dotBuilder = new StringBuilder("digraph VariantWitnessGraph{\ngraph [rankdir=LR]\nlabelloc=b\n");
+    addNodesAndEdges(dotBuilder, graph);
+    dotBuilder.append("}");
+    return dotBuilder.toString();
+  }
 
+  public void addNodesAndEdges(StringBuilder dotBuilder, VariantWitnessGraph graph) {
     List<String> edges = new ArrayList<>();
     Deque<TokenVertex> nextTokens = new LinkedList<>();
     nextTokens.add(graph.getStartTokenVertex());
@@ -77,8 +81,6 @@ public class DotFactory {
       }
     }
     edges.stream().sorted().forEach(e -> dotBuilder.append(e).append("\n"));
-    dotBuilder.append("}");
-    return dotBuilder.toString();
   }
 
   private String vertexVariable(TokenVertex tokenVertex) {
@@ -99,6 +101,12 @@ public class DotFactory {
 
   public String fromCollationGraph(CollationGraph collation) {
     StringBuilder dotBuilder = new StringBuilder("digraph CollationGraph{\nlabelloc=b\n");
+    addNodesAndEdges(dotBuilder, collation);
+    dotBuilder.append("}");
+    return dotBuilder.toString();
+  }
+
+  public void addNodesAndEdges(StringBuilder dotBuilder, CollationGraph collation) {
     Map<TextNode, String> nodeIdentifiers = new HashMap<>();
 
     List<TextNode> nodes = collation.traverseTextNodes();
@@ -110,9 +118,6 @@ public class DotFactory {
       appendNodeLine(dotBuilder, node, nodeId);
     }
     appendEdgeLines(dotBuilder, collation, nodeIdentifiers, nodes);
-
-    dotBuilder.append("}");
-    return dotBuilder.toString();
   }
 
   private void appendEdgeLines(StringBuilder dotBuilder, CollationGraph collation, Map<TextNode, String> nodeIdentifiers, List<TextNode> nodes) {

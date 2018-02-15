@@ -27,6 +27,7 @@ import static java.util.stream.Collectors.*;
 import nl.knaw.huygens.hypercollate.model.*;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphRanking;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
+import nl.knaw.huygens.hypercollate.tools.DotFactory;
 import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -165,7 +166,8 @@ public class HyperCollator {
     LOG.info("matchList={}", matchList);
     OptimalCollatedMatchListAlgorithm optimalCollatedMatchListAlgorithm = new OptimalCollatedMatchListAlgorithm();
     List<CollatedMatch> optimalMatchList = optimalCollatedMatchListAlgorithm.getOptimalCollatedMatchList(matchList);
-//    visualizeDecisionTree(filteredSortedMatchesForWitness, witnessSigil, optimalCollatedMatchListAlgorithm);
+    visualizeDecisionTree(filteredSortedMatchesForWitness, witnessSigil, optimalCollatedMatchListAlgorithm);
+    visualizeDecisionTree(collationGraph, witnessGraph, filteredSortedMatchesForWitness, optimalCollatedMatchListAlgorithm.getDecisionTreeRootNode());
 
     LOG.info("optimalMatchList={}", optimalMatchList);
 
@@ -196,6 +198,7 @@ public class HyperCollator {
     addEdges(collationGraph, collatedTokenVertexMap);
     logCollated(collatedTokenVertexMap);
   }
+
 
   private void visualizeDecisionTree(List<Match> filteredSortedMatchesForWitness, String witnessSigil, OptimalCollatedMatchListAlgorithm optimalCollatedMatchListAlgorithm) {
     DecisionTreeNode decisionTreeRootNode = optimalCollatedMatchListAlgorithm.getDecisionTreeRootNode();
@@ -431,7 +434,7 @@ public class HyperCollator {
         .filter(MarkedUpToken.class::isInstance)//
         .map(MarkedUpToken.class::cast)//
         .map(st -> {
-          String content = st.getContent();
+          String content = st.getContent().replaceAll("\\s+", "_");
           if (chosenMatchedWitnessTokens.contains(st)) {
             return String.format("<b><u>%s</u></b>", content); // highlight chosen token
           }
@@ -451,5 +454,23 @@ public class HyperCollator {
     }
   }
 
+  private void visualizeDecisionTree(CollationGraph collationGraph,//
+                                     VariantWitnessGraph witnessGraph,//
+                                     List<Match> filteredSortedMatchesForWitness,//
+                                     DecisionTreeNode decisionTreeRootNode) {
+    DotFactory dotFactory = new DotFactory(true);
+    StringBuilder builder = new StringBuilder("digraph DecisionTree{\n")//
+        .append("subgraph cluster_witnesses{\n")//
+        .append("graph [rankdir=LR]\n")//
+        .append("labelloc=b\n");
+    dotFactory.addNodesAndEdges(builder, collationGraph);
+    dotFactory.addNodesAndEdges(builder, witnessGraph);
+    builder.append("}\n")//
+        .append("}\n");
+    System.out.println();
+    System.out.println(builder.toString());
+    System.out.println();
+
+  }
 
 }

@@ -87,7 +87,6 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
   AtomicInteger decisionTreeNodeCounter = new AtomicInteger();
   Map<QuantumCollatedMatchList, Integer> decisionTreeNodeNumberMap = new HashMap<>();
 
-  @Override
   protected Iterable<QuantumCollatedMatchList> neighborNodes(QuantumCollatedMatchList matchList) {
     if (rootNode == null) {
       rootNode = matchList;
@@ -97,26 +96,13 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
     Set<QuantumCollatedMatchList> nextPotentialMatches = new LinkedHashSet<>();
 
     CollatedMatch firstPotentialMatch1 = getFirstPotentialMatch(this.matchesSortedByNode, matchList);
-    List<CollatedMatch> matchesSortedByWitness = this.matchesSortedByWitness;
-    CollatedMatch firstPotentialMatch2 = getFirstPotentialMatch(matchesSortedByWitness, matchList);
+    CollatedMatch firstPotentialMatch2 = getFirstPotentialMatch(this.matchesSortedByWitness, matchList);
 
-    addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1);
     if (firstPotentialMatch1.equals(firstPotentialMatch2)) {
-      QuantumCollatedMatchList quantumCollatedMatchList = matchList;
-      boolean goOn = true;
-      while (goOn) {
-        quantumCollatedMatchList = quantumCollatedMatchList.chooseMatch(firstPotentialMatch1);
-        if (quantumCollatedMatchList.isDetermined()) {
-          goOn = false;
-        } else {
-          firstPotentialMatch1 = getFirstPotentialMatch(this.matchesSortedByNode, quantumCollatedMatchList);
-          firstPotentialMatch2 = getFirstPotentialMatch(this.matchesSortedByWitness, quantumCollatedMatchList);
-          goOn = firstPotentialMatch1.equals(firstPotentialMatch2);
-        }
-      }
-      nextPotentialMatches.add(quantumCollatedMatchList);
+      keepChoosingMatchesUntilPotentialsAreDifferent(matchList, nextPotentialMatches, firstPotentialMatch1);
 
     } else {
+//      addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1);
       addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1);
       addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch2);
     }
@@ -129,6 +115,52 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
     newPotentialMatches.forEach(l -> decisionTreeNodeNumberMap.putIfAbsent(l, decisionTreeNodeCounter.getAndIncrement()));
 
     return newPotentialMatches;
+  }
+
+  private void keepChoosingMatchesUntilPotentialsAreDifferent(QuantumCollatedMatchList matchList, Set<QuantumCollatedMatchList> nextPotentialMatches, CollatedMatch firstPotentialMatch1) {
+    CollatedMatch firstPotentialMatch2;
+    QuantumCollatedMatchList quantumCollatedMatchList = matchList;
+    boolean goOn = true;
+    while (goOn) {
+      quantumCollatedMatchList = quantumCollatedMatchList.chooseMatch(firstPotentialMatch1);
+      if (quantumCollatedMatchList.isDetermined()) {
+        goOn = false;
+      } else {
+        firstPotentialMatch1 = getFirstPotentialMatch(this.matchesSortedByNode, quantumCollatedMatchList);
+        firstPotentialMatch2 = getFirstPotentialMatch(this.matchesSortedByWitness, quantumCollatedMatchList);
+        goOn = firstPotentialMatch1.equals(firstPotentialMatch2);
+      }
+    }
+    nextPotentialMatches.add(quantumCollatedMatchList);
+  }
+
+  protected Iterable<QuantumCollatedMatchList> neighborNodes0(QuantumCollatedMatchList matchList) {
+    LOG.info("neighborNodes: matchList = {}", matchList);
+    if (rootNode == null) {
+      rootNode = matchList;
+      decisionTreeNodeNumberMap.put(matchList, decisionTreeNodeCounter.getAndIncrement());
+    }
+
+    Set<QuantumCollatedMatchList> nextPotentialMatches = new LinkedHashSet<>();
+
+    CollatedMatch firstPotentialMatch1 = getFirstPotentialMatch(this.matchesSortedByNode, matchList);
+    CollatedMatch firstPotentialMatch2 = getFirstPotentialMatch(this.matchesSortedByWitness, matchList);
+
+    addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1);
+    if (firstPotentialMatch1.equals(firstPotentialMatch2)) {
+      //TODO
+    } else {
+      addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch2);
+    }
+
+    Set<QuantumCollatedMatchList> newPotentialMatches = nextPotentialMatches.stream()//
+        .filter(m -> !neighborNodeMap.containsKey(m))//
+        .collect(toSet());
+
+    neighborNodeMap.put(matchList, newPotentialMatches);
+    newPotentialMatches.forEach(l -> decisionTreeNodeNumberMap.putIfAbsent(l, decisionTreeNodeCounter.getAndIncrement()));
+
+    return nextPotentialMatches;
   }
 
   private CollatedMatch getFirstPotentialMatch(List<CollatedMatch> matches, QuantumCollatedMatchList matchSet) {
@@ -144,7 +176,6 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
     nextPotentialMatches.add(quantumMatchSet2);
   }
 
-
   @Override
   protected LostPotential heuristicCostEstimate(QuantumCollatedMatchList matchList) {
     return new LostPotential(maxPotential - matchList.totalSize());
@@ -157,17 +188,21 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
 
   public DecisionTreeNode getDecisionTreeRootNode() {
     Preconditions.checkNotNull(rootNode, "aStart() needs to be called first.");
-    return getConnectedDecisionTreeNode(rootNode);
+    Set<QuantumCollatedMatchList> visitedNodes = new HashSet<>();
+    return getConnectedDecisionTreeNode(rootNode, visitedNodes);
   }
 
-  private DecisionTreeNode getConnectedDecisionTreeNode(QuantumCollatedMatchList node) {
+  private DecisionTreeNode getConnectedDecisionTreeNode(QuantumCollatedMatchList node, Set<QuantumCollatedMatchList> nodesVisited) {
     DecisionTreeNode decisionTreeNode = DecisionTreeNode.of(node)
         .setCost(heuristicCostEstimate(node).getCost())
         .setNumber(decisionTreeNodeNumberMap.get(node));
-    neighborNodeMap.getOrDefault(node, Collections.emptySet())//
-        .stream()//
-        .map(this::getConnectedDecisionTreeNode)//
-        .forEach(decisionTreeNode::addChildNode);
+    if (!nodesVisited.contains(node)) {
+      nodesVisited.add(node);
+      neighborNodeMap.getOrDefault(node, Collections.emptySet())//
+          .stream()//
+          .map(n -> getConnectedDecisionTreeNode(n, nodesVisited))//
+          .forEach(decisionTreeNode::addChildNode);
+    }
     return decisionTreeNode;
   }
 
