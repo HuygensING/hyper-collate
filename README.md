@@ -6,9 +6,9 @@ This is a prototype that takes care of intradocumentary variation. The code deal
 ## Server
 
 There is a HyperCollate server with a REST-based API to interact with the HyperCollate algorithm.
-To work with the server, you can either download the latest prebuilt jar, or clone this repository and build it yourself.
+To work with the server, you can either download the latest prebuilt jar or war, or clone this repository and build it yourself.
 
-### Option 1 - download the prebuilt
+### Option 1a - download the prebuilt (jar)
 
 - Download the jar from <https://cdn.huygens.knaw.nl/hyper-collate-server.jar> to the current directory.
 - Download an example config file from <https://raw.githubusercontent.com/HuygensING/hyper-collate/master/hyper-collate-server/config.yml> to the same directory.
@@ -16,23 +16,34 @@ To work with the server, you can either download the latest prebuilt jar, or clo
 - `java -jar hyper-collate-server.jar server config.yml`
 - In your browser, go to the `baseURI` URL from `config.yml`.
 
+### Option 1b - download the prebuilt (war)
+
+1. Download the war from <https://cdn.huygens.knaw.nl/hyper-collate-server.war> to the current directory.
+2. Download an example config file from <https://raw.githubusercontent.com/HuygensING/hyper-collate/master/hyper-collate-war/hypercollate.xml> to the same directory.
+3. Change the `Context docBase`, `Context path` and the `value`s for `projectDir` and `baseURI` in `hypercollate.xml` as needed.
+4. copy `` to `$TOMCAT_HOME/conf/[Engine]/[Host]/` (e.g. `/opt/tomcat8/conf/Catalina/localhost/`)
+5. In your browser, go to the `baseURI` URL from `hypercollate.xml`.
 
 ### Option 2 - build your own
 
 - `mvn package`
 
-to build the hyper-collate-server jar, then to use it:
+to build the hyper-collate-server jar and war, then to use the jar:
 
 - `cd hyper-collate-server`
 - `java -jar target/hyper-collate-server-1.0-SNAPSHOT.jar server config.yml`
 - In your browser, open <http://127.0.0.1:8080/>
 
+the war can be found in `hyper-collate-war/target`, an example config file in `hyper-collate-war/hypercollate.xml`
+Follow steps 3 - 5 from Option 1b  
+
 
 ### Interacting with the server
 
 Interaction with the server is through REST calls.
-This can be done in the computer language of your choice, with the `curl` tool, or with the built-in API explorer at 
+This can be done in the computer language of your choice, with the `curl` tool, or (for the jar option) with the built-in API explorer at 
 the `/swagger` endpoint of the server.
+The war just exposes a swagger file without a UI, in the `/swagger.json` or `/swagger.yaml` endpoints
 
 - **Create a new Collation with a given name:**    
   `PUT /collations/{name}`  

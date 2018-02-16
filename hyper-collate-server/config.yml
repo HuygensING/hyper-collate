@@ -12,4 +12,4 @@ logging:
 
 # DO NOT CHANGE THESE SETTINGS:
 swagger:
-  resourcePackage: nl.knaw.huygens.hypercollate.dropwizard.resources
+  resourcePackage: nl.knaw.huygens.hypercollate.rest.resources
