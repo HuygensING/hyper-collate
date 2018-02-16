@@ -36,18 +36,11 @@ public class ServerConfiguration extends Configuration {
 
   private String pathToDotExecutable;
 
-  private final File projectDir;
-  private final File collationsDir;
+  private File projectDir;
+  private File collationsDir;
 
   public ServerConfiguration() {
     super();
-    projectDir = Paths.get(System.getProperty("user.home"), ".hypercollate").toFile();
-    collationsDir = new File(projectDir, "collations");
-    try {
-      Files.createDirectories(collationsDir.toPath());
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   public void setBaseURI(String baseURI) {
@@ -62,10 +55,13 @@ public class ServerConfiguration extends Configuration {
   public SwaggerBundleConfiguration swaggerBundleConfiguration;
 
   public File getProjectDir() {
+    checkProjectDirIsInitialized();
     return this.projectDir;
+
   }
 
   public File getCollationsDir() {
+    checkProjectDirIsInitialized();
     return collationsDir;
   }
 
@@ -79,5 +75,21 @@ public class ServerConfiguration extends Configuration {
 
   public boolean hasPathToDotExecutable() {
     return pathToDotExecutable != null;
+  }
+
+  public void setProjectDir(String projectDir) {
+    this.projectDir = new File(projectDir);
+    collationsDir = new File(projectDir, "collations");
+    try {
+      Files.createDirectories(collationsDir.toPath());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void checkProjectDirIsInitialized() {
+    if (this.projectDir == null) {
+      setProjectDir(Paths.get(System.getProperty("user.home"), ".hypercollate").toString());
+    }
   }
 }

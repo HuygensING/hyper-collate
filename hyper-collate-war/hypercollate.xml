@@ -1,0 +1,4 @@
+<Context docBase="hyper-collate.war" path="/hypercollate" reloadable="true">
+    <Environment name="projectDir" type="java.lang.String" value="C:\tmp\.hypercollate" />
+    <Environment name="baseURI" type="java.lang.String" value="http://localhost:8080/hypercollate" />
+</Context>
