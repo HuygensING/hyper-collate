@@ -1,8 +1,8 @@
-package nl.knaw.huygens.hypercollate.dropwizard.resources;
+package nl.knaw.huygens.hypercollate.rest.resources;
 
 /*-
  * #%L
- * hyper-collate-server
+ * hyper-collate-rest
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
@@ -19,22 +19,15 @@ package nl.knaw.huygens.hypercollate.dropwizard.resources;
  * limitations under the License.
  * #L%
  */
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import org.junit.Test;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
-
-@Provider
-public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException> {
-
-  @Override
-  public Response toResponse(RuntimeException exception) {
-    return Response.status(Status.BAD_REQUEST)//
-        .entity(exception.getMessage())//
-        .type(MediaType.TEXT_PLAIN)//
-        .build();
+public class HomePageResourceTest {
+  @Test
+  public void testNoRobots() {
+    HomePageResource resource = new HomePageResource();
+    String noRobots = resource.noRobots();
+    assertThat(noRobots).isEqualTo("User-agent: *\n" +
+        "Disallow: /\n");
   }
-
 }

@@ -1,8 +1,8 @@
-package nl.knaw.huygens.hypercollate.dropwizard.api;
+package nl.knaw.huygens.hypercollate.rest;
 
 /*-
  * #%L
- * hyper-collate-server
+ * hyper-collate-rest
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
@@ -20,7 +20,6 @@ package nl.knaw.huygens.hypercollate.dropwizard.api;
  * #L%
  */
 
-import nl.knaw.huygens.hypercollate.dropwizard.db.CollationInfo;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 
 import java.util.Optional;

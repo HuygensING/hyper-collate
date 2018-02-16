@@ -1,8 +1,8 @@
-package nl.knaw.huygens.hypercollate.dropwizard.db;
+package nl.knaw.huygens.hypercollate.rest;
 
 /*-
  * #%L
- * hyper-collate-server
+ * hyper-collate-rest
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======

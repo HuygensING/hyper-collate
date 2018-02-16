@@ -13,10 +13,11 @@
     <inceptionYear>2017</inceptionYear>
 
     <modules>
-        <module>hyper-collate-server</module>
-        <module>hyper-collate-core</module>
         <module>hyper-collate-api</module>
         <module>hyper-collate-test</module>
+        <module>hyper-collate-core</module>
+        <module>hyper-collate-rest</module>
+        <module>hyper-collate-server</module>
         <module>hyper-collate-war</module>
     </modules>
 
@@ -69,6 +70,10 @@
         <graphviz-java.version>0.2.2</graphviz-java.version>
         <batik.version>1.9</batik.version>
         <guava.version>21.0</guava.version>
+        <swagger.version>1.5.16</swagger.version>
+        <metrics-annotation.version>3.2.5</metrics-annotation.version>
+        <jackson.version>2.9.1</jackson.version>
+        <validation-api.version>1.1.0.Final</validation-api.version>
     </properties>
 
     <build>

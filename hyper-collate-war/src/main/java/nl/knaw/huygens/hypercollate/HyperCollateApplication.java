@@ -20,14 +20,11 @@ package nl.knaw.huygens.hypercollate;
  * #L%
  */
 
-import io.federecio.dropwizard.swagger.SwaggerOAuth2Configuration;
-import io.federecio.dropwizard.swagger.SwaggerResource;
-import io.federecio.dropwizard.swagger.SwaggerViewConfiguration;
 import io.swagger.jaxrs.config.BeanConfig;
-import nl.knaw.huygens.hypercollate.dropwizard.ServerConfiguration;
-import nl.knaw.huygens.hypercollate.dropwizard.api.CollationStore;
-import nl.knaw.huygens.hypercollate.dropwizard.db.CachedCollationStore;
-import nl.knaw.huygens.hypercollate.dropwizard.resources.*;
+import nl.knaw.huygens.hypercollate.rest.CachedCollationStore;
+import nl.knaw.huygens.hypercollate.rest.CollationStore;
+import nl.knaw.huygens.hypercollate.rest.HyperCollateConfiguration;
+import nl.knaw.huygens.hypercollate.rest.resources.*;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -52,7 +49,7 @@ public class HyperCollateApplication extends Application {
     beanConfig.setSchemes(new String[]{"http"});
     beanConfig.setTitle("HyperCollate API");
     beanConfig.setBasePath("swagger");
-    beanConfig.setResourcePackage("nl.knaw.huygens.hypercollate.dropwizard.resources");
+    beanConfig.setResourcePackage("nl.knaw.huygens.hypercollate.rest.resources");
     beanConfig.setScan(true);
   }
 
@@ -66,7 +63,7 @@ public class HyperCollateApplication extends Application {
 
   @Override
   public Set<Object> getSingletons() {
-    ServerConfiguration configuration = getServerConfiguration();
+    HyperCollateConfiguration configuration = getServerConfiguration();
 
     Set<Object> singletons = new HashSet<>();
     singletons.add(new HomePageResource());
@@ -75,42 +72,23 @@ public class HyperCollateApplication extends Application {
     singletons.add(new CollationsResource(configuration, collationStore));
     singletons.add(new XMLStreamExceptionMapper());
     singletons.add(new RuntimeExceptionMapper());
-//    SwaggerResource swaggerResource = getSwaggerResource(configuration);
-//    singletons.add(swaggerResource);
-//    singletons.add(new SwaggerBundle<ServerConfiguration>() {
-//      @Override
-//      protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(ServerConfiguration configuration) {
-//        SwaggerBundleConfiguration swaggerBundleConfiguration = new SwaggerBundleConfiguration();
-//        swaggerBundleConfiguration.setResourcePackage("nl.knaw.huygens.hypercollate.dropwizard.resources");
-//        return swaggerBundleConfiguration;
-//      }
-//    });
     return singletons;
   }
 
-  private ServerConfiguration getServerConfiguration() {
-    ServerConfiguration configuration = new ServerConfiguration();
+  private HyperCollateConfiguration getServerConfiguration() {
     try {
       InitialContext initialContext = new InitialContext();
-
       String baseURI = (String) initialContext.lookup("java:comp/env/baseURI");
-      configuration.setBaseURI(baseURI);
-
       String projectDir = (String) initialContext.lookup("java:comp/env/projectDir");
-      configuration.setProjectDir(projectDir);
+      return new SimpleConfiguration()//
+          .setBaseURI(baseURI)//
+          .setProjectDir(projectDir)//
+          .setPathToDotExecutable(detectDotPath());
+
     } catch (NamingException e) {
       e.printStackTrace();
       throw new RuntimeException(e);
     }
-    configuration.setPathToDotExecutable(detectDotPath());
-    return configuration;
-  }
-
-  private SwaggerResource getSwaggerResource(ServerConfiguration configuration) {
-    SwaggerOAuth2Configuration oAuth2Configuration = new SwaggerOAuth2Configuration();
-    SwaggerViewConfiguration swaggerViewConfiguration = new SwaggerViewConfiguration();
-    swaggerViewConfiguration.setTemplateUrl(configuration.getBaseURI() + "swagger.json");
-    return new SwaggerResource("/", swaggerViewConfiguration, oAuth2Configuration);
   }
 
   private static String detectDotPath() {

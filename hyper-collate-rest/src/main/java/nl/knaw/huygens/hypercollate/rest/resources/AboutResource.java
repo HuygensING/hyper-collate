@@ -1,8 +1,8 @@
-package nl.knaw.huygens.hypercollate.dropwizard.resources;
+package nl.knaw.huygens.hypercollate.rest.resources;
 
 /*-
  * #%L
- * hyper-collate-server
+ * hyper-collate-rest
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
@@ -26,7 +26,7 @@ import io.swagger.annotations.ApiOperation;
 import nl.knaw.huygens.hypercollate.api.AboutInfo;
 import nl.knaw.huygens.hypercollate.api.ResourcePaths;
 import nl.knaw.huygens.hypercollate.config.PropertiesConfiguration;
-import nl.knaw.huygens.hypercollate.dropwizard.ServerConfiguration;
+import nl.knaw.huygens.hypercollate.rest.HyperCollateConfiguration;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -42,7 +42,7 @@ public class AboutResource {
 
   private final AboutInfo about = new AboutInfo();
 
-  public AboutResource(ServerConfiguration configuration, String appName) {
+  public AboutResource(HyperCollateConfiguration configuration, String appName) {
     PropertiesConfiguration properties = new PropertiesConfiguration(PROPERTIES_FILE, true);
     about.setAppName(appName)//
         .setStartedAt(Instant.now().toString())//

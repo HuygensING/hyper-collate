@@ -17,8 +17,13 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>hyper-collate-server</artifactId>
+            <artifactId>hyper-collate-rest</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-jaxrs</artifactId>
+            <version>${swagger.version}</version>
         </dependency>
     </dependencies>
 

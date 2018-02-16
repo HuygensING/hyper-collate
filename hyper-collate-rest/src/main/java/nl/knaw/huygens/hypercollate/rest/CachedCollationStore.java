@@ -1,8 +1,8 @@
-package nl.knaw.huygens.hypercollate.dropwizard.db;
+package nl.knaw.huygens.hypercollate.rest;
 
 /*-
  * #%L
- * hyper-collate-server
+ * hyper-collate-rest
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
@@ -26,12 +26,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import nl.knaw.huygens.hypercollate.dropwizard.ServerConfiguration;
-import nl.knaw.huygens.hypercollate.dropwizard.api.CollationStore;
-import nl.knaw.huygens.hypercollate.dropwizard.db.CollationInfo.State;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+import nl.knaw.huygens.hypercollate.rest.CollationInfo.State;
 
 import java.io.File;
 import java.time.Instant;
@@ -53,7 +51,7 @@ public class CachedCollationStore implements CollationStore {
   private final File projectDir;
   private final File collationsDir;
 
-  public CachedCollationStore(ServerConfiguration config) {
+  public CachedCollationStore(HyperCollateConfiguration config) {
     baseURI = config.getBaseURI();
     projectDir = config.getProjectDir();
     collationsDir = config.getCollationsDir();

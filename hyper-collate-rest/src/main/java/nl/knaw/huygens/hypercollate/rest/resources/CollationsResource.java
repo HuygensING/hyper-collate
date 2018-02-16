@@ -1,8 +1,8 @@
-package nl.knaw.huygens.hypercollate.dropwizard.resources;
+package nl.knaw.huygens.hypercollate.rest.resources;
 
 /*-
  * #%L
- * hyper-collate-server
+ * hyper-collate-rest
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
@@ -25,16 +25,17 @@ import com.google.common.base.Stopwatch;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.api.ResourcePaths;
 import nl.knaw.huygens.hypercollate.api.UTF8MediaType;
 import nl.knaw.huygens.hypercollate.collator.HyperCollator;
-import nl.knaw.huygens.hypercollate.dropwizard.ServerConfiguration;
-import nl.knaw.huygens.hypercollate.dropwizard.api.CollationStore;
-import nl.knaw.huygens.hypercollate.dropwizard.core.DotEngine;
-import nl.knaw.huygens.hypercollate.dropwizard.db.CollationInfo;
 import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+import nl.knaw.huygens.hypercollate.rest.CollationInfo;
+import nl.knaw.huygens.hypercollate.rest.CollationStore;
+import nl.knaw.huygens.hypercollate.rest.DotEngine;
+import nl.knaw.huygens.hypercollate.rest.HyperCollateConfiguration;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
 import nl.knaw.huygens.hypercollate.tools.DotFactory;
@@ -48,8 +49,6 @@ import javax.ws.rs.core.StreamingOutput;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import static java.util.stream.Collectors.toList;
 
 @Api(ResourcePaths.COLLATIONS)
 @Path(ResourcePaths.COLLATIONS)
@@ -82,13 +81,13 @@ public class CollationsResource {
   private static final String SVG = "svg";
   private static final String FALSE = "false";
 
-  private final ServerConfiguration configuration;
+  private final HyperCollateConfiguration configuration;
   private final HyperCollator hypercollator = new HyperCollator();
   private final CollationStore collationStore;
   private final DotEngine dotEngine;
   private final boolean dotEngineAvailable;
 
-  public CollationsResource(ServerConfiguration configuration, CollationStore collationStore) {
+  public CollationsResource(HyperCollateConfiguration configuration, CollationStore collationStore) {
     this.configuration = configuration;
     this.collationStore = collationStore;
     if (configuration.hasPathToDotExecutable()) {

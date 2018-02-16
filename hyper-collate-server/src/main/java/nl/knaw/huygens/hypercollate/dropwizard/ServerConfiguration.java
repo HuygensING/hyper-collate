@@ -1,16 +1,6 @@
 package nl.knaw.huygens.hypercollate.dropwizard;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.dropwizard.Configuration;
-import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
-import org.hibernate.validator.constraints.NotEmpty;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-/*
+/*-
  * #%L
  * hyper-collate-server
  * =======
@@ -29,8 +19,18 @@ import java.nio.file.Paths;
  * limitations under the License.
  * #L%
  */
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.dropwizard.Configuration;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+import nl.knaw.huygens.hypercollate.rest.HyperCollateConfiguration;
+import org.hibernate.validator.constraints.NotEmpty;
 
-public class ServerConfiguration extends Configuration {
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+public class ServerConfiguration extends Configuration implements HyperCollateConfiguration {
   @NotEmpty
   private String baseURI;
 
@@ -57,7 +57,6 @@ public class ServerConfiguration extends Configuration {
   public File getProjectDir() {
     checkProjectDirIsInitialized();
     return this.projectDir;
-
   }
 
   public File getCollationsDir() {
