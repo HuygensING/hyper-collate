@@ -19,9 +19,13 @@ package nl.knaw.huygens.hypercollate;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huygens.hypercollate.rest.HyperCollateConfiguration;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class SimpleConfiguration implements HyperCollateConfiguration {
   private String baseURI;
@@ -36,6 +40,7 @@ public class SimpleConfiguration implements HyperCollateConfiguration {
 
   @Override
   public File getProjectDir() {
+    checkProjectDirIsInitialized();
     return projectDir;
   }
 
@@ -61,6 +66,13 @@ public class SimpleConfiguration implements HyperCollateConfiguration {
 
   public SimpleConfiguration setProjectDir(String projectDir) {
     this.projectDir = new File(projectDir);
+    collationsDir = new File(projectDir, "collations");
+    try {
+      Files.createDirectories(collationsDir.toPath());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
     return this;
   }
 
@@ -68,4 +80,11 @@ public class SimpleConfiguration implements HyperCollateConfiguration {
     this.pathToDotExecutable = pathToDotExecutable;
     return this;
   }
+
+  private void checkProjectDirIsInitialized() {
+    if (this.projectDir == null) {
+      setProjectDir(Paths.get(System.getProperty("user.home"), ".hypercollate").toString());
+    }
+  }
+
 }

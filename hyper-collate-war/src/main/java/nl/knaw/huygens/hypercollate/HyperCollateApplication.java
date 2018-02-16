@@ -21,10 +21,15 @@ package nl.knaw.huygens.hypercollate;
  */
 
 import io.swagger.jaxrs.config.BeanConfig;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.rest.CachedCollationStore;
 import nl.knaw.huygens.hypercollate.rest.CollationStore;
 import nl.knaw.huygens.hypercollate.rest.HyperCollateConfiguration;
-import nl.knaw.huygens.hypercollate.rest.resources.*;
+import nl.knaw.huygens.hypercollate.rest.resources.AboutResource;
+import nl.knaw.huygens.hypercollate.rest.resources.CollationsResource;
+import nl.knaw.huygens.hypercollate.rest.resources.RuntimeExceptionMapper;
+import nl.knaw.huygens.hypercollate.rest.resources.XMLStreamExceptionMapper;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -32,30 +37,30 @@ import javax.ws.rs.core.Application;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class HyperCollateApplication extends Application {
   private static final Logger LOG = Logger.getLogger(HyperCollateApplication.class.getName());
+  private final HyperCollateConfiguration configuration;
 
   public HyperCollateApplication() {
     super();
+    configuration = getServerConfiguration();
     BeanConfig beanConfig = new BeanConfig();
     beanConfig.setVersion("1.0");
     beanConfig.setSchemes(new String[]{"http"});
     beanConfig.setTitle("HyperCollate API");
-    beanConfig.setBasePath("swagger");
+    beanConfig.setBasePath("");
     beanConfig.setResourcePackage("nl.knaw.huygens.hypercollate.rest.resources");
     beanConfig.setScan(true);
   }
 
   @Override
   public Set<Class<?>> getClasses() {
-    Set<Class<?>> set = super.getClasses();
+    Set<Class<?>> set = new HashSet<>();
     set.add(io.swagger.jaxrs.listing.ApiListingResource.class);
     set.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
     return set;
@@ -63,10 +68,13 @@ public class HyperCollateApplication extends Application {
 
   @Override
   public Set<Object> getSingletons() {
-    HyperCollateConfiguration configuration = getServerConfiguration();
-
     Set<Object> singletons = new HashSet<>();
-    singletons.add(new HomePageResource());
+    String[] strings = {"about", "collations", "swagger.json", "swagger.yaml"};
+    List<String> endpoints = new ArrayList<>(asList(strings));
+    List<String> rootEndpointURLs = endpoints.stream()//
+        .map(e -> configuration.getBaseURI() + "/" + e)//
+        .collect(toList());
+    singletons.add(new SimpleHomePageResource(rootEndpointURLs));
     singletons.add(new AboutResource(configuration, "HyperCollate Server"));
     CollationStore collationStore = new CachedCollationStore(configuration);
     singletons.add(new CollationsResource(configuration, collationStore));
