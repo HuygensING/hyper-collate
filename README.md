@@ -18,7 +18,7 @@ To work with the server, you can either download the latest prebuilt jar or war,
 
 ### Option 1b - download the prebuilt (war)
 
-1. Download the war from <https://cdn.huygens.knaw.nl/hyper-collate-server.war> to the current directory.
+1. Download the war from <https://cdn.huygens.knaw.nl/hyper-collate.war> to the current directory.
 2. Download an example config file from <https://raw.githubusercontent.com/HuygensING/hyper-collate/master/hyper-collate-war/hypercollate.xml> to the same directory.
 3. Change the `Context docBase`, `Context path` and the `value`s for `projectDir` and `baseURI` in `hypercollate.xml` as needed.
 4. copy `` to `$TOMCAT_HOME/conf/[Engine]/[Host]/` (e.g. `/opt/tomcat8/conf/Catalina/localhost/`)
