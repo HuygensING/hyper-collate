@@ -1,8 +1,8 @@
-package nl.knaw.huygens.hypercollate.dropwizard.db;
+package nl.knaw.huygens.hypercollate.rest;
 
 /*-
  * #%L
- * hyper-collate-server
+ * hyper-collate-rest
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
@@ -20,6 +20,17 @@ package nl.knaw.huygens.hypercollate.dropwizard.db;
  * #L%
  */
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import nl.knaw.huygens.hypercollate.importer.XMLImporter;
+import nl.knaw.huygens.hypercollate.model.CollationGraph;
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+import nl.knaw.huygens.hypercollate.rest.CollationInfo.State;
+
 import java.io.File;
 import java.time.Instant;
 import java.util.LinkedHashSet;
@@ -28,22 +39,8 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-
-import nl.knaw.huygens.hypercollate.dropwizard.ServerConfiguration;
-import nl.knaw.huygens.hypercollate.dropwizard.api.CollationStore;
-import nl.knaw.huygens.hypercollate.dropwizard.db.CollationInfo.State;
-import nl.knaw.huygens.hypercollate.importer.XMLImporter;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
-
 public class CachedCollationStore implements CollationStore {
-  private final Set<String> names = new LinkedHashSet<>();
+  private final Set<String> collationIds = new LinkedHashSet<>();
   private static String baseURI;
   private static final Cache<String, CollationInfo> CollationInfoCache = CacheBuilder.newBuilder()//
       .maximumSize(100)//
@@ -54,7 +51,7 @@ public class CachedCollationStore implements CollationStore {
   private final File projectDir;
   private final File collationsDir;
 
-  public CachedCollationStore(ServerConfiguration config) {
+  public CachedCollationStore(HyperCollateConfiguration config) {
     baseURI = config.getBaseURI();
     projectDir = config.getProjectDir();
     collationsDir = config.getCollationsDir();
@@ -63,7 +60,7 @@ public class CachedCollationStore implements CollationStore {
 
   @Override
   public Optional<CollationGraph> getCollationGraph(String collationId) {
-    if (names.contains(collationId)) {
+    if (collationIds.contains(collationId)) {
       try {
         CollationGraph document = CollationGraphCache.get(collationId, readCollationGraph(collationId));
         return Optional.of(document);
@@ -80,7 +77,7 @@ public class CachedCollationStore implements CollationStore {
         .orElseGet(() -> newCollationInfo(collationId));
     collationInfo.setModified(Instant.now());
     CollationInfoCache.put(collationId, collationInfo);
-    names.add(collationId);
+    collationIds.add(collationId);
     persist(collationId);
   }
 
@@ -103,12 +100,12 @@ public class CachedCollationStore implements CollationStore {
 
   @Override
   public Set<String> getCollationIds() {
-    return names;
+    return collationIds;
   }
 
   @Override
   public Optional<CollationInfo> getCollationInfo(String collationId) {
-    if (names.contains(collationId)) {
+    if (collationIds.contains(collationId)) {
       try {
         CollationInfo CollationInfo = CollationInfoCache.get(collationId, () -> readCollationInfo(collationId).orElse(null));
         return Optional.ofNullable(CollationInfo);
@@ -120,6 +117,15 @@ public class CachedCollationStore implements CollationStore {
   }
 
   @Override
+  public void removeCollation(String collationId) {
+    CollationInfoCache.invalidate(collationId);
+    collationIds.remove(collationId);
+    storeCollationIds();
+    File file = getCollationInfoFile(collationId);
+    file.delete();
+  }
+
+  @Override
   public void persist(String collationId) {
     storeCollationIds();
     storeCollationInfo(getCollationInfo(collationId).get());
@@ -128,10 +134,15 @@ public class CachedCollationStore implements CollationStore {
     // .forEach(this::storeCollationInfo);
   }
 
+  @Override
+  public boolean idInUse(String collationId) {
+    return collationIds.contains(collationId);
+  }
+
   private void storeCollationIds() {
     try {
       File file = getCollationIndexFile();
-      new ObjectMapper().writeValue(file, names);
+      new ObjectMapper().writeValue(file, collationIds);
     } catch (Exception e) {
       e.printStackTrace();
       throw new RuntimeException(e);
@@ -146,7 +157,7 @@ public class CachedCollationStore implements CollationStore {
     File file = getCollationIndexFile();
     if (file.exists()) {
       try {
-        names.addAll(objectMapper().readValue(file, Set.class));
+        collationIds.addAll(objectMapper().readValue(file, Set.class));
       } catch (Exception e) {
         e.printStackTrace();
         throw new RuntimeException(e);

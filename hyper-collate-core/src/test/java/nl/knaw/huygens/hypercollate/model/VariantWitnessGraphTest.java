@@ -20,13 +20,14 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.tools.DotFactory;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Test;
 
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class VariantWitnessGraphTest extends HyperCollateTest {
 
@@ -80,15 +81,15 @@ public class VariantWitnessGraphTest extends HyperCollateTest {
     List<TokenVertex> incoming = mtv5.getIncomingTokenVertexStream().collect(toList());
     assertThat(incoming).containsOnly(mtv3, mtv4);
 
-    String dot = DotFactory.fromVariantWitnessGraph(vwg1);
+    String dot = new DotFactory(false).fromVariantWitnessGraphSimple(vwg1);
     System.out.println(dot);
     String expected = "digraph VariantWitnessGraph{\n" +//
         "graph [rankdir=LR]\n" +//
         "labelloc=b\n" +//
         "begin [label=\"\";shape=doublecircle,rank=middle]\n" +//
-        "A_000 [label=<Collating&#9251;<br/><i>A: /s</i>>]\n" +//
-        "A_001 [label=<is&#9251;<br/><i>A: /s</i>>]\n" +//
-        "A_002 [label=<NP&#9251;<br/><i>A: /s/del</i>>]\n" +//
+        "A_000 [label=<Collating&nbsp;<br/><i>A: /s</i>>]\n" +//
+        "A_001 [label=<is&nbsp;<br/><i>A: /s</i>>]\n" +//
+        "A_002 [label=<NP&nbsp;<br/><i>A: /s/del</i>>]\n" +//
         "A_004 [label=<easy<br/><i>A: /s/add</i>>]\n" +//
         "A_003 [label=<hard<br/><i>A: /s/del</i>>]\n" +//
         "A_005 [label=<.<br/><i>A: /s</i>>]\n" +//

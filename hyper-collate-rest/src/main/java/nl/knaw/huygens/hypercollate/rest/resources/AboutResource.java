@@ -1,8 +1,8 @@
-package nl.knaw.huygens.hypercollate.dropwizard.resources;
+package nl.knaw.huygens.hypercollate.rest.resources;
 
 /*-
  * #%L
- * hyper-collate-server
+ * hyper-collate-rest
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
@@ -19,21 +19,20 @@ package nl.knaw.huygens.hypercollate.dropwizard.resources;
  * limitations under the License.
  * #L%
  */
-import java.time.Instant;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 
 import com.codahale.metrics.annotation.Timed;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import nl.knaw.huygens.hypercollate.api.AboutInfo;
 import nl.knaw.huygens.hypercollate.api.ResourcePaths;
 import nl.knaw.huygens.hypercollate.config.PropertiesConfiguration;
-import nl.knaw.huygens.hypercollate.dropwizard.ServerConfiguration;
+import nl.knaw.huygens.hypercollate.rest.HyperCollateConfiguration;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import java.time.Instant;
 
 @Api(ResourcePaths.ABOUT)
 @Path(ResourcePaths.ABOUT)
@@ -43,7 +42,7 @@ public class AboutResource {
 
   private final AboutInfo about = new AboutInfo();
 
-  public AboutResource(ServerConfiguration configuration, String appName) {
+  public AboutResource(HyperCollateConfiguration configuration, String appName) {
     PropertiesConfiguration properties = new PropertiesConfiguration(PROPERTIES_FILE, true);
     about.setAppName(appName)//
         .setStartedAt(Instant.now().toString())//
@@ -51,8 +50,8 @@ public class AboutResource {
         .setCommitId(properties.getProperty("commitId").orElse("no commitId set in about.properties"))//
         .setScmBranch(properties.getProperty("scmBranch").orElse("no scmBranch set in about.properties"))//
         .setVersion(properties.getProperty("version").orElse("no version set in about.properties"))//
-        .setProjectDir(configuration.getProjectDir());
-    ;
+        .setProjectDirURI(configuration.getProjectDir().toURI())//
+        .setDotRendering(configuration.hasPathToDotExecutable());
   }
 
   @GET

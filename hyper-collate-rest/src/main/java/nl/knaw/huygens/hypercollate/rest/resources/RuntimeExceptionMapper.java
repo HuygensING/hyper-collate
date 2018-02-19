@@ -1,8 +1,8 @@
-package nl.knaw.huygens.hypercollate.dropwizard.resources;
+package nl.knaw.huygens.hypercollate.rest.resources;
 
 /*-
  * #%L
- * hyper-collate-server
+ * hyper-collate-rest
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
@@ -25,13 +25,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-import javax.xml.stream.XMLStreamException;
 
 @Provider
-public class XMLStreamExceptionMapper implements ExceptionMapper<XMLStreamException> {
+public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException> {
 
   @Override
-  public Response toResponse(XMLStreamException exception) {
+  public Response toResponse(RuntimeException exception) {
     return Response.status(Status.BAD_REQUEST)//
         .entity(exception.getMessage())//
         .type(MediaType.TEXT_PLAIN)//

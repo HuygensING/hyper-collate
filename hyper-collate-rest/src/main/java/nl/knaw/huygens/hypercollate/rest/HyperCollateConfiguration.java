@@ -1,8 +1,8 @@
-package nl.knaw.huygens.hypercollate.api;
+package nl.knaw.huygens.hypercollate.rest;
 
-/*
+/*-
  * #%L
- * hyper-collate-api
+ * hyper-collate-rest
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
@@ -19,15 +19,16 @@ package nl.knaw.huygens.hypercollate.api;
  * limitations under the License.
  * #L%
  */
+import java.io.File;
 
-public class ResourcePaths {
-  public static final String ABOUT = "about";
-  public static final String DOCUMENTS = "documents";
-  public static final String COLLATIONS = "collations";
-  public static final String COLLATIONS_DOT = "dot";
-  public static final String COLLATIONS_SVG = "svg";
-  public static final String COLLATIONS_PNG = "png";
-  public static final String COLLATIONS_ASCII_TABLE = "ascii_table";
-  public static final String COLLATIONS_HTML_TABLE = "html_table";
-  public static final String WITNESSES = "witnesses";
+public interface HyperCollateConfiguration {
+  String getBaseURI();
+
+  File getProjectDir();
+
+  File getCollationsDir();
+
+  boolean hasPathToDotExecutable();
+
+  String getPathToDotExecutable();
 }

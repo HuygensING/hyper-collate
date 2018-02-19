@@ -1,8 +1,8 @@
-package nl.knaw.huygens.hypercollate.dropwizard.resources;
+package nl.knaw.huygens.hypercollate.rest;
 
 /*-
  * #%L
- * hyper-collate-server
+ * hyper-collate-rest
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
@@ -19,15 +19,27 @@ package nl.knaw.huygens.hypercollate.dropwizard.resources;
  * limitations under the License.
  * #L%
  */
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import org.junit.Test;
 
-public class HomePageResourceTest {
-  @Test
-  public void testNoRobots() {
-    HomePageResource resource = new HomePageResource();
-    String noRobots = resource.noRobots();
-    assertThat(noRobots).isEqualTo("User-agent: *\n" +
-        "Disallow: /\n");
-  }
+import nl.knaw.huygens.hypercollate.model.CollationGraph;
+
+import java.util.Optional;
+import java.util.Set;
+
+public interface CollationStore {
+
+  void addCollation(String collationId);
+
+  void setCollation(CollationInfo collationInfo, CollationGraph collationGraph);
+
+  void persist(String collationId);
+
+  boolean idInUse(String collationId);
+
+  Set<String> getCollationIds();
+
+  Optional<CollationGraph> getCollationGraph(String collationId);
+
+  Optional<CollationInfo> getCollationInfo(String collationId);
+
+  void removeCollation(String collationId);
 }

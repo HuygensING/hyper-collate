@@ -134,18 +134,18 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
     if (this.markupNode == null) {
       throw new RuntimeException("use hasMarkupNodeMatching to set the markupNodeSketch to use first");
     }
-    Set<TextNodeSketch> actualTextNodeSkethesForMarkupNode = actual.getTextNodeStreamForMarkup(markupNode.getMarkup())//
+    Set<TextNodeSketch> actualTextNodeSketchesForMarkupNode = actual.getTextNodeStreamForMarkup(markupNode.getMarkup())//
         .map(this::toTextNodeSketch)//
         .collect(toSet());
-    Iterables.instance().assertContains(info, actualTextNodeSkethesForMarkupNode, textNodeSketches);
+    Iterables.instance().assertContains(info, actualTextNodeSketchesForMarkupNode, textNodeSketches);
     return myself;
   }
 
   public static class TextNodeSketch {
     Map<String, String> witnessTokenSegments = new OrderedHashMap<>();
 
-    public TextNodeSketch withWitnessSegmentSketch(String sigil, String mergedtokens) {
-      witnessTokenSegments.put(sigil, mergedtokens);
+    public TextNodeSketch withWitnessSegmentSketch(String sigil, String mergedTokens) {
+      witnessTokenSegments.put(sigil, mergedTokens);
       return this;
     }
 

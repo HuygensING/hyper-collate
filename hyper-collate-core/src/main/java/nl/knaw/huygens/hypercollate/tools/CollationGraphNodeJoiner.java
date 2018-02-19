@@ -2,10 +2,11 @@ package nl.knaw.huygens.hypercollate.tools;
 
 import com.google.common.base.Preconditions;
 import eu.interedition.collatex.Token;
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.model.*;
 
 import java.util.*;
+
+import static java.util.stream.Collectors.toList;
 
 /*-
  * #%L
@@ -78,7 +79,7 @@ public class CollationGraphNodeJoiner {
         Token mWitnessToken = mergedNode.getTokenForWitness(s);
         Token nWitnessToken = originalNode.getTokenForWitness(s);
         if (nWitnessToken == null) {
-          // it's an endtoken, so not mergable
+          // it's an endtoken, so not mergeable
           parentXPathsMatch = false;
         }
         String mParentXPath = ((MarkedUpToken) mWitnessToken).getParentXPath();

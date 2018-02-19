@@ -152,13 +152,13 @@ public class HyperCollatorTest extends HyperCollateTest {
     assertThat(collationGraph).containsTextNodesMatching(n1, n2, n3, n4, n5, n6, trachten_naar, werven_om);
 
     assertThat(collationGraph).containsMarkupNodesMatching(//
-        markupNodeSketch("F","text"),//
-        markupNodeSketch("Q","text"),//
-        markupNodeSketch("Z","text")
+        markupNodeSketch("F", "text"),//
+        markupNodeSketch("Q", "text"),//
+        markupNodeSketch("Z", "text")
     );
 
-    MarkupNodeSketch f_del = markupNodeSketch("F","del");
-    MarkupNodeSketch q_add = markupNodeSketch("Q","add");
+    MarkupNodeSketch f_del = markupNodeSketch("F", "del");
+    MarkupNodeSketch q_add = markupNodeSketch("Q", "add");
     assertThat(collationGraph).hasTextNodeMatching(werven_om).withMarkupNodesMatching(f_del);
     assertThat(collationGraph).hasMarkupNodeMatching(q_add).withTextNodesMatching(trachten_naar);
   }
@@ -809,7 +809,7 @@ public class HyperCollatorTest extends HyperCollateTest {
     Map<Markup, MarkupNode> markupNodeIndex = new HashMap<>();
     hyperCollator.initialize(collationGraph, map, markupNodeIndex, wF);
     CollationGraph collation = CollationGraphNodeJoiner.join(collationGraph);
-    String dot = CollationGraphVisualizer.toDot(collation);
+    String dot = CollationGraphVisualizer.toDot(collation, true);
     String expected = "digraph CollationGraph{\n" + "labelloc=b\n" + "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
         + "t002 [label=<F: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F: <i>/text/s</i>>]\n"
         + "t003 [label=<F: &#9251;een&#9251;vrouw,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;vóór&#9251;de&#9251;<br/>F: <i>/text/s</i>>]\n" + "t004 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n"
@@ -894,7 +894,7 @@ public class HyperCollatorTest extends HyperCollateTest {
   }
 
   private CollationGraph testHyperCollation(VariantWitnessGraph witness1, VariantWitnessGraph witness2, String expected) {
-    Map<String, Long> collationDuration = new HashMap<>();
+//    Map<String, Long> collationDuration = new HashMap<>();
     Stopwatch stopwatch = Stopwatch.createStarted();
     CollationGraph collation0 = hyperCollator.collate(witness1, witness2);
     stopwatch.stop();
@@ -903,18 +903,18 @@ public class HyperCollatorTest extends HyperCollateTest {
 
     CollationGraph collation = CollationGraphNodeJoiner.join(collation0);
 
-    String dot = CollationGraphVisualizer.toDot(collation);
+    String dot = CollationGraphVisualizer.toDot(collation, true);
     System.out.println(dot);
     writeGraph(dot, "graph");
     assertThat(dot).isEqualTo(expected);
 
-    String table = CollationGraphVisualizer.toTableASCII(collation);
+    String table = CollationGraphVisualizer.toTableASCII(collation, true);
     System.out.println(table);
     return collation;
   }
 
   private CollationGraph testHyperCollation3(VariantWitnessGraph witness1, VariantWitnessGraph witness2, VariantWitnessGraph witness3, String expected) {
-    Map<String, Long> collationDuration = new HashMap<>();
+//    Map<String, Long> collationDuration = new HashMap<>();
     Stopwatch stopwatch = Stopwatch.createStarted();
     CollationGraph collation = hyperCollator.collate(witness1, witness2, witness3);
     stopwatch.stop();
@@ -931,12 +931,12 @@ public class HyperCollatorTest extends HyperCollateTest {
 
     assertThat(markupAfterJoin).containsExactlyElementsOf(markupBeforeJoin);
 
-    String dot = CollationGraphVisualizer.toDot(collation);
+    String dot = CollationGraphVisualizer.toDot(collation, true);
     System.out.println(dot);
     writeGraph(dot, "graph");
     assertThat(dot).isEqualTo(expected);
 
-    String table = CollationGraphVisualizer.toTableASCII(collation);
+    String table = CollationGraphVisualizer.toTableASCII(collation, true);
     System.out.println(table);
 
     assertThat(collation).isNotNull();

@@ -1,8 +1,8 @@
-package nl.knaw.huygens.hypercollate.dropwizard;
+package nl.knaw.huygens.hypercollate;
 
 /*-
  * #%L
- * hyper-collate-server
+ * hyper-collate-war
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
@@ -19,64 +19,52 @@ package nl.knaw.huygens.hypercollate.dropwizard;
  * limitations under the License.
  * #L%
  */
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.dropwizard.Configuration;
-import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
+
 import nl.knaw.huygens.hypercollate.rest.HyperCollateConfiguration;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class ServerConfiguration extends Configuration implements HyperCollateConfiguration {
-  @NotEmpty
+public class SimpleConfiguration implements HyperCollateConfiguration {
   private String baseURI;
-
-  private String pathToDotExecutable;
-
   private File projectDir;
   private File collationsDir;
+  private String pathToDotExecutable;
 
-  public ServerConfiguration() {
-    super();
-  }
-
-  public void setBaseURI(String baseURI) {
-    this.baseURI = baseURI.replaceFirst("/$", "");
-  }
-
+  @Override
   public String getBaseURI() {
     return baseURI;
   }
 
-  @JsonProperty("swagger")
-  public SwaggerBundleConfiguration swaggerBundleConfiguration;
-
+  @Override
   public File getProjectDir() {
     checkProjectDirIsInitialized();
-    return this.projectDir;
+    return projectDir;
   }
 
+  @Override
   public File getCollationsDir() {
-    checkProjectDirIsInitialized();
     return collationsDir;
   }
 
-  public String getPathToDotExecutable() {
-    return pathToDotExecutable;
-  }
-
-  public void setPathToDotExecutable(String pathToDotExecutable) {
-    this.pathToDotExecutable = pathToDotExecutable;
-  }
-
+  @Override
   public boolean hasPathToDotExecutable() {
     return pathToDotExecutable != null;
   }
 
-  public void setProjectDir(String projectDir) {
+  @Override
+  public String getPathToDotExecutable() {
+    return pathToDotExecutable;
+  }
+
+  public SimpleConfiguration setBaseURI(String baseURI) {
+    this.baseURI = baseURI;
+    return this;
+  }
+
+  public SimpleConfiguration setProjectDir(String projectDir) {
     this.projectDir = new File(projectDir);
     collationsDir = new File(projectDir, "collations");
     try {
@@ -84,6 +72,13 @@ public class ServerConfiguration extends Configuration implements HyperCollateCo
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+
+    return this;
+  }
+
+  public SimpleConfiguration setPathToDotExecutable(String pathToDotExecutable) {
+    this.pathToDotExecutable = pathToDotExecutable;
+    return this;
   }
 
   private void checkProjectDirIsInitialized() {
@@ -91,4 +86,5 @@ public class ServerConfiguration extends Configuration implements HyperCollateCo
       setProjectDir(Paths.get(System.getProperty("user.home"), ".hypercollate").toString());
     }
   }
+
 }

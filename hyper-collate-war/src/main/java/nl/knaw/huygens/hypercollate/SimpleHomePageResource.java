@@ -1,8 +1,8 @@
-package nl.knaw.huygens.hypercollate.dropwizard.resources;
+package nl.knaw.huygens.hypercollate;
 
 /*-
  * #%L
- * hyper-collate-server
+ * hyper-collate-war
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
@@ -19,21 +19,31 @@ package nl.knaw.huygens.hypercollate.dropwizard.resources;
  * limitations under the License.
  * #L%
  */
+import io.swagger.annotations.ApiOperation;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import java.io.IOException;
+import java.util.List;
 
-@Provider
-public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException> {
+@Path("")
+public class SimpleHomePageResource {
 
-  @Override
-  public Response toResponse(RuntimeException exception) {
-    return Response.status(Status.BAD_REQUEST)//
-        .entity(exception.getMessage())//
-        .type(MediaType.TEXT_PLAIN)//
+  private final List<String> rootEndpointURLs;
+
+  public SimpleHomePageResource(List<String> rootEndpointURLs) {
+    this.rootEndpointURLs = rootEndpointURLs;
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @ApiOperation(value = "List the root endpoint URLs")
+  public Response getHomePage() throws IOException {
+    return Response//
+        .ok(rootEndpointURLs)//
         .build();
   }
 
