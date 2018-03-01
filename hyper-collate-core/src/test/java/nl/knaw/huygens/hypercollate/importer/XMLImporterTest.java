@@ -21,10 +21,16 @@ package nl.knaw.huygens.hypercollate.importer;
  */
 
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
+import nl.knaw.huygens.hypercollate.model.Markup;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+import nl.knaw.huygens.hypercollate.tools.DotFactory;
 import org.junit.Test;
 
 import java.io.InputStream;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class XMLImporterTest extends HyperCollateTest {
 
@@ -495,6 +501,53 @@ public class XMLImporterTest extends HyperCollateTest {
         "}";
 
     verifyDotExport(wg0, expectedDot, "witness-q-hierarchy-app-rdg-vincent");
+  }
+
+  @Test
+  public void testSingleAdd() {
+    XMLImporter importer = new XMLImporter();
+    VariantWitnessGraph a = importer.importXML("a", "<p><s>&amp; himself corrected <add>and augmented</add> them</s></p>");
+    assertThat(a).isNotNull();
+    List<Markup> markups = a.getMarkupStream().collect(toList());
+    assertThat(markups).hasSize(3);
+    String dot = new DotFactory(true).fromVariantWitnessGraphColored(a);
+    String expectedDot = "digraph VariantWitnessGraph{\n" +//
+        "graph [rankdir=LR]\n" +//
+        "node [style=\"filled\";fillcolor=\"white\"]\n" +//
+        "begin [label=\"\";shape=doublecircle,rank=middle]\n" +//
+        "subgraph cluster_0 {\n" +//
+        "label=<<i><b>p</b></i>>\n" +//
+        "graph[style=\"rounded,filled\";fillcolor=\"yellow\"]\n" +//
+        "subgraph cluster_1 {\n" +//
+        "label=<<i><b>s</b></i>>\n" +//
+        "graph[style=\"rounded,filled\";fillcolor=\"orange\"]\n" +//
+        "a_000 [label=<&amp;>]\n" +//
+        "a_001 [label=<&#9251;>]\n" +//
+        "a_002 [label=<himself&#9251;>]\n" +//
+        "a_003 [label=<corrected&#9251;>]\n" +//
+        "subgraph cluster_2 {\n" +//
+        "label=<<i><b>add</b></i>>\n" +//
+        "graph[style=\"rounded,filled\";fillcolor=\"#9aed7d\"]\n" +//
+        "a_004 [label=<and&#9251;>]\n" +//
+        "a_005 [label=<augmented>]\n" +//
+        "}\n" +//
+        "a_006 [label=<&#9251;>]\n" +//
+        "a_007 [label=<them>]\n" +//
+        "}\n" +//
+        "}\n" +//
+        "end [label=\"\";shape=doublecircle,rank=middle]\n" +//
+        "a_000->a_001\n" +//
+        "a_001->a_002\n" +//
+        "a_002->a_003\n" +//
+        "a_003->a_004\n" +//
+        "a_003->a_006\n" +//
+        "a_004->a_005\n" +//
+        "a_005->a_006\n" +//
+        "a_006->a_007\n" +//
+        "a_007->end\n" +//
+        "begin->a_000\n" +//
+        "}";
+    assertThat(dot).isEqualTo(expectedDot);
   }
 
 }

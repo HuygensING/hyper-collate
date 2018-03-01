@@ -27,6 +27,7 @@ import java.util.TreeMap;
 public class Markup {
   private final String tagName;
   private final Map<String, String> attributeMap = new TreeMap<>();
+  private int depth;
 
   public Markup(String tagName) {
     this.tagName = tagName;
@@ -52,5 +53,14 @@ public class Markup {
 
   public Map<String, String> getAttributeMap() {
     return attributeMap;
+  }
+
+  public Markup setDepth(int depth) {
+    this.depth = depth;
+    return this;
+  }
+
+  public int getDepth() {
+    return this. depth;
   }
 }
