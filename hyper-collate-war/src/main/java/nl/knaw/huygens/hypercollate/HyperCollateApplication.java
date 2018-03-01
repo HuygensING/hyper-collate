@@ -21,8 +21,6 @@ package nl.knaw.huygens.hypercollate;
  */
 
 import io.swagger.jaxrs.config.BeanConfig;
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.rest.CachedCollationStore;
 import nl.knaw.huygens.hypercollate.rest.CollationStore;
 import nl.knaw.huygens.hypercollate.rest.HyperCollateConfiguration;
@@ -41,6 +39,9 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 
 public class HyperCollateApplication extends Application {
   private static final Logger LOG = Logger.getLogger(HyperCollateApplication.class.getName());
