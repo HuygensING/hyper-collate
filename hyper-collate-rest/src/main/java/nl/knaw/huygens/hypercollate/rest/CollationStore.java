@@ -2,7 +2,7 @@ package nl.knaw.huygens.hypercollate.rest;
 
 /*-
  * #%L
- * hyper-collate-rest
+ * HyperCollate REST resources
  * =======
  * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
  * =======
