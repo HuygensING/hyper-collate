@@ -22,6 +22,7 @@ package nl.knaw.huygens.hypercollate.model;
 
 import com.google.common.base.Preconditions;
 import eu.interedition.collatex.Token;
+import nl.knaw.huygens.hypercollate.tools.CollationIterationData;
 import nl.knaw.huygens.hypergraph.core.Hypergraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,8 @@ public class CollationGraph extends Hypergraph<Node, Edge> {
   private final List<String> sigils;
   private TextDelimiterNode textStartNode = new TextDelimiterNode();
   private TextDelimiterNode textEndNode = new TextDelimiterNode();
-  Map<Markup, MarkupNode> markupNodeIndex = new HashMap<>();
+  private Map<Markup, MarkupNode> markupNodeIndex = new HashMap<>();
+  private Map<String, CollationIterationData> collationIterationData = new HashMap<>();
 
   public CollationGraph() {
     this(new ArrayList<>());
@@ -185,4 +187,11 @@ public class CollationGraph extends Hypergraph<Node, Edge> {
     return (MarkupNode) markupNode;
   }
 
+  public void addCollationIterationData(String witnessSigil, CollationIterationData data) {
+    collationIterationData.put(witnessSigil, data);
+  }
+
+  public CollationIterationData getCollationIterationData(final String witnessSigil) {
+    return collationIterationData.get(witnessSigil);
+  }
 }

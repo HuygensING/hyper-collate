@@ -22,13 +22,11 @@ package nl.knaw.huygens.hypercollate.collator;
 
 import eu.interedition.collatex.Token;
 import eu.interedition.collatex.dekker.Tuple;
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.*;
 import nl.knaw.huygens.hypercollate.model.*;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphRanking;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
+import nl.knaw.huygens.hypercollate.tools.CollationIterationData;
 import nl.knaw.huygens.hypercollate.tools.DotFactory;
-import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +35,10 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
+
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.*;
+import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
 
 public class HyperCollator {
   private static final Logger LOG = LoggerFactory.getLogger(HyperCollator.class);
@@ -97,9 +99,9 @@ public class HyperCollator {
   }
 
   void initialize(CollationGraph collationGraph, //
-                  Map<TokenVertex, TextNode> collatedTokenVertexMap, //
-                  Map<Markup, MarkupNode> markupNodeIndex,//
-                  VariantWitnessGraph witnessGraph) {
+      Map<TokenVertex, TextNode> collatedTokenVertexMap, //
+      Map<Markup, MarkupNode> markupNodeIndex,//
+      VariantWitnessGraph witnessGraph) {
     String sigil = witnessGraph.getSigil();
     collationGraph.getSigils().add(sigil);
     addMarkupNodes(collationGraph, markupNodeIndex, witnessGraph);
@@ -122,7 +124,7 @@ public class HyperCollator {
   }
 
   private List<CollatedMatch> getCollatedMatches(Map<TokenVertex, TextNode> collatedTokenVertexMap,//
-                                                 List<Match> matches, String sigil) {
+      List<Match> matches, String sigil) {
     return matches.stream()//
 //        .peek(System.out::println)//
         .map(match -> toCollatedMatch(match, sigil, collatedTokenVertexMap))//
@@ -140,13 +142,15 @@ public class HyperCollator {
   }
 
   private void collate(CollationGraph collationGraph, //
-                       VariantWitnessGraph witnessGraph, //
-                       List<Match> sortedMatchesForWitness, //
-                       Map<Markup, MarkupNode> markupNodeIndex,//
-                       Map<TokenVertex, TextNode> collatedTokenVertexMap) {
+      VariantWitnessGraph witnessGraph, //
+      List<Match> sortedMatchesForWitness, //
+      Map<Markup, MarkupNode> markupNodeIndex,//
+      Map<TokenVertex, TextNode> collatedTokenVertexMap) {
+
     Predicate<? super Match> matchesWithCollationGraph = m -> collationGraph.getSigils()//
         .stream()//
         .anyMatch(m::hasWitness);
+
     CollationGraphRanking baseRanking = CollationGraphRanking.of(collationGraph);
 
     List<Match> filteredSortedMatchesForWitness = sortedMatchesForWitness.stream()//
@@ -154,6 +158,10 @@ public class HyperCollator {
         .collect(toList());
 
     String witnessSigil = witnessGraph.getSigil();
+    CollationIterationData iterationData = new CollationIterationData()
+        .setCollationGraphSigils(collationGraph.getSigils())
+        .setWitnessSigil(witnessSigil);
+
     collationGraph.getSigils().add(witnessSigil);
     addMarkupNodes(collationGraph, markupNodeIndex, witnessGraph);
 
@@ -164,10 +172,15 @@ public class HyperCollator {
         .distinct()//
         .collect(toList());
     LOG.info("matchList={}", matchList);
+    iterationData.setPotentialMatches(matchList);
+
     OptimalCollatedMatchListAlgorithm optimalCollatedMatchListAlgorithm = new OptimalCollatedMatchListAlgorithm();
     List<CollatedMatch> optimalMatchList = optimalCollatedMatchListAlgorithm.getOptimalCollatedMatchList(matchList);
-    visualizeDecisionTree(filteredSortedMatchesForWitness, witnessSigil, optimalCollatedMatchListAlgorithm);
-    visualizeDecisionTree(collationGraph, witnessGraph, filteredSortedMatchesForWitness, optimalCollatedMatchListAlgorithm.getDecisionTreeRootNode());
+    DecisionTreeNode decisionTreeRootNode = optimalCollatedMatchListAlgorithm.getDecisionTreeRootNode();
+    iterationData.setDecisionTree(decisionTreeRootNode);
+    collationGraph.addCollationIterationData(witnessSigil, iterationData);
+//    visualizeDecisionTree(filteredSortedMatchesForWitness, witnessSigil, optimalCollatedMatchListAlgorithm);
+//    visualizeDecisionTree(collationGraph, witnessGraph, filteredSortedMatchesForWitness, optimalCollatedMatchListAlgorithm.getDecisionTreeRootNode());
 
     LOG.info("optimalMatchList={}", optimalMatchList);
 
@@ -199,17 +212,6 @@ public class HyperCollator {
     logCollated(collatedTokenVertexMap);
   }
 
-
-  private void visualizeDecisionTree(List<Match> filteredSortedMatchesForWitness, String witnessSigil, OptimalCollatedMatchListAlgorithm optimalCollatedMatchListAlgorithm) {
-    DecisionTreeNode decisionTreeRootNode = optimalCollatedMatchListAlgorithm.getDecisionTreeRootNode();
-
-    List<Token> matchedWitnessTokens = filteredSortedMatchesForWitness.stream()//
-        .map(m -> m.getTokenVertexForWitness(witnessSigil))//
-        .map(TokenVertex::getToken)//
-        .collect(toList());
-    visualize(decisionTreeRootNode, matchedWitnessTokens);
-  }
-
   private void addMarkupHyperEdges(CollationGraph collationGraph, VariantWitnessGraph witnessGraph, Map<Markup, MarkupNode> markupNodeIndex, TokenVertex tokenVertexForWitnessGraph, TextNode matchingNode) {
     witnessGraph.getMarkupListForTokenVertex(tokenVertexForWitnessGraph)//
         .forEach(markup -> collationGraph.linkMarkupToText(markupNodeIndex.get(markup), matchingNode));
@@ -233,11 +235,11 @@ public class HyperCollator {
   }
 
   private void advanceWitness(CollationGraph collationGraph, //
-                              Map<TokenVertex, TextNode> collatedTokenVertexMap, //
-                              Iterator<TokenVertex> tokenVertexIterator, //
-                              TokenVertex tokenVertexForWitness,//
-                              VariantWitnessGraph witnessGraph,//
-                              Map<Markup, MarkupNode> markupNodeIndex) {
+      Map<TokenVertex, TextNode> collatedTokenVertexMap, //
+      Iterator<TokenVertex> tokenVertexIterator, //
+      TokenVertex tokenVertexForWitness,//
+      VariantWitnessGraph witnessGraph,//
+      Map<Markup, MarkupNode> markupNodeIndex) {
     if (tokenVertexIterator.hasNext()) {
       TokenVertex nextWitnessVertex = tokenVertexIterator.next();
       while (tokenVertexIterator.hasNext() && !nextWitnessVertex.equals(tokenVertexForWitness)) {
@@ -281,10 +283,10 @@ public class HyperCollator {
   }
 
   private void addCollationNode(CollationGraph collationGraph, //
-                                Map<TokenVertex, TextNode> collatedTokenVertexMap, //
-                                TokenVertex tokenVertex,//
-                                VariantWitnessGraph witnessGraph,//
-                                Map<Markup, MarkupNode> markupNodeIndex) {
+      Map<TokenVertex, TextNode> collatedTokenVertexMap, //
+      TokenVertex tokenVertex,//
+      VariantWitnessGraph witnessGraph,//
+      Map<Markup, MarkupNode> markupNodeIndex) {
     if (!collatedTokenVertexMap.containsKey(tokenVertex)) {
       TextNode collationNode = collationGraph.addTextNodeWithTokens(tokenVertex.getToken());
       collationNode.addBranchPath(tokenVertex.getSigil(), tokenVertex.getBranchPath());
@@ -359,9 +361,9 @@ public class HyperCollator {
   }
 
   private void match(VariantWitnessGraph witness1, VariantWitnessGraph witness2,//
-                     VariantWitnessGraphRanking ranking1, VariantWitnessGraphRanking ranking2,//
-                     Set<Match> allPotentialMatches,//
-                     Map<TokenVertex, Match> vertexToMatch) {
+      VariantWitnessGraphRanking ranking1, VariantWitnessGraphRanking ranking2,//
+      Set<Match> allPotentialMatches,//
+      Map<TokenVertex, Match> vertexToMatch) {
     VariantWitnessGraphTraversal traversal1 = VariantWitnessGraphTraversal.of(witness1);
     VariantWitnessGraphTraversal traversal2 = VariantWitnessGraphTraversal.of(witness2);
     String sigil1 = witness1.getSigil();
@@ -382,6 +384,19 @@ public class HyperCollator {
                 vertexToMatch.put(tv2, match);
               }
             }));
+  }
+
+  // decision tree visualization
+  private void visualizeDecisionTree(List<Match> filteredSortedMatchesForWitness,
+      String witnessSigil,
+      OptimalCollatedMatchListAlgorithm optimalCollatedMatchListAlgorithm) {
+    DecisionTreeNode decisionTreeRootNode = optimalCollatedMatchListAlgorithm.getDecisionTreeRootNode();
+
+    List<Token> matchedWitnessTokens = filteredSortedMatchesForWitness.stream()//
+        .map(m -> m.getTokenVertexForWitness(witnessSigil))//
+        .map(TokenVertex::getToken)//
+        .collect(toList());
+    visualize(decisionTreeRootNode, matchedWitnessTokens);
   }
 
   private void visualize(DecisionTreeNode decisionTreeRootNode, List<Token> matchedWitnessTokens) {
@@ -424,7 +439,6 @@ public class HyperCollator {
         .map(MarkedUpToken.class::cast)//
         .collect(toSet());
 
-
     String fillColor = childNodes.isEmpty()//
         ? decisionTreeNode.getQuantumCollatedMatchList().isDetermined() ? "#78b259" : "#f46349"//
         : "white";
@@ -455,9 +469,9 @@ public class HyperCollator {
   }
 
   private void visualizeDecisionTree(CollationGraph collationGraph,//
-                                     VariantWitnessGraph witnessGraph,//
-                                     List<Match> filteredSortedMatchesForWitness,//
-                                     DecisionTreeNode decisionTreeRootNode) {
+      VariantWitnessGraph witnessGraph,//
+      List<Match> filteredSortedMatchesForWitness,//
+      DecisionTreeNode decisionTreeRootNode) {
     DotFactory dotFactory = new DotFactory(true);
     StringBuilder builder = new StringBuilder("digraph DecisionTree{\n")//
         .append("subgraph cluster_witnesses{\n")//
@@ -470,7 +484,6 @@ public class HyperCollator {
     System.out.println();
     System.out.println(builder.toString());
     System.out.println();
-
   }
 
 }

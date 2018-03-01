@@ -279,4 +279,8 @@ public class DotFactory {
         .replaceAll(" +", whitespaceCharacter);
   }
 
+  public String potentialMatchesGraph(CollationGraph collationGraph, String witnessSigil) {
+    return new PotentialMatchesGraphDotBuilder(collationGraph, witnessSigil).build();
+  }
+
 }
