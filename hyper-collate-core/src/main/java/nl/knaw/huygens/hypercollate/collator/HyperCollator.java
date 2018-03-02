@@ -36,7 +36,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
-import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.*;
 import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
 
@@ -63,7 +62,7 @@ public class HyperCollator {
     List<VariantWitnessGraph> witnesses = new ArrayList<>();
     List<VariantWitnessGraphRanking> rankings = new ArrayList<>();
     Arrays.stream(graphs)//
-        .sorted(comparing(VariantWitnessGraph::getSigil))//
+//        .sorted(comparing(VariantWitnessGraph::getSigil))//
         .forEach(graph -> {
           sigils.add(graph.getSigil());
           witnesses.add(graph);

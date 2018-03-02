@@ -32,7 +32,6 @@ import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
 import nl.knaw.huygens.hypercollate.tools.PotentialMatchesGraphDotBuilder;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Sets;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -446,7 +445,7 @@ public class HyperCollatorTest extends HyperCollateTest {
     );
   }
 
-  @Ignore
+//  @Ignore
   @Test
   public void testTranspositionAndDuplication() {
     XMLImporter importer = new XMLImporter();
@@ -738,7 +737,7 @@ public class HyperCollatorTest extends HyperCollateTest {
 //    );
   }
 
-  @Ignore
+//  @Ignore
   @Test
   public void testMaryShellyGodwinFrankensteinFragment2() {
     XMLImporter importer = new XMLImporter();
@@ -747,7 +746,7 @@ public class HyperCollatorTest extends HyperCollateTest {
         "<add place=\"superlinear\">and augmented</add>\n" + //
         "them in many places</s>\n" + //
         "</text>";
-    VariantWitnessGraph wF = importer.importXML("N", xmlN);
+    VariantWitnessGraph wN = importer.importXML("N", xmlN);
     LOG.info("N: {}", xmlN);
     String xmlF = "<text>\n" + //
         "<s>Frankenstein discovered\n" + //
@@ -756,7 +755,7 @@ public class HyperCollatorTest extends HyperCollateTest {
         "</s>\n" + //
         "</text>";
     LOG.info("F: {}", xmlF);
-    VariantWitnessGraph wQ = importer.importXML("F", xmlF);//
+    VariantWitnessGraph wF = importer.importXML("F", xmlF);//
     String expected = "digraph CollationGraph{\n" + //
         "labelloc=b\n" + //
         "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + //
@@ -796,7 +795,7 @@ public class HyperCollatorTest extends HyperCollateTest {
         "t014->t009[label=\"N\"]\n" + //
         "}";
 
-    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
+    CollationGraph collationGraph = testHyperCollation(wF, wN, expected);
     assertThat(collationGraph).containsTextNodesMatching(
         textNodeSketch()
             .withWitnessSegmentSketch("F", "Frankenstein discovered")
