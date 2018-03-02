@@ -26,6 +26,7 @@ import nl.knaw.huygens.hypercollate.model.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.String.format;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -150,7 +151,7 @@ public class DotFactory {
   private String vertexVariable(TokenVertex tokenVertex) {
     if (tokenVertex instanceof SimpleTokenVertex) {
       MarkedUpToken token = (MarkedUpToken) tokenVertex.getToken();
-      return token.getWitness().getSigil() + "_" + String.format("%03d", token.getIndexNumber());
+      return token.getWitness().getSigil() + "_" + format("%03d", token.getIndexNumber());
     }
     if (tokenVertex instanceof StartTokenVertex) {
       return "begin";
@@ -177,7 +178,7 @@ public class DotFactory {
     nodes.sort(BY_NODE);
     for (int i = 0; i < nodes.size(); i++) {
       TextNode node = nodes.get(i);
-      String nodeId = "t" + String.format("%03d", i);
+      String nodeId = format("t%03d", i);
       nodeIdentifiers.put(node, nodeId);
       appendNodeLine(dotBuilder, node, nodeId);
     }
@@ -192,7 +193,7 @@ public class DotFactory {
             Node source = collation.getSource(e);
             Node target = collation.getTarget(e);
             String edgeLabel = e.getSigils().stream().sorted().collect(joining(","));
-            String line = String.format("%s->%s[label=\"%s\"]\n",//
+            String line = format("%s->%s[label=\"%s\"]\n",//
                 nodeIdentifiers.get(source), nodeIdentifiers.get(target), edgeLabel);
             edgeLines.add(line);
           });
