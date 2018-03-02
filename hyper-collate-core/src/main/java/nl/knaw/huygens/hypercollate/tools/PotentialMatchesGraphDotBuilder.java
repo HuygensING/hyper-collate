@@ -19,17 +19,35 @@ package nl.knaw.huygens.hypercollate.tools;
  * limitations under the License.
  * #L%
  */
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
+import eu.interedition.collatex.Token;
+import nl.knaw.huygens.hypercollate.model.*;
 
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.google.common.collect.Iterables.cycle;
 import static java.lang.String.format;
+import static java.util.Collections.disjoint;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public class PotentialMatchesGraphDotBuilder {
 
+  private static final String COLLATIONGRAPH_NODE_TEMPLATE = "  %s [label=<%s>]\n";
+  private static final String COLLATIONGRAPH_EDGE_TEMPLATE = "  %s->%s [label=\"%s\"]\n";
+  private static final String WITNESS_NODE_TEMPLATE = "  %s [fontcolor=blue;color=blue;label=<%s>]\n";
+  private static final String WITNESS_EDGE_TEMPLATE = "  %s->%s [fontcolor=blue;color=blue;label=\"%s\"]\n";
+  private static final String MATCH_EDGE_TEMPLATE = "  %s->%s [fontcolor=red;color=red;xlabel=\"%s \";dir=none;style=%s;constraint=false;bgcolor=white]\n";
+  private static final String SAME_RANK_TEMPLATE = "  {rank=same;%s %s}\n";
+
+  private static final Iterator<String> STYLE_CYCLE = cycle(new String[]{"dashed", "solid"}).iterator();
+
   private final CollationGraph collationGraph;
   private final CollationIterationData iterationData;
+  private final AtomicInteger nodeCounter = new AtomicInteger();
 
   public PotentialMatchesGraphDotBuilder(CollationGraph collationGraph, String witnessSigil) {
     this.iterationData = collationGraph.getCollationIterationData(witnessSigil);
@@ -37,75 +55,145 @@ public class PotentialMatchesGraphDotBuilder {
   }
 
   public String build() {
+    List<String> collationGraphSigils = iterationData.getCollationGraphSigils();
+    String witnessSigil = iterationData.getWitnessSigil();
+
     StringBuilder dotBuilder = new StringBuilder()
         .append("digraph PotentialMatchesGraph{\n")
         .append("  rankdir=LR\n")
         .append("  label=\"potential matches (red) for collating witness ")
-        .append(iterationData.getWitnessSigil())
-        .append(" (blue) against the collation graph (black)\"\n")
+        .append(witnessSigil)
+        .append(" (blue) against the collation graph ")
+        .append(collationGraphSigils)
+        .append(" (black)\"\n")
         .append("  forcelabels=true\n")
-        .append("  labelfontname=Helvetica\n")
-        .append("  begin [label=\"\";shape=doublecircle,rank=middle]\n")
-        .append("  end [label=\"\";shape=doublecircle,rank=middle]\n");
+        .append("  labelfontname=Helvetica\n\n");
 
-    Map<Object, String> nodeNames = new HashMap<>();
+    Map<TextNode, String> collationGraphNodeNames = new HashMap<>();
+    Map<TextNode, String> witnessNodeNames = new HashMap<>();
+
+    List<TextNode> allTextNodes = collationGraph.traverseTextNodes();
+    List<TextNode> collationGraphTextNodes = allTextNodes
+        .stream()
+        .filter(tn -> hasAnyRelevantSigils(tn, collationGraphSigils))
+        .collect(toList());
 
     // collation graph nodes
-//    collationGraph.traverseTextNodes().stream()
-    String node = "t002";
-    String label = "A: The&#9251;";
-    dotBuilder
-        .append(format("    %s [label=<%s>]\n", node, label))
-        .append("    t003 [label=<A: dog's&#9251;>]\n")
-        .append("    t004 [label=<A: big&#9251;>]\n")
-        .append("    t005 [label=<A: eyes>]\n")
-        .append("    t007 [label=<A: brown>]\n")
-        .append("    t006 [label=<A: .>]\n");
+    for (TextNode tn1 : collationGraphTextNodes) {
+      String node = nextNodeVariable();
+      collationGraphNodeNames.put(tn1, node);
+
+      Multimap<String, String> labelMap = LinkedHashMultimap.create();
+      collationGraphSigils.forEach(s -> {
+        String content = ((MarkedUpToken) tn1.getTokenForWitness(s)).getContent();
+        labelMap.put(content, s);
+      });
+      String label = labelMap.asMap()
+          .entrySet().stream()
+          .map(this::labelLine)
+          .collect(joining("\n"));
+
+      dotBuilder
+          .append(format(COLLATIONGRAPH_NODE_TEMPLATE, node, label));
+    }
+    dotBuilder.append("\n");
 
     // collation graph edges
-    dotBuilder
-        .append("    begin->t002[label=\"A\"]\n")
-        .append("    t002->t003[label=\"A\"]\n")
-        .append("    t003->t004[label=\"A\"]\n")
-        .append("    t004->t005[label=\"A\"]\n")
-        .append("    t005->t007[label=\"A\"]\n")
-        .append("    t007->t006[label=\"A\"]\n")
-        .append("    t006->end[label=\"A\"]\n");
+    Set<String> edgeLines = new TreeSet<>();
+    for (TextNode collationGraphTextNode : collationGraphTextNodes) {
+      collationGraph.getIncomingTextEdgeStream(collationGraphTextNode)//
+          .filter(e -> hasAnyRelevantSigils(e, collationGraphSigils))
+          .forEach(e -> {
+            Node source = collationGraph.getSource(e);
+            Node target = collationGraph.getTarget(e);
+            if (collationGraphNodeNames.containsKey(source) && collationGraphNodeNames.containsKey(target)) {
+              String edgeLabel = e.getSigils().stream()
+                  .filter(collationGraphSigils::contains)
+                  .sorted()
+                  .collect(joining(","));
+              String line = format(COLLATIONGRAPH_EDGE_TEMPLATE,//
+                  collationGraphNodeNames.get(source), collationGraphNodeNames.get(target), edgeLabel);
+              edgeLines.add(line);
+            }
+          });
+    }
+
+    List<TextNode> witnessTextNodes = allTextNodes
+        .stream()
+        .filter(tn -> tn.getSigils().contains(witnessSigil))
+        .collect(toList());
 
     // witness graph nodes
-    dotBuilder
-        .append("    B_000 [fontcolor=blue;color=blue;label=<The&#9251;>]\n")
-        .append("    B_001 [fontcolor=blue;color=blue;label=<dog's&#9251;>]\n")
-        .append("    B_002 [fontcolor=blue;color=blue;label=<big&#9251;>]\n")
-        .append("    B_005 [fontcolor=blue;color=blue;label=<brown&#9251;>]\n")
-        .append("    B_003 [fontcolor=blue;color=blue;label=<black&#9251;>]\n")
-        .append("    B_006 [fontcolor=blue;color=blue;label=<eyes>]\n")
-        .append("    B_004 [fontcolor=blue;color=blue;label=<ears>]\n")
-        .append("    B_007 [fontcolor=blue;color=blue;label=<.>]\n");
+    for (TextNode witnessTextNode : witnessTextNodes) {
+      String node = nextNodeVariable();
+      witnessNodeNames.put(witnessTextNode, node);
+
+      String label = ((MarkedUpToken) witnessTextNode.getTokenForWitness(witnessSigil)).getContent();
+      dotBuilder.append(format(WITNESS_NODE_TEMPLATE, node, label));
+    }
+
+    dotBuilder.append("\n");
 
     // witness graph edges
-    dotBuilder
-        .append("    begin->B_000[fontcolor=blue;color=blue;label=\"B\"]\n")
-        .append("    B_000->B_001[fontcolor=blue;color=blue;label=\"B\"]\n")
-        .append("    B_001->B_002[fontcolor=blue;color=blue;label=\"B\"]\n")
-        .append("    B_001->B_005[fontcolor=blue;color=blue;label=\"B\"]\n")
-        .append("    B_002->B_003[fontcolor=blue;color=blue;label=\"B\"]\n")
-        .append("    B_003->B_004[fontcolor=blue;color=blue;label=\"B\"]\n")
-        .append("    B_004->B_007[fontcolor=blue;color=blue;label=\"B\"]\n")
-        .append("    B_005->B_006[fontcolor=blue;color=blue;label=\"B\"]\n")
-        .append("    B_006->B_007[fontcolor=blue;color=blue;label=\"B\"]\n")
-        .append("    B_007->end[fontcolor=blue;color=blue;label=\"B\"]\n");
+    for (TextNode node : witnessTextNodes) {
+      collationGraph.getIncomingTextEdgeStream(node)//
+          .filter(e -> e.getSigils().contains(witnessSigil))
+          .forEach(e -> {
+            Node source = collationGraph.getSource(e);
+            Node target = collationGraph.getTarget(e);
+            if (witnessNodeNames.containsKey(source) && witnessNodeNames.containsKey(target)) {
+              String line = format(WITNESS_EDGE_TEMPLATE,//
+                  witnessNodeNames.get(source), witnessNodeNames.get(target), witnessSigil);
+              edgeLines.add(line);
+            }
+          });
+    }
+    edgeLines.forEach(dotBuilder::append);
+    dotBuilder.append("\n");
+
+    Map<Token, TextNode> collationGraphNodeForWitnessToken = new HashMap<>();
+    witnessTextNodes.forEach(tn -> {
+      Token token = tn.getTokenForWitness(witnessSigil);
+      collationGraphNodeForWitnessToken.put(token, tn);
+    });
 
     // potential matches edges
-    dotBuilder
-        .append("    t002->B_000 [fontcolor=red;color=red;xlabel=\"m1 \";dir=none;style=dashed;constraint=false;bgcolor=white]\n")
-        .append("    t003->B_001 [fontcolor=red;color=red;xlabel=\"m2 \";dir=none;style=dashed;constraint=false;]\n")
-        .append("    t004->B_002 [fontcolor=red;color=red;xlabel=\"m3 \";dir=none;style=dashed;constraint=false;bgcolor=white]\n")
-        .append("    t005->B_006 [fontcolor=red;color=red;xlabel=\"m4 \";dir=none;style=dashed;constraint=false;]\n")
-        .append("    t006->B_007 [fontcolor=red;color=red;xlabel=\"m5 \";dir=none;style=dashed;constraint=false;]\n")
-        .append("    t007->B_005 [fontcolor=red;color=red;xlabel=\"m6 \";dir=none;style=dashed;constraint=false;]\n");
+    AtomicInteger matchCounter = new AtomicInteger();
+    iterationData.getPotentialMatches().forEach(m -> {
+      TextNode collatedNode = m.getCollatedNode();
+      String cNode = collationGraphNodeNames.get(collatedNode);
+      if (cNode != null) {
+        Token wToken = m.getWitnessVertex().getToken();
+        TextNode textNode = collationGraphNodeForWitnessToken.get(wToken);
+        String wNode = witnessNodeNames.get(textNode);
+        String label = format("m%d", matchCounter.getAndIncrement());
+
+        dotBuilder.append(format(MATCH_EDGE_TEMPLATE, cNode, wNode, label, STYLE_CYCLE.next()));
+        if (collatedNode.equals(textNode)) {
+          dotBuilder.append(format(SAME_RANK_TEMPLATE, cNode, wNode));
+        }
+      }
+    });
 
     return dotBuilder.append("}").toString();
+  }
+
+  private String nextNodeVariable() {
+    return format("n%05d", nodeCounter.getAndIncrement());
+  }
+
+  private boolean hasAnyRelevantSigils(final TextNode tn, final List<String> collationGraphSigils) {
+    return !disjoint(tn.getSigils(), collationGraphSigils);
+  }
+
+  private boolean hasAnyRelevantSigils(final TextEdge e, final List<String> collationGraphSigils) {
+    return !disjoint(e.getSigils(), collationGraphSigils);
+  }
+
+  private String labelLine(final Map.Entry<String, Collection<String>> e) {
+    String sigils = e.getValue().stream().sorted().collect(joining(","));
+    String content = e.getKey();
+    return format("%s:%s", sigils, content);
   }
 
 }
