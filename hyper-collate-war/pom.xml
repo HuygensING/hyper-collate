@@ -10,7 +10,6 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <groupId>nl.knaw.huygens</groupId>
   <artifactId>hyper-collate-war</artifactId>
   <name>HyperCollate server-as-war module</name>
   <packaging>war</packaging>
