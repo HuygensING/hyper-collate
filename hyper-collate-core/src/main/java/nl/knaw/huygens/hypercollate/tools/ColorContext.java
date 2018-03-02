@@ -19,25 +19,25 @@ package nl.knaw.huygens.hypercollate.tools;
  * limitations under the License.
  * #L%
  */
+
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+
+import static com.google.common.collect.Iterables.cycle;
 
 public class ColorContext {
   private Map<String, String> assignedColors = new HashMap<>();
   private String[] colors = {"yellow", "orange", "#9aed7d", "lightblue", "grey", "#4286f4", "#ef10eb",
       "#9091D4", "#B190D4", "#B3D490", "#D49091", "#E62023", "#86E620", "#8020E6", "#20E6E3"};
-  private int colorIndex = 0;
+  private Iterator<String> colorCycle = cycle(colors).iterator();
 
   public String colorFor(String tagName) {
     if (assignedColors.containsKey(tagName)) {
       return assignedColors.get(tagName);
     }
-    String color = colors[colorIndex];
+    String color = colorCycle.next();
     assignedColors.put(tagName, color);
-    colorIndex++;
-    if (colorIndex > colors.length - 1) {
-      colorIndex = 0;
-    }
     return color;
   }
 }
