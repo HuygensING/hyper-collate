@@ -29,6 +29,7 @@ import nl.knaw.huygens.hypercollate.model.CollationGraphAssert.MarkupNodeSketch;
 import nl.knaw.huygens.hypercollate.model.CollationGraphAssert.TextNodeSketch;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
+import nl.knaw.huygens.hypercollate.tools.DecisionTreeDotBuilder;
 import nl.knaw.huygens.hypercollate.tools.PotentialMatchesGraphDotBuilder;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Sets;
@@ -930,6 +931,9 @@ public class HyperCollatorTest extends HyperCollateTest {
 
     String potentialMatchesGraph = new PotentialMatchesGraphDotBuilder(collation0, witness2.getSigil()).build();
     LOG.info("potentialMatchesGraph=\n{}\n", potentialMatchesGraph);
+
+    String decisionTreeDot = new DecisionTreeDotBuilder(collation0, witness2.getSigil()).build();
+    LOG.info("decisionTree=\n{}\n", decisionTreeDot);
 
     CollationGraph collation = CollationGraphNodeJoiner.join(collation0);
 
