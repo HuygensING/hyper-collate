@@ -76,7 +76,7 @@ public class HyperCollator {
     Map<Markup, MarkupNode> markupNodeIndex = new HashMap<>();
 
     initialize(collationGraph, collatedTokenVertexMap, markupNodeIndex, first);
-    visualize(collationGraph);
+//    visualize(collationGraph);
 
     for (VariantWitnessGraph witnessGraph : witnesses) {
       List<Match> sortedMatchesForWitness = matchesSortedByRankPerWitness.get(witnessGraph.getSigil());
@@ -85,7 +85,7 @@ public class HyperCollator {
           sortedMatchesForWitness, //
           markupNodeIndex, //
           collatedTokenVertexMap);
-      visualize(collationGraph);
+//      visualize(collationGraph);
     }
     return collationGraph;
   }
@@ -174,7 +174,8 @@ public class HyperCollator {
     OptimalCollatedMatchListAlgorithm optimalCollatedMatchListAlgorithm = new OptimalCollatedMatchListAlgorithm();
     List<CollatedMatch> optimalMatchList = optimalCollatedMatchListAlgorithm.getOptimalCollatedMatchList(matchList);
     DecisionTreeNode decisionTreeRootNode = optimalCollatedMatchListAlgorithm.getDecisionTreeRootNode();
-    iterationData.setDecisionTree(decisionTreeRootNode);
+    iterationData.setDecisionTree(decisionTreeRootNode)
+        .setOptimalCollatedMatchList(optimalMatchList);
     collationGraph.addCollationIterationData(witnessSigil, iterationData);
 
     LOG.info("optimalMatchList={}", optimalMatchList);
@@ -183,8 +184,10 @@ public class HyperCollator {
     TokenVertex first = witnessIterator.next();
     TextNode rootNode = collationGraph.getTextStartNode();
     collatedTokenVertexMap.put(first, rootNode);
-
     logCollated(collatedTokenVertexMap);
+
+    CollatedMatch endMatch = new CollatedMatch(collationGraph.getTextEndNode(), witnessGraph.getEndTokenVertex());
+    optimalMatchList.add(endMatch);
     while (!optimalMatchList.isEmpty()) {
       CollatedMatch match = optimalMatchList.remove(0);
       System.out.println(match);
@@ -324,9 +327,6 @@ public class HyperCollator {
       VariantWitnessGraph witness2 = witnesses.get(t.right);
       VariantWitnessGraphRanking ranking2 = rankings.get(t.right);
       match(witness1, witness2, ranking1, ranking2, allPotentialMatches, vertexToMatch);
-
-      Match endMatch = getEndMatch(witness1, ranking1, witness2, ranking2);
-      allPotentialMatches.add(endMatch);
     }
 
     return allPotentialMatches;

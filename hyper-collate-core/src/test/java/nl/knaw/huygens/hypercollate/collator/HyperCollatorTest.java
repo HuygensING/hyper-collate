@@ -446,7 +446,7 @@ public class HyperCollatorTest extends HyperCollateTest {
     );
   }
 
-//  @Ignore
+  //  @Ignore
   @Test
   public void testTranspositionAndDuplication() {
     XMLImporter importer = new XMLImporter();
@@ -738,7 +738,7 @@ public class HyperCollatorTest extends HyperCollateTest {
 //    );
   }
 
-//  @Ignore
+  //  @Ignore
   @Test
   public void testMaryShellyGodwinFrankensteinFragment2() {
     XMLImporter importer = new XMLImporter();
@@ -887,25 +887,22 @@ public class HyperCollatorTest extends HyperCollateTest {
     String match3 = "<A1,C1>";
     String match4 = "<B0,C0>";
     String match5 = "<B2,C2>";
-    String match6 = "<A:EndTokenVertex,B:EndTokenVertex>";
-    String match7 = "<A:EndTokenVertex,C:EndTokenVertex>";
-    String match8 = "<B:EndTokenVertex,C:EndTokenVertex>";
-    Assertions.assertThat(allPotentialMatches).hasSize(8);
+    Assertions.assertThat(allPotentialMatches).hasSize(5);
     Set<String> matchStrings = allPotentialMatches.stream().map(Match::toString).collect(toSet());
-    assertThat(matchStrings).contains(match1, match2, match3, match4, match5, match6, match7, match8);
+    assertThat(matchStrings).contains(match1, match2, match3, match4, match5);
 
     Map<String, List<Match>> sortAndFilterMatchesByWitness = hyperCollator.sortAndFilterMatchesByWitness(allPotentialMatches, asList(sigil1, sigil2, sigil3));
     LOG.info("sortAndFilterMatchesByWitness={}", sortAndFilterMatchesByWitness);
     assertThat(sortAndFilterMatchesByWitness).containsOnlyKeys(sigil1, sigil2, sigil3);
 
     List<String> listA = stringList(sortAndFilterMatchesByWitness, sigil1);
-    assertThat(listA).containsOnly(match1, match2, match3, match6, match7);
+    assertThat(listA).containsOnly(match1, match2, match3);
 
     List<String> listB = stringList(sortAndFilterMatchesByWitness, sigil2);
-    assertThat(listB).containsOnly(match4, match1, match5, match6, match8);
+    assertThat(listB).containsOnly(match4, match1, match5);
 
     List<String> listC = stringList(sortAndFilterMatchesByWitness, sigil3);
-    assertThat(listC).containsOnly(match4, match2, match3, match5, match7, match8);
+    assertThat(listC).containsOnly(match4, match2, match3, match5);
   }
 
   private List<String> stringList(Map<String, List<Match>> sortAndFilterMatchesByWitness, String key) {

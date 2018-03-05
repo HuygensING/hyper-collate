@@ -61,7 +61,7 @@ public class PotentialMatchesGraphDotBuilder {
     StringBuilder dotBuilder = new StringBuilder()
         .append("digraph PotentialMatchesGraph{\n")
         .append("  rankdir=LR\n")
-        .append("  label=\"potential matches (red) for collating witness ")
+        .append("  label=\"1. Potential matches (red) for collating witness ")
         .append(witnessSigil)
         .append(" (blue) against the collation graph ")
         .append(collationGraphSigils)

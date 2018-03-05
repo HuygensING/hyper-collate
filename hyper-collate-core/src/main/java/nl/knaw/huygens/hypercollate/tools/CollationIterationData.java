@@ -19,6 +19,7 @@ package nl.knaw.huygens.hypercollate.tools;
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huygens.hypercollate.collator.CollatedMatch;
 import nl.knaw.huygens.hypercollate.collator.DecisionTreeNode;
 
@@ -30,6 +31,7 @@ public class CollationIterationData {
   private List<String> collationGraphSigils = new ArrayList<>();
   private String witnessSigil;
   private List<CollatedMatch> potentialMatches = new ArrayList<>();
+  private List<CollatedMatch> optimalCollatedMatchList = new ArrayList<>();
 
   public CollationIterationData setDecisionTree(final DecisionTreeNode decisionTree) {
     this.decisionTree = decisionTree;
@@ -60,11 +62,22 @@ public class CollationIterationData {
 
   public CollationIterationData setPotentialMatches(final List<CollatedMatch> potentialMatches) {
     this.potentialMatches.addAll(potentialMatches);
+//    this.potentialMatches.remove(this.potentialMatches.size() - 1); // because last CollatedMatch is between the EndTokens
     return this;
   }
 
   public List<CollatedMatch> getPotentialMatches() {
     return potentialMatches;
+  }
+
+  public CollationIterationData setOptimalCollatedMatchList(final List<CollatedMatch> optimalCollatedMatchList) {
+    this.optimalCollatedMatchList.addAll(optimalCollatedMatchList);
+//    this.optimalCollatedMatchList.remove(this.optimalCollatedMatchList.size() - 1);// because last CollatedMatch is between the EndTokens
+    return this;
+  }
+
+  public List<CollatedMatch> getOptimalCollatedMatchList() {
+    return optimalCollatedMatchList;
   }
 
   //    String iterationId = collationGraph.getSigils().stream().collect(joining()) + "+" + witnessSigil;

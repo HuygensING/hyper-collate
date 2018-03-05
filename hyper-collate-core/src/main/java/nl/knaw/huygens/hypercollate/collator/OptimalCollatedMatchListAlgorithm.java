@@ -35,6 +35,7 @@ import static java.util.stream.Collectors.toSet;
 
 public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCollatedMatchList, LostPotential> implements OptimalCollatedMatchListFinder {
   private static final Logger LOG = LoggerFactory.getLogger(OptimalCollatedMatchListAlgorithm.class);
+  private static final Boolean SHORTCUT = true; // Reduce the decision tree. Experimental, might lose alternatives.
 
   private List<CollatedMatch> matchesSortedByNode;
   private List<CollatedMatch> matchesSortedByWitness;
@@ -99,7 +100,7 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
     CollatedMatch firstPotentialMatch1 = getFirstPotentialMatch(this.matchesSortedByNode, matchList);
     CollatedMatch firstPotentialMatch2 = getFirstPotentialMatch(this.matchesSortedByWitness, matchList);
 
-    if (firstPotentialMatch1.equals(firstPotentialMatch2)) {
+    if (SHORTCUT && firstPotentialMatch1.equals(firstPotentialMatch2)) {
       keepChoosingMatchesUntilPotentialsAreDifferent(matchList, nextPotentialMatches, firstPotentialMatch1);
 
     } else {
@@ -187,7 +188,7 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
   }
 
   public DecisionTreeNode getDecisionTreeRootNode() {
-    Preconditions.checkNotNull(rootNode, "aStart() needs to be called first.");
+    Preconditions.checkNotNull(rootNode, "aStar() needs to be called first.");
     Set<QuantumCollatedMatchList> visitedNodes = new HashSet<>();
     return getConnectedDecisionTreeNode(rootNode, visitedNodes);
   }
