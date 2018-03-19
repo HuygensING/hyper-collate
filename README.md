@@ -1,7 +1,9 @@
 # HyperCollate
 
 ## General
-This is a prototype that takes care of intradocumentary variation. The code dealing with collation of structure is in the "Prioritised XML Collation" [codebase](https://github.com/bleekere/prioritised_xml_collation_java) (java). Also take a look at the [Jupyter Notebook](https://github.com/HuygensING/hyper-collate-python-proxy/blob/master/hyper-collate-example.ipynb). The two codebases will be merged in the near future.
+HyperCollate is a prototype collation engine that is able to handle intradocumentary variation (i.e. variation _within_ one document), in addition to finding the differences _between_ witnesses. This advanced form of collation is possible because HyperCollate looks not only at the text of a document, but also at its markup.
+
+We are also developing a collation algorithm that can deal with structural variation (think of deleted paragraphs, split sentences, etc.). The code (work-in-progress) can be found in the "Prioritised XML Collation" [codebase](https://github.com/bleekere/prioritised_xml_collation_java) (java). Also take a look at the [Jupyter Notebook](https://github.com/HuygensING/hyper-collate-python-proxy/blob/master/hyper-collate-example.ipynb). The two codebases (interval variation and structural variation) will be merged in the near future.
 
 ## Server
 
