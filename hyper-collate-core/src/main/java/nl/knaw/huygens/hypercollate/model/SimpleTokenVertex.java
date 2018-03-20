@@ -29,8 +29,8 @@ import java.util.stream.Stream;
 public class SimpleTokenVertex implements TokenVertex, Comparable<SimpleTokenVertex> {
 
   private final MarkedUpToken token;
-  private final List<TokenVertex> incomingVertices = new ArrayList<>();
-  private final List<TokenVertex> outgoingVertices = new ArrayList<>();
+  private final List<TokenVertex> incomingVertices = new ArrayList<>(); // TODO: move to VariantWitnessGraph
+  private final List<TokenVertex> outgoingVertices = new ArrayList<>(); // TODO: move to VariantWitnessGraph
   private List<Integer> branchPath;
 
   public SimpleTokenVertex(MarkedUpToken token) {
