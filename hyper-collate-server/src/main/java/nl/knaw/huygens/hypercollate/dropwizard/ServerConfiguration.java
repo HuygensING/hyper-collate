@@ -19,10 +19,12 @@ package nl.knaw.huygens.hypercollate.dropwizard;
  * limitations under the License.
  * #L%
  */
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import nl.knaw.huygens.hypercollate.rest.HyperCollateConfiguration;
+import nl.knaw.huygens.hypercollate.rest.Util;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import java.io.File;
@@ -41,6 +43,7 @@ public class ServerConfiguration extends Configuration implements HyperCollateCo
 
   public ServerConfiguration() {
     super();
+    pathToDotExecutable = Util.detectDotPath();
   }
 
   public void setBaseURI(String baseURI) {
@@ -91,4 +94,5 @@ public class ServerConfiguration extends Configuration implements HyperCollateCo
       setProjectDir(Paths.get(System.getProperty("user.home"), ".hypercollate").toString());
     }
   }
+
 }

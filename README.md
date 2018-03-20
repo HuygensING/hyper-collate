@@ -1,7 +1,7 @@
 # HyperCollate
 
 ## General
-HyperCollate is a prototype collation engine that is able to handle intradocumentary variation (i.e. variation _within_ one document), in addition to finding the differences _between_ witnesses. This advanced form of collation is possible because HyperCollate looks not only at the text of a document, but also at its markup.
+HyperCollate is a prototype collation engine that is able to handle *intradocumentary* variation (i.e. variation _within_ one document), in addition to finding the differences _between_ witnesses. This advanced form of collation is possible because HyperCollate looks not only at the text of a document, but also at its markup.
 
 We are also developing a collation algorithm that can deal with structural variation (think of deleted paragraphs, split sentences, etc.). The code (work-in-progress) can be found in the "Prioritised XML Collation" [codebase](https://github.com/bleekere/prioritised_xml_collation_java) (java). Also take a look at the [Jupyter Notebook](https://github.com/HuygensING/hyper-collate-python-proxy/blob/master/hyper-collate-example.ipynb). The two codebases (interval variation and structural variation) will be merged in the near future.
 
@@ -34,7 +34,7 @@ to build the hyper-collate-server jar and war, then to use the jar:
 
 - `cd hyper-collate-server`
 - `java -jar target/hyper-collate-server-1.0-SNAPSHOT.jar server config.yml`
-- In your browser, open <http://127.0.0.1:8080/>
+- In your browser, open <http://localhost:9000/>
 
 the war can be found in `hyper-collate-war/target`, an example config file in `hyper-collate-war/hypercollate.xml`
 Follow steps 3 - 5 from Option 1b.  
@@ -53,7 +53,7 @@ The war just exposes a swagger file without a UI, in the `/swagger.json` or `/sw
   with a URL to the collation in the `location` header.  
   
   curl example:  
-    `curl -X PUT --header 'Content-Type: application/json' --header 'Accept: text/plain; charset=UTF-8' 'http://localhost:8080/collations/testcollation'` 
+    `curl -X PUT --header 'Content-Type: application/json' --header 'Accept: text/plain; charset=UTF-8' 'http://localhost:9000/collations/testcollation'` 
   
 - **Add witnesses to the collation:**  
   `PUT /collations/{name}/witnesses/{sigil}`
@@ -61,9 +61,9 @@ The war just exposes a swagger file without a UI, in the `/swagger.json` or `/sw
   Repeat this step for the other witness(es)
   
   curl example:  
-    `curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in <del>Cataluña</del><add>Spain</add> falls mainly on the plain.</xml>' 'http://localhost:8080/collations/testcollation/witnesses/A'`
+    `curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in <del>Cataluña</del><add>Spain</add> falls mainly on the plain.</xml>' 'http://localhost:9000/collations/testcollation/witnesses/A'`
     
-    `curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in Spain falls mainly on the <del>street</del><add>plain</add>.</xml>' 'http://localhost:8080/collations/testcollation/witnesses/B'` 
+    `curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in Spain falls mainly on the <del>street</del><add>plain</add>.</xml>' 'http://localhost:9000/collations/testcollation/witnesses/B'` 
   
 
 - **Get an ASCII table visualization of the collation graph:**  
@@ -72,7 +72,7 @@ The war just exposes a swagger file without a UI, in the `/swagger.json` or `/sw
   The response body has a table of the collated text using ASCII.  
   
   curl example:  
-    `curl -X GET --header 'Accept: text/plain' 'http://localhost:8080/collations/testcollation/ascii_table'`    
+    `curl -X GET --header 'Accept: text/plain' 'http://localhost:9000/collations/testcollation/ascii_table'`    
 
     This should return the response body
      <pre>
@@ -93,7 +93,7 @@ The war just exposes a swagger file without a UI, in the `/swagger.json` or `/sw
   The response body has the .dot representation of the collation graph.  
 
   curl example:  
-    `curl -X GET --header 'Accept: text/plain' 'http://localhost:8080/collations/testcollation.dot'`
+    `curl -X GET --header 'Accept: text/plain' 'http://localhost:9000/collations/testcollation.dot'`
       
     This should return the response body:
 
