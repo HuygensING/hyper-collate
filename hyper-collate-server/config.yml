@@ -1,6 +1,6 @@
 # The base URI with ip name/address and port for the server to run on
 # note: the port number in the baseURI should match the server/applicationConnectors/port setting below
-baseURI: http://localhost:9000/
+baseURI: http://localhost:2018/
 
 # optional path to dot executable for rendering dot to svg/png
 # uncomment and set when autodetecting does not work.
@@ -9,13 +9,9 @@ baseURI: http://localhost:9000/
 server:
   applicationConnectors:
   - type: http
-    port: 9000
+    port: 2018
 
 logging:
   level: INFO
   loggers:
     nl.knaw.huygens: DEBUG
-
-# DO NOT CHANGE THESE SETTINGS:
-swagger:
-  resourcePackage: nl.knaw.huygens.hypercollate.rest.resources

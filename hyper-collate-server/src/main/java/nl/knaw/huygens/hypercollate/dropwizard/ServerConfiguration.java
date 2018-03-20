@@ -22,18 +22,22 @@ package nl.knaw.huygens.hypercollate.dropwizard;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
+import io.dropwizard.jetty.HttpConnectorFactory;
+import io.dropwizard.server.DefaultServerFactory;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import nl.knaw.huygens.hypercollate.rest.HyperCollateConfiguration;
 import nl.knaw.huygens.hypercollate.rest.Util;
-import org.hibernate.validator.constraints.NotEmpty;
+import nl.knaw.huygens.hypercollate.rest.resources.AboutResource;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class ServerConfiguration extends Configuration implements HyperCollateConfiguration {
-  @NotEmpty
+  //  private static final int DEFAULT_PORT = 9000;
+  private static final String HTTP_LOCALHOST = "http://localhost:";
   private String baseURI;
 
   private String pathToDotExecutable;
@@ -41,9 +45,18 @@ public class ServerConfiguration extends Configuration implements HyperCollateCo
   private File projectDir;
   private File collationsDir;
 
+  @JsonProperty("swagger")
+  public SwaggerBundleConfiguration swaggerBundleConfiguration = new SwaggerBundleConfiguration();
+
   public ServerConfiguration() {
     super();
+    // By initializing the properties with default values in this constructor, a config file is not necessary.
     pathToDotExecutable = Util.detectDotPath();
+    int port = availablePort();
+    HttpConnectorFactory httpConnectorFactory = (HttpConnectorFactory) ((DefaultServerFactory) getServerFactory()).getApplicationConnectors().get(0);
+    httpConnectorFactory.setPort(port);
+    baseURI = HTTP_LOCALHOST + port;
+    swaggerBundleConfiguration.setResourcePackage(AboutResource.class.getPackage().getName());
   }
 
   public void setBaseURI(String baseURI) {
@@ -53,9 +66,6 @@ public class ServerConfiguration extends Configuration implements HyperCollateCo
   public String getBaseURI() {
     return baseURI;
   }
-
-  @JsonProperty("swagger")
-  public SwaggerBundleConfiguration swaggerBundleConfiguration;
 
   public File getProjectDir() {
     checkProjectDirIsInitialized();
@@ -92,6 +102,18 @@ public class ServerConfiguration extends Configuration implements HyperCollateCo
   private void checkProjectDirIsInitialized() {
     if (this.projectDir == null) {
       setProjectDir(Paths.get(System.getProperty("user.home"), ".hypercollate").toString());
+    }
+  }
+
+  private int availablePort() {
+    try {
+      ServerSocket s = new ServerSocket(0);
+      int port = s.getLocalPort();
+      s.close();
+      return port;
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
     }
   }
 
