@@ -133,6 +133,22 @@ public class CollationInfo {
     return URI.create(uriBase + "/" + ResourcePaths.COLLATIONS_ASCII_TABLE);
   }
 
+  @JsonProperty(value = "witness_visualisations")
+  public Map<String, Map<String, URI>> getWitnessVisualisationURIs() {
+    Map<String, Map<String, URI>> wvu = new HashMap<>();
+    witnesses.keySet().forEach(sigil -> {
+      String witnessBaseURI = String.format("%s/%s/%s.", uriBase, ResourcePaths.WITNESSES, sigil);
+      Map<String, URI> uriMap = new HashMap<>();
+      uriMap.put("^png", URI.create(witnessBaseURI + ResourcePaths.COLLATIONS_PNG));
+      uriMap.put("^svg", URI.create(witnessBaseURI + ResourcePaths.COLLATIONS_SVG));
+      uriMap.put("^dot", URI.create(witnessBaseURI + ResourcePaths.COLLATIONS_DOT));
+      uriMap.put("^xml", URI.create(witnessBaseURI + "xml"));
+      wvu.put(sigil, uriMap);
+    });
+    return wvu;
+  }
+
+
   public void setCollationDurationInMilliseconds(long collationDuration) {
     this.collationDuration = collationDuration;
     this.collationState = State.is_collated;
