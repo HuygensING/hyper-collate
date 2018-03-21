@@ -23,6 +23,7 @@ package nl.knaw.huygens.hypercollate.dropwizard;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Configuration;
 import io.dropwizard.jetty.HttpConnectorFactory;
+import io.dropwizard.logging.DefaultLoggingFactory;
 import io.dropwizard.server.DefaultServerFactory;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import nl.knaw.huygens.hypercollate.rest.HyperCollateConfiguration;
@@ -36,7 +37,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class ServerConfiguration extends Configuration implements HyperCollateConfiguration {
-  //  private static final int DEFAULT_PORT = 9000;
+  // By initializing the properties with default values, a config file is not necessary.
+
   private static final String HTTP_LOCALHOST = "http://localhost:";
   private String baseURI;
 
@@ -50,13 +52,17 @@ public class ServerConfiguration extends Configuration implements HyperCollateCo
 
   public ServerConfiguration() {
     super();
-    // By initializing the properties with default values in this constructor, a config file is not necessary.
+    setDefaults();
+  }
+
+  private void setDefaults() {
     pathToDotExecutable = Util.detectDotPath();
     int port = availablePort();
     HttpConnectorFactory httpConnectorFactory = (HttpConnectorFactory) ((DefaultServerFactory) getServerFactory()).getApplicationConnectors().get(0);
     httpConnectorFactory.setPort(port);
     baseURI = HTTP_LOCALHOST + port;
     swaggerBundleConfiguration.setResourcePackage(AboutResource.class.getPackage().getName());
+    ((DefaultLoggingFactory) getLoggingFactory()).setLevel("INFO");
   }
 
   public void setBaseURI(String baseURI) {

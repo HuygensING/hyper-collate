@@ -904,12 +904,12 @@ public class HyperCollatorTest extends HyperCollateTest {
     CollationGraph collation = CollationGraphNodeJoiner.join(collation0);
 
     String dot = CollationGraphVisualizer.toDot(collation, true);
-    LOG.info("dot=\n{}", dot);
+    LOG.debug("dot=\n{}", dot);
     writeGraph(dot, "graph");
     assertThat(dot).isEqualTo(expected);
 
     String table = CollationGraphVisualizer.toTableASCII(collation, true);
-    LOG.info("table=\n{}", table);
+    LOG.debug("table=\n{}", table);
     return collation;
   }
 

@@ -92,7 +92,7 @@ class ServerApplication extends Application<ServerConfiguration> {
     if (!healthy.get()) {
       throw new RuntimeException("Failing health check(s)");
     }
-    LOG.info(String.format("\n\nStarting %s at %s ...\n", getName(), configuration.getBaseURI()));
+    LOG.info(String.format("\n\n************************************************************\n** Starting %s at %s ...\n************************************************************\n", getName(), configuration.getBaseURI()));
   }
 
 }

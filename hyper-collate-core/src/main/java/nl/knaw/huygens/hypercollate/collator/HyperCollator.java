@@ -92,7 +92,7 @@ public class HyperCollator {
 
   private void visualize(CollationGraph collationGraph) {
     String dot = CollationGraphVisualizer.toDot(collationGraph, true);
-    LOG.info("dot={}", dot);
+    LOG.debug("dot={}", dot);
   }
 
   void initialize(CollationGraph collationGraph, //
@@ -162,9 +162,9 @@ public class HyperCollator {
         .map(m -> adjustRankForCollatedNode(m, baseRanking))//
         .distinct()//
         .collect(toList());
-    LOG.info("matchList={}", matchList);
+    LOG.debug("matchList={}", matchList);
     List<CollatedMatch> optimalMatchList = getOptimalMatchList(matchList);
-    LOG.info("optimalMatchList={}", optimalMatchList);
+    LOG.debug("optimalMatchList={}", optimalMatchList);
 
     Iterator<TokenVertex> witnessIterator = VariantWitnessGraphTraversal.of(witnessGraph).iterator();
     TokenVertex first = witnessIterator.next();
@@ -174,7 +174,7 @@ public class HyperCollator {
     logCollated(collatedTokenVertexMap);
     while (!optimalMatchList.isEmpty()) {
       CollatedMatch match = optimalMatchList.remove(0);
-      LOG.info("match={}", match);
+      LOG.debug("match={}", match);
       TokenVertex tokenVertexForWitnessGraph = match.getWitnessVertex();
       advanceWitness(collationGraph, collatedTokenVertexMap, witnessIterator, tokenVertexForWitnessGraph, witnessGraph, markupNodeIndex);
 
@@ -213,7 +213,7 @@ public class HyperCollator {
   private void logCollated(Map<TokenVertex, TextNode> collatedTokenVertexMap) {
     List<String> lines = new ArrayList<>();
     collatedTokenVertexMap.forEach((k, v) -> lines.add(k.getSigil() + ":" + k.getToken() + " -> " + v));
-    LOG.info("collated={}", lines.stream().sorted().collect(joining("\n")));
+    LOG.debug("collated={}", lines.stream().sorted().collect(joining("\n")));
   }
 
   private void advanceWitness(CollationGraph collationGraph, //
