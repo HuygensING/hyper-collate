@@ -34,11 +34,9 @@ public class DecisionTreeDotBuilder {
   public static final String GREEN = "#78b259";
   public static final String ORANGE = "#f48341";
   private final CollationIterationData iterationData;
-  private final CollationGraph collationGraph;
 
   public DecisionTreeDotBuilder(CollationGraph collationGraph, String witnessSigil) {
     this.iterationData = collationGraph.getCollationIterationData(witnessSigil);
-    this.collationGraph = collationGraph;
   }
 
   public String build() {
