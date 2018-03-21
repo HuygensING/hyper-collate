@@ -22,7 +22,7 @@ To work with the server, you can either download the latest prebuilt jar or war,
     ```
     in the output, which lists the URL of the server. Open this URL in your browser.
 
-##### Use a custom port
+##### Optional: Use a custom port
 * Download an example config file from <https://raw.githubusercontent.com/HuygensING/hyper-collate/master/hyper-collate-server/config.yml> to the same directory.
 * Set the `baseURI` and `port` parameters in the configfile
 * run `java -jar hyper-collate-server.jar server config.yml`
@@ -32,7 +32,7 @@ To work with the server, you can either download the latest prebuilt jar or war,
 1. Download the war from <https://cdn.huygens.knaw.nl/hyper-collate.war> to the current directory.
 2. Download an example config file from <https://raw.githubusercontent.com/HuygensING/hyper-collate/master/hyper-collate-war/hypercollate.xml> to the same directory.
 3. Change the `Context docBase`, `Context path` and the `value`s for `projectDir` and `baseURI` in `hypercollate.xml` as needed.
-4. copy `` to `$TOMCAT_HOME/conf/[Engine]/[Host]/` (e.g. `/opt/tomcat8/conf/Catalina/localhost/`)
+4. copy `hypercollate.xml` to `$TOMCAT_HOME/conf/[Engine]/[Host]/` (e.g. `/opt/tomcat8/conf/Catalina/localhost/`)
 5. In your browser, go to the `baseURI` URL from `hypercollate.xml`.
 
 ### Option 2 - build your own
@@ -42,8 +42,8 @@ To work with the server, you can either download the latest prebuilt jar or war,
 to build the hyper-collate-server jar and war, then to use the jar:
 
 - `cd hyper-collate-server`
-- `java -jar target/hyper-collate-server-1.0-SNAPSHOT.jar server config.yml`
-- In your browser, open <http://localhost:9000/>
+- `java -jar target/hyper-collate-server-1.0-SNAPSHOT.jar server config.yml` to start using the settings from `config.yml` 
+- In your browser, open <http://localhost:2018/>
 
 the war can be found in `hyper-collate-war/target`, an example config file in `hyper-collate-war/hypercollate.xml`
 Follow steps 3 - 5 from Option 1b.  
