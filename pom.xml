@@ -46,7 +46,7 @@
         <dropwizard.version>1.2.0</dropwizard.version>
         <graphviz-java.version>0.2.2</graphviz-java.version>
         <groovy.version>1.0-jsr-05-1</groovy.version>
-        <guava.version>21.0</guava.version>
+        <guava.version>24.1-jre</guava.version>
         <jackson.version>2.8.4</jackson.version>
         <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
         <jaxb-api.version>2.3.0</jaxb-api.version>
@@ -67,10 +67,10 @@
         <maven-source.version>3.0.1</maven-source.version>
         <maven-war.version>3.2.0</maven-war.version>
         <metrics-annotation.version>3.2.5</metrics-annotation.version>
-        <mockito.version>2.13.0</mockito.version>
+        <mockito.version>2.16.0</mockito.version>
         <reflections.version>0.9.10</reflections.version> <!-- 0.9.11 leads to ReflectionsExceptions -->
         <servlet-api.version>4.0.0-b01</servlet-api.version>
-        <slf4j-api.version>1.7.25</slf4j-api.version>
+        <slf4j-api.version>1.8.0-beta1</slf4j-api.version>
         <swagger.version>1.5.16</swagger.version>
         <tomcat-jsp-api.version>9.0.1</tomcat-jsp-api.version>
         <validation-api.version>2.0.1.Final</validation-api.version>
