@@ -3,7 +3,7 @@
 baseURI: http://localhost:2018/
 
 # optional path to dot executable for rendering dot to svg/png
-# uncomment and set when autodetecting does not work.
+# uncomment and set when auto-detecting does not work.
 #pathToDotExecutable: /usr/bin/dot
 
 server:

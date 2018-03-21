@@ -25,7 +25,6 @@ import com.google.common.base.Stopwatch;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.api.ResourcePaths;
 import nl.knaw.huygens.hypercollate.api.UTF8MediaType;
 import nl.knaw.huygens.hypercollate.collator.HyperCollator;
@@ -49,6 +48,8 @@ import javax.ws.rs.core.StreamingOutput;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.stream.Collectors.toList;
 
 @Api(ResourcePaths.COLLATIONS)
 @Path(ResourcePaths.COLLATIONS)
@@ -163,8 +164,8 @@ public class CollationsResource {
   @Consumes(UTF8MediaType.TEXT_XML)
   @ApiOperation(value = "Add a witness to the collation")
   public Response addXMLWitness(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) @NotNull final String name, //
-                                @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) @NotNull final String sigil, //
-                                @ApiParam(APIPARAM_XML) @NotNull @Valid String xml) {
+      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) @NotNull final String sigil, //
+      @ApiParam(APIPARAM_XML) @NotNull @Valid String xml) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     VariantWitnessGraph variantWitnessGraph = new XMLImporter().importXML(sigil, xml);
     collationInfo.addWitness(sigil, xml);
@@ -179,7 +180,7 @@ public class CollationsResource {
   @Produces(UTF8MediaType.TEXT_XML)
   @ApiOperation(value = "Return the XML source of the witness")
   public Response getWitnessXML(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name, //
-                                @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil) {
+      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     String xml = collationInfo.getWitness(sigil).orElseThrow(NotFoundException::new);
     return Response.ok(xml).build();
@@ -205,8 +206,8 @@ public class CollationsResource {
   @Produces(IMAGE_SVG)
   @ApiOperation(value = "Return an SVG visualization of the witness graph, with optional emphasizing of whitespace.")
   public Response getWitnessSVG(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name, //
-                                @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,//
-                                @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace) {
+      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,//
+      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace) {
     return renderWitnessGraphAs(name, sigil, emphasizeWhitespace, SVG);
   }
 
@@ -216,8 +217,8 @@ public class CollationsResource {
   @Produces(IMAGE_PNG)
   @ApiOperation(value = "Return a PNG visualization of the witness graph, with optional emphasizing of whitespace.")
   public Response getWitnessPNG(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name, //
-                                @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,//
-                                @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace) {
+      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,//
+      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace) {
     return renderWitnessGraphAs(name, sigil, emphasizeWhitespace, PNG);
   }
 
