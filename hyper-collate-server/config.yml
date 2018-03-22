@@ -1,15 +1,19 @@
 # The base URI with ip name/address and port for the server to run on
-baseURI: http://127.0.0.1:8080/
+# note: the port number in the baseURI should match the server/applicationConnectors/port setting below
+baseURI: http://localhost:2018/
 
 # optional path to dot executable for rendering dot to svg/png
-# comment out when no dot executable available
-pathToDotExecutable: /usr/local/bin/dot
+# uncomment and set when auto-detecting does not work.
+#pathToDotExecutable: /usr/bin/dot
+#or
+#pathToDotExecutable: /usr/local/bin/dot
+
+server:
+  applicationConnectors:
+  - type: http
+    port: 2018
 
 logging:
   level: INFO
   loggers:
-    nl.knaw.huygens: DEBUG
-
-# DO NOT CHANGE THESE SETTINGS:
-swagger:
-  resourcePackage: nl.knaw.huygens.hypercollate.rest.resources
+    nl.knaw.huygens: WARN

@@ -904,12 +904,12 @@ public class HyperCollatorTest extends HyperCollateTest {
     CollationGraph collation = CollationGraphNodeJoiner.join(collation0);
 
     String dot = CollationGraphVisualizer.toDot(collation, true);
-    System.out.println(dot);
+    LOG.debug("dot=\n{}", dot);
     writeGraph(dot, "graph");
     assertThat(dot).isEqualTo(expected);
 
     String table = CollationGraphVisualizer.toTableASCII(collation, true);
-    System.out.println(table);
+    LOG.debug("table=\n{}", table);
     return collation;
   }
 
@@ -932,16 +932,15 @@ public class HyperCollatorTest extends HyperCollateTest {
     assertThat(markupAfterJoin).containsExactlyElementsOf(markupBeforeJoin);
 
     String dot = CollationGraphVisualizer.toDot(collation, true);
-    System.out.println(dot);
+    LOG.info("dot=\n{}", dot);
     writeGraph(dot, "graph");
     assertThat(dot).isEqualTo(expected);
 
     String table = CollationGraphVisualizer.toTableASCII(collation, true);
-    System.out.println(table);
+    LOG.info("dot=\n{}", table);
 
     assertThat(collation).isNotNull();
     return collation;
   }
-
 
 }

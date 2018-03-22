@@ -19,6 +19,7 @@ package nl.knaw.huygens.hypercollate;
  * limitations under the License.
  * #L%
  */
+
 import io.swagger.annotations.ApiOperation;
 
 import javax.ws.rs.GET;

@@ -21,11 +21,10 @@ package nl.knaw.huygens.hypercollate;
  */
 
 import io.swagger.jaxrs.config.BeanConfig;
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.rest.CachedCollationStore;
 import nl.knaw.huygens.hypercollate.rest.CollationStore;
 import nl.knaw.huygens.hypercollate.rest.HyperCollateConfiguration;
+import nl.knaw.huygens.hypercollate.rest.Util;
 import nl.knaw.huygens.hypercollate.rest.resources.AboutResource;
 import nl.knaw.huygens.hypercollate.rest.resources.CollationsResource;
 import nl.knaw.huygens.hypercollate.rest.resources.RuntimeExceptionMapper;
@@ -34,13 +33,14 @@ import nl.knaw.huygens.hypercollate.rest.resources.XMLStreamExceptionMapper;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.ws.rs.core.Application;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
+
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 
 public class HyperCollateApplication extends Application {
   private static final Logger LOG = Logger.getLogger(HyperCollateApplication.class.getName());
@@ -90,34 +90,13 @@ public class HyperCollateApplication extends Application {
       String projectDir = (String) initialContext.lookup("java:comp/env/projectDir");
       return new SimpleConfiguration()//
           .setBaseURI(baseURI)//
-          .setProjectDir(projectDir)//
-          .setPathToDotExecutable(detectDotPath());
+          .setProjectDir(projectDir)
+          .setPathToDotExecutable(Util.detectDotPath());
 
     } catch (NamingException e) {
       e.printStackTrace();
       throw new RuntimeException(e);
     }
-  }
-
-  private static String detectDotPath() {
-    for (String detectionCommand : new String[]{"which dot", "where dot.exe"}) {
-      try {
-        final Process process = Runtime.getRuntime().exec(detectionCommand);
-        try (BufferedReader processReader = new BufferedReader(new InputStreamReader(process.getInputStream(), Charset.defaultCharset()))) {
-          final CompletableFuture<Optional<String>> path = CompletableFuture.supplyAsync(() -> processReader.lines()
-              .map(String::trim)
-              .filter(l -> l.toLowerCase().contains("dot"))
-              .findFirst());
-          process.waitFor();
-          final String dotPath = path.get().get();
-          LOG.info(() -> "Detected GraphViz' dot at '" + dotPath + "'");
-          return dotPath;
-        }
-      } catch (Throwable t) {
-        LOG.log(Level.FINE, detectionCommand, t);
-      }
-    }
-    return null;
   }
 
 }
