@@ -65,7 +65,7 @@ The war just exposes a swagger file without a UI, in the `/swagger.json` or `/sw
   with a URL to the collation in the `location` header.  
   
   curl example:  
-    `curl -X PUT --header 'Content-Type: application/json' --header 'Accept: text/plain; charset=UTF-8' 'http://localhost:9000/collations/testcollation'` 
+    `curl -X PUT --header 'Content-Type: application/json' --header 'Accept: text/plain; charset=UTF-8' 'http://localhost:2018/collations/testcollation'` 
   
 - **Add witnesses to the collation:**  
   `PUT /collations/{name}/witnesses/{sigil}`  
@@ -74,9 +74,9 @@ The war just exposes a swagger file without a UI, in the `/swagger.json` or `/sw
   Repeat this step for the other witness(es).
   
   curl example:  
-    `curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in <del>Cataluña</del><add>Spain</add> falls mainly on the plain.</xml>' 'http://localhost:9000/collations/testcollation/witnesses/A'`
+    `curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in <del>Cataluña</del><add>Spain</add> falls mainly on the plain.</xml>' 'http://localhost:2018/collations/testcollation/witnesses/A'`
     
-    `curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in Spain falls mainly on the <del>street</del><add>plain</add>.</xml>' 'http://localhost:9000/collations/testcollation/witnesses/B'` 
+    `curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in Spain falls mainly on the <del>street</del><add>plain</add>.</xml>' 'http://localhost:2018/collations/testcollation/witnesses/B'` 
   
 
 - **Get an ASCII table visualization of the collation graph:**  
@@ -86,7 +86,7 @@ The war just exposes a swagger file without a UI, in the `/swagger.json` or `/sw
   The response body has a table of the collated text using ASCII.  
   
   curl example:  
-    `curl -X GET --header 'Accept: text/plain' 'http://localhost:9000/collations/testcollation/ascii_table'`    
+    `curl -X GET --header 'Accept: text/plain' 'http://localhost:2018/collations/testcollation/ascii_table'`    
 
     This should return the response body
      <pre>
@@ -108,7 +108,7 @@ The war just exposes a swagger file without a UI, in the `/swagger.json` or `/sw
   The response body has the .dot representation of the collation graph.  
 
   curl example:  
-    `curl -X GET --header 'Accept: text/plain' 'http://localhost:9000/collations/testcollation.dot'`
+    `curl -X GET --header 'Accept: text/plain' 'http://localhost:2018/collations/testcollation.dot'`
       
     This should return the response body:
 

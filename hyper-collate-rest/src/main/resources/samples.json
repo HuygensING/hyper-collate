@@ -1,0 +1,18 @@
+{
+  "mary-shelly-godwin-frankenstein-1": {
+    "F": "samples/mary-shelly-godwin-frankenstein-1/F.xml",
+    "N": "samples/mary-shelly-godwin-frankenstein-1/N.xml"
+  },
+  "mary-shelly-godwin-frankenstein-2": {
+    "F": "samples/mary-shelly-godwin-frankenstein-2/F.xml",
+    "N": "samples/mary-shelly-godwin-frankenstein-2/N.xml"
+  },
+  "structure": {
+    "A": "samples/structure/A.xml",
+    "B": "samples/structure/B.xml"
+  },
+  "virginia-woolf-time-passes": {
+    "H": "samples/virginia-woolf-time-passes/H.xml",
+    "T": "samples/virginia-woolf-time-passes/T.xml"
+  }
+}

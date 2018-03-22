@@ -57,12 +57,19 @@ public class ServerConfiguration extends Configuration implements HyperCollateCo
 
   private void setDefaults() {
     pathToDotExecutable = Util.detectDotPath();
+
+    String name = AboutResource.class.getPackage().getName();
+    swaggerBundleConfiguration.setResourcePackage(name);
+
     int port = availablePort();
-    HttpConnectorFactory httpConnectorFactory = (HttpConnectorFactory) ((DefaultServerFactory) getServerFactory()).getApplicationConnectors().get(0);
-    httpConnectorFactory.setPort(port);
     baseURI = HTTP_LOCALHOST + port;
-    swaggerBundleConfiguration.setResourcePackage(AboutResource.class.getPackage().getName());
-    ((DefaultLoggingFactory) getLoggingFactory()).setLevel("INFO");
+
+    DefaultServerFactory serverFactory = (DefaultServerFactory) getServerFactory();
+    HttpConnectorFactory httpConnectorFactory = (HttpConnectorFactory) serverFactory.getApplicationConnectors().get(0);
+    httpConnectorFactory.setPort(port);
+
+    DefaultLoggingFactory loggingFactory = (DefaultLoggingFactory) getLoggingFactory();
+    loggingFactory.setLevel("INFO");
   }
 
   public void setBaseURI(String baseURI) {
