@@ -279,14 +279,14 @@ public class CollationsResource {
 
   private CollationInfo getExistingCollationInfo(final String name) {
     return collationStore.getCollationInfo(name)//
-        .orElseThrow(NotFoundException::new);
+        .orElseThrow(() -> collationNotFoundException(name));
   }
 
   private CollationGraph getExistingCollationGraph(final String name) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     CollationInfo.State collationState = collationInfo.getCollationState();
     if (collationState.equals(CollationInfo.State.needs_witness)) {
-      throw new BadRequestException("This collation has no witnesses yet. Please add them first.");
+      throw new BadRequestException(String.format("Collation '%s' has no witnesses yet. Please add them first.", name));
     }
     if (collationState.equals(CollationInfo.State.ready_to_collate)) {
       collate(collationInfo);
