@@ -182,7 +182,8 @@ public class CollationsResource {
   public Response getWitnessXML(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name, //
       @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
-    String xml = collationInfo.getWitness(sigil).orElseThrow(NotFoundException::new);
+    String xml = collationInfo.getWitness(sigil)
+        .orElseThrow(() -> new NotFoundException(String.format("No witness '%s' found for collation '%s'.", sigil, name)));
     return Response.ok(xml).build();
   }
 
