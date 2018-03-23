@@ -2,39 +2,94 @@ digraph CollationGraph{
   labelloc=b
 
   t000 [label="";shape=doublecircle,rank=middle]
-  t001 [label="";shape=doublecircle,rank=middle]
-  t002 [label=<IHD: &nbsp;sliding&nbsp;from&nbsp;<br/>IHD: <i>/TEI/text/div/p/s</i>>]
-  t003 [label=<IHD: Moreover<br/>IHD: <i>/TEI/text/div/p/s/del</i>>]
-  t004 [label=<IHD,TS: ,&nbsp;<br/>IHD: <i>/TEI/text/div/p/s/del</i><br/>TS: <i>/TEI/text/div/p/s</i><br/>>]
-  t005 [label=<IHD: howAnd<br/>IHD: <i>/TEI/text/div/p/s/del</i>>]
-  t006 [label=<IHD: &nbsp;Further,&nbsp;what&nbsp;<br/>IHD: <i>/TEI/text/div/p/s</i>>]
-  t007 [label=<IHD,TS: is&nbsp;one&nbsp;night?<br/>IHD,TS: <i>/TEI/text/div/p/s</i>>]
+  t002 [label=<IHD: sliding&nbsp;from<br/>IHD: <i>/TEI/text/div/p/s</i>>]
   t008 [label=<IHD: corn<br/>IHD: <i>/TEI/text/div/p/s/del</i>>]
-  t009 [label=<IHD: &nbsp;dresser&nbsp;to&nbsp;carpet<br/>IHD: <i>/TEI/text/div/p/s</i>>]
+  t009 [label=<IHD: dresser&nbsp;to&nbsp;carpet<br/>IHD: <i>/TEI/text/div/p/s</i>>]
+  t012 [label=<TS: and&nbsp;washing&nbsp;away&nbsp;in&nbsp;water<br/>TS: <i>/TEI/text/div/p/s</i>>]
   t010 [label=<IHD,TS: .<br/>IHD,TS: <i>/TEI/text/div/p/s</i>>]
   t011 [label=<IHD: 2<br/>IHD: <i>/TEI/text/div/p/add/head</i>>]
-  t012 [label=<TS: and&nbsp;washing&nbsp;away&nbsp;in&nbsp;water<br/>TS: <i>/TEI/text/div/p/s</i>>]
   t013 [label=<TS: III<br/>TS: <i>/TEI/text/div/head</i>>]
-  t014 [label=<TS: But&nbsp;what&nbsp;after&nbsp;all<br/>TS: <i>/TEI/text/div/p/s</i>>]
+  t003 [label=<IHD: Moreover, how<br/>IHD: <i>/TEI/text/div/p/s/del</i>>]
+  t005 [label=<IHD: And<br/>IHD: <i>/TEI/text/div/p/s/del</i>>]
+  t006 [label=<IHD: Further,<br/>IHD: <i>/TEI/text/div/p/s</i>>]
+  t014 [label=<TS: But<br/>TS: <i>/TEI/text/div/p/s</i>>]
+  t015 [label=<IHD,TS: what<br/>IHD: <i>/TEI/text/div/p/s</i><br/>TS: <i>/TEI/text/div/p/s</i>>]
+  t016 [label=<TS: after&nbsp;all,<br/>TS: <i>/TEI/text/div/p/s</i>>]
+  t007 [label=<IHD,TS: is&nbsp;one&nbsp;night?<br/>IHD,TS: <i>/TEI/text/div/p/s</i>>]
+  t001 [label="";shape=doublecircle,rank=middle]
 
-  t000->t002[label="IHD"]
-  t000->t012[label="TS"]
-  t002->t008[label="IHD"]
-  t002->t009[label="IHD"]
-  t003->t004[label="IHD"]
-  t004->t005[label="IHD"]
-  t004->t007[label="TS"]
-  t005->t006[label="IHD"]
-  t006->t007[label="IHD"]
-  t007->t001[label="IHD,TS"]
-  t008->t009[label="IHD"]
-  t009->t010[label="IHD"]
-  t010->t003[label="IHD"]
-  t010->t011[label="IHD"]
-  t010->t013[label="TS"]
-  t011->t003[label="IHD"]
-  t011->t006[label="IHD"]
-  t012->t010[label="TS"]
-  t013->t014[label="TS"]
-  t014->t004[label="TS"]
+  # () -> (sliding from)
+  t000 -> t002[label="IHD"]
+
+  # (sliding from) -> (corn)
+  t002 -> t008[label="IHD"]
+
+  # (corn) -> (dresser to carpet)
+  t008 -> t009[label="IHD"]
+
+  # (sliding from) -> (dresser to carpet)
+  t002 -> t009[label="IHD"]
+
+  # (dresser to carpet) -> (.)
+  t009 -> t010[label="IHD"]
+
+  # (.) -> (2)
+  t010 -> t011[label="IHD"]
+
+  # (2) -> (moreover, how)
+  t011 -> t003[label="IHD"]
+
+  # (2) -> (and)
+  t011 -> t005[label="IHD"]
+
+  # (2) -> (further,)
+  t011 -> t006[label="IHD"]
+
+  # (.) -> (moreover, how)
+  t010 -> t003[label="IHD"]
+
+  # (moreover, how) -> (and)
+  t003 -> t005[label="IHD"]
+
+  # (moreover, how) -> (further,)
+  t003 -> t006[label="IHD"]
+
+  # (.) -> (and)
+  t010 -> t005[label="IHD"]
+
+  # (and) -> (further,)
+  t005 -> t006[label="IHD"]
+
+  # (.) -> (further,)
+  t010 -> t006[label="IHD"]
+
+  # (further,) -> (what)
+  t006  -> t015[label="IHD"]
+
+  # (what) -> (is one night?)
+  t015->t007[label="IHD"]
+
+  # () -> (and washing away in water)
+  t000 -> t012[label="TS"]
+
+  # (and washing away in water) -> (.)
+  t012 -> t010[label="TS"]
+
+  # (.) -> (III)
+  t010 -> t013[label="TS"]
+
+  # (III) -> (but)
+  t013 -> t014[label="TS"]
+
+  # (but) -> (what)
+  t014 -> t015[label="TS"]
+
+  # (what) -> (after all,)
+  t015  -> t016[label="TS"]
+
+  # (after all,) -> (is one night?)
+  t016 -> t007[label="TS"]
+
+  # (is one night) -> ()
+  t007 -> t001[label="IHD,TS"]
 }
