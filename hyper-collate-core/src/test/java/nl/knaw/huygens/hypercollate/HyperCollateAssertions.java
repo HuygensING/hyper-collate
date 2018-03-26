@@ -21,8 +21,9 @@ package nl.knaw.huygens.hypercollate;
  */
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.CollationGraphAssert;
+import org.assertj.core.api.Assertions;
 
-public class HyperCollateAssertions extends org.assertj.core.api.Assertions {
+public class HyperCollateAssertions extends Assertions {
 
   protected HyperCollateAssertions() {
   }

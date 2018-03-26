@@ -90,6 +90,6 @@ digraph CollationGraph{
   # (after all,) -> (is one night?)
   t016 -> t007[label="TS"]
 
-  # (is one night) -> ()
+  # (is one night?) -> ()
   t007 -> t001[label="IHD,TS"]
 }

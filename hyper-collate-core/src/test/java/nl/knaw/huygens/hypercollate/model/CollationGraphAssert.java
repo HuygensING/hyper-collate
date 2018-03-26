@@ -23,6 +23,7 @@ package nl.knaw.huygens.hypercollate.model;
 import org.antlr.v4.misc.OrderedHashMap;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.internal.Iterables;
+import org.assertj.core.util.CheckReturnValue;
 
 import java.util.*;
 
@@ -43,7 +44,7 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
     super(actual, CollationGraphAssert.class);
   }
 
-  @org.assertj.core.util.CheckReturnValue
+  @CheckReturnValue
   public CollationGraphAssert containsTextNodesMatching(TextNodeSketch... textNodeSketches) {
     Set<TextNodeSketch> actualTextNodeSketches = getActualTextNodeSketches();
     Set<TextNodeSketch> expectedTextNodeSketches = new HashSet<>(Arrays.asList(textNodeSketches));
@@ -56,7 +57,7 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
     return myself;
   }
 
-  @org.assertj.core.util.CheckReturnValue
+  @CheckReturnValue
   public CollationGraphAssert doesNotContainTextNodesMatching(TextNodeSketch... textNodeSketches) {
     Set<TextNodeSketch> actualTextNodeSketches = getActualTextNodeSketches();
     List<TextNodeSketch> textNodeSketchList = Arrays.asList(textNodeSketches);
@@ -71,7 +72,7 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
     return myself;
   }
 
-  @org.assertj.core.util.CheckReturnValue
+  @CheckReturnValue
   public CollationGraphAssert containsOnlyTextNodesMatching(TextNodeSketch... textNodeSketches) {
     Set<TextNodeSketch> actualTextNodeSketches = getActualTextNodeSketches();
     Set<TextNodeSketch> expectedTextNodeSketches = new HashSet<>(Arrays.asList(textNodeSketches));
@@ -79,7 +80,7 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
     return myself;
   }
 
-  @org.assertj.core.util.CheckReturnValue
+  @CheckReturnValue
   public CollationGraphAssert containsMarkupNodesMatching(MarkupNodeSketch... markupNodeSketches) {
     Set<MarkupNodeSketch> actualMarkupNodeSketches = getActualMarkupNodeSketches();
     Set<MarkupNodeSketch> expectedMarkupNodeSketches = new HashSet<>(Arrays.asList(markupNodeSketches));
@@ -87,7 +88,7 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
     return myself;
   }
 
-  @org.assertj.core.util.CheckReturnValue
+  @CheckReturnValue
   public CollationGraphAssert hasTextNodeMatching(TextNodeSketch textNodeSketch) {
     Set<TextNodeSketch> actualTextNodeSketches = getActualTextNodeSketches();
     Iterables.instance().assertContains(info, actualTextNodeSketches, new TextNodeSketch[]{textNodeSketch});
@@ -103,7 +104,7 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
     return myself;
   }
 
-  @org.assertj.core.util.CheckReturnValue
+  @CheckReturnValue
   public CollationGraphAssert withMarkupNodesMatching(MarkupNodeSketch... markupNodeSketches) {
     if (this.textNode == null) {
       throw new RuntimeException("use hasTextNodeMatching to set the textNodeSketch to use first");
@@ -115,7 +116,7 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
     return myself;
   }
 
-  @org.assertj.core.util.CheckReturnValue
+  @CheckReturnValue
   public CollationGraphAssert hasMarkupNodeMatching(MarkupNodeSketch markupNodeSketch) {
     Set<MarkupNodeSketch> actualMarkupNodeSketches = getActualMarkupNodeSketches();
     Iterables.instance().assertContains(info, actualMarkupNodeSketches, new MarkupNodeSketch[]{markupNodeSketch});
@@ -129,7 +130,7 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
     return myself;
   }
 
-  @org.assertj.core.util.CheckReturnValue
+  @CheckReturnValue
   public CollationGraphAssert withTextNodesMatching(TextNodeSketch... textNodeSketches) {
     if (this.markupNode == null) {
       throw new RuntimeException("use hasMarkupNodeMatching to set the markupNodeSketch to use first");
@@ -193,7 +194,7 @@ public class CollationGraphAssert extends AbstractObjectAssert<CollationGraphAss
    * @param actual the CollationGraph we want to make assertions on.
    * @return a new <code>{@link CollationGraphAssert}</code>
    */
-  @org.assertj.core.util.CheckReturnValue
+  @CheckReturnValue
   public static CollationGraphAssert assertThat(CollationGraph actual) {
     return new CollationGraphAssert(actual);
   }
