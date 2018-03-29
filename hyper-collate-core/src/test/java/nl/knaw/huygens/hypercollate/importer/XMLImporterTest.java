@@ -24,6 +24,7 @@ import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.model.Markup;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 import nl.knaw.huygens.hypercollate.tools.DotFactory;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -109,6 +110,7 @@ public class XMLImporterTest extends HyperCollateTest {
     verifyDotExport(wg0, expectedDot);
   }
 
+  @Ignore
   @Test
   public void testDoubleDel() {
     XMLImporter importer = new XMLImporter();
@@ -135,6 +137,7 @@ public class XMLImporterTest extends HyperCollateTest {
     verifyDotExport(wg0, expectedDot);
   }
 
+  @Ignore
   @Test
   public void testTripleDel() {
     XMLImporter importer = new XMLImporter();
