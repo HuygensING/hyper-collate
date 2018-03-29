@@ -43,26 +43,13 @@ IHD_009 [label=<2>]
 subgraph cluster_8 {
 label=<<i><b>s</b></i>>
 graph[style="rounded,filled";fillcolor="grey"]
-subgraph cluster_9 {
-label=<<i><b>del</b></i>>
-graph[style="rounded,filled";fillcolor="#4286f4"]
-IHD_010 [label=<Moreover>]
+IHD_010 [label=<Further>]
 IHD_011 [label=<,&nbsp;>]
-IHD_012 [label=<how>]
-}
-subgraph cluster_10 {
-label=<<i><b>del</b></i>>
-graph[style="rounded,filled";fillcolor="#4286f4"]
-IHD_013 [label=<And>]
-}
-IHD_014 [label=<&nbsp;>]
-IHD_015 [label=<Further>]
-IHD_016 [label=<,&nbsp;>]
-IHD_017 [label=<what&nbsp;>]
-IHD_018 [label=<is&nbsp;>]
-IHD_019 [label=<one&nbsp;>]
-IHD_020 [label=<night>]
-IHD_021 [label=<?>]
+IHD_012 [label=<what&nbsp;>]
+IHD_013 [label=<is&nbsp;>]
+IHD_014 [label=<one&nbsp;>]
+IHD_015 [label=<night>]
+IHD_016 [label=<?>]
 }
 }
 }
@@ -81,19 +68,12 @@ IHD_007->IHD_008
 IHD_008->IHD_009
 IHD_008->IHD_010
 IHD_009->IHD_010
-IHD_009->IHD_014
 IHD_010->IHD_011
 IHD_011->IHD_012
-IHD_012->IHD_013
 IHD_012->IHD_013
 IHD_013->IHD_014
 IHD_014->IHD_015
 IHD_015->IHD_016
-IHD_016->IHD_017
-IHD_017->IHD_018
-IHD_018->IHD_019
-IHD_019->IHD_020
-IHD_020->IHD_021
-IHD_021->end
+IHD_016->end
 begin->IHD_000
 }

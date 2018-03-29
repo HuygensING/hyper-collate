@@ -9,8 +9,6 @@ digraph CollationGraph{
   t010 [label=<IHD,TS: .<br/>IHD,TS: <i>/TEI/text/div/p/s</i>>]
   t011 [label=<IHD: 2<br/>IHD: <i>/TEI/text/div/p/add/head</i>>]
   t013 [label=<TS: III<br/>TS: <i>/TEI/text/div/head</i>>]
-  t003 [label=<IHD: Moreover, how<br/>IHD: <i>/TEI/text/div/p/s/del</i>>]
-  t005 [label=<IHD: And<br/>IHD: <i>/TEI/text/div/p/s/del</i>>]
   t006 [label=<IHD: Further,<br/>IHD: <i>/TEI/text/div/p/s</i>>]
   t014 [label=<TS: But<br/>TS: <i>/TEI/text/div/p/s</i>>]
   t015 [label=<IHD,TS: what<br/>IHD: <i>/TEI/text/div/p/s</i><br/>TS: <i>/TEI/text/div/p/s</i>>]
@@ -36,29 +34,8 @@ digraph CollationGraph{
   # (.) -> (2)
   t010 -> t011[label="IHD"]
 
-  # (2) -> (moreover, how)
-  t011 -> t003[label="IHD"]
-
-  # (2) -> (and)
-  t011 -> t005[label="IHD"]
-
   # (2) -> (further,)
   t011 -> t006[label="IHD"]
-
-  # (.) -> (moreover, how)
-  t010 -> t003[label="IHD"]
-
-  # (moreover, how) -> (and)
-  t003 -> t005[label="IHD"]
-
-  # (moreover, how) -> (further,)
-  t003 -> t006[label="IHD"]
-
-  # (.) -> (and)
-  t010 -> t005[label="IHD"]
-
-  # (and) -> (further,)
-  t005 -> t006[label="IHD"]
 
   # (.) -> (further,)
   t010 -> t006[label="IHD"]
