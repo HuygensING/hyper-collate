@@ -41,18 +41,6 @@ digraph VariantWitnessGraph{
           subgraph cluster_8 {
             label=<<i><b>s</b></i>>
             graph[style="rounded,filled";fillcolor="grey"]
-            subgraph cluster_9 {
-              label=<<i><b>del</b></i>>
-              graph[style="rounded,filled";fillcolor="#4286f4"]
-              IHD_010 [label=<Moreover>]
-              IHD_011 [label=<,&nbsp;>]
-              IHD_012 [label=<how>]
-            }
-            subgraph cluster_10 {
-              label=<<i><b>del</b></i>>
-              graph[style="rounded,filled";fillcolor="#4286f4"]
-              IHD_013 [label=<And>]
-            }
             IHD_015 [label=<Further>]
             IHD_016 [label=<,&nbsp;>]
             IHD_017 [label=<what&nbsp;>]
@@ -76,19 +64,15 @@ digraph VariantWitnessGraph{
   # corn     dresser    to         carpet     .
   IHD_003 -> IHD_005 -> IHD_006 -> IHD_007 -> IHD_008
 
-  # .          2        Moreover And      Further
-  IHD_008 -> { IHD_009, IHD_010, IHD_013, IHD_015 }
+  # .          2         Further
+  IHD_008 -> { IHD_009,  IHD_015 }
 
-  # 2          Moreover And      Further
-  IHD_009 -> { IHD_010, IHD_013, IHD_015 }
+  # 2               Further
+  IHD_009 ->  IHD_015
 
-  # Moreover .          how
-  IHD_010 -> IHD_011 -> IHD_012
 
-  # how        And      Further
-  IHD_012 -> { IHD_013, IHD_015 }
 
-  # And      Further    ,          what       is         one        night      ?
-  IHD_013 -> IHD_015 -> IHD_016 -> IHD_017 -> IHD_018 -> IHD_019 -> IHD_020 -> IHD_021 -> end
+  # Further    ,          what       is         one        night      ?
+  IHD_015 -> IHD_016 -> IHD_017 -> IHD_018 -> IHD_019 -> IHD_020 -> IHD_021 -> end
 
 }
