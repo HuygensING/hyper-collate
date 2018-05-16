@@ -145,9 +145,38 @@ t009->t004[label="B"]
   
    ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/testcollation.png?raw=true)
   
-  In this representation, significant whitespace in the witnesses is represented as `␣`  
+  In this representation, significant whitespace in the witnesses is represented as `␣`  (You can turn this off by adding `?emphasize-whitespace=false` to the url)  
   The markup of the witnesses is represented as separate lines in the node with, per witness, the xpath to the text.  
   For example, the first text node in the collation graph with `( A,B: The_rain_in_ / A,B: /xml )` indicates that
-   the matched text `"The rain in "` has markup `xml` in both witnesses.
+   the matched text `"The rain in "` has markup `xml` in both witnesses.  
+   (You can turn off the markup lines by adding `?hide-markup=true` to the url)
+   
+ If you have GraphViz' `dot` executable installed, you can get a .png or .svg image directly from the server by replacing the `.dot` extension in the url to `.png` or `.svg`, respectively.
+ 
+    
+- **Get a .dot/.png/.svg visualization of the witnesses:**  
+  `GET /collations/{name}/witnesses/{sigil}.dot`   
+  `GET /collations/{name}/witnesses/{sigil}.png`   
+  `GET /collations/{name}/witnesses/{sigil}.svg`
+     
+  Click on `Try it out`, enter the name of your collation and the sigil of the witness, and click on `Exectute`.  
+  This should return response code `200 - OK` 
+  The response body has the .dot , .png or .svg representation of the witness.
   
+    curl example:  
+    `curl -X GET --header 'Accept: image/svg+xml' 'http://localhost:2018/collations/testcollation/witnesses/A.svg'`
+      
+    This should return an svg image like this:
+    
+   ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A.svg?raw=true)
+   
+   To group the text nodes per markup combination, add `?join-tokens=true` to the url.
+
+    `curl -X GET --header 'Accept: image/svg+xml' 'http://localhost:2018/collations/testcollation/witnesses/A.svg?join-tokens=true'`
+   
+   This should return an svg image like this:
+   
+   ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A-joined.svg?raw=true)
+      
+   
 -------------------

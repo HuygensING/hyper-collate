@@ -160,7 +160,7 @@ public class DotFactory {
 
   private final Comparator<TextNode> BY_NODE = Comparator.comparing(TextNode::toString);
 
-  public String fromCollationGraph(CollationGraph collation) {
+  public String fromCollationGraph(CollationGraph collation, final boolean hideMarkup) {
     StringBuilder dotBuilder = new StringBuilder("digraph CollationGraph{\nlabelloc=b\n");
     Map<TextNode, String> nodeIdentifiers = new HashMap<>();
 
@@ -170,7 +170,7 @@ public class DotFactory {
       TextNode node = nodes.get(i);
       String nodeId = "t" + String.format("%03d", i);
       nodeIdentifiers.put(node, nodeId);
-      appendNodeLine(dotBuilder, node, nodeId);
+      appendNodeLine(dotBuilder, node, nodeId, hideMarkup);
     }
     appendEdgeLines(dotBuilder, collation, nodeIdentifiers, nodes);
 
@@ -194,8 +194,8 @@ public class DotFactory {
     edgeLines.forEach(dotBuilder::append);
   }
 
-  private void appendNodeLine(StringBuilder dotBuilder, TextNode node, String nodeId) {
-    String labelString = generateNodeLabel(node);
+  private void appendNodeLine(StringBuilder dotBuilder, TextNode node, String nodeId, final boolean hideMarkup) {
+    String labelString = generateNodeLabel(node, hideMarkup);
     if (labelString.isEmpty()) {
       dotBuilder.append(nodeId)//
           .append(" [label=\"\";shape=doublecircle,rank=middle]\n");
@@ -208,7 +208,7 @@ public class DotFactory {
     }
   }
 
-  private String generateNodeLabel(TextNode node) {
+  private String generateNodeLabel(TextNode node, final boolean hideMarkup) {
     StringBuilder label = new StringBuilder();
     Map<String, String> contentLabel = new HashMap<>();
     Map<String, String> markupLabel = new HashMap<>();
@@ -218,8 +218,12 @@ public class DotFactory {
     prepare(node, contentLabel, markupLabel, sortedSigils);
 
     appendContent(label, contentLabel, sortedSigils, joinedSigils);
-    appendMarkup(label, markupLabel, sortedSigils, joinedSigils);
-
+    if (!hideMarkup) {
+      if (label.length() > 0) {
+        label.append("<br/>");
+      }
+      appendMarkup(label, markupLabel, sortedSigils, joinedSigils);
+    }
     return label.toString();
   }
 
@@ -256,14 +260,14 @@ public class DotFactory {
     if (contentLabelSet.size() == 1) {
       label.append(joinedSigils)//
           .append(": ")//
-          .append(contentLabelSet.iterator().next())//
-          .append("<br/>");
+          .append(contentLabelSet.iterator().next());
 
     } else {
-      sortedSigils.forEach(s -> label.append(s)//
-          .append(": ")//
-          .append(contentLabel.get(s))//
-          .append("<br/>"));
+      String witnessLines = sortedSigils.stream()
+          .map(s -> s + ": " + contentLabel.get(s))
+          .collect(joining("<br/>"));
+      label.append(witnessLines);
+
     }
   }
 

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI>
+    <text>
+        <div type="chapter" n="1">
+            <p>
+                <s> sliding from <del>corn</del> dresser to carpet.</s>
+                <add place="margin">
+                    <head>2</head>
+                </add>
+                <s>Further, what is one night?</s>
+            </p>
+        </div>
+    </text>
+
+</TEI>

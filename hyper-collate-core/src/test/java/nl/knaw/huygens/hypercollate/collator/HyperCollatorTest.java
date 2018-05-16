@@ -809,14 +809,55 @@ public class HyperCollatorTest extends HyperCollateTest {
     Map<Markup, MarkupNode> markupNodeIndex = new HashMap<>();
     hyperCollator.initialize(collationGraph, map, markupNodeIndex, wF);
     CollationGraph collation = CollationGraphNodeJoiner.join(collationGraph);
-    String dot = CollationGraphVisualizer.toDot(collation, true);
-    String expected = "digraph CollationGraph{\n" + "labelloc=b\n" + "t000 [label=\"\";shape=doublecircle,rank=middle]\n" + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
-        + "t002 [label=<F: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F: <i>/text/s</i>>]\n"
-        + "t003 [label=<F: &#9251;een&#9251;vrouw,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;vóór&#9251;de&#9251;<br/>F: <i>/text/s</i>>]\n" + "t004 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n"
-        + "t005 [label=<F: liefelijke&#9251;toestemming!<br/>F: <i>/text/s</i>>]\n" + "t006 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n" + "t007 [label=<F: werven&#9251;om<br/>F: <i>/text/s/del</i>>]\n"
-        + "t008 [label=<F: trachten&#9251;naar<br/>F: <i>/text/s/add</i>>]\n" + "t000->t002[label=\"F\"]\n" + "t002->t006[label=\"F\"]\n" + "t003->t004[label=\"F\"]\n" + "t004->t005[label=\"F\"]\n"
-        + "t005->t001[label=\"F\"]\n" + "t006->t007[label=\"F\"]\n" + "t006->t008[label=\"F\"]\n" + "t007->t003[label=\"F\"]\n" + "t008->t003[label=\"F\"]\n" + "}";
+
+    String dot = CollationGraphVisualizer.toDot(collation, true, false);
+    String expected = "digraph CollationGraph{\n" +
+        "labelloc=b\n" +
+        "t000 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t001 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t002 [label=<F: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F: <i>/text/s</i>>]\n" +
+        "t003 [label=<F: &#9251;een&#9251;vrouw,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;vóór&#9251;de&#9251;<br/>F: <i>/text/s</i>>]\n" +
+        "t004 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n" +
+        "t005 [label=<F: liefelijke&#9251;toestemming!<br/>F: <i>/text/s</i>>]\n" +
+        "t006 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n" +
+        "t007 [label=<F: werven&#9251;om<br/>F: <i>/text/s/del</i>>]\n" +
+        "t008 [label=<F: trachten&#9251;naar<br/>F: <i>/text/s/add</i>>]\n" +
+        "t000->t002[label=\"F\"]\n" +
+        "t002->t006[label=\"F\"]\n" +
+        "t003->t004[label=\"F\"]\n" +
+        "t004->t005[label=\"F\"]\n" +
+        "t005->t001[label=\"F\"]\n" +
+        "t006->t007[label=\"F\"]\n" +
+        "t006->t008[label=\"F\"]\n" +
+        "t007->t003[label=\"F\"]\n" +
+        "t008->t003[label=\"F\"]\n" +
+        "}";
     assertThat(dot).isEqualTo(expected);
+
+    String dotWithoutMarkupAndWhitespaceEmphasis = CollationGraphVisualizer.toDot(collation, false, true);
+    String expected2 = "digraph CollationGraph{\n" +
+        "labelloc=b\n" +
+        "t000 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t001 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t002 [label=<F: Hoe&nbsp;zoet&nbsp;moet&nbsp;nochtans&nbsp;zijn&nbsp;dit&nbsp;>]\n" +
+        "t003 [label=<F: &nbsp;een&nbsp;vrouw,&#x21A9;<br/>&nbsp;de&nbsp;ongewisheid&nbsp;vóór&nbsp;de&nbsp;>]\n" +
+        "t004 [label=<F: >]\n" +
+        "t005 [label=<F: liefelijke&nbsp;toestemming!>]\n" +
+        "t006 [label=<F: >]\n" +
+        "t007 [label=<F: werven&nbsp;om>]\n" +
+        "t008 [label=<F: trachten&nbsp;naar>]\n" +
+        "t000->t002[label=\"F\"]\n" +
+        "t002->t006[label=\"F\"]\n" +
+        "t003->t004[label=\"F\"]\n" +
+        "t004->t005[label=\"F\"]\n" +
+        "t005->t001[label=\"F\"]\n" +
+        "t006->t007[label=\"F\"]\n" +
+        "t006->t008[label=\"F\"]\n" +
+        "t007->t003[label=\"F\"]\n" +
+        "t008->t003[label=\"F\"]\n" +
+        "}";
+    assertThat(dotWithoutMarkupAndWhitespaceEmphasis).isEqualTo(expected2);
+
     // System.out.println(dot);
     // writeGraph(dot, "graph");
   }
@@ -903,7 +944,7 @@ public class HyperCollatorTest extends HyperCollateTest {
 
     CollationGraph collation = CollationGraphNodeJoiner.join(collation0);
 
-    String dot = CollationGraphVisualizer.toDot(collation, true);
+    String dot = CollationGraphVisualizer.toDot(collation, true, false);
     LOG.debug("dot=\n{}", dot);
     writeGraph(dot, "graph");
     assertThat(dot).isEqualTo(expected);
@@ -931,7 +972,7 @@ public class HyperCollatorTest extends HyperCollateTest {
 
     assertThat(markupAfterJoin).containsExactlyElementsOf(markupBeforeJoin);
 
-    String dot = CollationGraphVisualizer.toDot(collation, true);
+    String dot = CollationGraphVisualizer.toDot(collation, true, false);
     LOG.info("dot=\n{}", dot);
     writeGraph(dot, "graph");
     assertThat(dot).isEqualTo(expected);
