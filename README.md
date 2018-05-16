@@ -168,7 +168,7 @@ t009->t004[label="B"]
       
     This should return an svg image like this:
     
-   ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A.svg?raw=true)
+   ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A.svg?sanitize=true)
    
    To group the text nodes per markup combination, add `?join-tokens=true` to the url.
 
@@ -176,7 +176,7 @@ t009->t004[label="B"]
    
    This should return an svg image like this:
    
-   ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A-joined.svg?raw=true)
+   ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A-joined.svg?sanitize=true)
       
    
 -------------------
