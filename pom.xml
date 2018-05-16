@@ -315,7 +315,7 @@
         <developer>
             <id>dekker</id>
             <name>Ronald Dekker</name>
-            <email>ronald.dekker@huygens.knaw.nl</email>
+            <email>ronald.dekker@di.huc.knaw.nl</email>
             <url>https://www.huygens.knaw.nl/dekker/</url>
             <roles>
                 <role>architect</role>
@@ -324,7 +324,7 @@
         <developer>
             <id>bramb</id>
             <name>Bram Buitendijk</name>
-            <email>bram.buitendijk@huygens.knaw.nl</email>
+            <email>bram.buitendijk@di.huc.knaw.nl</email>
             <url>https://www.huygens.knaw.nl/buitendijk/</url>
             <roles>
                 <role>developer</role>
@@ -333,7 +333,7 @@
         <developer>
             <id>bleekere</id>
             <name>Elli Bleeker</name>
-            <email>bleekere@huygens.knaw.nl</email>
+            <email>elli.bleeker@di.huc.knaw.nl</email>
             <url>https://www.huygens.knaw.nl/bleeker/</url>
             <roles>
                 <role>developer</role>

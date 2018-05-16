@@ -346,10 +346,10 @@ public class HyperCollator {
     String sigil1 = witness1.getSigil();
     String sigil2 = witness2.getSigil();
     stream(traversal1)//
-        .filter(tv -> tv instanceof SimpleTokenVertex)//
+        .filter(SimpleTokenVertex.class::isInstance)//
         .map(SimpleTokenVertex.class::cast)//
         .forEach(tv1 -> stream(traversal2)//
-            .filter(tv -> tv instanceof SimpleTokenVertex)//
+            .filter(SimpleTokenVertex.class::isInstance)//
             .map(SimpleTokenVertex.class::cast)//
             .forEach(tv2 -> {
               if (matcher.apply(tv1, tv2)) {
