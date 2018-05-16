@@ -813,8 +813,8 @@ public class HyperCollatorTest extends HyperCollateTest {
     String dot = CollationGraphVisualizer.toDot(collation, true, false);
     String expected = "digraph CollationGraph{\n" +
         "labelloc=b\n" +
-        "t000 [label=<<br/>>]\n" +
-        "t001 [label=<<br/>>]\n" +
+        "t000 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t001 [label=\"\";shape=doublecircle,rank=middle]\n" +
         "t002 [label=<F: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F: <i>/text/s</i>>]\n" +
         "t003 [label=<F: &#9251;een&#9251;vrouw,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;vóór&#9251;de&#9251;<br/>F: <i>/text/s</i>>]\n" +
         "t004 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n" +

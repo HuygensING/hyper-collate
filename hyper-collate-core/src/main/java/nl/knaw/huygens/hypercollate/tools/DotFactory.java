@@ -219,6 +219,9 @@ public class DotFactory {
 
     appendContent(label, contentLabel, sortedSigils, joinedSigils);
     if (!hideMarkup) {
+      if (label.length() > 0) {
+        label.append("<br/>");
+      }
       appendMarkup(label, markupLabel, sortedSigils, joinedSigils);
     }
     return label.toString();
@@ -237,7 +240,6 @@ public class DotFactory {
   }
 
   private void appendMarkup(StringBuilder label, Map<String, String> markupLabel, List<String> sortedSigils, String joinedSigils) {
-    label.append("<br/>");
     Set<String> markupLabelSet = new HashSet<>(markupLabel.values());
     if (markupLabelSet.size() == 1) {
       label.append(joinedSigils)//
@@ -261,9 +263,11 @@ public class DotFactory {
           .append(contentLabelSet.iterator().next());
 
     } else {
-      sortedSigils.forEach(s -> label.append(s)//
-          .append(": ")//
-          .append(contentLabel.get(s)));
+      String witnessLines = sortedSigils.stream()
+          .map(s -> s + ": " + contentLabel.get(s))
+          .collect(joining("<br/>"));
+      label.append(witnessLines);
+
     }
   }
 
