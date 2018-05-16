@@ -202,8 +202,8 @@ public class CollationGraphVisualizer {
         .toString();
   }
 
-  public static String toDot(CollationGraph graph, boolean emphasizeWhitespace) {
-    return new DotFactory(emphasizeWhitespace).fromCollationGraph(graph);
+  public static String toDot(CollationGraph graph, boolean emphasizeWhitespace, final boolean hideMarkup) {
+    return new DotFactory(emphasizeWhitespace).fromCollationGraph(graph, hideMarkup);
   }
 
 }

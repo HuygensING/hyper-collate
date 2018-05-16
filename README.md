@@ -145,9 +145,11 @@ t009->t004[label="B"]
   
    ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/testcollation.png?raw=true)
   
-  In this representation, significant whitespace in the witnesses is represented as `␣`  
+  In this representation, significant whitespace in the witnesses is represented as `␣`  (You can turn this off by adding `?emphasize-whitespace=false` to the url)  
   The markup of the witnesses is represented as separate lines in the node with, per witness, the xpath to the text.  
   For example, the first text node in the collation graph with `( A,B: The_rain_in_ / A,B: /xml )` indicates that
-   the matched text `"The rain in "` has markup `xml` in both witnesses.
+   the matched text `"The rain in "` has markup `xml` in both witnesses.  
+   (You can turn off the markup lines by adding `?hide-markup=true` to the url)
+   
   
 -------------------

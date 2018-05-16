@@ -91,7 +91,7 @@ public class HyperCollator {
   }
 
   private void visualize(CollationGraph collationGraph) {
-    String dot = CollationGraphVisualizer.toDot(collationGraph, true);
+    String dot = CollationGraphVisualizer.toDot(collationGraph, true, false);
     LOG.debug("dot={}", dot);
   }
 
