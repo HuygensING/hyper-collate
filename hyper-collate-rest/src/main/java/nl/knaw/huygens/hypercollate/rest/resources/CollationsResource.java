@@ -25,7 +25,6 @@ import com.google.common.base.Stopwatch;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.api.ResourcePaths;
 import nl.knaw.huygens.hypercollate.api.UTF8MediaType;
 import nl.knaw.huygens.hypercollate.collator.HyperCollator;
@@ -49,6 +48,8 @@ import javax.ws.rs.core.StreamingOutput;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.stream.Collectors.toList;
 
 @Api(ResourcePaths.COLLATIONS)
 @Path(ResourcePaths.COLLATIONS)
@@ -163,8 +164,8 @@ public class CollationsResource {
   @Consumes(UTF8MediaType.TEXT_XML)
   @ApiOperation(value = "Add a witness to the collation")
   public Response addXMLWitness(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) @NotNull final String name, //
-                                @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) @NotNull final String sigil, //
-                                @ApiParam(APIPARAM_XML) @NotNull @Valid String xml) {
+      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) @NotNull final String sigil, //
+      @ApiParam(APIPARAM_XML) @NotNull @Valid String xml) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     VariantWitnessGraph variantWitnessGraph = new XMLImporter().importXML(sigil, xml);
     collationInfo.addWitness(sigil, xml);
@@ -179,9 +180,10 @@ public class CollationsResource {
   @Produces(UTF8MediaType.TEXT_XML)
   @ApiOperation(value = "Return the XML source of the witness")
   public Response getWitnessXML(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name, //
-                                @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil) {
+      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
-    String xml = collationInfo.getWitness(sigil).orElseThrow(NotFoundException::new);
+    String xml = collationInfo.getWitness(sigil)
+        .orElseThrow(() -> new NotFoundException(String.format("No witness '%s' found for collation '%s'.", sigil, name)));
     return Response.ok(xml).build();
   }
 
@@ -205,8 +207,8 @@ public class CollationsResource {
   @Produces(IMAGE_SVG)
   @ApiOperation(value = "Return an SVG visualization of the witness graph, with optional emphasizing of whitespace.")
   public Response getWitnessSVG(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name, //
-                                @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,//
-                                @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace) {
+      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,//
+      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace) {
     return renderWitnessGraphAs(name, sigil, emphasizeWhitespace, SVG);
   }
 
@@ -216,8 +218,8 @@ public class CollationsResource {
   @Produces(IMAGE_PNG)
   @ApiOperation(value = "Return a PNG visualization of the witness graph, with optional emphasizing of whitespace.")
   public Response getWitnessPNG(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name, //
-                                @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,//
-                                @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace) {
+      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,//
+      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace) {
     return renderWitnessGraphAs(name, sigil, emphasizeWhitespace, PNG);
   }
 
@@ -278,14 +280,14 @@ public class CollationsResource {
 
   private CollationInfo getExistingCollationInfo(final String name) {
     return collationStore.getCollationInfo(name)//
-        .orElseThrow(NotFoundException::new);
+        .orElseThrow(() -> collationNotFoundException(name));
   }
 
   private CollationGraph getExistingCollationGraph(final String name) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     CollationInfo.State collationState = collationInfo.getCollationState();
     if (collationState.equals(CollationInfo.State.needs_witness)) {
-      throw new BadRequestException("This collation has no witnesses yet. Please add them first.");
+      throw new BadRequestException(String.format("Collation '%s' has no witnesses yet. Please add them first.", name));
     }
     if (collationState.equals(CollationInfo.State.ready_to_collate)) {
       collate(collationInfo);

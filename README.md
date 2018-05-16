@@ -12,18 +12,29 @@ To work with the server, you can either download the latest prebuilt jar or war,
 
 ### Option 1a - download the prebuilt (jar)
 
-1. Download the jar from <https://cdn.huygens.knaw.nl/hyper-collate-server.jar> to the current directory.
-2. Download an example config file from <https://raw.githubusercontent.com/HuygensING/hyper-collate/master/hyper-collate-server/config.yml> to the same directory.
-3. Change the `baseURI` in `config.yml` as needed.
-4. `java -jar hyper-collate-server.jar server config.yml`
-5. In your browser, go to the `baseURI` URL from `config.yml`.
+1. In your terminal or command prompt, navigate to the directory from which you want to run HyperCollate.
+2. Download the jar from <https://cdn.huygens.knaw.nl/hyper-collate-server.jar> to the HyperCollate directory.
+2. run `java -jar hyper-collate-server.jar server`
+3. The server will start on a random available port, look for the lines:
+
+    ```
+    *************************************************************
+    ** Starting HyperCollate Server at http://localhost:<port> **
+    *************************************************************
+    ```
+    in the output, which lists the URL of the server. Open this URL (starting with `http://`) in your browser.
+
+##### Optional: Use a custom port
+1. Download an example config file from <https://raw.githubusercontent.com/HuygensING/hyper-collate/master/hyper-collate-server/config.yml> to the HyperCollate directory.
+2. Set the `baseURI` and `port` parameters in the configfile
+3. run `java -jar hyper-collate-server.jar server config.yml`
 
 ### Option 1b - download the prebuilt (war)
 
 1. Download the war from <https://cdn.huygens.knaw.nl/hyper-collate.war> to the current directory.
 2. Download an example config file from <https://raw.githubusercontent.com/HuygensING/hyper-collate/master/hyper-collate-war/hypercollate.xml> to the same directory.
 3. Change the `Context docBase`, `Context path` and the `value`s for `projectDir` and `baseURI` in `hypercollate.xml` as needed.
-4. copy `` to `$TOMCAT_HOME/conf/[Engine]/[Host]/` (e.g. `/opt/tomcat8/conf/Catalina/localhost/`)
+4. copy `hypercollate.xml` to `$TOMCAT_HOME/conf/[Engine]/[Host]/` (e.g. `/opt/tomcat8/conf/Catalina/localhost/`)
 5. In your browser, go to the `baseURI` URL from `hypercollate.xml`.
 
 ### Option 2 - build your own
@@ -33,8 +44,8 @@ To work with the server, you can either download the latest prebuilt jar or war,
 to build the hyper-collate-server jar and war, then to use the jar:
 
 - `cd hyper-collate-server`
-- `java -jar target/hyper-collate-server-1.0-SNAPSHOT.jar server config.yml`
-- In your browser, open <http://localhost:9000/>
+- `java -jar target/hyper-collate-server-1.0-SNAPSHOT.jar server config.yml` to start using the settings from `config.yml` 
+- In your browser, open <http://localhost:2018/>
 
 the war can be found in `hyper-collate-war/target`, an example config file in `hyper-collate-war/hypercollate.xml`
 Follow steps 3 - 5 from Option 1b.  
@@ -49,30 +60,33 @@ The war just exposes a swagger file without a UI, in the `/swagger.json` or `/sw
 
 - **Create a new Collation with a given name:**    
   `PUT /collations/{name}`  
-  This should return response code 201 - created,  
+  Click on `Try it out` and provide your collation with a new name. Click on `Execute`.  
+  This should return response code `201 - created`,  
   with a URL to the collation in the `location` header.  
   
   curl example:  
-    `curl -X PUT --header 'Content-Type: application/json' --header 'Accept: text/plain; charset=UTF-8' 'http://localhost:9000/collations/testcollation'` 
+    `curl -X PUT --header 'Content-Type: application/json' --header 'Accept: text/plain; charset=UTF-8' 'http://localhost:2018/collations/testcollation'` 
   
 - **Add witnesses to the collation:**  
-  `PUT /collations/{name}/witnesses/{sigil}`
-  This should return response code 204 - no content  
-  Repeat this step for the other witness(es)
+  `PUT /collations/{name}/witnesses/{sigil}`  
+  Click on `Try it out`, enter your witness data, and click on `Execute`.  
+  This should return response code `204 - no content`.  
+  Repeat this step for the other witness(es).
   
   curl example:  
-    `curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in <del>Cataluña</del><add>Spain</add> falls mainly on the plain.</xml>' 'http://localhost:9000/collations/testcollation/witnesses/A'`
+    `curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in <del>Cataluña</del><add>Spain</add> falls mainly on the plain.</xml>' 'http://localhost:2018/collations/testcollation/witnesses/A'`
     
-    `curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in Spain falls mainly on the <del>street</del><add>plain</add>.</xml>' 'http://localhost:9000/collations/testcollation/witnesses/B'` 
+    `curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in Spain falls mainly on the <del>street</del><add>plain</add>.</xml>' 'http://localhost:2018/collations/testcollation/witnesses/B'` 
   
 
 - **Get an ASCII table visualization of the collation graph:**  
   `GET /collations/{name}/ascii_table`   
-  This should return response code 200 - OK  
+  Click on `Try it out` and enter the name of the collation. Click on `Execute`.    
+  This should return response code `200 - OK`  
   The response body has a table of the collated text using ASCII.  
   
   curl example:  
-    `curl -X GET --header 'Accept: text/plain' 'http://localhost:9000/collations/testcollation/ascii_table'`    
+    `curl -X GET --header 'Accept: text/plain' 'http://localhost:2018/collations/testcollation/ascii_table'`    
 
     This should return the response body
      <pre>
@@ -89,11 +103,12 @@ The war just exposes a swagger file without a UI, in the `/swagger.json` or `/sw
 
 - **Get a .dot visualization of the collation graph:**  
   `GET /collations/{name}.dot`   
-  This should return response code 200 - OK  
+  Click on `Try it out`, enter the name of your collation and click on `Exectute`.  
+  This should return response code `200 - OK`  
   The response body has the .dot representation of the collation graph.  
 
   curl example:  
-    `curl -X GET --header 'Accept: text/plain' 'http://localhost:9000/collations/testcollation.dot'`
+    `curl -X GET --header 'Accept: text/plain' 'http://localhost:2018/collations/testcollation.dot'`
       
     This should return the response body:
 

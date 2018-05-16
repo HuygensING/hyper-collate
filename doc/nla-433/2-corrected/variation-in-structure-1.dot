@@ -1,0 +1,78 @@
+digraph VariantWitnessGraph{
+  graph [rankdir=LR]
+  node [style="filled";fillcolor="white"]
+  begin [label="";shape=doublecircle,rank=middle]
+  subgraph cluster_0 {
+    label=<<i><b>TEI</b></i>>
+    graph[style="rounded,filled";fillcolor="yellow"]
+    subgraph cluster_1 {
+      label=<<i><b>text</b></i>>
+      graph[style="rounded,filled";fillcolor="orange"]
+      subgraph cluster_2 {
+        label=<<i><b>div</b></i>>
+        graph[style="rounded,filled";fillcolor="#9aed7d"]
+        subgraph cluster_3 {
+          label=<<i><b>p</b></i>>
+          graph[style="rounded,filled";fillcolor="lightblue"]
+          subgraph cluster_4 {
+            label=<<i><b>s</b></i>>
+            graph[style="rounded,filled";fillcolor="grey"]
+            IHD_001 [label=<sliding&nbsp;>]
+            IHD_002 [label=<from&nbsp;>]
+            subgraph cluster_5 {
+              label=<<i><b>del</b></i>>
+              graph[style="rounded,filled";fillcolor="#4286f4"]
+              IHD_003 [label=<corn>]
+            }
+            IHD_005 [label=<dresser&nbsp;>]
+            IHD_006 [label=<to&nbsp;>]
+            IHD_007 [label=<carpet>]
+            IHD_008 [label=<.>]
+          }
+          subgraph cluster_6 {
+            label=<<i><b>add</b></i>>
+            graph[style="rounded,filled";fillcolor="#ef10eb"]
+            subgraph cluster_7 {
+              label=<<i><b>head</b></i>>
+              graph[style="rounded,filled";fillcolor="#9091D4"]
+              IHD_009 [label=<2>]
+            }
+          }
+          subgraph cluster_8 {
+            label=<<i><b>s</b></i>>
+            graph[style="rounded,filled";fillcolor="grey"]
+            IHD_015 [label=<Further>]
+            IHD_016 [label=<,&nbsp;>]
+            IHD_017 [label=<what&nbsp;>]
+            IHD_018 [label=<is&nbsp;>]
+            IHD_019 [label=<one&nbsp;>]
+            IHD_020 [label=<night>]
+            IHD_021 [label=<?>]
+          }
+        }
+      }
+    }
+  }
+  end [label="";shape=doublecircle,rank=middle]
+
+  #         sliding    from
+  begin ->  IHD_001 -> IHD_002
+
+  # from       corn     dresser
+  IHD_002 -> { IHD_003, IHD_005 }
+
+  # corn     dresser    to         carpet     .
+  IHD_003 -> IHD_005 -> IHD_006 -> IHD_007 -> IHD_008
+
+  # .          2         Further
+  IHD_008 -> { IHD_009,  IHD_015 }
+
+  # 2               Further
+  IHD_009 ->  IHD_015
+
+
+
+  # Further    ,          what       is         one        night      ?
+  IHD_015 -> IHD_016 -> IHD_017 -> IHD_018 -> IHD_019 -> IHD_020 -> IHD_021 -> end
+
+}

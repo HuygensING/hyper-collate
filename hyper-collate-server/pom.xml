@@ -49,7 +49,7 @@
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
-            <version>0.9.10</version> <!-- 0.9.11 leads to ReflectionsExceptions -->
+            <version>${reflections.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.xml.bind</groupId>
@@ -64,7 +64,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>RELEASE</version>
+            <version>${junit-jupiter-api.version}</version>
         </dependency>
         <!-- <dependency> <groupId>org.lucee</groupId> <artifactId>jdom</artifactId>
           <version>${jdom.version}</version> </dependency> <dependency> <groupId>jaxen</groupId>

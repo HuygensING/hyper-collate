@@ -1,0 +1,56 @@
+digraph VariantWitnessGraph{
+graph [rankdir=LR]
+node [style="filled";fillcolor="white"]
+begin [label="";shape=doublecircle,rank=middle]
+subgraph cluster_0 {
+label=<<i><b>TEI</b></i>>
+graph[style="rounded,filled";fillcolor="yellow"]
+subgraph cluster_1 {
+label=<<i><b>text</b></i>>
+graph[style="rounded,filled";fillcolor="orange"]
+subgraph cluster_2 {
+label=<<i><b>p</b></i>>
+graph[style="rounded,filled";fillcolor="#9aed7d"]
+subgraph cluster_3 {
+label=<<i><b>s</b></i>>
+graph[style="rounded,filled";fillcolor="lightblue"]
+IHD_000 [label=<a&nbsp;>]
+IHD_001 [label=<board&nbsp;>]
+IHD_002 [label=<creaks&nbsp;>]
+subgraph cluster_4 {
+label=<<i><b>add</b></i>>
+graph[style="rounded,filled";fillcolor="grey"]
+IHD_003 [label=<on&nbsp;>]
+IHD_004 [label=<the&nbsp;>]
+subgraph cluster_5 {
+label=<<i><b>choice</b></i>>
+graph[style="rounded,filled";fillcolor="#4286f4"]
+subgraph cluster_6 {
+label=<<i><b>sic</b></i>>
+graph[style="rounded,filled";fillcolor="#ef10eb"]
+IHD_005 [label=<landg>]
+}
+subgraph cluster_7 {
+label=<<i><b>corr</b></i>>
+graph[style="rounded,filled";fillcolor="#9091D4"]
+IHD_006 [label=<landing>]
+}
+}
+}
+IHD_007 [label=<;>]
+}
+}
+}
+}
+end [label="";shape=doublecircle,rank=middle]
+IHD_000->IHD_001
+IHD_001->IHD_002
+IHD_002->IHD_003
+IHD_002->IHD_007
+IHD_003->IHD_004
+IHD_004->IHD_005
+IHD_005->IHD_006
+IHD_006->IHD_007
+IHD_007->end
+begin->IHD_000
+}

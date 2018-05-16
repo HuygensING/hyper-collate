@@ -27,7 +27,7 @@ import java.util.Set;
 
 public interface CollationStore {
 
-  void addCollation(String collationId);
+  CollationInfo addCollation(String collationId);
 
   void setCollation(CollationInfo collationInfo, CollationGraph collationGraph);
 

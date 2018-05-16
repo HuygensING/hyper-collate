@@ -24,6 +24,7 @@ import io.swagger.jaxrs.config.BeanConfig;
 import nl.knaw.huygens.hypercollate.rest.CachedCollationStore;
 import nl.knaw.huygens.hypercollate.rest.CollationStore;
 import nl.knaw.huygens.hypercollate.rest.HyperCollateConfiguration;
+import nl.knaw.huygens.hypercollate.rest.Util;
 import nl.knaw.huygens.hypercollate.rest.resources.AboutResource;
 import nl.knaw.huygens.hypercollate.rest.resources.CollationsResource;
 import nl.knaw.huygens.hypercollate.rest.resources.RuntimeExceptionMapper;
@@ -89,7 +90,8 @@ public class HyperCollateApplication extends Application {
       String projectDir = (String) initialContext.lookup("java:comp/env/projectDir");
       return new SimpleConfiguration()//
           .setBaseURI(baseURI)//
-          .setProjectDir(projectDir);
+          .setProjectDir(projectDir)
+          .setPathToDotExecutable(Util.detectDotPath());
 
     } catch (NamingException e) {
       e.printStackTrace();

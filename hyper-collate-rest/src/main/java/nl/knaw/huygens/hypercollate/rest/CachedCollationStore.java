@@ -20,6 +20,7 @@ package nl.knaw.huygens.hypercollate.rest;
  * #L%
  */
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -30,9 +31,15 @@ import nl.knaw.huygens.hypercollate.importer.XMLImporter;
 import nl.knaw.huygens.hypercollate.model.CollationGraph;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 import nl.knaw.huygens.hypercollate.rest.CollationInfo.State;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -40,6 +47,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 public class CachedCollationStore implements CollationStore {
+  private static final Logger LOG = LoggerFactory.getLogger(CachedCollationStore.class);
   private final Set<String> collationIds = new LinkedHashSet<>();
   private static String baseURI;
   private static final Cache<String, CollationInfo> CollationInfoCache = CacheBuilder.newBuilder()//
@@ -72,13 +80,14 @@ public class CachedCollationStore implements CollationStore {
   }
 
   @Override
-  public void addCollation(String collationId) {
+  public CollationInfo addCollation(String collationId) {
     CollationInfo collationInfo = getCollationInfo(collationId)//
         .orElseGet(() -> newCollationInfo(collationId));
     collationInfo.setModified(Instant.now());
     CollationInfoCache.put(collationId, collationInfo);
     collationIds.add(collationId);
     persist(collationId);
+    return collationInfo;
   }
 
   @Override
@@ -142,7 +151,7 @@ public class CachedCollationStore implements CollationStore {
   private void storeCollationIds() {
     try {
       File file = getCollationIndexFile();
-      new ObjectMapper().writeValue(file, collationIds);
+      objectMapper().writeValue(file, collationIds);
     } catch (Exception e) {
       e.printStackTrace();
       throw new RuntimeException(e);
@@ -162,8 +171,48 @@ public class CachedCollationStore implements CollationStore {
         e.printStackTrace();
         throw new RuntimeException(e);
       }
+    } else {
+      addSampleCollations();
     }
   }
+
+  void addSampleCollations() {
+    ClassLoader classLoader = getClass().getClassLoader();
+    InputStream sampleMapStream = classLoader.getResourceAsStream("samples.json");
+    TypeReference<HashMap<String, HashMap<String, String>>> typeRef =
+        new TypeReference<HashMap<String, HashMap<String, String>>>() {
+        };
+    try {
+      HashMap<String, HashMap<String, String>> map = objectMapper().readValue(sampleMapStream, typeRef);
+      map.forEach((name, witnessMap) -> {
+        String collationId = "sample-" + name;
+        CollationInfo collationInfo = addCollation(collationId);
+        witnessMap.forEach((sigil, xmlPath) ->
+            processWitnessXML(classLoader, collationId, collationInfo, sigil, xmlPath)
+        );
+      });
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void processWitnessXML(final ClassLoader classLoader, final String collationId, final CollationInfo collationInfo, final String sigil, final String xmlPath) {
+    InputStream xmlStream = classLoader.getResourceAsStream(xmlPath);
+    try {
+      String xml = null;
+      xml = IOUtils.toString(xmlStream, "UTF-8");
+      VariantWitnessGraph variantWitnessGraph = xmlImporter.importXML(sigil, xml);
+      collationInfo.addWitness(sigil, xml)
+          .addWitnessGraph(sigil, variantWitnessGraph);
+      persist(collationId);
+    } catch (IOException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
+  }
+
+  XMLImporter xmlImporter = new XMLImporter();
 
   private ObjectMapper objectMapper() {
     return new ObjectMapper()//

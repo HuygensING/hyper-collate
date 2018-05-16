@@ -24,6 +24,7 @@ import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.model.Markup;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 import nl.knaw.huygens.hypercollate.tools.DotFactory;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -108,6 +109,66 @@ public class XMLImporterTest extends HyperCollateTest {
 
     verifyDotExport(wg0, expectedDot);
   }
+
+  @Ignore
+  @Test
+  public void testDoubleDel() {
+    XMLImporter importer = new XMLImporter();
+    VariantWitnessGraph wg0 = importer.importXML("A", "<xml>word1 <del>word2</del><del>word3</del> word4</xml>");
+    String expectedDot = "digraph VariantWitnessGraph{\n" +
+        "graph [rankdir=LR]\n" +
+        "labelloc=b\n" +
+        "begin [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "A_000 [label=<word1&#9251;<br/><i>A: /xml</i>>]\n" +
+        "A_001 [label=<word2<br/><i>A: /xml/del</i>>]\n" +
+        "A_003 [label=<&#9251;word4<br/><i>A: /xml</i>>]\n" +
+        "A_002 [label=<word3<br/><i>A: /xml/del</i>>]\n" +
+        "end [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "A_000->A_001\n" +
+        "A_000->A_002\n" +
+        "A_000->A_003\n" +
+        "A_001->A_002\n" +
+        "A_001->A_003\n" +
+        "A_002->A_003\n" +
+        "A_003->end\n" +
+        "begin->A_000\n" +
+        "}";
+
+    verifyDotExport(wg0, expectedDot);
+  }
+
+  @Ignore
+  @Test
+  public void testTripleDel() {
+    XMLImporter importer = new XMLImporter();
+    VariantWitnessGraph wg0 = importer.importXML("A", "<xml>word1 <del>word2</del><del>word3</del><del>word4</del> word5</xml>");
+    String expectedDot = "digraph VariantWitnessGraph{\n" +
+        "graph [rankdir=LR]\n" +
+        "labelloc=b\n" +
+        "begin [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "A_000 [label=<word1&#9251;<br/><i>A: /xml</i>>]\n" +
+        "A_001 [label=<word2<br/><i>A: /xml/del</i>>]\n" +
+        "A_004 [label=<&#9251;word5<br/><i>A: /xml</i>>]\n" +
+        "A_002 [label=<word3<br/><i>A: /xml/del</i>>]\n" +
+        "end [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "A_003 [label=<word4<br/><i>A: /xml/del</i>>]\n" +
+        "A_000->A_001\n" +
+        "A_000->A_002\n" +
+        "A_000->A_003\n" +
+        "A_000->A_004\n" +
+        "A_001->A_002\n" +
+        "A_001->A_003\n" +
+        "A_001->A_004\n" +
+        "A_002->A_003\n" +
+        "A_002->A_004\n" +
+        "A_003->A_004\n" +
+        "A_004->end\n" +
+        "begin->A_000\n" +
+        "}";
+
+    verifyDotExport(wg0, expectedDot);
+  }
+
 
   @Test
   public void testDelWithoutAddAtTheEnd() {

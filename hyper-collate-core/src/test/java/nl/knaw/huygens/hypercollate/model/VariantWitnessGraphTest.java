@@ -23,6 +23,8 @@ package nl.knaw.huygens.hypercollate.model;
 import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.tools.DotFactory;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -30,6 +32,8 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class VariantWitnessGraphTest extends HyperCollateTest {
+
+  private static final Logger LOG = LoggerFactory.getLogger(VariantWitnessGraphTest.class);
 
   @Test
   public void test() {
@@ -82,7 +86,7 @@ public class VariantWitnessGraphTest extends HyperCollateTest {
     assertThat(incoming).containsOnly(mtv3, mtv4);
 
     String dot = new DotFactory(false).fromVariantWitnessGraphSimple(vwg1);
-    System.out.println(dot);
+    LOG.info("dot=\n{}", dot);
     String expected = "digraph VariantWitnessGraph{\n" +//
         "graph [rankdir=LR]\n" +//
         "labelloc=b\n" +//

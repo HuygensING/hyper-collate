@@ -191,7 +191,15 @@ public class CollationGraphVisualizer {
   }
 
   public static String toTableHTML(CollationGraph graph) {
-    return "";
+    // TODO
+    return new StringBuilder()
+        .append("<table>")
+        .append("<tr><th>")
+        .append("</th></tr>")
+        .append("<tr><td>")
+        .append("</td></tr>")
+        .append("</table>")
+        .toString();
   }
 
   public static String toDot(CollationGraph graph, boolean emphasizeWhitespace) {
