@@ -38,6 +38,7 @@ import nl.knaw.huygens.hypercollate.rest.HyperCollateConfiguration;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
 import nl.knaw.huygens.hypercollate.tools.DotFactory;
+import nl.knaw.huygens.hypercollate.tools.TokenMerger;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -76,6 +77,7 @@ public class CollationsResource {
   private static final String APIPARAM_XML = "Witness Source (XML)";
   private static final String EMPHASIZE_WHITESPACE = "emphasize-whitespace";
   private static final String HIDE_MARKUP = "hide-markup";
+  private static final String JOIN_TOKENS = "join-tokens";
 
   private static final String IMAGE_PNG = "image/png";
   private static final String IMAGE_SVG = "image/svg+xml";
@@ -192,13 +194,14 @@ public class CollationsResource {
   @Path(COLLATION_WITNESS_DOT_PATH)
   @Timed
   @Produces(UTF8MediaType.TEXT_PLAIN)
-  @ApiOperation(value = "Get a .dot visualization of the witness graph, with optional emphasizing of whitespace.")
+  @ApiOperation(value = "Get a .dot visualization of the witness graph, with optional emphasizing of whitespace and optional joining of tokens.")
   public Response getWitnessDot(
       @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,//
       @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,//
-      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace//
+      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace,//
+      @DefaultValue(FALSE) @QueryParam(JOIN_TOKENS) final boolean joinTokens//
   ) {
-    String dot = getDot(name, sigil, emphasizeWhitespace);
+    String dot = getDot(name, sigil, emphasizeWhitespace, joinTokens);
     return Response.ok(dot).build();
   }
 
@@ -206,22 +209,26 @@ public class CollationsResource {
   @Path(COLLATION_WITNESS_SVG_PATH)
   @Timed
   @Produces(IMAGE_SVG)
-  @ApiOperation(value = "Return an SVG visualization of the witness graph, with optional emphasizing of whitespace.")
+  @ApiOperation(value = "Return an SVG visualization of the witness graph, with optional emphasizing of whitespace and optional joining of tokens.")
   public Response getWitnessSVG(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name, //
       @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,//
-      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace) {
-    return renderWitnessGraphAs(name, sigil, emphasizeWhitespace, SVG);
+      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace,//
+      @DefaultValue(FALSE) @QueryParam(JOIN_TOKENS) final boolean joinTokens//
+  ) {
+    return renderWitnessGraphAs(name, sigil, emphasizeWhitespace, joinTokens, SVG);
   }
 
   @GET
   @Path(COLLATION_WITNESS_PNG_PATH)
   @Timed
   @Produces(IMAGE_PNG)
-  @ApiOperation(value = "Return a PNG visualization of the witness graph, with optional emphasizing of whitespace.")
+  @ApiOperation(value = "Return a PNG visualization of the witness graph, with optional emphasizing of whitespace and optional joining of tokens.")
   public Response getWitnessPNG(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name, //
       @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,//
-      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace) {
-    return renderWitnessGraphAs(name, sigil, emphasizeWhitespace, PNG);
+      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace,//
+      @DefaultValue(FALSE) @QueryParam(JOIN_TOKENS) final boolean joinTokens//
+  ) {
+    return renderWitnessGraphAs(name, sigil, emphasizeWhitespace, joinTokens, PNG);
   }
 
   @GET
@@ -242,7 +249,7 @@ public class CollationsResource {
   @Path(COLLATION_SVG_PATH)
   @Timed
   @Produces(IMAGE_SVG)
-  @ApiOperation(value = "Get an SVG visualization of the collation graph, with optional emphasizing of whitespace.")
+  @ApiOperation(value = "Get an SVG visualization of the collation graph, with optional emphasizing of whitespace and optional hiding of markup.")
   public Response getSVGVisualization(
       @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,//
       @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace,//
@@ -255,7 +262,7 @@ public class CollationsResource {
   @Path(COLLATION_PNG_PATH)
   @Timed
   @Produces(IMAGE_PNG)
-  @ApiOperation(value = "Get a PNG visualization of the collation graph, with optional emphasizing of whitespace.")
+  @ApiOperation(value = "Get a PNG visualization of the collation graph, with optional emphasizing of whitespace and optional hiding of markup.")
   public Response getPNGVisualization(
       @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,//
       @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace,//
@@ -341,14 +348,17 @@ public class CollationsResource {
     return CollationGraphVisualizer.toDot(collation, emphasizeWhitespace, hideMarkup);
   }
 
-  private Response renderWitnessGraphAs(String name, String sigil, boolean emphasizeWhitespace, String format) {
-    String dot = getDot(name, sigil, emphasizeWhitespace);
+  private Response renderWitnessGraphAs(String name, String sigil, boolean emphasizeWhitespace, boolean joinTokens, String format) {
+    String dot = getDot(name, sigil, emphasizeWhitespace, joinTokens);
     return renderDotAs(dot, format);
   }
 
-  private String getDot(String name, String sigil, boolean emphasizeWhitespace) {
+  private String getDot(String name, String sigil, boolean emphasizeWhitespace, boolean joinTokens) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     VariantWitnessGraph variantWitnessGraph = collationInfo.getWitnessGraphMap().get(sigil);
+    if (joinTokens) {
+      variantWitnessGraph = TokenMerger.merge(variantWitnessGraph);
+    }
     return new DotFactory(emphasizeWhitespace).fromVariantWitnessGraphColored(variantWitnessGraph);
   }
 }
