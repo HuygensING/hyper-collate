@@ -3,16 +3,12 @@
 ## General
 HyperCollate is a prototype collation engine that is able to handle *intradocumentary* variation (i.e. variation _within_ one document), in addition to finding the differences _between_ witnesses. This advanced form of collation is possible because HyperCollate looks not only at the text of a document, but also at its markup.
 
-We are also developing a collation algorithm that can deal with structural variation (think of deleted paragraphs, split sentences, etc.). The code (work-in-progress) can be found in the "Prioritised XML Collation" [codebase](https://github.com/bleekere/prioritised_xml_collation_java) (java). Also take a look at the [Jupyter Notebook](https://github.com/HuygensING/hyper-collate-python-proxy/blob/master/hyper-collate-example.ipynb). The two codebases (interval variation and structural variation) will be merged in the near future.
-
-## Server
+## How to use HyperCollate
 
 There is a HyperCollate server with a REST-based API to interact with the HyperCollate algorithm.
 To work with the server, you can either download the latest prebuilt jar or war, or clone this repository and build it yourself.
 
-### Option 1a - download the prebuilt (jar)
-
-1. In your terminal or command prompt, navigate to the directory from which you want to run HyperCollate.
+<details><summary>**1. Download prebuild jar**</summary><p>1. In your terminal or command prompt, navigate to the directory from which you want to run HyperCollate.
 2. Download the jar from <https://cdn.huygens.knaw.nl/hyper-collate-server.jar> to the HyperCollate directory.
 2. run `java -jar hyper-collate-server.jar server`
 3. The server will start on a random available port, look for the lines:
@@ -27,18 +23,15 @@ To work with the server, you can either download the latest prebuilt jar or war,
 ##### Optional: Use a custom port
 1. Download an example config file from <https://raw.githubusercontent.com/HuygensING/hyper-collate/master/hyper-collate-server/config.yml> to the HyperCollate directory.
 2. Set the `baseURI` and `port` parameters in the configfile
-3. run `java -jar hyper-collate-server.jar server config.yml`
+3. run `java -jar hyper-collate-server.jar server config.yml`</p></details>
 
-### Option 1b - download the prebuilt (war)
-
-1. Download the war from <https://cdn.huygens.knaw.nl/hyper-collate.war> to the current directory.
+<details><summary>**2. Download prebuild war**</summary><p>1. Download the war from <https://cdn.huygens.knaw.nl/hyper-collate.war> to the current directory.
 2. Download an example config file from <https://raw.githubusercontent.com/HuygensING/hyper-collate/master/hyper-collate-war/hypercollate.xml> to the same directory.
 3. Change the `Context docBase`, `Context path` and the `value`s for `projectDir` and `baseURI` in `hypercollate.xml` as needed.
 4. copy `hypercollate.xml` to `$TOMCAT_HOME/conf/[Engine]/[Host]/` (e.g. `/opt/tomcat8/conf/Catalina/localhost/`)
-5. In your browser, go to the `baseURI` URL from `hypercollate.xml`.
+5. In your browser, go to the `baseURI` URL from `hypercollate.xml`.</p></details>
 
-### Option 2 - build your own
-
+<details><summary>**3. Build your own**</summary><p>
 - `mvn package`
 
 to build the hyper-collate-server jar and war, then to use the jar:
@@ -48,7 +41,9 @@ to build the hyper-collate-server jar and war, then to use the jar:
 - In your browser, open <http://localhost:2018/>
 
 the war can be found in `hyper-collate-war/target`, an example config file in `hyper-collate-war/hypercollate.xml`
-Follow steps 3 - 5 from Option 1b.  
+Follow steps 3 - 5 from Option 1.</p></details>
+
+
 
 
 ### Interacting with the server
