@@ -5,10 +5,16 @@ HyperCollate is a prototype collation engine that is able to handle *intradocume
 
 ## How to use HyperCollate
 
-There is a HyperCollate server with a REST-based API to interact with the HyperCollate algorithm.
-To work with the server, you can either download the latest prebuilt jar or war, or clone this repository and build it yourself.
+HyperCollate is easy to install and to use. We recommend you install the prebuild jar (option 1), although you are of course welcome to build it yourself.
 
-<details><summary>**1. Download prebuild jar**</summary><p>1. In your terminal or command prompt, navigate to the directory from which you want to run HyperCollate.
+Because you install HyperCollate via the command-line, you need a little basic knowledge of how the command-line works. If you are unfamiliar with the command line, there are some good tutorials [here](http://nbviewer.jupyter.org/github/DiXiT-eu/collatex-tutorial/blob/master/unit1/Command_line.ipynb) and [here](https://pittsburgh-neh-institute.github.io/Institute-Materials-2017/schedule/week_1/command_resources.html). 
+
+When you install and run HyperCollate, you create a work environment in your browser. This work environment (or “server”) is a local environment, which means that only you can access it.
+
+<details><summary>**1. Download prebuild jar (recommended)**</summary>
+<p>
+
+1. In your terminal or command prompt, navigate to the directory from which you want to run HyperCollate.
 2. Download the jar from <https://cdn.huygens.knaw.nl/hyper-collate-server.jar> to the HyperCollate directory.
 2. run `java -jar hyper-collate-server.jar server`
 3. The server will start on a random available port, look for the lines:
@@ -21,11 +27,16 @@ To work with the server, you can either download the latest prebuilt jar or war,
     in the output, which lists the URL of the server. Open this URL (starting with `http://`) in your browser.
 
 ##### Optional: Use a custom port
+In principle, the server of HyperCollate uses a random port that may differ each time depending on which port is available. If you prefer to have the server use the same port each time, you can set it up as follows:  
+
 1. Download an example config file from <https://raw.githubusercontent.com/HuygensING/hyper-collate/master/hyper-collate-server/config.yml> to the HyperCollate directory.
 2. Set the `baseURI` and `port` parameters in the configfile
 3. run `java -jar hyper-collate-server.jar server config.yml`</p></details>
 
-<details><summary>**2. Download prebuild war**</summary><p>1. Download the war from <https://cdn.huygens.knaw.nl/hyper-collate.war> to the current directory.
+<details><summary>**2. Download prebuild war**</summary>
+<p>
+
+1. Download the war from <https://cdn.huygens.knaw.nl/hyper-collate.war> to the current directory.
 2. Download an example config file from <https://raw.githubusercontent.com/HuygensING/hyper-collate/master/hyper-collate-war/hypercollate.xml> to the same directory.
 3. Change the `Context docBase`, `Context path` and the `value`s for `projectDir` and `baseURI` in `hypercollate.xml` as needed.
 4. copy `hypercollate.xml` to `$TOMCAT_HOME/conf/[Engine]/[Host]/` (e.g. `/opt/tomcat8/conf/Catalina/localhost/`)
@@ -47,6 +58,10 @@ Follow steps 3 - 5 from Option 1.</p></details>
 
 
 ### Interacting with the server
+
+There is a HyperCollate server with a REST-based API to interact with the HyperCollate algorithm.
+
+You have two options: either you interact with HyperCollate via the command line, or via a graphical interface. Both options are explained in detail below, so if you don’t know which one to choose, don’t worry and read on. 
 
 Interaction with the server is through REST calls.
 This can be done in the computer language of your choice, with the `curl` tool, or (for the jar option) with the built-in API explorer at 
