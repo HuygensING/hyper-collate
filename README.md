@@ -3,17 +3,21 @@
 ## General
 HyperCollate is a prototype collation engine that is able to handle *intradocumentary* variation (i.e. variation _within_ one document), in addition to finding the differences _between_ witnesses. This advanced form of collation is possible because HyperCollate looks not only at the text of a document, but also at its markup.
 
+When you install and run HyperCollate, you create a work environment in your browser. This work environment (or “server”) is a local environment, which means that only you can access it. In other words: you have a private environment to experiment with HyperCollate at liberty.
+
 ## How to use HyperCollate
 
-HyperCollate is easy to install and to use. We recommend you install the prebuild jar (option 1), although you are of course welcome to build it yourself.
+HyperCollate is easy to install and to use. Below we give you three options to install it: downloading a  JAR or a WAR file, or building it yourself.
+
+Briefly put, a JAR file requires only Java 8 (or higher) to run; for the WAR file you need a web application server like Apache Tomcat. If you don’t know what to choose, we recommend you install the prebuild JAR (option 1).
 
 Because you install HyperCollate via the command-line, you need a little basic knowledge of how the command-line works. If you are unfamiliar with the command line, there are some good tutorials [here](http://nbviewer.jupyter.org/github/DiXiT-eu/collatex-tutorial/blob/master/unit1/Command_line.ipynb) and [here](https://pittsburgh-neh-institute.github.io/Institute-Materials-2017/schedule/week_1/command_resources.html). 
 
-When you install and run HyperCollate, you create a work environment in your browser. This work environment (or “server”) is a local environment, which means that only you can access it.
 
-**1. Download prebuild jar (recommended)**
+###1. Download the prebuilt JAR (recommended)
 
-1. In your terminal or command prompt, navigate to the directory from which you want to run HyperCollate.
+1. Make sure you have installed [Java 8](https://java.com/en/download/) or higher.
+2. In your terminal or command prompt, navigate to the directory from which you want to run HyperCollate.
 2. Download the jar from <https://cdn.huygens.knaw.nl/hyper-collate-server.jar> to the HyperCollate directory.
 2. run `java -jar hyper-collate-server.jar server`
 3. The server will start on a random available port, look for the lines:
@@ -25,31 +29,34 @@ When you install and run HyperCollate, you create a work environment in your bro
     ```
     in the output, which lists the URL of the server. Open this URL (starting with `http://`) in your browser.
 
-##### Optional: Use a custom port
+#### Optional: Use a custom port
 In principle, the server of HyperCollate uses a random port that may differ each time depending on which port is available. If you prefer to have the server use the same port each time, you can set it up as follows:  
 
 1. Download an example config file from <https://raw.githubusercontent.com/HuygensING/hyper-collate/master/hyper-collate-server/config.yml> to the HyperCollate directory.
 2. Set the `baseURI` and `port` parameters in the configfile
 3. run `java -jar hyper-collate-server.jar server config.yml`
 
-**2. Download prebuild war**
+If you want to find out more about which custom port to use, you’ll find some useful documentation [here](https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers) and [here](https://stackoverflow.com/questions/133879/how-should-one-go-about-choosing-a-default-tcp-ip-port-for-a-new-service).
 
+### 2. Download the prebuilt WAR
+
+1. On your command line prompt or terminal, navigate to the directory from which you want to run HyperCollate.
 1. Download the war from <https://cdn.huygens.knaw.nl/hyper-collate.war> to the current directory.
 2. Download an example config file from <https://raw.githubusercontent.com/HuygensING/hyper-collate/master/hyper-collate-war/hypercollate.xml> to the same directory.
 3. Change the `Context docBase`, `Context path` and the `value`s for `projectDir` and `baseURI` in `hypercollate.xml` as needed.
 4. copy `hypercollate.xml` to `$TOMCAT_HOME/conf/[Engine]/[Host]/` (e.g. `/opt/tomcat8/conf/Catalina/localhost/`)
 5. In your browser, go to the `baseURI` URL from `hypercollate.xml`.
 
-**3. Build your own**
-- `mvn package`
+### 3. Build your own
 
-to build the hyper-collate-server jar and war, then to use the jar:
+1. On your command line prompt or terminal, navigate to the directory from which you want to run HyperCollate.
+2. Run `mvn package` to build the hyper-collate-server JAR and WAR, then to use the JAR:
+3.  `cd hyper-collate-server`
+4. `java -jar target/hyper-collate-server-1.0-SNAPSHOT.jar server config.yml` to start using the settings from `config.yml` 
+5. In your browser, open <http://localhost:2018/>
 
-- `cd hyper-collate-server`
-- `java -jar target/hyper-collate-server-1.0-SNAPSHOT.jar server config.yml` to start using the settings from `config.yml` 
-- In your browser, open <http://localhost:2018/>
+The WAR can be found in `hyper-collate-war/target`, an example config file in `hyper-collate-war/hypercollate.xml`
 
-the war can be found in `hyper-collate-war/target`, an example config file in `hyper-collate-war/hypercollate.xml`
 Follow steps 3 - 5 from Option 1.
 
 
