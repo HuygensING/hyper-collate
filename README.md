@@ -14,7 +14,7 @@ Briefly put, a JAR file requires only Java 8 (or higher) to run; for the WAR fil
 Because you install HyperCollate via the command-line, you need a little basic knowledge of how the command-line works. If you are unfamiliar with the command line, there are some good tutorials [here](http://nbviewer.jupyter.org/github/DiXiT-eu/collatex-tutorial/blob/master/unit1/Command_line.ipynb) and [here](https://pittsburgh-neh-institute.github.io/Institute-Materials-2017/schedule/week_1/command_resources.html). 
 
 
-###1. Download the prebuilt JAR (recommended)
+### 1. Download the prebuilt JAR (recommended)
 
 1. Make sure you have installed [Java 8](https://java.com/en/download/) or higher.
 2. In your terminal or command prompt, navigate to the directory from which you want to run HyperCollate.
