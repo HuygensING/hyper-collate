@@ -11,8 +11,7 @@ Because you install HyperCollate via the command-line, you need a little basic k
 
 When you install and run HyperCollate, you create a work environment in your browser. This work environment (or “server”) is a local environment, which means that only you can access it.
 
-<details><summary>**1. Download prebuild jar (recommended)**</summary>
-<p>
+**1. Download prebuild jar (recommended)**
 
 1. In your terminal or command prompt, navigate to the directory from which you want to run HyperCollate.
 2. Download the jar from <https://cdn.huygens.knaw.nl/hyper-collate-server.jar> to the HyperCollate directory.
@@ -31,18 +30,17 @@ In principle, the server of HyperCollate uses a random port that may differ each
 
 1. Download an example config file from <https://raw.githubusercontent.com/HuygensING/hyper-collate/master/hyper-collate-server/config.yml> to the HyperCollate directory.
 2. Set the `baseURI` and `port` parameters in the configfile
-3. run `java -jar hyper-collate-server.jar server config.yml`</p></details>
+3. run `java -jar hyper-collate-server.jar server config.yml`
 
-<details><summary>**2. Download prebuild war**</summary>
-<p>
+**2. Download prebuild war**
 
 1. Download the war from <https://cdn.huygens.knaw.nl/hyper-collate.war> to the current directory.
 2. Download an example config file from <https://raw.githubusercontent.com/HuygensING/hyper-collate/master/hyper-collate-war/hypercollate.xml> to the same directory.
 3. Change the `Context docBase`, `Context path` and the `value`s for `projectDir` and `baseURI` in `hypercollate.xml` as needed.
 4. copy `hypercollate.xml` to `$TOMCAT_HOME/conf/[Engine]/[Host]/` (e.g. `/opt/tomcat8/conf/Catalina/localhost/`)
-5. In your browser, go to the `baseURI` URL from `hypercollate.xml`.</p></details>
+5. In your browser, go to the `baseURI` URL from `hypercollate.xml`.
 
-<details><summary>**3. Build your own**</summary><p>
+**3. Build your own**
 - `mvn package`
 
 to build the hyper-collate-server jar and war, then to use the jar:
@@ -52,7 +50,7 @@ to build the hyper-collate-server jar and war, then to use the jar:
 - In your browser, open <http://localhost:2018/>
 
 the war can be found in `hyper-collate-war/target`, an example config file in `hyper-collate-war/hypercollate.xml`
-Follow steps 3 - 5 from Option 1.</p></details>
+Follow steps 3 - 5 from Option 1.
 
 
 
