@@ -5,7 +5,7 @@ HyperCollate is a prototype collation engine that is able to handle *intradocume
 
 When you install and run HyperCollate, you create a work environment in your browser. This work environment (or “server”) is a local environment, which means that only you can access it. In other words: you have a private environment to experiment with HyperCollate at liberty.
 
-## How to use HyperCollate
+## How to install HyperCollate
 
 HyperCollate is easy to install and to use. Below we give you three options to install it: downloading a  JAR or a WAR file, or building it yourself.
 
@@ -60,9 +60,9 @@ The WAR can be found in `hyper-collate-war/target`, an example config file in `h
 Follow steps 3 - 5 from Option 1.
 
 
+## How to use HyperCollate
 
-
-### Interacting with the server
+The URL of the local host you created during the installation above is the server on which you run HyperCollate.
 
 There is a HyperCollate server with a REST-based API to interact with the HyperCollate algorithm.
 
