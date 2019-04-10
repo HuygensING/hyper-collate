@@ -69,7 +69,7 @@ API stands for “application programming interface”. You can read more about 
 
 The API of HyperCollate is RESTful, which means that we interact with it according to the Hypertext Transfer Protocol ([HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)).
 
-You will use four HTTP methods:
+For HyperCollate you make use of four REST calls:
 
 - POST (creating)
 - PUT (updating / modifying)
@@ -77,6 +77,8 @@ You will use four HTTP methods:
 - DELETE (removing)
 
 You have two options: either you interact with HyperCollate via the command line, or via a graphical interface. Both options are explained in detail below, so if you don’t know which one to choose, don’t worry and read on. 
+
+=== TOT HIER === [20190410]
 
 Interaction with the server is through REST calls.
 This can be done in the computer language of your choice, with the `curl` tool, or (for the jar option) with the built-in API explorer at 
