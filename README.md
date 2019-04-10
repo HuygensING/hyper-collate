@@ -62,9 +62,19 @@ Follow steps 3 - 5 from Option 1.
 
 ## How to use HyperCollate
 
-The URL of the local host you created during the installation above is the server on which you run HyperCollate.
+During the installation steps above you created a server on a port on your local machine. HyperCollate runs on this server and you can interact with the program through a REST-based API. 
 
-There is a HyperCollate server with a REST-based API to interact with the HyperCollate algorithm.
+### What is an API?
+API stands for “application programming interface”. You can read more about it [here](https://medium.freecodecamp.org/what-is-an-api-in-english-please-b880a3214a82); in the context of HyperCollate you simply need to understand that an API is a part of the server that receives requests and sends out responses.
+
+The API of HyperCollate is RESTful, which means that we interact with it according to the Hypertext Transfer Protocol ([HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol)).
+
+You will use four HTTP methods:
+
+- POST (creating)
+- PUT (updating / modifying)
+- GET (getting)
+- DELETE (removing)
 
 You have two options: either you interact with HyperCollate via the command line, or via a graphical interface. Both options are explained in detail below, so if you don’t know which one to choose, don’t worry and read on. 
 
