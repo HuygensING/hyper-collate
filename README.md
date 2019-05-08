@@ -87,27 +87,26 @@ If you selected option 1 above (= install the prebuilt JAR) and you opened the U
 
 For the GUI, select the option `API`. You’re taken to HyperCollate’s user interface (built with the [Swagger](https://swagger.io/about/) UI tool). 
 
-- **Create a new Collation with a given name:**    
+Below we outline what steps you take to create a new collation with HyperCollate and visualize the results:
+
+#### Create a new Collation with a given name:
   `PUT /collations/{name}`  
   Click on `Try it out` and provide your collation with a new name. Click on `Execute`.  
   This should return response code `201 - created`,  
   with a URL to the collation in the `location` header.  
- 
   
-- **Add witnesses to the collation:**  
+#### Add witnesses to the collation:
   `PUT /collations/{name}/witnesses/{sigil}`  
-  Click on `Try it out`, enter your witness data, and click on `Execute`.  
+  Click on `Try it out`, enter your witness data in the “Witness Source” field, and click on `Execute`.  
   This should return response code `204 - no content`.  
   Repeat this step for the other witness(es).
   
-- **Get an ASCII table visualization of the collation graph:**  
+#### Get an ASCII table visualization of the collation graph:  
   `GET /collations/{name}/ascii_table`   
   Click on `Try it out` and enter the name of the collation. Click on `Execute`.    
-  This should return response code `200 - OK`  
-  The response body has a table of the collated text using ASCII.  
-      
-
-    This should return the response body
+  This should return response code `200 - OK`. The response body has a table of the collated text using ASCII.  
+  This should return the table:
+  
      <pre>
     ┌───┬────────────┬────────────┬─┬────────────────────┬──────────┬─┐
     │[A]│            │[+]    Spain│ │                    │          │ │
@@ -116,11 +115,12 @@ For the GUI, select the option `API`. You’re taken to HyperCollate’s user in
     │[B]│            │            │ │                    │[+]  plain│ │
     │   │The_rain_in_│Spain_      │ │falls_mainly_on_the_│[-] street│.│
     └───┴────────────┴────────────┴─┴────────────────────┴──────────┴─┘</pre>
-    In this table the `<del>`eted text is indicated with `[-]`, and the `<add>`ed text with `[+]`
+
+In this table the `<del>`eted text is indicated with `[-]`, and the `<add>`ed text with `[+]`
     Significant whitespace in the witnesses is indicated with `_`
     
 
-- **Get a .dot visualization of the collation graph:**  
+#### Get a .dot visualization of the collation graph:
 `GET /collations/{name}.dot`   
 Click on `Try it out`, enter the name of your collation and click on `Exectute`.  
 This should return response code `200 - OK`  
@@ -165,10 +165,10 @@ This should return the response body:
    the matched text `"The rain in "` has markup `xml` in both witnesses.  
    (You can turn off the markup lines by adding `?hide-markup=true` to the url)
    
- If you have GraphViz' `dot` executable installed, you can get a .png or .svg image directly from the server by replacing the `.dot` extension in the url to `.png` or `.svg`, respectively.
+   If you have GraphViz' `dot` executable installed, you can get a .png or .svg image directly from the server by replacing the `.dot` extension in the url to `.png` or `.svg`, respectively.
  
     
-- **Get a .dot/.png/.svg visualization of the witnesses:**  
+#### Get a .dot/.png/.svg visualization of the witnesses:
   `GET /collations/{name}/witnesses/{sigil}.dot`   
   `GET /collations/{name}/witnesses/{sigil}.png`   
   `GET /collations/{name}/witnesses/{sigil}.svg`
@@ -176,8 +176,7 @@ This should return the response body:
   Click on `Try it out`, enter the name of your collation and the sigil of the witness, and click on `Exectute`.  
   This should return response code `200 - OK` 
   The response body has the .dot , .png or .svg representation of the witness.
-      
-    This should return an svg image like this:
+ This should return an svg image like this:
     
    ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A.svg?sanitize=true)
    
@@ -190,19 +189,20 @@ This should return the response body:
 ### Command Line
 You can also interact with the HyperCollate server via the command line. Interaction can be done in the computer language of you choice or with the `curl` tool. Below, we’ll give examples using `curl`.
 
-- **Create a new Collation with a given name:**    
+#### Create a new Collation with a given name: 
     `curl -X PUT --header 'Content-Type: application/json' --header 'Accept: text/plain; charset=UTF-8' 'http://localhost:2018/collations/testcollation'` 
   
-- **Add witnesses to the collation:**  
+#### Add witnesses to the collation:  
     `curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in <del>Cataluña</del><add>Spain</add> falls mainly on the plain.</xml>' 'http://localhost:2018/collations/testcollation/witnesses/A'`
     
     `curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in Spain falls mainly on the <del>street</del><add>plain</add>.</xml>' 'http://localhost:2018/collations/testcollation/witnesses/B'` 
   
 
-- **Get an ASCII table visualization of the collation graph:**  
+#### Get an ASCII table visualization of the collation graph:  
     `curl -X GET --header 'Accept: text/plain' 'http://localhost:2018/collations/testcollation/ascii_table'`    
 
-    This should return the response body
+This should return the response body
+     
      <pre>
     ┌───┬────────────┬────────────┬─┬────────────────────┬──────────┬─┐
     │[A]│            │[+]    Spain│ │                    │          │ │
@@ -211,15 +211,15 @@ You can also interact with the HyperCollate server via the command line. Interac
     │[B]│            │            │ │                    │[+]  plain│ │
     │   │The_rain_in_│Spain_      │ │falls_mainly_on_the_│[-] street│.│
     └───┴────────────┴────────────┴─┴────────────────────┴──────────┴─┘</pre>
-    In this table the `<del>`eted text is indicated with `[-]`, and the `<add>`ed text with `[+]`
-    Significant whitespace in the witnesses is indicated with `_`
+
+In this table the `<del>`eted text is indicated with `[-]`, and the `<add>`ed text with `[+]`. Significant whitespace in the witnesses is indicated with `_`
     
 
-- **Get a .dot visualization of the collation graph:**  
+#### Get a .dot visualization of the collation graph:  
 
     `curl -X GET --header 'Accept: text/plain' 'http://localhost:2018/collations/testcollation.dot'`
       
-    This should return the response body:
+This should return the response body:
 
 ```
 digraph CollationGraph{
@@ -248,41 +248,36 @@ t008->t009[label="B"]
 t009->t004[label="B"]
 }
 ```
-  
-  Which, when rendered as png using the dot tool from [Graphviz](https://www.graphviz.org/)
-   or using [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/), gives:
+
+Which, when rendered as png using the dot tool from [Graphviz](https://www.graphviz.org/) or using [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/), gives:
   
    ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/testcollation.png?raw=true)
   
-  In this representation, significant whitespace in the witnesses is represented as `␣`  (You can turn this off by adding `?emphasize-whitespace=false` to the url)  
-  The markup of the witnesses is represented as separate lines in the node with, per witness, the xpath to the text.  
-  For example, the first text node in the collation graph with `( A,B: The_rain_in_ / A,B: /xml )` indicates that
-   the matched text `"The rain in "` has markup `xml` in both witnesses.  
-   (You can turn off the markup lines by adding `?hide-markup=true` to the url)
-   
- If you have GraphViz' `dot` executable installed, you can get a .png or .svg image directly from the server by replacing the `.dot` extension in the url to `.png` or `.svg`, respectively.
- 
-    
-- **Get a .dot/.png/.svg visualization of the witnesses:**  
-  `GET /collations/{name}/witnesses/{sigil}.dot`   
-  `GET /collations/{name}/witnesses/{sigil}.png`   
-  `GET /collations/{name}/witnesses/{sigil}.svg`
+In this representation, significant whitespace in the witnesses is represented as `␣`  (You can turn this off by adding `?emphasize-whitespace=false` to the url)  
 
-    `curl -X GET --header 'Accept: image/svg+xml' 'http://localhost:2018/collations/testcollation/witnesses/A.svg'`
+The markup of the witnesses is represented as separate lines in the node with, per witness, the xpath to the text.  
+
+For example, the first text node in the collation graph with `( A,B: The_rain_in_ / A,B: /xml )` indicates that the matched text `"The rain in "` has markup `xml` in both witnesses. You can turn off the markup lines by adding `?hide-markup=true` to the url.
+   
+If you have GraphViz' `dot` executable installed, you can get a .png or .svg image directly from the server by replacing the `.dot` extension in the url to `.png` or `.svg`, respectively.
+
+#### Get a .dot/.png/.svg visualization of the witnesses: 
+`GET /collations/{name}/witnesses/{sigil}.dot`   
+`GET /collations/{name}/witnesses/{sigil}.png`   
+`GET /collations/{name}/witnesses/{sigil}.svg`
+
+`curl -X GET --header 'Accept: image/svg+xml' 'http://localhost:2018/collations/testcollation/witnesses/A.svg'`
       
-    This should return an svg image like this:
-    
-   ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A.svg?sanitize=true)
+This should return an svg image similar to this:
+![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A.svg?sanitize=true)
    
-   To group the text nodes per markup combination, add `?join-tokens=true` to the url.
+To group the text nodes per markup combination, add `?join-tokens=true` to the url.
 
-    `curl -X GET --header 'Accept: image/svg+xml' 'http://localhost:2018/collations/testcollation/witnesses/A.svg?join-tokens=true'`
+`curl -X GET --header 'Accept: image/svg+xml' 'http://localhost:2018/collations/testcollation/witnesses/A.svg?join-tokens=true'`
    
-   This should return an svg image like this:
+This should return an svg image similar to this:
    
-   ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A-joined.svg?sanitize=true)
-   
-   
--------------------
+![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A-joined.svg?sanitize=true)
 
-The war just exposes a swagger file without a UI, in the `/swagger.json` or `/swagger.yaml` endpoints
+### 3. Swagger file via WAR
+If you chose the WAR option above, you probably know what to do. The war just exposes a swagger file without a UI, in the `/swagger.json` or `/swagger.yaml` endpoints.
