@@ -190,21 +190,21 @@ This should return the response body:
 You can also interact with the HyperCollate server via the command line. Interaction can be done in the computer language of you choice or with the `curl` tool. Below, we’ll give examples using `curl`.
 
 #### Create a new Collation with a given name: 
-    `curl -X PUT --header 'Content-Type: application/json' --header 'Accept: text/plain; charset=UTF-8' 'http://localhost:2018/collations/testcollation'` 
+
+`curl -X PUT --header 'Content-Type: application/json' --header 'Accept: text/plain; charset=UTF-8' 'http://localhost:2018/collations/testcollation'` 
   
 #### Add witnesses to the collation:  
-    `curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in <del>Cataluña</del><add>Spain</add> falls mainly on the plain.</xml>' 'http://localhost:2018/collations/testcollation/witnesses/A'`
+
+`curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in <del>Cataluña</del><add>Spain</add> falls mainly on the plain.</xml>' 'http://localhost:2018/collations/testcollation/witnesses/A'`
     
-    `curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in Spain falls mainly on the <del>street</del><add>plain</add>.</xml>' 'http://localhost:2018/collations/testcollation/witnesses/B'` 
-  
+`curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in Spain falls mainly on the <del>street</del><add>plain</add>.</xml>' 'http://localhost:2018/collations/testcollation/witnesses/B'` 
 
 #### Get an ASCII table visualization of the collation graph:  
-    `curl -X GET --header 'Accept: text/plain' 'http://localhost:2018/collations/testcollation/ascii_table'`    
+`curl -X GET --header 'Accept: text/plain' 'http://localhost:2018/collations/testcollation/ascii_table'`    
 
-This should return the response body
-     
-     <pre>
-    ┌───┬────────────┬────────────┬─┬────────────────────┬──────────┬─┐
+This should return the response body:
+
+<pre>    ┌───┬────────────┬────────────┬─┬────────────────────┬──────────┬─┐
     │[A]│            │[+]    Spain│ │                    │          │ │
     │   │The_rain_in_│[-] Cataluña│_│falls_mainly_on_the_│plain     │.│
     ├───┼────────────┼────────────┼─┼────────────────────┼──────────┼─┤
@@ -217,7 +217,7 @@ In this table the `<del>`eted text is indicated with `[-]`, and the `<add>`ed te
 
 #### Get a .dot visualization of the collation graph:  
 
-    `curl -X GET --header 'Accept: text/plain' 'http://localhost:2018/collations/testcollation.dot'`
+`curl -X GET --header 'Accept: text/plain' 'http://localhost:2018/collations/testcollation.dot'`
       
 This should return the response body:
 
@@ -251,7 +251,7 @@ t009->t004[label="B"]
 
 Which, when rendered as png using the dot tool from [Graphviz](https://www.graphviz.org/) or using [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/), gives:
   
-   ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/testcollation.png?raw=true)
+![](https://github.com/HuygensING/hyper-collate/blob/master/doc/testcollation.png?raw=true)
   
 In this representation, significant whitespace in the witnesses is represented as `␣`  (You can turn this off by adding `?emphasize-whitespace=false` to the url)  
 
