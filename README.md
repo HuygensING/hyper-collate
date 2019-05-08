@@ -110,12 +110,12 @@ This should return the table:
   
 <pre>
 ┌───┬────────────┬────────────┬─┬────────────────────┬──────────┬─┐
-    │[A]│            │[+]    Spain│ │                    │          │ │
-    │   │The_rain_in_│[-] Cataluña│_│falls_mainly_on_the_│plain     │.│
-    ├───┼────────────┼────────────┼─┼────────────────────┼──────────┼─┤
-    │[B]│            │            │ │                    │[+]  plain│ │
-    │   │The_rain_in_│Spain_      │ │falls_mainly_on_the_│[-] street│.│
-    └───┴────────────┴────────────┴─┴────────────────────┴──────────┴─┘
+│[A]│            │[+]    Spain│ │                    │          │ │
+│   │The_rain_in_│[-] Cataluña│_│falls_mainly_on_the_│plain     │.│
+├───┼────────────┼────────────┼─┼────────────────────┼──────────┼─┤
+│[B]│            │            │ │                    │[+]  plain│ │
+│   │The_rain_in_│Spain_      │ │falls_mainly_on_the_│[-] street│.│
+└───┴────────────┴────────────┴─┴────────────────────┴──────────┴─┘
 </pre>
 
 In this table the `<del>`eted text is indicated with `[-]`, and the `<add>`ed text with `[+]`. Significant whitespace in the witnesses is indicated with `_`
