@@ -121,43 +121,41 @@ For the GUI, select the option `API`. You’re taken to HyperCollate’s user in
     
 
 - **Get a .dot visualization of the collation graph:**  
-  `GET /collations/{name}.dot`   
-  Click on `Try it out`, enter the name of your collation and click on `Exectute`.  
-  This should return response code `200 - OK`  
-  The response body has the .dot representation of the collation graph.  
-      
-    This should return the response body:
+`GET /collations/{name}.dot`   
+Click on `Try it out`, enter the name of your collation and click on `Exectute`.  
+This should return response code `200 - OK`  
+The response body has the .dot representation of the collation graph.  
+This should return the response body:
 
-```
-digraph CollationGraph{
-labelloc=b
-t000 [label="";shape=doublecircle,rank=middle]
-t001 [label="";shape=doublecircle,rank=middle]
-t002 [label=<A,B: The&#9251;rain&#9251;in&#9251;<br/>A,B: <i>/xml</i>>]
-t003 [label=<A,B: plain<br/>A: <i>/xml</i><br/>B: <i>/xml/add</i><br/>>]
-t004 [label=<A,B: .<br/>A,B: <i>/xml</i>>]
-t005 [label=<A: Cataluña<br/>A: <i>/xml/del</i>>]
-t006 [label=<A: Spain<br/>B: Spain&#9251;<br/>A: <i>/xml/add</i><br/>B: <i>/xml</i><br/>>]
-t007 [label=<A: &#9251;<br/>A: <i>/xml</i>>]
-t008 [label=<A,B: falls&#9251;mainly&#9251;on&#9251;the&#9251;<br/>A,B: <i>/xml</i>>]
-t009 [label=<B: street<br/>B: <i>/xml/del</i>>]
-t000->t002[label="A,B"]
-t002->t005[label="A"]
-t002->t006[label="A,B"]
-t003->t004[label="A,B"]
-t004->t001[label="A,B"]
-t005->t007[label="A"]
-t006->t007[label="A"]
-t006->t008[label="B"]
-t007->t008[label="A"]
-t008->t003[label="A,B"]
-t008->t009[label="B"]
-t009->t004[label="B"]
-}
-```
+	```
+	digraph CollationGraph{
+	labelloc=b
+	t000 [label=“”;shape=doublecircle,rank=middle]
+	t001 [label=“”;shape=doublecircle,rank=middle]
+	t002 [label=<A,B: The&#9251;rain&#9251;in&#9251;<br/>A,B: <i>/xml</i>>]
+	t003 [label=<A,B: plain<br/>A: <i>/xml</i><br/>B: <i>/xml/add</i><br/>>]
+	t004 [label=<A,B: .<br/>A,B: <i>/xml</i>>]
+	t005 [label=<A: Cataluña<br/>A: <i>/xml/del</i>>]
+	t006 [label=<A: Spain<br/>B: Spain&#9251;<br/>A: <i>/xml/add</i><br/>B: <i>/xml</i><br/>>]
+	t007 [label=<A: &#9251;<br/>A: <i>/xml</i>>]
+	t008 [label=<A,B: falls&#9251;mainly&#9251;on&#9251;the&#9251;<br/>A,B: <i>/xml</i>>]
+	t009 [label=<B: street<br/>B: <i>/xml/del</i>>]
+	t000->t002[label=“A,B”]
+	t002->t005[label=“A”]
+	t002->t006[label=“A,B”]
+	t003->t004[label=“A,B”]
+	t004->t001[label=“A,B”]
+	t005->t007[label=“A”]
+	t006->t007[label=“A”]
+	t006->t008[label=“B”]
+	t007->t008[label=“A”]
+	t008->t003[label=“A,B”]
+	t008->t009[label=“B”]
+	t009->t004[label=“B”]
+	}
+	```
   
-  Which, when rendered as png using the dot tool from [Graphviz](https://www.graphviz.org/)
-   or using [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/), gives:
+  Which, when rendered as png using the dot tool from [Graphviz](https://www.graphviz.org/) or using [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/), gives:
   
    ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/testcollation.png?raw=true)
   
