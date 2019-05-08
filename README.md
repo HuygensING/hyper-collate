@@ -102,22 +102,23 @@ Below we outline what steps you take to create a new collation with HyperCollate
   Repeat this step for the other witness(es).
   
 #### Get an ASCII table visualization of the collation graph:  
-  `GET /collations/{name}/ascii_table`   
-  Click on `Try it out` and enter the name of the collation. Click on `Execute`.    
-  This should return response code `200 - OK`. The response body has a table of the collated text using ASCII.  
-  This should return the table:
+
+`GET /collations/{name}/ascii_table`   
+Click on `Try it out` and enter the name of the collation. Click on `Execute`. This should return response code `200 - OK`. The response body has a table of the collated text using ASCII. 
+ 
+This should return the table:
   
-     <pre>
-    ┌───┬────────────┬────────────┬─┬────────────────────┬──────────┬─┐
+<pre>
+┌───┬────────────┬────────────┬─┬────────────────────┬──────────┬─┐
     │[A]│            │[+]    Spain│ │                    │          │ │
     │   │The_rain_in_│[-] Cataluña│_│falls_mainly_on_the_│plain     │.│
     ├───┼────────────┼────────────┼─┼────────────────────┼──────────┼─┤
     │[B]│            │            │ │                    │[+]  plain│ │
     │   │The_rain_in_│Spain_      │ │falls_mainly_on_the_│[-] street│.│
-    └───┴────────────┴────────────┴─┴────────────────────┴──────────┴─┘</pre>
+    └───┴────────────┴────────────┴─┴────────────────────┴──────────┴─┘
+</pre>
 
-In this table the `<del>`eted text is indicated with `[-]`, and the `<add>`ed text with `[+]`
-    Significant whitespace in the witnesses is indicated with `_`
+In this table the `<del>`eted text is indicated with `[-]`, and the `<add>`ed text with `[+]`. Significant whitespace in the witnesses is indicated with `_`
     
 
 #### Get a .dot visualization of the collation graph:
@@ -127,67 +128,63 @@ This should return response code `200 - OK`
 The response body has the .dot representation of the collation graph.  
 This should return the response body:
 
-	```
-	digraph CollationGraph{
-	labelloc=b
-	t000 [label=“”;shape=doublecircle,rank=middle]
-	t001 [label=“”;shape=doublecircle,rank=middle]
-	t002 [label=<A,B: The&#9251;rain&#9251;in&#9251;<br/>A,B: <i>/xml</i>>]
-	t003 [label=<A,B: plain<br/>A: <i>/xml</i><br/>B: <i>/xml/add</i><br/>>]
-	t004 [label=<A,B: .<br/>A,B: <i>/xml</i>>]
-	t005 [label=<A: Cataluña<br/>A: <i>/xml/del</i>>]
-	t006 [label=<A: Spain<br/>B: Spain&#9251;<br/>A: <i>/xml/add</i><br/>B: <i>/xml</i><br/>>]
-	t007 [label=<A: &#9251;<br/>A: <i>/xml</i>>]
-	t008 [label=<A,B: falls&#9251;mainly&#9251;on&#9251;the&#9251;<br/>A,B: <i>/xml</i>>]
-	t009 [label=<B: street<br/>B: <i>/xml/del</i>>]
-	t000->t002[label=“A,B”]
-	t002->t005[label=“A”]
-	t002->t006[label=“A,B”]
-	t003->t004[label=“A,B”]
-	t004->t001[label=“A,B”]
-	t005->t007[label=“A”]
-	t006->t007[label=“A”]
-	t006->t008[label=“B”]
-	t007->t008[label=“A”]
-	t008->t003[label=“A,B”]
-	t008->t009[label=“B”]
-	t009->t004[label=“B”]
-	}
-	```
+```
+digraph CollationGraph{
+labelloc=b
+t000 [label=“”;shape=doublecircle,rank=middle]
+t001 [label=“”;shape=doublecircle,rank=middle]
+t002 [label=<A,B: The&#9251;rain&#9251;in&#9251;<br/>A,B: <i>/xml</i>>]
+t003 [label=<A,B: plain<br/>A: <i>/xml</i><br/>B: <i>/xml/add</i><br/>>]
+t004 [label=<A,B: .<br/>A,B: <i>/xml</i>>]
+t005 [label=<A: Cataluña<br/>A: <i>/xml/del</i>>]
+t006 [label=<A: Spain<br/>B: Spain&#9251;<br/>A: <i>/xml/add</i><br/>B: <i>/xml</i><br/>>]
+t007 [label=<A: &#9251;<br/>A: <i>/xml</i>>]
+t008 [label=<A,B: falls&#9251;mainly&#9251;on&#9251;the&#9251;<br/>A,B: <i>/xml</i>>]
+t009 [label=<B: street<br/>B: <i>/xml/del</i>>]
+t000->t002[label=“A,B”]
+t002->t005[label=“A”]
+t002->t006[label=“A,B”]
+t003->t004[label=“A,B”]
+t004->t001[label=“A,B”]
+t005->t007[label=“A”]
+t006->t007[label=“A”]
+t006->t008[label=“B”]
+t007->t008[label=“A”]
+t008->t003[label=“A,B”]
+t008->t009[label=“B”]
+t009->t004[label=“B”]
+}
+```
   
-  Which, when rendered as png using the dot tool from [Graphviz](https://www.graphviz.org/) or using [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/), gives:
+Which, when rendered as png using the dot tool from [Graphviz](https://www.graphviz.org/) or using [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/), gives:
   
-   ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/testcollation.png?raw=true)
+![](https://github.com/HuygensING/hyper-collate/blob/master/doc/testcollation.png?raw=true)
   
-  In this representation, significant whitespace in the witnesses is represented as `␣`  (You can turn this off by adding `?emphasize-whitespace=false` to the url)  
-  The markup of the witnesses is represented as separate lines in the node with, per witness, the xpath to the text.  
-  For example, the first text node in the collation graph with `( A,B: The_rain_in_ / A,B: /xml )` indicates that
-   the matched text `"The rain in "` has markup `xml` in both witnesses.  
-   (You can turn off the markup lines by adding `?hide-markup=true` to the url)
-   
-   If you have GraphViz' `dot` executable installed, you can get a .png or .svg image directly from the server by replacing the `.dot` extension in the url to `.png` or `.svg`, respectively.
+In this representation, significant whitespace in the witnesses is represented as `␣`. You can turn this off by adding `?emphasize-whitespace=false` to the url. 
+
+The markup of the witnesses is represented as separate lines in the node with, per witness, the xpath to the text. For example, the first text node in the collation graph with `( A,B: The_rain_in_ / A,B: /xml )` indicates that the matched text `"The rain in "` has markup `xml` in both witnesses.  Again, you can turn off the markup lines by adding `?hide-markup=true` to the url.
  
+If you have GraphViz' `dot` executable installed, you can get a .png or .svg image directly from the server by replacing the `.dot` extension in the url to `.png` or `.svg`, respectively.
     
 #### Get a .dot/.png/.svg visualization of the witnesses:
-  `GET /collations/{name}/witnesses/{sigil}.dot`   
-  `GET /collations/{name}/witnesses/{sigil}.png`   
-  `GET /collations/{name}/witnesses/{sigil}.svg`
+`GET /collations/{name}/witnesses/{sigil}.dot`   
+`GET /collations/{name}/witnesses/{sigil}.png`   
+`GET /collations/{name}/witnesses/{sigil}.svg`
      
-  Click on `Try it out`, enter the name of your collation and the sigil of the witness, and click on `Exectute`.  
-  This should return response code `200 - OK` 
-  The response body has the .dot , .png or .svg representation of the witness.
- This should return an svg image like this:
+Click on `Try it out`, enter the name of your collation and the sigil of the witness, and click on `Exectute`. This should return response code `200 - OK`. The response body has the .dot , .png or .svg representation of the witness. This should return an svg image like this:
     
-   ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A.svg?sanitize=true)
+![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A.svg?sanitize=true)
    
-   To group the text nodes per markup combination, add `?join-tokens=true` to the url.
+To group the text nodes per markup combination, add `?join-tokens=true` to the url.
    
-   This should return an svg image like this:
+This should return an svg image like this:
    
-   ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A-joined.svg?sanitize=true)
+![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A-joined.svg?sanitize=true)
       
 ### Command Line
-You can also interact with the HyperCollate server via the command line. Interaction can be done in the computer language of you choice or with the `curl` tool. Below, we’ll give examples using `curl`.
+You can also interact with the HyperCollate server via the command line. Interaction can be done in the computer language of you choice or with [Curl](http://www.redmine.org/projects/redmine/wiki/Rest_api_with_curl), a programming language often used to interact with RESTful APIs. 
+
+Below, we’ll give examples using `curl`.
 
 #### Create a new Collation with a given name: 
 
