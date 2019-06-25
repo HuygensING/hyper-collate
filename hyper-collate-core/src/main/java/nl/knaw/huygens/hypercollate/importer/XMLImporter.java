@@ -88,54 +88,54 @@ public class XMLImporter {
       while (reader.hasNext()) {
         XMLEvent event = reader.nextEvent();
         switch (event.getEventType()) {
-        case XMLStreamConstants.START_DOCUMENT:
-          handleStartDocument(event, context);
-          break;
-        case XMLStreamConstants.START_ELEMENT:
-          handleStartElement(event.asStartElement(), context);
-          break;
-        case XMLStreamConstants.CHARACTERS:
-          handleCharacters(event.asCharacters(), context);
-          break;
-        case XMLStreamConstants.END_ELEMENT:
-          handleEndElement(event.asEndElement(), context);
-          break;
-        case XMLStreamConstants.END_DOCUMENT:
-          handleEndDocument(event, context);
-          break;
-        case XMLStreamConstants.PROCESSING_INSTRUCTION:
-          handleProcessingInstruction(event, context);
-          break;
-        case XMLStreamConstants.COMMENT:
-          handleComment(event, context);
-          break;
-        case XMLStreamConstants.SPACE:
-          handleSpace(event, context);
-          break;
-        case XMLStreamConstants.ENTITY_REFERENCE:
-          handleEntityReference(event, context);
-          break;
-        case XMLStreamConstants.ATTRIBUTE:
-          handleAttribute(event, context);
-          break;
-        case XMLStreamConstants.DTD:
-          handleDTD(event, context);
-          break;
-        case XMLStreamConstants.CDATA:
-          handleCData(event, context);
-          break;
-        case XMLStreamConstants.NAMESPACE:
-          handleNameSpace(event, context);
-          break;
-        case XMLStreamConstants.NOTATION_DECLARATION:
-          handleNotationDeclaration(event, context);
-          break;
-        case XMLStreamConstants.ENTITY_DECLARATION:
-          handleEntityDeclaration(event, context);
-          break;
+          case XMLStreamConstants.START_DOCUMENT:
+            handleStartDocument(event, context);
+            break;
+          case XMLStreamConstants.START_ELEMENT:
+            handleStartElement(event.asStartElement(), context);
+            break;
+          case XMLStreamConstants.CHARACTERS:
+            handleCharacters(event.asCharacters(), context);
+            break;
+          case XMLStreamConstants.END_ELEMENT:
+            handleEndElement(event.asEndElement(), context);
+            break;
+          case XMLStreamConstants.END_DOCUMENT:
+            handleEndDocument(event, context);
+            break;
+          case XMLStreamConstants.PROCESSING_INSTRUCTION:
+            handleProcessingInstruction(event, context);
+            break;
+          case XMLStreamConstants.COMMENT:
+            handleComment(event, context);
+            break;
+          case XMLStreamConstants.SPACE:
+            handleSpace(event, context);
+            break;
+          case XMLStreamConstants.ENTITY_REFERENCE:
+            handleEntityReference(event, context);
+            break;
+          case XMLStreamConstants.ATTRIBUTE:
+            handleAttribute(event, context);
+            break;
+          case XMLStreamConstants.DTD:
+            handleDTD(event, context);
+            break;
+          case XMLStreamConstants.CDATA:
+            handleCData(event, context);
+            break;
+          case XMLStreamConstants.NAMESPACE:
+            handleNameSpace(event, context);
+            break;
+          case XMLStreamConstants.NOTATION_DECLARATION:
+            handleNotationDeclaration(event, context);
+            break;
+          case XMLStreamConstants.ENTITY_DECLARATION:
+            handleEntityDeclaration(event, context);
+            break;
 
-        default:
-          break;
+          default:
+            break;
         }
 
       }
@@ -229,6 +229,7 @@ public class XMLImporter {
     private final Deque<TokenVertex> unconnectedVertices = new LinkedList<>(); // the last tokenvertex in an <add> which hasn't been linked to the tokenvertex after the </del> yet
     private final Function<String, String> normalizer;
     private final SimpleWitness witness;
+    private String rdg = "";
     private String parentXPath;
     private Boolean afterDel = false;
     private final AtomicInteger branchCounter = new AtomicInteger(0);
@@ -284,6 +285,7 @@ public class XMLImporter {
         unconnectedRdgVerticesStack.push(new ArrayList<>());
 
       } else if (isRdg(markup)) { // rdg
+        rdg = markup.getAttributeMap().get("varSeq");
         if (isLitRdg(markup)) {
           ignoreRdgStack.push(true);
 
@@ -365,6 +367,7 @@ public class XMLImporter {
       MarkedUpToken token = new MarkedUpToken()//
           .setContent(content)//
           .setWitness(witness)//
+          .setRdg(rdg)//
           .setIndexNumber(tokenCounter++)//
           .setParentXPath(parentXPath)//
           .setNormalizedContent(normalizer.apply(content));

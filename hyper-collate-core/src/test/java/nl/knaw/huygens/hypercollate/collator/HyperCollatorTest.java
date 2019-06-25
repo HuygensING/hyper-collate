@@ -51,42 +51,161 @@ public class HyperCollatorTest extends HyperCollateTest {
   final HyperCollator hyperCollator = new HyperCollator();
 
   @Test
-  public void test() {
+  public void testAppRdgWithAddDel() {
     XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph wF = importer.importXML("F", "<s>doorheen de <del><add>stille</add></del><add>luistille</add> gangen</s>");
-    VariantWitnessGraph wQ = importer.importXML("Q", "<s>door<del>heen</del> de luistille gangen</s>");
+    VariantWitnessGraph wF = importer.importXML("W1", "<s>One must have lived longer with <app>" +
+        "<rdg varSeq=\"1\"><del>this</del></rdg>" +
+        "<rdg varSeq=\"2\"><del><add>such a</add></del></rdg>" +
+        "<rdg varSeq=\"3\"><add>a</add></rdg>" +
+        "</app> system, to appreciate its advantages.</s>");
+    VariantWitnessGraph wQ = importer.importXML("W2", "<s>One must have lived longer with this system, to appreciate its advantages.</s>");
+
     String expected = "digraph CollationGraph{\n" +
         "labelloc=b\n" +
         "t000 [label=\"\";shape=doublecircle,rank=middle]\n" +
         "t001 [label=\"\";shape=doublecircle,rank=middle]\n" +
-        "t002 [label=<F: doorheen&#9251;<br/>F: <i>/s</i>>]\n" +
-        "t003 [label=<F,Q: de&#9251;<br/>F,Q: <i>/s</i>>]\n" +
-        "t004 [label=<F: stille<br/>F: <i>/s/del/add</i>>]\n" +
-        "t005 [label=<F: luistille<br/>Q: luistille&#9251;<br/>F: <i>/s/add</i><br/>Q: <i>/s</i><br/>>]\n" +
-        "t006 [label=<F: &#9251;<br/>F: <i>/s</i>>]\n" +
-        "t007 [label=<F,Q: gangen<br/>F,Q: <i>/s</i>>]\n" +
-        "t008 [label=<Q: door<br/>Q: <i>/s</i>>]\n" +
-        "t009 [label=<Q: heen<br/>Q: <i>/s/del</i>>]\n" +
-        "t010 [label=<Q: &#9251;<br/>Q: <i>/s</i>>]\n" +
-        "t000->t002[label=\"F\"]\n" +
-        "t000->t008[label=\"Q\"]\n" +
-        "t002->t003[label=\"F\"]\n" +
-        "t003->t001[label=\"F\"]\n" +
-        "t003->t004[label=\"F\"]\n" +
-        "t003->t005[label=\"F,Q\"]\n" +
-        "t004->t006[label=\"F\"]\n" +
-        "t005->t006[label=\"F\"]\n" +
-        "t005->t007[label=\"Q\"]\n" +
-        "t006->t007[label=\"F\"]\n" +
-        "t007->t001[label=\"F,Q\"]\n" +
-        "t008->t009[label=\"Q\"]\n" +
-        "t008->t010[label=\"Q\"]\n" +
-        "t009->t010[label=\"Q\"]\n" +
-        "t010->t003[label=\"Q\"]\n" +
+        "t002 [label=<W1,W2: One&#9251;must&#9251;have&#9251;lived&#9251;longer&#9251;with&#9251;<br/>W1,W2: <i>/s</i>>]\n" +
+        "t003 [label=<W1: &#9251;<br/>W1: <i>/s</i>>]\n" +
+        "t004 [label=<W1,W2: system,&#9251;to&#9251;appreciate&#9251;its&#9251;advantages.<br/>W1,W2: <i>/s</i>>]\n" +
+        "t005 [label=<W1: this<br/>W2: this&#9251;<br/>W1: <i>/s/app/rdg/del</i><br/>W2: <i>/s</i><br/>>]\n" +
+        "t006 [label=<W1: such&#9251;a<br/>W1: <i>/s/app/rdg/del/add</i>>]\n" +
+        "t007 [label=<W1: a<br/>W1: <i>/s/app/rdg/add</i>>]\n" +
+        "t000->t002[label=\"W1,W2\"]\n" +
+        "t002->t005[label=\"W1,W2\"]\n" +
+        "t002->t006[label=\"W1\"]\n" +
+        "t002->t007[label=\"W1\"]\n" +
+        "t003->t004[label=\"W1\"]\n" +
+        "t004->t001[label=\"W1,W2\"]\n" +
+        "t005->t003[label=\"W1\"]\n" +
+        "t005->t004[label=\"W2\"]\n" +
+        "t006->t003[label=\"W1\"]\n" +
+        "t007->t003[label=\"W1\"]\n" +
         "}";
+
     CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
-    assertThat(collationGraph).isNotNull();
-    String table = CollationGraphVisualizer.toTableASCII(collationGraph, true);
+
+//    // test matching tokens
+//    TextNodeSketch n1 = textNodeSketch()
+//        .withWitnessSegmentSketch("F", "Hoe zoet moet nochtans zijn dit ")
+//        .withWitnessSegmentSketch("Q", "Hoe zoet moet nochtans zijn dit ")
+//        .withWitnessSegmentSketch("Z", "Hoe zoet moet nochtans zijn dit ");
+//    TextNodeSketch n2 = textNodeSketch()
+//        .withWitnessSegmentSketch("F", " ")
+//        .withWitnessSegmentSketch("Q", " ");
+//    TextNodeSketch n3 = textNodeSketch()
+//        .withWitnessSegmentSketch("F", "een ")
+//        .withWitnessSegmentSketch("Q", "een ")
+//        .withWitnessSegmentSketch("Z", "een ");
+//    TextNodeSketch n4 = textNodeSketch()
+//        .withWitnessSegmentSketch("F", "vrouw")
+//        .withWitnessSegmentSketch("Q", "vrouw ")
+//        .withWitnessSegmentSketch("Z", "vrouw ");
+//    TextNodeSketch n5 = textNodeSketch()
+//        .withWitnessSegmentSketch("F", "ongewisheid ")
+//        .withWitnessSegmentSketch("Z", "ongewisheid ");
+//    TextNodeSketch n6 = textNodeSketch()
+//        .withWitnessSegmentSketch("F", "liefelijke toestemming")
+//        .withWitnessSegmentSketch("Z", "liefelijke toestemming")
+//        .withWitnessSegmentSketch("Q", "liefelijke toestemming");
+//    TextNodeSketch trachten_naar = textNodeSketch()
+//        .withWitnessSegmentSketch("F", "trachten naar")
+//        .withWitnessSegmentSketch("Q", "trachten naar")
+//        .withWitnessSegmentSketch("Z", "trachten naar ");
+//    TextNodeSketch werven_om = textNodeSketch()
+//        .withWitnessSegmentSketch("F", "werven om")
+//        .withWitnessSegmentSketch("Q", "werven om");
+//
+//    assertThat(collationGraph).containsTextNodesMatching(n1, n2, n3, n4, n5, n6, trachten_naar, werven_om);
+//
+//    assertThat(collationGraph).containsMarkupNodesMatching(//
+//        markupNodeSketch("F", "text"),//
+//        markupNodeSketch("Q", "text"),//
+//        markupNodeSketch("Z", "text")
+//    );
+//
+//    MarkupNodeSketch f_del = markupNodeSketch("F", "del");
+//    MarkupNodeSketch q_add = markupNodeSketch("Q", "add");
+//    assertThat(collationGraph).hasTextNodeMatching(werven_om).withMarkupNodesMatching(f_del);
+//    assertThat(collationGraph).hasMarkupNodeMatching(q_add).withTextNodesMatching(trachten_naar);
+  }
+
+  @Test
+  public void testAppRdg() {
+    XMLImporter importer = new XMLImporter();
+    VariantWitnessGraph wF = importer.importXML("W1", "<s>One must have lived longer with <app>" +
+        "<rdg varSeq=\"1\">this</rdg>" +
+        "<rdg varSeq=\"2\">such a</rdg>" +
+        "<rdg varSeq=\"3\">a</rdg>" +
+        "</app> system, to appreciate its advantages.</s>");
+    VariantWitnessGraph wQ = importer.importXML("W2", "<s>One must have lived longer with this system, to appreciate its advantages.</s>");
+
+    String expected = "digraph CollationGraph{\n" +
+        "labelloc=b\n" +
+        "t000 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t001 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t002 [label=<W1,W2: One&#9251;must&#9251;have&#9251;lived&#9251;longer&#9251;with&#9251;<br/>W1,W2: <i>/s</i>>]\n" +
+        "t003 [label=<W1: &#9251;<br/>W1: <i>/s</i>>]\n" +
+        "t004 [label=<W1,W2: system,&#9251;to&#9251;appreciate&#9251;its&#9251;advantages.<br/>W1,W2: <i>/s</i>>]\n" +
+        "t005 [label=<W1: this<br/>W2: this&#9251;<br/>W1: <i>/s/app/rdg</i><br/>W2: <i>/s</i><br/>>]\n" +
+        "t006 [label=<W1: such&#9251;a<br/>W1: <i>/s/app/rdg</i>>]\n" +
+        "t007 [label=<W1: a<br/>W1: <i>/s/app/rdg</i>>]\n" +
+        "t000->t002[label=\"W1,W2\"]\n" +
+        "t002->t005[label=\"W1,W2\"]\n" +
+        "t002->t006[label=\"W1\"]\n" +
+        "t002->t007[label=\"W1\"]\n" +
+        "t003->t004[label=\"W1\"]\n" +
+        "t004->t001[label=\"W1,W2\"]\n" +
+        "t005->t003[label=\"W1\"]\n" +
+        "t005->t004[label=\"W2\"]\n" +
+        "t006->t003[label=\"W1\"]\n" +
+        "t007->t003[label=\"W1\"]\n" +
+        "}";
+
+    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
+
+//    // test matching tokens
+//    TextNodeSketch n1 = textNodeSketch()
+//        .withWitnessSegmentSketch("F", "Hoe zoet moet nochtans zijn dit ")
+//        .withWitnessSegmentSketch("Q", "Hoe zoet moet nochtans zijn dit ")
+//        .withWitnessSegmentSketch("Z", "Hoe zoet moet nochtans zijn dit ");
+//    TextNodeSketch n2 = textNodeSketch()
+//        .withWitnessSegmentSketch("F", " ")
+//        .withWitnessSegmentSketch("Q", " ");
+//    TextNodeSketch n3 = textNodeSketch()
+//        .withWitnessSegmentSketch("F", "een ")
+//        .withWitnessSegmentSketch("Q", "een ")
+//        .withWitnessSegmentSketch("Z", "een ");
+//    TextNodeSketch n4 = textNodeSketch()
+//        .withWitnessSegmentSketch("F", "vrouw")
+//        .withWitnessSegmentSketch("Q", "vrouw ")
+//        .withWitnessSegmentSketch("Z", "vrouw ");
+//    TextNodeSketch n5 = textNodeSketch()
+//        .withWitnessSegmentSketch("F", "ongewisheid ")
+//        .withWitnessSegmentSketch("Z", "ongewisheid ");
+//    TextNodeSketch n6 = textNodeSketch()
+//        .withWitnessSegmentSketch("F", "liefelijke toestemming")
+//        .withWitnessSegmentSketch("Z", "liefelijke toestemming")
+//        .withWitnessSegmentSketch("Q", "liefelijke toestemming");
+//    TextNodeSketch trachten_naar = textNodeSketch()
+//        .withWitnessSegmentSketch("F", "trachten naar")
+//        .withWitnessSegmentSketch("Q", "trachten naar")
+//        .withWitnessSegmentSketch("Z", "trachten naar ");
+//    TextNodeSketch werven_om = textNodeSketch()
+//        .withWitnessSegmentSketch("F", "werven om")
+//        .withWitnessSegmentSketch("Q", "werven om");
+//
+//    assertThat(collationGraph).containsTextNodesMatching(n1, n2, n3, n4, n5, n6, trachten_naar, werven_om);
+//
+//    assertThat(collationGraph).containsMarkupNodesMatching(//
+//        markupNodeSketch("F", "text"),//
+//        markupNodeSketch("Q", "text"),//
+//        markupNodeSketch("Z", "text")
+//    );
+//
+//    MarkupNodeSketch f_del = markupNodeSketch("F", "del");
+//    MarkupNodeSketch q_add = markupNodeSketch("Q", "add");
+//    assertThat(collationGraph).hasTextNodeMatching(werven_om).withMarkupNodesMatching(f_del);
+//    assertThat(collationGraph).hasMarkupNodeMatching(q_add).withTextNodesMatching(trachten_naar);
   }
 
   @Test
@@ -205,14 +324,18 @@ public class HyperCollatorTest extends HyperCollateTest {
   @Test
   public void testHierarchy() {
     XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph wF = importer.importXML("F", "<text>\n" + //
+    String fXML = "<text>\n" + //
         "    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,\n" + //
         "        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>\n" + //
-        "</text>");
-    VariantWitnessGraph wQ = importer.importXML("Q", "<text>\n" + //
+        "</text>";
+    VariantWitnessGraph wF = importer.importXML("F", fXML);
+    String qXML = "<text>\n" + //
         "    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !\n" + //
         "        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>\n" + //
-        "</text>");
+        "</text>";
+    VariantWitnessGraph wQ = importer.importXML("Q", qXML);
+    LOG.info(fXML);
+    LOG.info(qXML);
 
     String expectedDotF = "digraph VariantWitnessGraph{\n" + //
         "graph [rankdir=LR]\n" + //
@@ -988,7 +1111,7 @@ public class HyperCollatorTest extends HyperCollateTest {
     writeGraph(dot, "graph");
     assertThat(dot).isEqualTo(expected);
 
-    String table = CollationGraphVisualizer.toTableASCII(collation, true);
+    String table = CollationGraphVisualizer.toTableASCII(collation, false);
     LOG.debug("table=\n{}", table);
     return collation;
   }

@@ -288,6 +288,35 @@ public class XMLImporterTest extends HyperCollateTest {
     verifyDotExport(wg0, expectedDot);
   }
 
+
+  @Test
+  public void testAppRdg2() {
+    XMLImporter importer = new XMLImporter();
+    VariantWitnessGraph wg0 = importer.importXML("A", "<xml>Sinterklaas en"//
+        + "<app>\n"//
+        + "<rdg wit=\"a\">Zwarte Piet</rdg>\n" //
+        + "<rdg wit=\"b\">Roetpiet</rdg>\n"//
+        + "</app> zijn weer aangekomen.</xml>");//
+    String expectedDot = "digraph VariantWitnessGraph{\n" + //
+        "graph [rankdir=LR]\n" + //
+        "labelloc=b\n" + //
+        "begin [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "A_000 [label=<Sinterklaas&#9251;en<br/><i>A: /xml</i>>]\n" + //
+        "A_002 [label=<Zwarte&#9251;Piet<br/><i>A: /xml/app/rdg</i>>]\n" + //
+        "A_004 [label=<Roetpiet<br/><i>A: /xml/app/rdg</i>>]\n" + ///
+        "A_005 [label=<&#9251;zijn&#9251;weer&#9251;aangekomen.<br/><i>A: /xml</i>>]\n" + //
+        "end [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "A_000->A_002\n" + //
+        "A_000->A_004\n" + //
+        "A_002->A_005\n" + //
+        "A_004->A_005\n" + //
+        "A_005->end\n" + //
+        "begin->A_000\n" + //
+        "}";
+
+    verifyDotExport(wg0, expectedDot);
+  }
+
   @Test
   public void testWitnessFOrderAppRdgBordalejo() {
     XMLImporter importer = new XMLImporter();
