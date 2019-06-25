@@ -20,6 +20,7 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
+import com.google.common.base.Preconditions;
 import nl.knaw.huygens.hypercollate.collator.VariantWitnessGraphTraversal;
 
 import java.util.*;
@@ -38,7 +39,7 @@ public class VariantWitnessGraph {
 
   public VariantWitnessGraph(String sigil) {
     this.sigil = sigil;
-    startTokenVertex =  new StartTokenVertex(sigil);
+    startTokenVertex = new StartTokenVertex(sigil);
     endTokenVertex = new EndTokenVertex(sigil);
   }
 
@@ -63,6 +64,11 @@ public class VariantWitnessGraph {
   }
 
   public void addOutgoingTokenVertexToTokenVertex(TokenVertex token0, TokenVertex token1) {
+    if (token0 == null || token1 == null) {
+      return;
+    }
+    Preconditions.checkNotNull(token0);
+    Preconditions.checkNotNull(token1);
     token0.addOutgoingTokenVertex(token1); // (token0)->(token1)
     token1.addIncomingTokenVertex(token0); // (token1)<-(token0)
   }

@@ -232,7 +232,8 @@ public class HyperCollator {
   }
 
   private static void addEdges(CollationGraph collationGraph, Map<TokenVertex, TextNode> collatedTokenVertexMap) {
-    collatedTokenVertexMap.keySet().forEach(tv -> tv.getIncomingTokenVertexStream().forEach(itv -> {
+    collatedTokenVertexMap.keySet().forEach(tv ->
+        tv.getIncomingTokenVertexStream().forEach(itv -> {
       TextNode source = collatedTokenVertexMap.get(itv);
       TextNode target = collatedTokenVertexMap.get(tv);
       if (source == null || target == null) {

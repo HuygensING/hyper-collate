@@ -79,6 +79,7 @@ public class TokenMerger {
         .setNormalizedContent(originalToken.getNormalizedContent())//
         .setParentXPath(originalToken.getParentXPath())//
         .setWitness((SimpleWitness) originalToken.getWitness())//
+        .setRdg(originalToken.getRdg())//
         .setIndexNumber(tokenNumber);
 
     SimpleTokenVertex mergedVertex = new SimpleTokenVertex(mergedToken)//

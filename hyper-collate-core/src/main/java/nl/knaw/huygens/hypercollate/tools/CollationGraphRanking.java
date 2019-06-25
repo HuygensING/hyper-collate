@@ -46,9 +46,9 @@ public class CollationGraphRanking implements Iterable<Set<TextNode>>, Function<
           .stream()//
           .filter(TextEdge.class::isInstance)//
           .map(graph::getSource)//
-          .forEach(incomingTextEdge -> {
+          .forEach(incomingTextNode -> {
             int currentRank = rank.get();
-            Integer incomingRank = ranking.byNode.get(incomingTextEdge);
+            Integer incomingRank = ranking.byNode.get(incomingTextNode);
             if (incomingRank == null) {
               // node has an incoming node that hasn't been ranked yet, so node can't be ranked yet either.
               canRank.set(false);
