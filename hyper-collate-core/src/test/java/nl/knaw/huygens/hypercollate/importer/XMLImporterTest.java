@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.importer;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,11 @@ import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.model.Markup;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 import nl.knaw.huygens.hypercollate.tools.DotFactory;
+import nl.knaw.huygens.hypercollate.tools.TokenMerger;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.List;
@@ -34,6 +37,32 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class XMLImporterTest extends HyperCollateTest {
+
+  private static final Logger LOG = LoggerFactory.getLogger(XMLImporterTest.class);
+
+  @Test
+  public void testHoeLanger() {
+    XMLImporter importer = new XMLImporter();
+//    VariantWitnessGraph wg0 = importer.importXML("A", "<xml>kon den vorst <del>min en min</del><add>hoe langer hoe minder</add> bekoren.</xml>");
+//    VariantWitnessGraph wg0 = importer.importXML("A", "<xml><s><del>Dit kwam van een</del><del><add>Gevolg van een</add></del><add>De</add>te streng doorgedreven rationalisatie<add>had dit met zich meegebracht</add>.</s></xml>");
+//    VariantWitnessGraph wg0 = importer.importXML("A", "<xml><del>Dit kwam van een</del><del><add>Gevolg van een</add></del><add>De</add> te streng doorgedreven rationalisatie</xml>");
+    VariantWitnessGraph wg0 = importer.importXML("A", "<xml><del>Dit kwam van een</del><del><add>Gevolg van een</add></del><add>De</add></xml>");
+//    VariantWitnessGraph wg0 = importer.importXML("A", "<xml><del>Dit kwam van een</del><add><del>Gevolg van een</del><add>De</add></add> te streng doorgedreven rationalisatie</xml>");
+//    VariantWitnessGraph wg0 = importer.importXML("A", "<xml><subst><del>Dit kwam van een</del><del><add>Gevolg van een</add></del><add>De</add></subst> te streng doorgedreven rationalisatie</xml>");
+    visualize(wg0);
+  }
+
+  private void visualize(final VariantWitnessGraph vwg) {
+    String dot0s = new DotFactory(true).fromVariantWitnessGraphSimple(vwg);
+    LOG.info("unjoined simple:\n{}",dot0s);
+    String dot0c = new DotFactory(true).fromVariantWitnessGraphColored(vwg);
+    LOG.info("unjoined colored:\n{}",dot0c);
+    VariantWitnessGraph joined = TokenMerger.merge(vwg);
+    String dot1s = new DotFactory(true).fromVariantWitnessGraphSimple(joined);
+    LOG.info("joined simple:\n{}",dot1s);
+    String dot1c = new DotFactory(true).fromVariantWitnessGraphColored(joined);
+    LOG.info("joined colored:\n{}",dot1c);
+  }
 
   @Test
   public void testImportFromString() {
@@ -168,7 +197,6 @@ public class XMLImporterTest extends HyperCollateTest {
 
     verifyDotExport(wg0, expectedDot);
   }
-
 
   @Test
   public void testDelWithoutAddAtTheEnd() {

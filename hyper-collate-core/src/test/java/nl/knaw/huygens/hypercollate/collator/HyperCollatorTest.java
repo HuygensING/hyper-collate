@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.collator;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,45 @@ public class HyperCollatorTest extends HyperCollateTest {
   private static final Logger LOG = LoggerFactory.getLogger(HyperCollateTest.class);
 
   final HyperCollator hyperCollator = new HyperCollator();
+
+  @Test
+  public void test() {
+    XMLImporter importer = new XMLImporter();
+    VariantWitnessGraph wF = importer.importXML("F", "<s>doorheen de <del><add>stille</add></del><add>luistille</add> gangen</s>");
+    VariantWitnessGraph wQ = importer.importXML("Q", "<s>door<del>heen</del> de luistille gangen</s>");
+    String expected = "digraph CollationGraph{\n" +
+        "labelloc=b\n" +
+        "t000 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t001 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t002 [label=<F: doorheen&#9251;<br/>F: <i>/s</i>>]\n" +
+        "t003 [label=<F,Q: de&#9251;<br/>F,Q: <i>/s</i>>]\n" +
+        "t004 [label=<F: stille<br/>F: <i>/s/del/add</i>>]\n" +
+        "t005 [label=<F: luistille<br/>Q: luistille&#9251;<br/>F: <i>/s/add</i><br/>Q: <i>/s</i><br/>>]\n" +
+        "t006 [label=<F: &#9251;<br/>F: <i>/s</i>>]\n" +
+        "t007 [label=<F,Q: gangen<br/>F,Q: <i>/s</i>>]\n" +
+        "t008 [label=<Q: door<br/>Q: <i>/s</i>>]\n" +
+        "t009 [label=<Q: heen<br/>Q: <i>/s/del</i>>]\n" +
+        "t010 [label=<Q: &#9251;<br/>Q: <i>/s</i>>]\n" +
+        "t000->t002[label=\"F\"]\n" +
+        "t000->t008[label=\"Q\"]\n" +
+        "t002->t003[label=\"F\"]\n" +
+        "t003->t001[label=\"F\"]\n" +
+        "t003->t004[label=\"F\"]\n" +
+        "t003->t005[label=\"F,Q\"]\n" +
+        "t004->t006[label=\"F\"]\n" +
+        "t005->t006[label=\"F\"]\n" +
+        "t005->t007[label=\"Q\"]\n" +
+        "t006->t007[label=\"F\"]\n" +
+        "t007->t001[label=\"F,Q\"]\n" +
+        "t008->t009[label=\"Q\"]\n" +
+        "t008->t010[label=\"Q\"]\n" +
+        "t009->t010[label=\"Q\"]\n" +
+        "t010->t003[label=\"Q\"]\n" +
+        "}";
+    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
+    assertThat(collationGraph).isNotNull();
+    String table = CollationGraphVisualizer.toTableASCII(collationGraph, true);
+  }
 
   @Test
   public void testHierarchyWith3Witnesses() {

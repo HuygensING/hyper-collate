@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypergraph.core;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,10 @@ package nl.knaw.huygens.hypergraph.core;
  * @author: Ronald Haentjens Dekker
  */
 
-import static java.util.Arrays.asList;
-
 import java.util.*;
 import java.util.function.Function;
+
+import static java.util.Arrays.asList;
 
 public class Hypergraph<N, H> {
   private final GraphType graphType;

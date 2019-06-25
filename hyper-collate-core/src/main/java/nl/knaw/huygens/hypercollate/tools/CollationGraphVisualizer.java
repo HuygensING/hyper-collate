@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.tools;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,10 +132,11 @@ public class CollationGraphVisualizer {
 
   private static String determineLayerName(String parentXPath) {
     String layerName = "";
-    if (parentXPath.endsWith("/add")) {
+    if (parentXPath.endsWith("/del/add")) {
+      layerName = "add+del";
+    } else if (parentXPath.endsWith("/add")) {
       layerName = "add";
-    }
-    if (parentXPath.endsWith("/del")) {
+    } else if (parentXPath.endsWith("/del")) {
       layerName = "del";
     }
     return layerName;
@@ -186,6 +187,8 @@ public class CollationGraphVisualizer {
       content = "[+] " + content;
     } else if (lName.equals("del")) {
       content = "[-] " + content;
+    } else if (lName.equals("add+del")) {
+      content = "[+][-] " + content;
     }
     return content;
   }
