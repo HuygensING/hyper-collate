@@ -83,59 +83,15 @@ public class HyperCollatorTest extends HyperCollateTest {
         "}";
 
     CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
-
-//    // test matching tokens
-//    TextNodeSketch n1 = textNodeSketch()
-//        .withWitnessSegmentSketch("F", "Hoe zoet moet nochtans zijn dit ")
-//        .withWitnessSegmentSketch("Q", "Hoe zoet moet nochtans zijn dit ")
-//        .withWitnessSegmentSketch("Z", "Hoe zoet moet nochtans zijn dit ");
-//    TextNodeSketch n2 = textNodeSketch()
-//        .withWitnessSegmentSketch("F", " ")
-//        .withWitnessSegmentSketch("Q", " ");
-//    TextNodeSketch n3 = textNodeSketch()
-//        .withWitnessSegmentSketch("F", "een ")
-//        .withWitnessSegmentSketch("Q", "een ")
-//        .withWitnessSegmentSketch("Z", "een ");
-//    TextNodeSketch n4 = textNodeSketch()
-//        .withWitnessSegmentSketch("F", "vrouw")
-//        .withWitnessSegmentSketch("Q", "vrouw ")
-//        .withWitnessSegmentSketch("Z", "vrouw ");
-//    TextNodeSketch n5 = textNodeSketch()
-//        .withWitnessSegmentSketch("F", "ongewisheid ")
-//        .withWitnessSegmentSketch("Z", "ongewisheid ");
-//    TextNodeSketch n6 = textNodeSketch()
-//        .withWitnessSegmentSketch("F", "liefelijke toestemming")
-//        .withWitnessSegmentSketch("Z", "liefelijke toestemming")
-//        .withWitnessSegmentSketch("Q", "liefelijke toestemming");
-//    TextNodeSketch trachten_naar = textNodeSketch()
-//        .withWitnessSegmentSketch("F", "trachten naar")
-//        .withWitnessSegmentSketch("Q", "trachten naar")
-//        .withWitnessSegmentSketch("Z", "trachten naar ");
-//    TextNodeSketch werven_om = textNodeSketch()
-//        .withWitnessSegmentSketch("F", "werven om")
-//        .withWitnessSegmentSketch("Q", "werven om");
-//
-//    assertThat(collationGraph).containsTextNodesMatching(n1, n2, n3, n4, n5, n6, trachten_naar, werven_om);
-//
-//    assertThat(collationGraph).containsMarkupNodesMatching(//
-//        markupNodeSketch("F", "text"),//
-//        markupNodeSketch("Q", "text"),//
-//        markupNodeSketch("Z", "text")
-//    );
-//
-//    MarkupNodeSketch f_del = markupNodeSketch("F", "del");
-//    MarkupNodeSketch q_add = markupNodeSketch("Q", "add");
-//    assertThat(collationGraph).hasTextNodeMatching(werven_om).withMarkupNodesMatching(f_del);
-//    assertThat(collationGraph).hasMarkupNodeMatching(q_add).withTextNodesMatching(trachten_naar);
   }
 
   @Test
   public void testAppRdg() {
     XMLImporter importer = new XMLImporter();
     VariantWitnessGraph wF = importer.importXML("W1", "<s>One must have lived longer with <app>" +
-        "<rdg varSeq=\"1\">this</rdg>" +
-        "<rdg varSeq=\"2\">such a</rdg>" +
-        "<rdg varSeq=\"3\">a</rdg>" +
+        "<rdg>this</rdg>" +
+        "<rdg>such a</rdg>" +
+        "<rdg>a</rdg>" +
         "</app> system, to appreciate its advantages.</s>");
     VariantWitnessGraph wQ = importer.importXML("W2", "<s>One must have lived longer with this system, to appreciate its advantages.</s>");
 
@@ -162,50 +118,6 @@ public class HyperCollatorTest extends HyperCollateTest {
         "}";
 
     CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
-
-//    // test matching tokens
-//    TextNodeSketch n1 = textNodeSketch()
-//        .withWitnessSegmentSketch("F", "Hoe zoet moet nochtans zijn dit ")
-//        .withWitnessSegmentSketch("Q", "Hoe zoet moet nochtans zijn dit ")
-//        .withWitnessSegmentSketch("Z", "Hoe zoet moet nochtans zijn dit ");
-//    TextNodeSketch n2 = textNodeSketch()
-//        .withWitnessSegmentSketch("F", " ")
-//        .withWitnessSegmentSketch("Q", " ");
-//    TextNodeSketch n3 = textNodeSketch()
-//        .withWitnessSegmentSketch("F", "een ")
-//        .withWitnessSegmentSketch("Q", "een ")
-//        .withWitnessSegmentSketch("Z", "een ");
-//    TextNodeSketch n4 = textNodeSketch()
-//        .withWitnessSegmentSketch("F", "vrouw")
-//        .withWitnessSegmentSketch("Q", "vrouw ")
-//        .withWitnessSegmentSketch("Z", "vrouw ");
-//    TextNodeSketch n5 = textNodeSketch()
-//        .withWitnessSegmentSketch("F", "ongewisheid ")
-//        .withWitnessSegmentSketch("Z", "ongewisheid ");
-//    TextNodeSketch n6 = textNodeSketch()
-//        .withWitnessSegmentSketch("F", "liefelijke toestemming")
-//        .withWitnessSegmentSketch("Z", "liefelijke toestemming")
-//        .withWitnessSegmentSketch("Q", "liefelijke toestemming");
-//    TextNodeSketch trachten_naar = textNodeSketch()
-//        .withWitnessSegmentSketch("F", "trachten naar")
-//        .withWitnessSegmentSketch("Q", "trachten naar")
-//        .withWitnessSegmentSketch("Z", "trachten naar ");
-//    TextNodeSketch werven_om = textNodeSketch()
-//        .withWitnessSegmentSketch("F", "werven om")
-//        .withWitnessSegmentSketch("Q", "werven om");
-//
-//    assertThat(collationGraph).containsTextNodesMatching(n1, n2, n3, n4, n5, n6, trachten_naar, werven_om);
-//
-//    assertThat(collationGraph).containsMarkupNodesMatching(//
-//        markupNodeSketch("F", "text"),//
-//        markupNodeSketch("Q", "text"),//
-//        markupNodeSketch("Z", "text")
-//    );
-//
-//    MarkupNodeSketch f_del = markupNodeSketch("F", "del");
-//    MarkupNodeSketch q_add = markupNodeSketch("Q", "add");
-//    assertThat(collationGraph).hasTextNodeMatching(werven_om).withMarkupNodesMatching(f_del);
-//    assertThat(collationGraph).hasMarkupNodeMatching(q_add).withTextNodesMatching(trachten_naar);
   }
 
   @Test

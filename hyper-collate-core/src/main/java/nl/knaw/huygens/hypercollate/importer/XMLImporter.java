@@ -239,6 +239,7 @@ public class XMLImporter {
     private final Deque<Boolean> ignoreRdgStack = new LinkedList<>();
     private final Deque<Boolean> afterAppStack = new LinkedList<>();
     private final Deque<List<TokenVertex>> unconnectedRdgVerticesStack = new LinkedList<>();
+    private AtomicInteger rdgCounter = new AtomicInteger(1);
 
     Context(VariantWitnessGraph graph, Function<String, String> normalizer, SimpleWitness witness) {
       this.graph = graph;
@@ -257,6 +258,9 @@ public class XMLImporter {
     }
 
     void openMarkup(Markup markup) {
+      if (markup.getTagName().equals("app")) {
+        rdgCounter.set(1);
+      }
       if (ignoreRdgStack.peek()) {
         return;
       }
@@ -286,6 +290,9 @@ public class XMLImporter {
 
       } else if (isRdg(markup)) { // rdg
         rdg = markup.getAttributeMap().get("varSeq");
+        if (rdg == null) {
+          rdg = String.valueOf(rdgCounter.getAndIncrement());
+        }
         if (isLitRdg(markup)) {
           ignoreRdgStack.push(true);
 
