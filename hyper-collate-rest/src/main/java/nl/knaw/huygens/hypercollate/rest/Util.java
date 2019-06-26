@@ -19,6 +19,7 @@ package nl.knaw.huygens.hypercollate.rest;
  * limitations under the License.
  * #L%
  */
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
@@ -31,7 +32,7 @@ public class Util {
   private static final java.util.logging.Logger LOG = java.util.logging.Logger.getLogger(Util.class.getName());
 
   public static String detectDotPath() {
-    for (String detectionCommand : new String[]{"which dot", "where dot.exe"}) {
+    for (String detectionCommand : new String[]{"where dot.exe", "which dot"}) {
       try {
         final Process process = Runtime.getRuntime().exec(detectionCommand);
         try (BufferedReader processReader = new BufferedReader(new InputStreamReader(process.getInputStream(), Charset.defaultCharset()))) {
