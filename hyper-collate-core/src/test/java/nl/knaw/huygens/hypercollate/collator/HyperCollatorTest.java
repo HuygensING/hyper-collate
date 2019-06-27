@@ -9,9 +9,9 @@ package nl.knaw.huygens.hypercollate.collator;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,6 +31,7 @@ import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Sets;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,29 @@ public class HyperCollatorTest extends HyperCollateTest {
   private static final Logger LOG = LoggerFactory.getLogger(HyperCollateTest.class);
 
   final HyperCollator hyperCollator = new HyperCollator();
+
+  //  @Test
+//  public void test() {
+//    XMLImporter importer = new XMLImporter();
+//    VariantWitnessGraph wF = importer.importXML("W1", "");
+//    VariantWitnessGraph wQ = importer.importXML("W2", "");
+//
+//    String expected = "";
+//
+//    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
+//  }
+//
+  @Ignore
+  @Test
+  public void testSlowCollate() {
+    XMLImporter importer = new XMLImporter();
+    VariantWitnessGraph wF = importer.importXML("W1", "<xml>Ik had een buurvrouw, een paar deuren verder, en <del>ze</del><add>het</add> was zo'n type dat naar het muse<del>im</del>um ging en cappuc<add>c</add>i<del>o</del>no's dronk<del>l</del>, dus ik<del>i k</del>kon er weinig mee, en zij kon weinig m<del>netr</del>et mij<del>,</del><add>;</add> we <del>lk</del> knikten alleen naar elkaar, en als ik Rock<del>u</del>y bij me had, <del>knikte</del> maakte ze van het knikken iets dat nog wat sneller a<del >g</del>fgehandeld moest<del>r</del> worden dan anders.</xml>");
+    VariantWitnessGraph wQ = importer.importXML("W2", "<xml><del>Ik had een buurvrouw,</del><add>Die buurvrouw woonde</add> een paar deuren verder, en het was zo'n type <del>dat naar het museum ging en cappuccino's dronk, dus ik kon er</del> <add>waar ik</add> weinig mee <add>ko<del>m</del>n</add>, en zij kon weinig met mij; we knikten alleen naar elkaar, en als ik Rocky bij me had, maakte ze van het knikken iets dat nog wat sneller afgehandeld moest worden dan anders.</xml>");
+
+    String expected = "";
+
+    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
+  }
 
   @Test
   public void testAppRdgWithAddDel() {

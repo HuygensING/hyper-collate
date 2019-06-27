@@ -121,7 +121,7 @@ public class QuantumCollatedMatchList {
 
   @Override
   public String toString() {
-    return "(" + chosenMatches + " | " + potentialMatches + ")";
+    return "(c" + chosenMatches.size() + " | p" + potentialMatches.size() + ")";
   }
 
   public List<CollatedMatch> getPotentialMatches() {
