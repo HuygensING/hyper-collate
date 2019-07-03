@@ -34,7 +34,7 @@ NOTE: make sure you organise your folders in a structured way. For example: crea
     ```
     in the output, which lists the URL of the server. Open this URL (starting with `http://`) in your browser.
 
-5. That’s it! HyperCollate is running on your computer. You can now start [using HyperCollate](##How to use HyperCollate).
+5. That’s it! HyperCollate is running on your computer. You can now start [using HyperCollate](##how-to-use-hypercollate).
 
 #### Optional: Use a custom port
 In principle, the server of HyperCollate uses a random port that may differ each time depending on which port is available. If you prefer to have the server use the same port each time, you can set it up as follows:  
@@ -90,7 +90,7 @@ The installation of HyperCollate also comes with a folder `/collations` in which
 
 Of course you are welcome to create your own collations. You can save them in the `/collations` folder or in a folder you create for the occasion. In that case, make sure that when you use HyperCollate, you provide a path pointing to that folder.
 
-In the Swagger Interface (see [below](###1. Graphical User Interface (GUI))) you can get an overview of all collations with the command `GET/collations`. You can also see them by navigating to `http://localhost:<port>/collations` (replace the `<port>` with the port HyperCollate is running on).
+In the Swagger Interface (see [below](###1.-graphical-user-interface-(GUI))) you can get an overview of all collations with the command `GET/collations`. You can also see them by navigating to `http://localhost:<port>/collations` (replace the `<port>` with the port HyperCollate is running on).
 
 
 ### 1. Graphical User Interface (GUI)
