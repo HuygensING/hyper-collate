@@ -9,7 +9,8 @@ When you install and run HyperCollate, you create a work environment in your bro
 
 HyperCollate is easy to install and to use. Below we give you three options to install it: downloading a  JAR or a WAR file, or building it yourself.
 
-Briefly put, a JAR file requires only Java 8 (or higher) to run; for the WAR file you need a web application server like Apache Tomcat. If you don’t know what to choose, we recommend you install the prebuild JAR (option 1).
+Briefly put, a JAR file requires only Java 8 (or higher), including the Java Development Kit (JDK) to run. You can download the package on the [Java website](https://www.oracle.com/technetwork/java/javase/downloads/index.html). 
+For the WAR file you need a web application server like Apache Tomcat. If you don’t know what to choose, we recommend you install the prebuild JAR (option 1).
 
 Because you install HyperCollate via the command-line, you need a little basic knowledge of how the command-line works. If you are unfamiliar with the command line, there are some good tutorials [here](http://nbviewer.jupyter.org/github/DiXiT-eu/collatex-tutorial/blob/master/unit1/Command_line.ipynb) and [here](https://pittsburgh-neh-institute.github.io/Institute-Materials-2017/schedule/week_1/command_resources.html). 
 
@@ -28,6 +29,8 @@ Because you install HyperCollate via the command-line, you need a little basic k
     *************************************************************
     ```
     in the output, which lists the URL of the server. Open this URL (starting with `http://`) in your browser.
+
+5. That’s it! HyperCollate is running on your computer. You can now start [using HyperCollate](##How to use HyperCollate).
 
 #### Optional: Use a custom port
 In principle, the server of HyperCollate uses a random port that may differ each time depending on which port is available. If you prefer to have the server use the same port each time, you can set it up as follows:  
@@ -57,7 +60,7 @@ If you want to find out more about which custom port to use, you’ll find some 
 
 The WAR can be found in `hyper-collate-war/target`, an example config file in `hyper-collate-war/hypercollate.xml`
 
-Follow steps 3 - 5 from Option 1.
+Follow steps 3 - 5 from Option 1. 
 
 
 ## How to use HyperCollate
@@ -123,7 +126,7 @@ In this table the `<del>`eted text is indicated with `[-]`, and the `<add>`ed te
 
 #### Get a .dot visualization of the collation graph:
 `GET /collations/{name}.dot`   
-Click on `Try it out`, enter the name of your collation and click on `Exectute`.  
+Click on `Try it out`, enter the name of your collation and click on `Execute`.  
 This should return response code `200 - OK`  
 The response body has the .dot representation of the collation graph.  
 This should return the response body:
@@ -181,7 +184,7 @@ This should return an svg image like this:
    
 ![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A-joined.svg?sanitize=true)
       
-### Command Line
+### 2.Command Line
 You can also interact with the HyperCollate server via the command line. Interaction can be done in the computer language of you choice or with [Curl](http://www.redmine.org/projects/redmine/wiki/Rest_api_with_curl), a programming language often used to interact with RESTful APIs. 
 
 Below, we’ll give examples using `curl`.
@@ -278,3 +281,11 @@ This should return an svg image similar to this:
 
 ### 3. Swagger file via WAR
 If you chose the WAR option above, you probably know what to do. The war just exposes a swagger file without a UI, in the `/swagger.json` or `/swagger.yaml` endpoints.
+
+### Terminating and restarting the server
+
+If you want to stop the HyperCollate program, you can simply close the browser window in which the Swagger is running and stop the terminal processes by typing `ctrl + d` on your command line. 
+
+The next time you want to start HyperCollate, you don’t have to follow all installation steps again. Simply navigate on your command line to the folder with the `hyper-collate-server.jar` file and run the command `java -jar hyper-collate-server.jar server`. HyperCollate is ready for use again!
+
+
