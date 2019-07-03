@@ -1,18 +1,22 @@
 # HyperCollate
 
 ## General
-HyperCollate is a prototype collation engine that is able to handle *intradocumentary* variation (i.e. variation _within_ one document), in addition to finding the differences _between_ witnesses. This advanced form of collation is possible because HyperCollate looks not only at the text of a document, but also at its markup.
+HyperCollate is a prototype collation engine that is able to handle *in-text* variation (i.e. textual variation _within_ one witness) if it’s marked with the TEI/XML elements `<del>`, `<add>`, `<subst>`, `<app>` or `<rdg>`. HyperCollate considers these elements as an interruption in the linear flow of the text: when its parser encounters a `<del>`, `<add>`, `<subst>`, `<app>` or `<rdg>` element, the stream of text tokens splits up into two or more branches. During the alignment process, HyperCollate looks at each branch and selects the one with the most matches. This means you do not have to linearize or “flatten” your TEI/XML transcription: the multiple layers within an individual witness can be preserved.
 
 When you install and run HyperCollate, you create a work environment in your browser. This work environment (or “server”) is a local environment, which means that only you can access it. In other words: you have a private environment to experiment with HyperCollate at liberty.
 
 ## How to install HyperCollate
 
-HyperCollate is easy to install and to use. Below we give you three options to install it: downloading a  JAR or a WAR file, or building it yourself.
+**NOTE: these instructions are optimised for users with a Mac OS.**
+
+HyperCollate is easy to install and to use. Below we give you three options to install it: downloading a JAR or a WAR file, or building it yourself.
 
 Briefly put, a JAR file requires only Java 8 (or higher), including the Java Development Kit (JDK) to run. You can download the package on the [Java website](https://www.oracle.com/technetwork/java/javase/downloads/index.html). 
 For the WAR file you need a web application server like Apache Tomcat. If you don’t know what to choose, we recommend you install the prebuild JAR (option 1).
 
 Because you install HyperCollate via the command-line, you need a little basic knowledge of how the command-line works. If you are unfamiliar with the command line, there are some good tutorials [here](http://nbviewer.jupyter.org/github/DiXiT-eu/collatex-tutorial/blob/master/unit1/Command_line.ipynb) and [here](https://pittsburgh-neh-institute.github.io/Institute-Materials-2017/schedule/week_1/command_resources.html). 
+
+NOTE: make sure you organise your folders in a structured way. For example: create a separate folder in your Home-drectory that you call `hypercollate`. You can read up on “file system hygiene” [here](https://nbviewer.jupyter.org/github/DiXiT-eu/collatex-tutorial/blob/master/unit1/Command_line.ipynb#File-naming-conventions).
 
 
 ### 1. Download the prebuilt JAR (recommended)
@@ -81,6 +85,13 @@ In both cases, though, you interact with the server through REST calls. For Hype
 - GET (getting)
 - DELETE (removing)
 
+### Collations folder
+The installation of HyperCollate also comes with a folder `/collations` in which we provide several small XML files that you can use to test HyperCollate, such as `/w1-rain.xml`. 
+
+Of course you are welcome to create your own collations. You can save them in the `/collations` folder or in a folder you create for the occasion. In that case, make sure that when you use HyperCollate, you provide a path pointing to that folder.
+
+In the Swagger Interface (see [below](###1. Graphical User Interface (GUI))) you can get an overview of all collations with the command `GET/collations`. You can also see them by navigating to `http://localhost:<port>/collations` (replace the `<port>` with the port HyperCollate is running on).
+
 
 ### 1. Graphical User Interface (GUI)
 
@@ -101,8 +112,9 @@ Below we outline what steps you take to create a new collation with HyperCollate
 #### Add witnesses to the collation:
   `PUT /collations/{name}/witnesses/{sigil}`  
   Click on `Try it out`, enter your witness data in the “Witness Source” field, and click on `Execute`.  
-  This should return response code `204 - no content`.  
-  Repeat this step for the other witness(es).
+  This should return response code `204`. This means that the server has successfully fulfilled the request and that there is no additional content to send in the response body. Your witness is now on the server. You can add more witnesses by simply overwriting the first witness in the Witness Source field.
+  
+You can visualise an individual witness as a variant graph via the `GET/collations/{name}/witnesses{sigil}.dot` in the Swagger interface.
   
 #### Get an ASCII table visualization of the collation graph:  
 
@@ -125,6 +137,7 @@ In this table the `<del>`eted text is indicated with `[-]`, and the `<add>`ed te
     
 
 #### Get a .dot visualization of the collation graph:
+The .dot file outputs the collation as a variant graph.
 `GET /collations/{name}.dot`   
 Click on `Try it out`, enter the name of your collation and click on `Execute`.  
 This should return response code `200 - OK`  
@@ -161,7 +174,7 @@ t009->t004[label=“B”]
   
 Which, when rendered as png using the dot tool from [Graphviz](https://www.graphviz.org/) or using [GraphvizOnline](https://dreampuf.github.io/GraphvizOnline/), gives:
   
-![](https://github.com/HuygensING/hyper-collate/blob/master/doc/testcollation.png?raw=true)
+![](https://github.com/bleekere/hyper-collate/blob/master/doc/testcollation.png?raw=true)
   
 In this representation, significant whitespace in the witnesses is represented as `␣`. You can turn this off by adding `?emphasize-whitespace=false` to the url. 
 
@@ -176,18 +189,20 @@ If you have GraphViz' `dot` executable installed, you can get a .png or .svg ima
      
 Click on `Try it out`, enter the name of your collation and the sigil of the witness, and click on `Exectute`. This should return response code `200 - OK`. The response body has the .dot , .png or .svg representation of the witness. This should return an svg image like this:
     
-![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A.svg?sanitize=true)
+![](https://github.com/bleekere/hyper-collate/blob/master/doc/rain-a.png?raw=true)
    
 To group the text nodes per markup combination, add `?join-tokens=true` to the url.
    
 This should return an svg image like this:
    
-![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A-joined.svg?sanitize=true)
+![](https://github.com/bleekere/hyper-collate/blob/master/doc/rain-a-joined.png?raw=true)
       
 ### 2.Command Line
 You can also interact with the HyperCollate server via the command line. Interaction can be done in the computer language of you choice or with [Curl](http://www.redmine.org/projects/redmine/wiki/Rest_api_with_curl), a programming language often used to interact with RESTful APIs. 
 
 Below, we’ll give examples using `curl`.
+
+IMPORTANT: Make sure to run the `curl` commands in a _new_ terminal window; not in the same window as where HyperCollate is running. We recommend you simply open a new tab in your terminal (with `cmd + t`, so that you are in the right directory.
 
 #### Create a new Collation with a given name: 
 
@@ -215,7 +230,8 @@ This should return the response body:
 In this table the `<del>`eted text is indicated with `[-]`, and the `<add>`ed text with `[+]`. Significant whitespace in the witnesses is indicated with `_`
     
 
-#### Get a .dot visualization of the collation graph:  
+#### Get a .dot visualization of the collation graph:
+The .dot file outputs the collation as a variant graph.  
 
 `curl -X GET --header 'Accept: text/plain' 'http://localhost:2018/collations/testcollation.dot'`
       
@@ -269,7 +285,7 @@ If you have GraphViz' `dot` executable installed, you can get a .png or .svg ima
 `curl -X GET --header 'Accept: image/svg+xml' 'http://localhost:2018/collations/testcollation/witnesses/A.svg'`
       
 This should return an svg image similar to this:
-![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-a.png?sanitize=true)
+![](https://github.com/bleekere/hyper-collate/blob/master/doc/rain-a.png?raw=true)
    
 To group the text nodes per markup combination, add `?join-tokens=true` to the url.
 
@@ -277,7 +293,7 @@ To group the text nodes per markup combination, add `?join-tokens=true` to the u
    
 This should return an svg image similar to this:
    
-![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-a-joined.png?sanitize=true)
+![](https://github.com/bleekere/hyper-collate/blob/master/doc/rain-a-joined.png?raw=true)
 
 ### 3. Swagger file via WAR
 If you chose the WAR option above, you probably know what to do. The war just exposes a swagger file without a UI, in the `/swagger.json` or `/swagger.yaml` endpoints.
