@@ -90,7 +90,7 @@ The installation of HyperCollate also comes with a folder `/collations` in which
 
 Of course you are welcome to create your own collations. You can save them in the `/collations` folder or in a folder you create for the occasion. In that case, make sure that when you use HyperCollate, you provide a path pointing to that folder.
 
-In the Swagger Interface (see [below](###1.-graphical-user-interface-(GUI))) you can get an overview of all collations with the command `GET/collations`. You can also see them by navigating to `http://localhost:<port>/collations` (replace the `<port>` with the port HyperCollate is running on).
+In the Swagger Interface (see [below](#1-graphical-user-interface-(gui))) you can get an overview of all collations with the command `GET/collations`. You can also see them by navigating to `http://localhost:<port>/collations` (replace the `<port>` with the port HyperCollate is running on).
 
 
 ### 1. Graphical User Interface (GUI)
