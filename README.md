@@ -269,7 +269,7 @@ If you have GraphViz' `dot` executable installed, you can get a .png or .svg ima
 `curl -X GET --header 'Accept: image/svg+xml' 'http://localhost:2018/collations/testcollation/witnesses/A.svg'`
       
 This should return an svg image similar to this:
-![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A.svg?sanitize=true)
+![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-a.png?sanitize=true)
    
 To group the text nodes per markup combination, add `?join-tokens=true` to the url.
 
@@ -277,7 +277,7 @@ To group the text nodes per markup combination, add `?join-tokens=true` to the u
    
 This should return an svg image similar to this:
    
-![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-A-joined.svg?sanitize=true)
+![](https://github.com/HuygensING/hyper-collate/blob/master/doc/rain-a-joined.png?sanitize=true)
 
 ### 3. Swagger file via WAR
 If you chose the WAR option above, you probably know what to do. The war just exposes a swagger file without a UI, in the `/swagger.json` or `/swagger.yaml` endpoints.
