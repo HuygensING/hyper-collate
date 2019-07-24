@@ -11,7 +11,7 @@ When you install and run HyperCollate, you create a work environment in your bro
 
 HyperCollate is easy to install and to use. Below we give you three options to install it: downloading a JAR or a WAR file, or building it yourself.
 
-Briefly put, a JAR file requires only Java 8 (or higher), including the Java Development Kit (JDK) to run. You can download the package on the [Java website](https://www.oracle.com/technetwork/java/javase/downloads/index.html). 
+Briefly put, a JAR file requires only Java 8 (or higher), including the Java Development Kit (JDK) to run. You can download the package on the [Oracle website](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html). 
 For the WAR file you need a web application server like Apache Tomcat. If you don’t know what to choose, we recommend you install the prebuild JAR (option 1).
 
 Because you install HyperCollate via the command-line, you need a little basic knowledge of how the command-line works. If you are unfamiliar with the command line, there are some good tutorials [here](http://nbviewer.jupyter.org/github/DiXiT-eu/collatex-tutorial/blob/master/unit1/Command_line.ipynb) and [here](https://pittsburgh-neh-institute.github.io/Institute-Materials-2017/schedule/week_1/command_resources.html). 
