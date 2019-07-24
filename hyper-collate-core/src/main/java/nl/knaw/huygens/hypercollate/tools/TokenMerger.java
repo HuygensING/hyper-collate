@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.tools;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,6 +79,7 @@ public class TokenMerger {
         .setNormalizedContent(originalToken.getNormalizedContent())//
         .setParentXPath(originalToken.getParentXPath())//
         .setWitness((SimpleWitness) originalToken.getWitness())//
+        .setRdg(originalToken.getRdg())//
         .setIndexNumber(tokenNumber);
 
     SimpleTokenVertex mergedVertex = new SimpleTokenVertex(mergedToken)//

@@ -187,18 +187,18 @@ If you have GraphViz' `dot` executable installed, you can get a .png or .svg ima
 `GET /collations/{name}/witnesses/{sigil}.png`   
 `GET /collations/{name}/witnesses/{sigil}.svg`
      
-Click on `Try it out`, enter the name of your collation and the sigil of the witness, and click on `Exectute`. This should return response code `200 - OK`. The response body has the .dot , .png or .svg representation of the witness. This should return an svg image like this:
+Click on `Try it out`, enter the name of your collation and the sigil of the witness, and click on `Exectute`. This should return response code `200 - OK`. The response body has the .dot , .png or .svg representation of the witness. This should return an image like this:
     
 ![](https://github.com/bleekere/hyper-collate/blob/master/doc/rain-a.png?raw=true)
    
 To group the text nodes per markup combination, add `?join-tokens=true` to the url.
    
-This should return an svg image like this:
+This should return an image like this:
    
 ![](https://github.com/bleekere/hyper-collate/blob/master/doc/rain-a-joined.png?raw=true)
       
 ### 2.Command Line
-You can also interact with the HyperCollate server via the command line. Interaction can be done in the computer language of you choice or with [Curl](http://www.redmine.org/projects/redmine/wiki/Rest_api_with_curl), a programming language often used to interact with RESTful APIs. 
+You can also interact with the HyperCollate server via the command line. Interaction can be done in the computer language of your choice or with [Curl](http://www.redmine.org/projects/redmine/wiki/Rest_api_with_curl), a command line tool often used to interact with RESTful APIs. 
 
 Below, we’ll give examples using `curl`.
 
@@ -284,14 +284,14 @@ If you have GraphViz' `dot` executable installed, you can get a .png or .svg ima
 
 `curl -X GET --header 'Accept: image/svg+xml' 'http://localhost:2018/collations/testcollation/witnesses/A.svg'`
       
-This should return an svg image similar to this:
+This should return an image similar to this:
 ![](https://github.com/bleekere/hyper-collate/blob/master/doc/rain-a.png?raw=true)
    
 To group the text nodes per markup combination, add `?join-tokens=true` to the url.
 
 `curl -X GET --header 'Accept: image/svg+xml' 'http://localhost:2018/collations/testcollation/witnesses/A.svg?join-tokens=true'`
    
-This should return an svg image similar to this:
+This should return an image similar to this:
    
 ![](https://github.com/bleekere/hyper-collate/blob/master/doc/rain-a-joined.png?raw=true)
 

@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.tools;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,9 +46,9 @@ public class CollationGraphRanking implements Iterable<Set<TextNode>>, Function<
           .stream()//
           .filter(TextEdge.class::isInstance)//
           .map(graph::getSource)//
-          .forEach(incomingTextEdge -> {
+          .forEach(incomingTextNode -> {
             int currentRank = rank.get();
-            Integer incomingRank = ranking.byNode.get(incomingTextEdge);
+            Integer incomingRank = ranking.byNode.get(incomingTextNode);
             if (incomingRank == null) {
               // node has an incoming node that hasn't been ranked yet, so node can't be ranked yet either.
               canRank.set(false);

@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.importer;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,54 +88,54 @@ public class XMLImporter {
       while (reader.hasNext()) {
         XMLEvent event = reader.nextEvent();
         switch (event.getEventType()) {
-        case XMLStreamConstants.START_DOCUMENT:
-          handleStartDocument(event, context);
-          break;
-        case XMLStreamConstants.START_ELEMENT:
-          handleStartElement(event.asStartElement(), context);
-          break;
-        case XMLStreamConstants.CHARACTERS:
-          handleCharacters(event.asCharacters(), context);
-          break;
-        case XMLStreamConstants.END_ELEMENT:
-          handleEndElement(event.asEndElement(), context);
-          break;
-        case XMLStreamConstants.END_DOCUMENT:
-          handleEndDocument(event, context);
-          break;
-        case XMLStreamConstants.PROCESSING_INSTRUCTION:
-          handleProcessingInstruction(event, context);
-          break;
-        case XMLStreamConstants.COMMENT:
-          handleComment(event, context);
-          break;
-        case XMLStreamConstants.SPACE:
-          handleSpace(event, context);
-          break;
-        case XMLStreamConstants.ENTITY_REFERENCE:
-          handleEntityReference(event, context);
-          break;
-        case XMLStreamConstants.ATTRIBUTE:
-          handleAttribute(event, context);
-          break;
-        case XMLStreamConstants.DTD:
-          handleDTD(event, context);
-          break;
-        case XMLStreamConstants.CDATA:
-          handleCData(event, context);
-          break;
-        case XMLStreamConstants.NAMESPACE:
-          handleNameSpace(event, context);
-          break;
-        case XMLStreamConstants.NOTATION_DECLARATION:
-          handleNotationDeclaration(event, context);
-          break;
-        case XMLStreamConstants.ENTITY_DECLARATION:
-          handleEntityDeclaration(event, context);
-          break;
+          case XMLStreamConstants.START_DOCUMENT:
+            handleStartDocument(event, context);
+            break;
+          case XMLStreamConstants.START_ELEMENT:
+            handleStartElement(event.asStartElement(), context);
+            break;
+          case XMLStreamConstants.CHARACTERS:
+            handleCharacters(event.asCharacters(), context);
+            break;
+          case XMLStreamConstants.END_ELEMENT:
+            handleEndElement(event.asEndElement(), context);
+            break;
+          case XMLStreamConstants.END_DOCUMENT:
+            handleEndDocument(event, context);
+            break;
+          case XMLStreamConstants.PROCESSING_INSTRUCTION:
+            handleProcessingInstruction(event, context);
+            break;
+          case XMLStreamConstants.COMMENT:
+            handleComment(event, context);
+            break;
+          case XMLStreamConstants.SPACE:
+            handleSpace(event, context);
+            break;
+          case XMLStreamConstants.ENTITY_REFERENCE:
+            handleEntityReference(event, context);
+            break;
+          case XMLStreamConstants.ATTRIBUTE:
+            handleAttribute(event, context);
+            break;
+          case XMLStreamConstants.DTD:
+            handleDTD(event, context);
+            break;
+          case XMLStreamConstants.CDATA:
+            handleCData(event, context);
+            break;
+          case XMLStreamConstants.NAMESPACE:
+            handleNameSpace(event, context);
+            break;
+          case XMLStreamConstants.NOTATION_DECLARATION:
+            handleNotationDeclaration(event, context);
+            break;
+          case XMLStreamConstants.ENTITY_DECLARATION:
+            handleEntityDeclaration(event, context);
+            break;
 
-        default:
-          break;
+          default:
+            break;
         }
 
       }
@@ -229,6 +229,7 @@ public class XMLImporter {
     private final Deque<TokenVertex> unconnectedVertices = new LinkedList<>(); // the last tokenvertex in an <add> which hasn't been linked to the tokenvertex after the </del> yet
     private final Function<String, String> normalizer;
     private final SimpleWitness witness;
+    private String rdg = "";
     private String parentXPath;
     private Boolean afterDel = false;
     private final AtomicInteger branchCounter = new AtomicInteger(0);
@@ -238,6 +239,7 @@ public class XMLImporter {
     private final Deque<Boolean> ignoreRdgStack = new LinkedList<>();
     private final Deque<Boolean> afterAppStack = new LinkedList<>();
     private final Deque<List<TokenVertex>> unconnectedRdgVerticesStack = new LinkedList<>();
+    private AtomicInteger rdgCounter = new AtomicInteger(1);
 
     Context(VariantWitnessGraph graph, Function<String, String> normalizer, SimpleWitness witness) {
       this.graph = graph;
@@ -256,6 +258,9 @@ public class XMLImporter {
     }
 
     void openMarkup(Markup markup) {
+      if (markup.getTagName().equals("app")) {
+        rdgCounter.set(1);
+      }
       if (ignoreRdgStack.peek()) {
         return;
       }
@@ -284,6 +289,10 @@ public class XMLImporter {
         unconnectedRdgVerticesStack.push(new ArrayList<>());
 
       } else if (isRdg(markup)) { // rdg
+        rdg = markup.getAttributeMap().get("varSeq");
+        if (rdg == null) {
+          rdg = String.valueOf(rdgCounter.getAndIncrement());
+        }
         if (isLitRdg(markup)) {
           ignoreRdgStack.push(true);
 
@@ -365,6 +374,7 @@ public class XMLImporter {
       MarkedUpToken token = new MarkedUpToken()//
           .setContent(content)//
           .setWitness(witness)//
+          .setRdg(rdg)//
           .setIndexNumber(tokenCounter++)//
           .setParentXPath(parentXPath)//
           .setNormalizedContent(normalizer.apply(content));

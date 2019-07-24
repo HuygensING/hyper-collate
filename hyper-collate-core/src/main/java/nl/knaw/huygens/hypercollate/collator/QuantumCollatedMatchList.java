@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.collator;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ package nl.knaw.huygens.hypercollate.collator;
  * #L%
  */
 
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.stream.Collectors.toList;
 import nl.knaw.huygens.hypercollate.model.TextNode;
 import nl.knaw.huygens.hypercollate.model.TokenVertex;
 
@@ -29,6 +27,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.stream.Collectors.toList;
 
 public class QuantumCollatedMatchList {
 

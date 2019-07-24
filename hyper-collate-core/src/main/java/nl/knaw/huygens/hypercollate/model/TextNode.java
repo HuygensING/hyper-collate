@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.model;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@ package nl.knaw.huygens.hypercollate.model;
  */
 
 import eu.interedition.collatex.Token;
-import static java.util.stream.Collectors.joining;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static java.util.stream.Collectors.joining;
 
 public class TextNode implements Node {
   final Map<String, Token> tokenMap = new HashMap<>();

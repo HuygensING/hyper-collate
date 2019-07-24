@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.importer;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,11 @@ import nl.knaw.huygens.hypercollate.HyperCollateTest;
 import nl.knaw.huygens.hypercollate.model.Markup;
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
 import nl.knaw.huygens.hypercollate.tools.DotFactory;
+import nl.knaw.huygens.hypercollate.tools.TokenMerger;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.List;
@@ -34,6 +37,32 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class XMLImporterTest extends HyperCollateTest {
+
+  private static final Logger LOG = LoggerFactory.getLogger(XMLImporterTest.class);
+
+  @Test
+  public void testHoeLanger() {
+    XMLImporter importer = new XMLImporter();
+//    VariantWitnessGraph wg0 = importer.importXML("A", "<xml>kon den vorst <del>min en min</del><add>hoe langer hoe minder</add> bekoren.</xml>");
+//    VariantWitnessGraph wg0 = importer.importXML("A", "<xml><s><del>Dit kwam van een</del><del><add>Gevolg van een</add></del><add>De</add>te streng doorgedreven rationalisatie<add>had dit met zich meegebracht</add>.</s></xml>");
+//    VariantWitnessGraph wg0 = importer.importXML("A", "<xml><del>Dit kwam van een</del><del><add>Gevolg van een</add></del><add>De</add> te streng doorgedreven rationalisatie</xml>");
+    VariantWitnessGraph wg0 = importer.importXML("A", "<xml><del>Dit kwam van een</del><del><add>Gevolg van een</add></del><add>De</add></xml>");
+//    VariantWitnessGraph wg0 = importer.importXML("A", "<xml><del>Dit kwam van een</del><add><del>Gevolg van een</del><add>De</add></add> te streng doorgedreven rationalisatie</xml>");
+//    VariantWitnessGraph wg0 = importer.importXML("A", "<xml><subst><del>Dit kwam van een</del><del><add>Gevolg van een</add></del><add>De</add></subst> te streng doorgedreven rationalisatie</xml>");
+    visualize(wg0);
+  }
+
+  private void visualize(final VariantWitnessGraph vwg) {
+    String dot0s = new DotFactory(true).fromVariantWitnessGraphSimple(vwg);
+    LOG.info("unjoined simple:\n{}",dot0s);
+    String dot0c = new DotFactory(true).fromVariantWitnessGraphColored(vwg);
+    LOG.info("unjoined colored:\n{}",dot0c);
+    VariantWitnessGraph joined = TokenMerger.merge(vwg);
+    String dot1s = new DotFactory(true).fromVariantWitnessGraphSimple(joined);
+    LOG.info("joined simple:\n{}",dot1s);
+    String dot1c = new DotFactory(true).fromVariantWitnessGraphColored(joined);
+    LOG.info("joined colored:\n{}",dot1c);
+  }
 
   @Test
   public void testImportFromString() {
@@ -169,7 +198,6 @@ public class XMLImporterTest extends HyperCollateTest {
     verifyDotExport(wg0, expectedDot);
   }
 
-
   @Test
   public void testDelWithoutAddAtTheEnd() {
     XMLImporter importer = new XMLImporter();
@@ -239,6 +267,35 @@ public class XMLImporterTest extends HyperCollateTest {
         + "<app>"//
         + "<rdg wit=\"a\">Zwarte Piet</rdg>"//
         + "<rdg wit=\"b\">Roetpiet</rdg>"//
+        + "</app> zijn weer aangekomen.</xml>");//
+    String expectedDot = "digraph VariantWitnessGraph{\n" + //
+        "graph [rankdir=LR]\n" + //
+        "labelloc=b\n" + //
+        "begin [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "A_000 [label=<Sinterklaas&#9251;en<br/><i>A: /xml</i>>]\n" + //
+        "A_002 [label=<Zwarte&#9251;Piet<br/><i>A: /xml/app/rdg</i>>]\n" + //
+        "A_004 [label=<Roetpiet<br/><i>A: /xml/app/rdg</i>>]\n" + ///
+        "A_005 [label=<&#9251;zijn&#9251;weer&#9251;aangekomen.<br/><i>A: /xml</i>>]\n" + //
+        "end [label=\"\";shape=doublecircle,rank=middle]\n" + //
+        "A_000->A_002\n" + //
+        "A_000->A_004\n" + //
+        "A_002->A_005\n" + //
+        "A_004->A_005\n" + //
+        "A_005->end\n" + //
+        "begin->A_000\n" + //
+        "}";
+
+    verifyDotExport(wg0, expectedDot);
+  }
+
+
+  @Test
+  public void testAppRdg2() {
+    XMLImporter importer = new XMLImporter();
+    VariantWitnessGraph wg0 = importer.importXML("A", "<xml>Sinterklaas en"//
+        + "<app>\n"//
+        + "<rdg wit=\"a\">Zwarte Piet</rdg>\n" //
+        + "<rdg wit=\"b\">Roetpiet</rdg>\n"//
         + "</app> zijn weer aangekomen.</xml>");//
     String expectedDot = "digraph VariantWitnessGraph{\n" + //
         "graph [rankdir=LR]\n" + //

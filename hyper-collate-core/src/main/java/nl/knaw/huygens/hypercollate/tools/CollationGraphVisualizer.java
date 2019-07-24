@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.tools;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ package nl.knaw.huygens.hypercollate.tools;
  * #L%
  */
 
-import com.google.common.base.Preconditions;
 import de.vandermeer.asciitable.AsciiTable;
 import de.vandermeer.asciitable.CWC_LongestLine;
 import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
@@ -31,7 +30,8 @@ import nl.knaw.huygens.hypercollate.model.TextNode;
 
 import java.util.*;
 
-import static java.util.stream.Collectors.joining;
+import static java.util.Collections.reverse;
+import static java.util.Collections.sort;
 import static java.util.stream.Collectors.toList;
 
 public class CollationGraphVisualizer {
@@ -39,23 +39,16 @@ public class CollationGraphVisualizer {
   private static final String NBSP = "\u00A0";
 
   public static class Cell {
-    final List<String> layerNames = new ArrayList<>();
-    final Map<String, String> layerContent = new HashMap<>();
+    final List<String> layerContent = new ArrayList<>();
 
-    public Cell(String layerName, String content) {
-      layerNames.add(layerName);
-      layerContent.put(layerName, content);
+    public Cell(String content) {
+      layerContent.add(content);
     }
 
     Cell() {
     }
 
-    Cell addLayer(String name) {
-      layerNames.add(name);
-      return this;
-    }
-
-    Map<String, String> getLayerContent() {
+    List<String> getLayerContent() {
       return this.layerContent;
     }
   }
@@ -113,18 +106,30 @@ public class CollationGraphVisualizer {
   private static Cell newCell(List<MarkedUpToken> tokens, String whitespaceCharacter) {
     Cell cell = new Cell();
     if (tokens.isEmpty()) {
-      setCellLayer(cell, "", " ");
+      setCellLayer(cell, " ");
     } else {
       tokens.forEach(token -> {
         String content = token.getContent()//
             .replaceAll("\n", " ")//
             .replaceAll(" +", whitespaceCharacter);
         String parentXPath = token.getParentXPath();
+        if (parentXPath.endsWith("/del/add")) {
+          content = "[za] " + content;
+        } else if (parentXPath.endsWith("/add")) {
+          content = "[z] " + content;
+        } else if (parentXPath.endsWith("/del")) {
+          content = "[a] " + content;
+        }
+        if (parentXPath.contains("/rdg")) {
+          String rdg = token.getRdg();
+          content = ("<" + rdg + "> " + content).replaceAll("\\>\\s+\\[", ">[");
+        }
+
         if (content.isEmpty()) {
           content = "<" + parentXPath.replaceAll(".*/", "") + "/>";
         }
-        String layerName = determineLayerName(parentXPath);
-        setCellLayer(cell, layerName, content);
+//        String layerName = determineLayerName(parentXPath);
+        setCellLayer(cell, content);
       });
     }
     return cell;
@@ -141,10 +146,10 @@ public class CollationGraphVisualizer {
     return layerName;
   }
 
-  private static void setCellLayer(Cell cell, String layerName, String content) {
-    cell.addLayer(layerName);
-    String previousContent = cell.getLayerContent().put(layerName, content);
-    Preconditions.checkState(previousContent == null);
+  private static void setCellLayer(Cell cell, String content) {
+    cell.getLayerContent().add(content);
+//    String previousContent = cell.getLayerContent().put(layerName, content);
+//    Preconditions.checkState(previousContent == null, "layerName " + layerName + " used twice!");
   }
 
   private static AsciiTable asciiTable(List<String> sigils, Map<String, List<Cell>> rowMap, Map<String, Integer> cellHeights) {
@@ -168,27 +173,30 @@ public class CollationGraphVisualizer {
   private static String toASCII(Cell cell, int cellHeight) {
     StringBuilder contentBuilder = new StringBuilder();
     // ASCIITable has no TextAlignment.BOTTOM option, so add empty lines manually
-    int emptyLinesToAdd = cellHeight - cell.layerNames.size();
+    int emptyLinesToAdd = cellHeight - cell.getLayerContent().size();
     for (int i = 0; i < emptyLinesToAdd; i++) {
       contentBuilder.append(NBSP + "<br>"); // regular space or just <br> leads to ASCIITable error when rendering
     }
-    String content = cell.layerNames//
-        .stream()//
-        .sorted()//
-        .map(lName -> cellLine(cell, lName))//
-        .collect(joining("<br>"));
+    List<String> layerContent = new ArrayList<>(cell.getLayerContent());
+    sort(layerContent);
+    reverse(layerContent);
+    StringJoiner joiner = new StringJoiner("<br>");
+    for (String s : layerContent) {
+      joiner.add(s.replaceAll("\\[z]", "[+]").replaceAll("\\[a]", "[-]").replaceAll("\\[za]", "[+-]"));
+    }
+    String content = joiner.toString();
     return contentBuilder.append(content).toString();
   }
 
-  private static String cellLine(Cell cell, String lName) {
-    String content = cell.getLayerContent().get(lName);
-    if (lName.equals("add")) {
-      content = "[+] " + content;
-    } else if (lName.equals("del")) {
-      content = "[-] " + content;
-    }
-    return content;
-  }
+//  private static String cellLine(Cell cell, String lName) {
+//    String content = cell.getLayerContent().get(lName);
+////    if (lName.equals("add")) {
+////      content = "[+] " + content;
+////    } else if (lName.equals("del")) {
+////      content = "[-] " + content;
+////    }
+//    return content;
+//  }
 
   public static String toTableHTML(CollationGraph graph) {
     // TODO

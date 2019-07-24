@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.collator;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,76 @@ public class HyperCollatorTest extends HyperCollateTest {
   private static final Logger LOG = LoggerFactory.getLogger(HyperCollateTest.class);
 
   final HyperCollator hyperCollator = new HyperCollator();
+
+  @Test
+  public void testAppRdgWithAddDel() {
+    XMLImporter importer = new XMLImporter();
+    VariantWitnessGraph wF = importer.importXML("W1", "<s>One must have lived longer with <app>" +
+        "<rdg varSeq=\"1\"><del>this</del></rdg>" +
+        "<rdg varSeq=\"2\"><del><add>such a</add></del></rdg>" +
+        "<rdg varSeq=\"3\"><add>a</add></rdg>" +
+        "</app> system, to appreciate its advantages.</s>");
+    VariantWitnessGraph wQ = importer.importXML("W2", "<s>One must have lived longer with this system, to appreciate its advantages.</s>");
+
+    String expected = "digraph CollationGraph{\n" +
+        "labelloc=b\n" +
+        "t000 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t001 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t002 [label=<W1,W2: One&#9251;must&#9251;have&#9251;lived&#9251;longer&#9251;with&#9251;<br/>W1,W2: <i>/s</i>>]\n" +
+        "t003 [label=<W1: &#9251;<br/>W1: <i>/s</i>>]\n" +
+        "t004 [label=<W1,W2: system,&#9251;to&#9251;appreciate&#9251;its&#9251;advantages.<br/>W1,W2: <i>/s</i>>]\n" +
+        "t005 [label=<W1: this<br/>W2: this&#9251;<br/>W1: <i>/s/app/rdg/del</i><br/>W2: <i>/s</i><br/>>]\n" +
+        "t006 [label=<W1: such&#9251;a<br/>W1: <i>/s/app/rdg/del/add</i>>]\n" +
+        "t007 [label=<W1: a<br/>W1: <i>/s/app/rdg/add</i>>]\n" +
+        "t000->t002[label=\"W1,W2\"]\n" +
+        "t002->t005[label=\"W1,W2\"]\n" +
+        "t002->t006[label=\"W1\"]\n" +
+        "t002->t007[label=\"W1\"]\n" +
+        "t003->t004[label=\"W1\"]\n" +
+        "t004->t001[label=\"W1,W2\"]\n" +
+        "t005->t003[label=\"W1\"]\n" +
+        "t005->t004[label=\"W2\"]\n" +
+        "t006->t003[label=\"W1\"]\n" +
+        "t007->t003[label=\"W1\"]\n" +
+        "}";
+
+    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
+  }
+
+  @Test
+  public void testAppRdg() {
+    XMLImporter importer = new XMLImporter();
+    VariantWitnessGraph wF = importer.importXML("W1", "<s>One must have lived longer with <app>" +
+        "<rdg>this</rdg>" +
+        "<rdg>such a</rdg>" +
+        "<rdg>a</rdg>" +
+        "</app> system, to appreciate its advantages.</s>");
+    VariantWitnessGraph wQ = importer.importXML("W2", "<s>One must have lived longer with this system, to appreciate its advantages.</s>");
+
+    String expected = "digraph CollationGraph{\n" +
+        "labelloc=b\n" +
+        "t000 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t001 [label=\"\";shape=doublecircle,rank=middle]\n" +
+        "t002 [label=<W1,W2: One&#9251;must&#9251;have&#9251;lived&#9251;longer&#9251;with&#9251;<br/>W1,W2: <i>/s</i>>]\n" +
+        "t003 [label=<W1: &#9251;<br/>W1: <i>/s</i>>]\n" +
+        "t004 [label=<W1,W2: system,&#9251;to&#9251;appreciate&#9251;its&#9251;advantages.<br/>W1,W2: <i>/s</i>>]\n" +
+        "t005 [label=<W1: this<br/>W2: this&#9251;<br/>W1: <i>/s/app/rdg</i><br/>W2: <i>/s</i><br/>>]\n" +
+        "t006 [label=<W1: such&#9251;a<br/>W1: <i>/s/app/rdg</i>>]\n" +
+        "t007 [label=<W1: a<br/>W1: <i>/s/app/rdg</i>>]\n" +
+        "t000->t002[label=\"W1,W2\"]\n" +
+        "t002->t005[label=\"W1,W2\"]\n" +
+        "t002->t006[label=\"W1\"]\n" +
+        "t002->t007[label=\"W1\"]\n" +
+        "t003->t004[label=\"W1\"]\n" +
+        "t004->t001[label=\"W1,W2\"]\n" +
+        "t005->t003[label=\"W1\"]\n" +
+        "t005->t004[label=\"W2\"]\n" +
+        "t006->t003[label=\"W1\"]\n" +
+        "t007->t003[label=\"W1\"]\n" +
+        "}";
+
+    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
+  }
 
   @Test
   public void testHierarchyWith3Witnesses() {
@@ -166,14 +236,18 @@ public class HyperCollatorTest extends HyperCollateTest {
   @Test
   public void testHierarchy() {
     XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph wF = importer.importXML("F", "<text>\n" + //
+    String fXML = "<text>\n" + //
         "    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,\n" + //
         "        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>\n" + //
-        "</text>");
-    VariantWitnessGraph wQ = importer.importXML("Q", "<text>\n" + //
+        "</text>";
+    VariantWitnessGraph wF = importer.importXML("F", fXML);
+    String qXML = "<text>\n" + //
         "    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !\n" + //
         "        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>\n" + //
-        "</text>");
+        "</text>";
+    VariantWitnessGraph wQ = importer.importXML("Q", qXML);
+    LOG.info(fXML);
+    LOG.info(qXML);
 
     String expectedDotF = "digraph VariantWitnessGraph{\n" + //
         "graph [rankdir=LR]\n" + //
@@ -949,7 +1023,7 @@ public class HyperCollatorTest extends HyperCollateTest {
     writeGraph(dot, "graph");
     assertThat(dot).isEqualTo(expected);
 
-    String table = CollationGraphVisualizer.toTableASCII(collation, true);
+    String table = CollationGraphVisualizer.toTableASCII(collation, false);
     LOG.debug("table=\n{}", table);
     return collation;
   }

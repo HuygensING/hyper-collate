@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.model;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2018 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ public class MarkedUpToken implements Token {
   private SimpleWitness witness;
   private Long index = 0L;
   private String parentXPath = "";
+  private String rdg;
 
   public MarkedUpToken setContent(String content) {
     this.content = content;
@@ -51,6 +52,15 @@ public class MarkedUpToken implements Token {
   public MarkedUpToken setWitness(SimpleWitness witness) {
     this.witness = witness;
     return this;
+  }
+
+  public MarkedUpToken setRdg(String rdg) {
+    this.rdg = rdg;
+    return this;
+  }
+
+  public String getRdg() {
+    return rdg;
   }
 
   @Override
@@ -86,8 +96,10 @@ public class MarkedUpToken implements Token {
     return new MarkedUpToken()//
         .setWitness(witness)//
         .setContent(content)//
+        .setRdg(rdg)//
         .setNormalizedContent(normalizedContent)//
         .setIndexNumber(index)//
         .setParentXPath(parentXPath);
   }
+
 }

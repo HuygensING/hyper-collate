@@ -8,7 +8,7 @@
     <groupId>nl.knaw.huygens</groupId>
     <artifactId>hyper-collate</artifactId>
     <name>HyperCollate</name>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1</version>
     <packaging>pom</packaging>
     <inceptionYear>2017</inceptionYear>
 
@@ -74,7 +74,7 @@
         <swagger.version>1.5.18</swagger.version> <!-- use version dropwizard-swagger uses -->
         <tomcat-jsp-api.version>9.0.1</tomcat-jsp-api.version>
         <validation-api.version>2.0.1.Final</validation-api.version>
-        <wagon-ssh.version>2.7</wagon-ssh.version>
+        <wagon-ssh.version>3.3.3</wagon-ssh.version>
     </properties>
 
     <build>
