@@ -21,7 +21,7 @@ NOTE: make sure you organise your folders in a structured way. For example: crea
 
 ### 1. Download the prebuilt JAR (recommended)
 
-1. Make sure you have installed [Java 8](https://java.com/en/download/) or higher.
+1. Make sure you have installed the [Java Developer Kit (JDK)](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html).
 2. In your terminal or command prompt, navigate to the directory from which you want to run HyperCollate.
 2. Download the jar from <https://cdn.huygens.knaw.nl/hyper-collate-server.jar> to the HyperCollate directory.
 2. run `java -jar hyper-collate-server.jar server`
