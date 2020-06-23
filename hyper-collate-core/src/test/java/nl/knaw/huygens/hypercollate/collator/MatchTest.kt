@@ -1,15 +1,4 @@
-package nl.knaw.huygens.hypercollate.collator;
-
-import eu.interedition.collatex.Token;
-import nl.knaw.huygens.hypercollate.HyperCollateTest;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
+package nl.knaw.huygens.hypercollate.collator
 
 /*-
  * #%L
@@ -31,53 +20,46 @@ import static org.assertj.core.api.Assertions.assertThat;
  * #L%
  */
 
-public class MatchTest extends HyperCollateTest {
-  @Test
-  public void testGetLowestRankForWitnessesOtherThan() {
-    TokenVertex v1 = mockVertexWithSigil("A");
-    TokenVertex v2 = mockVertexWithSigil("B");
-    TokenVertex v3 = mockVertexWithSigil("C");
-    TokenVertex v4 = mockVertexWithSigil("D");
-    Match match =
-        new Match(v1, v2, v3, v4).setRank("A", 1).setRank("B", 2).setRank("C", 3).setRank("D", 4);
-    Integer lowestRankForWitnessesOtherThan = match.getLowestRankForWitnessesOtherThan("A");
-    assertThat(lowestRankForWitnessesOtherThan).isEqualTo(2);
-  }
+import eu.interedition.collatex.Token
+import eu.interedition.collatex.Witness
+import nl.knaw.huygens.hypercollate.HyperCollateTest
+import nl.knaw.huygens.hypercollate.model.TokenVertex
+import org.assertj.core.api.Assertions
+import org.junit.Test
+import java.util.*
+import java.util.stream.Stream
 
-  private TokenVertex mockVertexWithSigil(String sigil) {
-    return new TokenVertex() {
-      @Override
-      public Token getToken() {
-        return null;
-      }
+class MatchTest : HyperCollateTest() {
 
-      @Override
-      public void addIncomingTokenVertex(TokenVertex incoming) {
-      }
+    @Test
+    fun testGetLowestRankForWitnessesOtherThan() {
+        val v1 = mockVertexWithSigil("A")
+        val v2 = mockVertexWithSigil("B")
+        val v3 = mockVertexWithSigil("C")
+        val v4 = mockVertexWithSigil("D")
+        val match = Match(v1, v2, v3, v4).setRank("A", 1).setRank("B", 2).setRank("C", 3).setRank("D", 4)
+        val lowestRankForWitnessesOtherThan = match.getLowestRankForWitnessesOtherThan("A")
+        Assertions.assertThat(lowestRankForWitnessesOtherThan).isEqualTo(2)
+    }
 
-      @Override
-      public Stream<TokenVertex> getIncomingTokenVertexStream() {
-        return null;
-      }
+    class DummyWitness : Witness {
+        override fun getSigil(): String = "S"
+    }
 
-      @Override
-      public void addOutgoingTokenVertex(TokenVertex outgoing) {
-      }
+    class DummyToken : Token {
+        override fun getWitness(): Witness = DummyWitness()
+    }
 
-      @Override
-      public Stream<TokenVertex> getOutgoingTokenVertexStream() {
-        return null;
-      }
+    val dummyToken: Token = DummyToken()
 
-      @Override
-      public String getSigil() {
-        return sigil;
-      }
-
-      @Override
-      public List<Integer> getBranchPath() {
-        return new ArrayList<>();
-      }
-    };
-  }
+    private fun mockVertexWithSigil(sigil: String): TokenVertex =
+            object : TokenVertex {
+                override fun getToken(): Token = dummyToken
+                override fun addIncomingTokenVertex(incoming: TokenVertex) {}
+                override fun getIncomingTokenVertexStream(): Stream<TokenVertex> = Stream.empty()
+                override fun addOutgoingTokenVertex(outgoing: TokenVertex) {}
+                override fun getOutgoingTokenVertexStream(): Stream<TokenVertex> = Stream.empty()
+                override fun getSigil(): String = sigil
+                override fun getBranchPath(): List<Int> = ArrayList()
+            }
 }
