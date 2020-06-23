@@ -1,4 +1,8 @@
-package nl.knaw.huygens.hypercollate.collator;
+package nl.knaw.huygens.hypercollate.collator
+
+import org.assertj.core.api.AssertionsForClassTypes
+import org.junit.Test
+import java.util.*
 
 /*-
  * #%L
@@ -18,33 +22,17 @@ package nl.knaw.huygens.hypercollate.collator;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
-public class QuantumCollatedMatchListTest {
-
-  @Test
-  public void testBranchPathsOverlap() {
-    List<Integer> matchBranchPath = Arrays.asList(0, 1, 3);
-    List<Integer> nodeBranchPath = Arrays.asList(0, 1);
-    List<Integer> matchBranchPath1 = Arrays.asList(0, 4, 6);
-
-    boolean branchPathsOverlap1 =
-        QuantumCollatedMatchList.branchPathsOverlap(matchBranchPath, nodeBranchPath);
-    assertThat(branchPathsOverlap1).isTrue();
-
-    boolean branchPathsOverlap2 =
-        QuantumCollatedMatchList.branchPathsOverlap(nodeBranchPath, matchBranchPath);
-    assertThat(branchPathsOverlap2).isTrue();
-
-    boolean branchPathsOverlap3 =
-        QuantumCollatedMatchList.branchPathsOverlap(matchBranchPath1, nodeBranchPath);
-    assertThat(branchPathsOverlap3).isFalse();
-  }
+ */   class QuantumCollatedMatchListTest {
+    @Test
+    fun testBranchPathsOverlap() {
+        val matchBranchPath = Arrays.asList(0, 1, 3)
+        val nodeBranchPath = Arrays.asList(0, 1)
+        val matchBranchPath1 = Arrays.asList(0, 4, 6)
+        val branchPathsOverlap1 = QuantumCollatedMatchList.branchPathsOverlap(matchBranchPath, nodeBranchPath)
+        AssertionsForClassTypes.assertThat(branchPathsOverlap1).isTrue()
+        val branchPathsOverlap2 = QuantumCollatedMatchList.branchPathsOverlap(nodeBranchPath, matchBranchPath)
+        AssertionsForClassTypes.assertThat(branchPathsOverlap2).isTrue()
+        val branchPathsOverlap3 = QuantumCollatedMatchList.branchPathsOverlap(matchBranchPath1, nodeBranchPath)
+        AssertionsForClassTypes.assertThat(branchPathsOverlap3).isFalse()
+    }
 }
