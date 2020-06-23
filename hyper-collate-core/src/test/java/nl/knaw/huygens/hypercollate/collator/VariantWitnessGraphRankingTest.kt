@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.collator;
+package nl.knaw.huygens.hypercollate.collator
 
 /*-
  * #%L
@@ -19,58 +19,46 @@ package nl.knaw.huygens.hypercollate.collator;
  * limitations under the License.
  * #L%
  */
+import nl.knaw.huygens.hypercollate.HyperCollateTest
+import nl.knaw.huygens.hypercollate.importer.XMLImporter
+import nl.knaw.huygens.hypercollate.model.MarkedUpToken
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex
+import nl.knaw.huygens.hypercollate.model.StartTokenVertex
+import nl.knaw.huygens.hypercollate.model.TokenVertex
+import nl.knaw.huygens.hypercollate.tools.TokenMerger
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.Test
+import java.util.stream.Collectors
 
-import nl.knaw.huygens.hypercollate.HyperCollateTest;
-import nl.knaw.huygens.hypercollate.importer.XMLImporter;
-import nl.knaw.huygens.hypercollate.model.*;
-import nl.knaw.huygens.hypercollate.tools.TokenMerger;
-import org.junit.Test;
+class VariantWitnessGraphRankingTest : HyperCollateTest() {
+    @Test
+    fun test() {
+        val importer = XMLImporter()
+        val wg0 = importer.importXML(
+                "A", "<xml>Een ongeluk komt <del>nooit</del><add>zelden</add> alleen.</xml>")
+        val witnessGraph = TokenMerger.merge(wg0)
+        val ranking = VariantWitnessGraphRanking.of(witnessGraph)
+        val byRank = ranking.byRank
+        byRank.forEach { (key: Int, value: Set<TokenVertex?>) -> println("$key:$value") }
+        assertThat(byRank[0]).hasSize(1)
+        assert(byRank[0]!!.iterator().next() is StartTokenVertex)
+        assertThat(byRank[1]).hasSize(1)
+        assert(byRank[1]!!.iterator().next() is SimpleTokenVertex)
+        val tokenVertex = byRank[1]!!.iterator().next()!!
+        assert(tokenVertex is SimpleTokenVertex)
+        val content = (tokenVertex.token as MarkedUpToken).content
+        assertThat(content).isEqualTo("Een ongeluk komt ")
+        assertThat(byRank[2]).hasSize(2)
+        val tokenVertices = byRank[2]!!.stream().sorted().collect(Collectors.toList())
+        val tokenVertex1 = tokenVertices[0]
+        assert(tokenVertex1 is SimpleTokenVertex)
+        val content1 = (tokenVertex1.token as MarkedUpToken).content
+        assertThat(content1).isEqualTo("nooit")
+        val tokenVertex2 = tokenVertices[1]
+        assert(tokenVertex2 is SimpleTokenVertex)
+        val content2 = (tokenVertex2.token as MarkedUpToken).content
+        assertThat(content2).isEqualTo("zelden")
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static java.util.stream.Collectors.toList;
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class VariantWitnessGraphRankingTest extends HyperCollateTest {
-
-  @Test
-  public void test() {
-    XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph wg0 =
-        importer.importXML(
-            "A", "<xml>Een ongeluk komt <del>nooit</del><add>zelden</add> alleen.</xml>");
-    VariantWitnessGraph witnessGraph = TokenMerger.merge(wg0);
-
-    VariantWitnessGraphRanking ranking = VariantWitnessGraphRanking.of(witnessGraph);
-    Map<Integer, Set<TokenVertex>> byRank = ranking.getByRank();
-    byRank.forEach((key, value) -> System.out.println(key + ":" + value));
-
-    assertThat(byRank.get(0)).hasSize(1);
-    assertThat(byRank.get(0).iterator().next()).isInstanceOf(StartTokenVertex.class);
-
-    assertThat(byRank.get(1)).hasSize(1);
-    assertThat(byRank.get(1).iterator().next()).isInstanceOf(SimpleTokenVertex.class);
-    TokenVertex tokenVertex = byRank.get(1).iterator().next();
-    assertThat(tokenVertex).isInstanceOf(SimpleTokenVertex.class);
-    String content = ((MarkedUpToken) tokenVertex.getToken()).getContent();
-    assertThat(content).isEqualTo("Een ongeluk komt ");
-
-    assertThat(byRank.get(2)).hasSize(2);
-    List<TokenVertex> tokenVertices = byRank.get(2).stream().sorted().collect(toList());
-
-    TokenVertex tokenVertex1 = tokenVertices.get(0);
-    assertThat(tokenVertex1).isInstanceOf(SimpleTokenVertex.class);
-    String content1 = ((MarkedUpToken) tokenVertex1.getToken()).getContent();
-    assertThat(content1).isEqualTo("nooit");
-
-    TokenVertex tokenVertex2 = tokenVertices.get(1);
-    assertThat(tokenVertex2).isInstanceOf(SimpleTokenVertex.class);
-    String content2 = ((MarkedUpToken) tokenVertex2.getToken()).getContent();
-    assertThat(content2).isEqualTo("zelden");
-
-    // Map<TokenVertex, Integer> byVertex = ranking.getByVertex();
-
-  }
+        // Map<TokenVertex, Integer> byVertex = ranking.getByVertex();
+    }
 }
