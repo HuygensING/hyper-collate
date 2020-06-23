@@ -1,4 +1,22 @@
-package nl.knaw.huygens.hypercollate.collator;
+package nl.knaw.huygens.hypercollate.collator
+
+import com.google.common.base.Stopwatch
+import eu.interedition.collatex.dekker.Tuple
+import nl.knaw.huygens.hypercollate.HyperCollateAssertions
+import nl.knaw.huygens.hypercollate.HyperCollateTest
+import nl.knaw.huygens.hypercollate.importer.XMLImporter
+import nl.knaw.huygens.hypercollate.model.*
+import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner
+import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer
+import org.assertj.core.api.Assertions
+import org.assertj.core.util.Sets
+import org.junit.Ignore
+import org.junit.Test
+import org.slf4j.LoggerFactory
+import java.text.MessageFormat
+import java.util.*
+import java.util.concurrent.TimeUnit
+import java.util.stream.Collectors
 
 /*-
  * #%L
@@ -18,1135 +36,1061 @@ package nl.knaw.huygens.hypercollate.collator;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
+ */   class HyperCollatorTest : HyperCollateTest() {
+    val hyperCollator = HyperCollator()
 
-import com.google.common.base.Stopwatch;
-import eu.interedition.collatex.dekker.Tuple;
-import nl.knaw.huygens.hypercollate.HyperCollateTest;
-import nl.knaw.huygens.hypercollate.importer.XMLImporter;
-import nl.knaw.huygens.hypercollate.model.*;
-import nl.knaw.huygens.hypercollate.model.CollationGraphAssert.MarkupNodeSketch;
-import nl.knaw.huygens.hypercollate.model.CollationGraphAssert.TextNodeSketch;
-import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner;
-import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.util.Sets;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+    @Ignore("takes too long")
+    @Test(timeout = 10000)
+    fun testCollationWithManyMatches() {
+        val importer = XMLImporter()
+        val w1 = importer.importXML(
+                "W1",
+                "<seg>Ik had een buurvrouw, een paar deuren verder,"
+                        + " en <del>ze</del><add>het</add> was zo'n type dat naar het muse<del>im</del>um ging en "
+                        + "cappuc<add>c</add>i<del>o</del>no's dronk<del>l</del>, dus ik<del>i k</del>kon er weinig mee, en zij kon weinig"
+                        + " m<del>netr</del>et mij<del>,</del><add>;</add> we <del>lk</del> knikten alleen naar elkaar, en als ik"
+                        + " Rock<del>u</del>y bij me had, <del>knikte</del>maakte ze van het knikken iets dat nog wat sneller "
+                        + "a<del >g</del>fgehandeld moest<del>r</del> worden dan anders.</seg>")
+        val w2 = importer.importXML(
+                "W2",
+                "<seg><del>Ik had een buurvrouw, </del><add>Die "
+                        + "buurvrouw woonde </add>een paar deuren verder, en het was zo'n type <del>dat naar het museum ging en "
+                        + "cappuccino's dronk, dus ik kon er</del><add>waar ik</add> weinig mee<add> ko<del>m</del>n</add>, en zij kon "
+                        + "weinig met mij; we knikten alleen naar elkaar, en als ik Rocky bij me had, maakte ze van het knikken iets dat"
+                        + " nog wat sneller afgehandeld moest worden dan anders.</seg>")
+        val expected = "something"
+        val collationGraph = testHyperCollation(w1, w2, expected)
+    }
 
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+    @Test(timeout = 10000)
+    fun testAppRdgWithAddDel() {
+        val importer = XMLImporter()
+        val wF = importer.importXML(
+                "W1",
+                "<s>One must have lived longer with <app>"
+                        + "<rdg varSeq=\"1\"><del>this</del></rdg>"
+                        + "<rdg varSeq=\"2\"><del><add>such a</add></del></rdg>"
+                        + "<rdg varSeq=\"3\"><add>a</add></rdg>"
+                        + "</app> system, to appreciate its advantages.</s>")
+        val wQ = importer.importXML(
+                "W2",
+                "<s>One must have lived longer with this system, to appreciate its advantages.</s>")
+        val expected = """
+            digraph CollationGraph{
+            labelloc=b
+            t000 [label="";shape=doublecircle,rank=middle]
+            t001 [label="";shape=doublecircle,rank=middle]
+            t002 [label=<W1,W2: One&#9251;must&#9251;have&#9251;lived&#9251;longer&#9251;with&#9251;<br/>W1,W2: <i>/s</i>>]
+            t003 [label=<W1: &#9251;<br/>W1: <i>/s</i>>]
+            t004 [label=<W1,W2: system,&#9251;to&#9251;appreciate&#9251;its&#9251;advantages.<br/>W1,W2: <i>/s</i>>]
+            t005 [label=<W1: this<br/>W2: this&#9251;<br/>W1: <i>/s/app/rdg/del</i><br/>W2: <i>/s</i><br/>>]
+            t006 [label=<W1: such&#9251;a<br/>W1: <i>/s/app/rdg/del/add</i>>]
+            t007 [label=<W1: a<br/>W1: <i>/s/app/rdg/add</i>>]
+            t000->t002[label="W1,W2"]
+            t002->t005[label="W1,W2"]
+            t002->t006[label="W1"]
+            t002->t007[label="W1"]
+            t003->t004[label="W1"]
+            t004->t001[label="W1,W2"]
+            t005->t003[label="W1"]
+            t005->t004[label="W2"]
+            t006->t003[label="W1"]
+            t007->t003[label="W1"]
+            }
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expected)
+    }
 
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.*;
-import static nl.knaw.huygens.hypercollate.HyperCollateAssertions.assertThat;
-import static nl.knaw.huygens.hypercollate.model.CollationGraphAssert.markupNodeSketch;
-import static nl.knaw.huygens.hypercollate.model.CollationGraphAssert.textNodeSketch;
+    @Test(timeout = 10000)
+    fun testAppRdg() {
+        val importer = XMLImporter()
+        val wF = importer.importXML(
+                "W1",
+                "<s>One must have lived longer with <app>"
+                        + "<rdg>this</rdg>"
+                        + "<rdg>such a</rdg>"
+                        + "<rdg>a</rdg>"
+                        + "</app> system, to appreciate its advantages.</s>")
+        val wQ = importer.importXML(
+                "W2",
+                "<s>One must have lived longer with this system, to appreciate its advantages.</s>")
+        val expected = """
+            digraph CollationGraph{
+            labelloc=b
+            t000 [label="";shape=doublecircle,rank=middle]
+            t001 [label="";shape=doublecircle,rank=middle]
+            t002 [label=<W1,W2: One&#9251;must&#9251;have&#9251;lived&#9251;longer&#9251;with&#9251;<br/>W1,W2: <i>/s</i>>]
+            t003 [label=<W1: &#9251;<br/>W1: <i>/s</i>>]
+            t004 [label=<W1,W2: system,&#9251;to&#9251;appreciate&#9251;its&#9251;advantages.<br/>W1,W2: <i>/s</i>>]
+            t005 [label=<W1: this<br/>W2: this&#9251;<br/>W1: <i>/s/app/rdg</i><br/>W2: <i>/s</i><br/>>]
+            t006 [label=<W1: such&#9251;a<br/>W1: <i>/s/app/rdg</i>>]
+            t007 [label=<W1: a<br/>W1: <i>/s/app/rdg</i>>]
+            t000->t002[label="W1,W2"]
+            t002->t005[label="W1,W2"]
+            t002->t006[label="W1"]
+            t002->t007[label="W1"]
+            t003->t004[label="W1"]
+            t004->t001[label="W1,W2"]
+            t005->t003[label="W1"]
+            t005->t004[label="W2"]
+            t006->t003[label="W1"]
+            t007->t003[label="W1"]
+            }
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expected)
+    }
 
-public class HyperCollatorTest extends HyperCollateTest {
-  private static final Logger LOG = LoggerFactory.getLogger(HyperCollateTest.class);
+    @Test(timeout = 10000)
+    fun testHierarchyWith3Witnesses() {
+        val importer = XMLImporter()
+        val wF = importer.importXML(
+                "F",
+                """<text>
+    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,
+        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>
+</text>""")
+        val wQ = importer.importXML(
+                "Q",
+                """<text>
+    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !
+        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>
+</text>""")
+        val wZ = importer.importXML(
+                "Z",
+                """<text>
+    <s>Hoe zoet moet nochtans zijn dit trachten naar een vrouw !
+        Die dagen van ongewisheid vóór de liefelijke toestemming.</s>
+</text>""")
+        val expected = """
+            digraph CollationGraph{
+            labelloc=b
+            t000 [label="";shape=doublecircle,rank=middle]
+            t001 [label="";shape=doublecircle,rank=middle]
+            t002 [label=<F,Q,Z: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F,Q,Z: <i>/text/s</i>>]
+            t003 [label=<F,Q: &#9251;<br/>F,Q: <i>/text/s</i>>]
+            t004 [label=<F,Q,Z: een&#9251;<br/>F,Q,Z: <i>/text/s</i>>]
+            t005 [label=<F: vrouw<br/>Q: vrouw&#9251;<br/>Z: vrouw&#9251;<br/>F,Q,Z: <i>/text/s</i>>]
+            t006 [label=<F: ,&#x21A9;<br/>&#9251;de&#9251;<br/>F: <i>/text/s</i>>]
+            t007 [label=<F,Z: ongewisheid&#9251;<br/>F,Z: <i>/text/s</i>>]
+            t008 [label=<F,Q,Z: vóór&#9251;de&#9251;<br/>F,Q,Z: <i>/text/s</i>>]
+            t009 [label=<F: <br/>F: <i>/text/s/lb</i>>]
+            t010 [label=<F,Q,Z: liefelijke&#9251;toestemming<br/>F,Q,Z: <i>/text/s</i>>]
+            t011 [label=<F: !<br/>F: <i>/text/s</i>>]
+            t012 [label=<F: <br/>F: <i>/text/s/lb</i>>]
+            t013 [label=<F,Q: werven&#9251;om<br/>F,Q: <i>/text/s/del</i>>]
+            t014 [label=<F: trachten&#9251;naar<br/>Q: trachten&#9251;naar<br/>Z: trachten&#9251;naar&#9251;<br/>F: <i>/text/s/add</i><br/>Q: <i>/text/s/add</i><br/>Z: <i>/text/s</i><br/>>]
+            t015 [label=<Q: <br/>Q: <i>/text/s/lb</i>>]
+            t016 [label=<Q: !&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;<br/>Z: !Die&#9251;dagen&#9251;van&#9251;<br/>Q,Z: <i>/text/s</i>>]
+            t017 [label=<Q: nerveuze&#9251;verwachting&#9251;<br/>Q: <i>/text/s</i>>]
+            t018 [label=<Q,Z: .<br/>Q,Z: <i>/text/s</i>>]
+            t000->t002[label="F,Q,Z"]
+            t002->t012[label="F"]
+            t002->t013[label="Q"]
+            t002->t014[label="Q,Z"]
+            t003->t004[label="F,Q"]
+            t004->t005[label="F,Z"]
+            t004->t015[label="Q"]
+            t005->t006[label="F"]
+            t005->t016[label="Q,Z"]
+            t006->t007[label="F"]
+            t007->t008[label="F,Z"]
+            t008->t009[label="F"]
+            t008->t010[label="Q,Z"]
+            t009->t010[label="F"]
+            t010->t011[label="F"]
+            t010->t018[label="Q,Z"]
+            t011->t001[label="F"]
+            t012->t013[label="F"]
+            t012->t014[label="F"]
+            t013->t003[label="F,Q"]
+            t014->t003[label="F,Q"]
+            t014->t004[label="Z"]
+            t015->t005[label="Q"]
+            t016->t007[label="Z"]
+            t016->t017[label="Q"]
+            t017->t008[label="Q"]
+            t018->t001[label="Q,Z"]
+            }
+            """.trimIndent()
+        val collationGraph = testHyperCollation3(wF, wQ, wZ, expected)
 
-  final HyperCollator hyperCollator = new HyperCollator();
-
-  @Ignore("takes too long")
-  @Test(timeout = 10000)
-  public void testCollationWithManyMatches() {
-    XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph w1 =
-        importer.importXML(
-            "W1",
-            "<seg>Ik had een buurvrouw, een paar deuren verder,"
-                + " en <del>ze</del><add>het</add> was zo'n type dat naar het muse<del>im</del>um ging en "
-                + "cappuc<add>c</add>i<del>o</del>no's dronk<del>l</del>, dus ik<del>i k</del>kon er weinig mee, en zij kon weinig"
-                + " m<del>netr</del>et mij<del>,</del><add>;</add> we <del>lk</del> knikten alleen naar elkaar, en als ik"
-                + " Rock<del>u</del>y bij me had, <del>knikte</del>maakte ze van het knikken iets dat nog wat sneller "
-                + "a<del >g</del>fgehandeld moest<del>r</del> worden dan anders.</seg>");
-    VariantWitnessGraph w2 =
-        importer.importXML(
-            "W2",
-            "<seg><del>Ik had een buurvrouw, </del><add>Die "
-                + "buurvrouw woonde </add>een paar deuren verder, en het was zo'n type <del>dat naar het museum ging en "
-                + "cappuccino's dronk, dus ik kon er</del><add>waar ik</add> weinig mee<add> ko<del>m</del>n</add>, en zij kon "
-                + "weinig met mij; we knikten alleen naar elkaar, en als ik Rocky bij me had, maakte ze van het knikken iets dat"
-                + " nog wat sneller afgehandeld moest worden dan anders.</seg>");
-
-    String expected = "something";
-
-    CollationGraph collationGraph = testHyperCollation(w1, w2, expected);
-  }
-
-  @Test(timeout = 10000)
-  public void testAppRdgWithAddDel() {
-    XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph wF =
-        importer.importXML(
-            "W1",
-            "<s>One must have lived longer with <app>"
-                + "<rdg varSeq=\"1\"><del>this</del></rdg>"
-                + "<rdg varSeq=\"2\"><del><add>such a</add></del></rdg>"
-                + "<rdg varSeq=\"3\"><add>a</add></rdg>"
-                + "</app> system, to appreciate its advantages.</s>");
-    VariantWitnessGraph wQ =
-        importer.importXML(
-            "W2",
-            "<s>One must have lived longer with this system, to appreciate its advantages.</s>");
-
-    String expected =
-        "digraph CollationGraph{\n"
-            + "labelloc=b\n"
-            + "t000 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t002 [label=<W1,W2: One&#9251;must&#9251;have&#9251;lived&#9251;longer&#9251;with&#9251;<br/>W1,W2: <i>/s</i>>]\n"
-            + "t003 [label=<W1: &#9251;<br/>W1: <i>/s</i>>]\n"
-            + "t004 [label=<W1,W2: system,&#9251;to&#9251;appreciate&#9251;its&#9251;advantages.<br/>W1,W2: <i>/s</i>>]\n"
-            + "t005 [label=<W1: this<br/>W2: this&#9251;<br/>W1: <i>/s/app/rdg/del</i><br/>W2: <i>/s</i><br/>>]\n"
-            + "t006 [label=<W1: such&#9251;a<br/>W1: <i>/s/app/rdg/del/add</i>>]\n"
-            + "t007 [label=<W1: a<br/>W1: <i>/s/app/rdg/add</i>>]\n"
-            + "t000->t002[label=\"W1,W2\"]\n"
-            + "t002->t005[label=\"W1,W2\"]\n"
-            + "t002->t006[label=\"W1\"]\n"
-            + "t002->t007[label=\"W1\"]\n"
-            + "t003->t004[label=\"W1\"]\n"
-            + "t004->t001[label=\"W1,W2\"]\n"
-            + "t005->t003[label=\"W1\"]\n"
-            + "t005->t004[label=\"W2\"]\n"
-            + "t006->t003[label=\"W1\"]\n"
-            + "t007->t003[label=\"W1\"]\n"
-            + "}";
-
-    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
-  }
-
-  @Test(timeout = 10000)
-  public void testAppRdg() {
-    XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph wF =
-        importer.importXML(
-            "W1",
-            "<s>One must have lived longer with <app>"
-                + "<rdg>this</rdg>"
-                + "<rdg>such a</rdg>"
-                + "<rdg>a</rdg>"
-                + "</app> system, to appreciate its advantages.</s>");
-    VariantWitnessGraph wQ =
-        importer.importXML(
-            "W2",
-            "<s>One must have lived longer with this system, to appreciate its advantages.</s>");
-
-    String expected =
-        "digraph CollationGraph{\n"
-            + "labelloc=b\n"
-            + "t000 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t002 [label=<W1,W2: One&#9251;must&#9251;have&#9251;lived&#9251;longer&#9251;with&#9251;<br/>W1,W2: <i>/s</i>>]\n"
-            + "t003 [label=<W1: &#9251;<br/>W1: <i>/s</i>>]\n"
-            + "t004 [label=<W1,W2: system,&#9251;to&#9251;appreciate&#9251;its&#9251;advantages.<br/>W1,W2: <i>/s</i>>]\n"
-            + "t005 [label=<W1: this<br/>W2: this&#9251;<br/>W1: <i>/s/app/rdg</i><br/>W2: <i>/s</i><br/>>]\n"
-            + "t006 [label=<W1: such&#9251;a<br/>W1: <i>/s/app/rdg</i>>]\n"
-            + "t007 [label=<W1: a<br/>W1: <i>/s/app/rdg</i>>]\n"
-            + "t000->t002[label=\"W1,W2\"]\n"
-            + "t002->t005[label=\"W1,W2\"]\n"
-            + "t002->t006[label=\"W1\"]\n"
-            + "t002->t007[label=\"W1\"]\n"
-            + "t003->t004[label=\"W1\"]\n"
-            + "t004->t001[label=\"W1,W2\"]\n"
-            + "t005->t003[label=\"W1\"]\n"
-            + "t005->t004[label=\"W2\"]\n"
-            + "t006->t003[label=\"W1\"]\n"
-            + "t007->t003[label=\"W1\"]\n"
-            + "}";
-
-    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
-  }
-
-  @Test(timeout = 10000)
-  public void testHierarchyWith3Witnesses() {
-    XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph wF =
-        importer.importXML(
-            "F",
-            "<text>\n"
-                + "    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,\n"
-                + "        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>\n"
-                + "</text>");
-    VariantWitnessGraph wQ =
-        importer.importXML(
-            "Q",
-            "<text>\n"
-                + "    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !\n"
-                + "        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>\n"
-                + "</text>");
-    VariantWitnessGraph wZ =
-        importer.importXML(
-            "Z",
-            "<text>\n"
-                + "    <s>Hoe zoet moet nochtans zijn dit trachten naar een vrouw !\n"
-                + "        Die dagen van ongewisheid vóór de liefelijke toestemming.</s>\n"
-                + "</text>");
-
-    String expected =
-        "digraph CollationGraph{\n"
-            + "labelloc=b\n"
-            + "t000 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t002 [label=<F,Q,Z: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n"
-            + "t003 [label=<F,Q: &#9251;<br/>F,Q: <i>/text/s</i>>]\n"
-            + "t004 [label=<F,Q,Z: een&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n"
-            + "t005 [label=<F: vrouw<br/>Q: vrouw&#9251;<br/>Z: vrouw&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n"
-            + "t006 [label=<F: ,&#x21A9;<br/>&#9251;de&#9251;<br/>F: <i>/text/s</i>>]\n"
-            + "t007 [label=<F,Z: ongewisheid&#9251;<br/>F,Z: <i>/text/s</i>>]\n"
-            + "t008 [label=<F,Q,Z: vóór&#9251;de&#9251;<br/>F,Q,Z: <i>/text/s</i>>]\n"
-            + "t009 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n"
-            + "t010 [label=<F,Q,Z: liefelijke&#9251;toestemming<br/>F,Q,Z: <i>/text/s</i>>]\n"
-            + "t011 [label=<F: !<br/>F: <i>/text/s</i>>]\n"
-            + "t012 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n"
-            + "t013 [label=<F,Q: werven&#9251;om<br/>F,Q: <i>/text/s/del</i>>]\n"
-            + "t014 [label=<F: trachten&#9251;naar<br/>Q: trachten&#9251;naar<br/>Z: trachten&#9251;naar&#9251;<br/>F: <i>/text/s/add</i><br/>Q: <i>/text/s/add</i><br/>Z: <i>/text/s</i><br/>>]\n"
-            + "t015 [label=<Q: <br/>Q: <i>/text/s/lb</i>>]\n"
-            + "t016 [label=<Q: !&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;<br/>Z: !Die&#9251;dagen&#9251;van&#9251;<br/>Q,Z: <i>/text/s</i>>]\n"
-            + "t017 [label=<Q: nerveuze&#9251;verwachting&#9251;<br/>Q: <i>/text/s</i>>]\n"
-            + "t018 [label=<Q,Z: .<br/>Q,Z: <i>/text/s</i>>]\n"
-            + "t000->t002[label=\"F,Q,Z\"]\n"
-            + "t002->t012[label=\"F\"]\n"
-            + "t002->t013[label=\"Q\"]\n"
-            + "t002->t014[label=\"Q,Z\"]\n"
-            + "t003->t004[label=\"F,Q\"]\n"
-            + "t004->t005[label=\"F,Z\"]\n"
-            + "t004->t015[label=\"Q\"]\n"
-            + "t005->t006[label=\"F\"]\n"
-            + "t005->t016[label=\"Q,Z\"]\n"
-            + "t006->t007[label=\"F\"]\n"
-            + "t007->t008[label=\"F,Z\"]\n"
-            + "t008->t009[label=\"F\"]\n"
-            + "t008->t010[label=\"Q,Z\"]\n"
-            + "t009->t010[label=\"F\"]\n"
-            + "t010->t011[label=\"F\"]\n"
-            + "t010->t018[label=\"Q,Z\"]\n"
-            + "t011->t001[label=\"F\"]\n"
-            + "t012->t013[label=\"F\"]\n"
-            + "t012->t014[label=\"F\"]\n"
-            + "t013->t003[label=\"F,Q\"]\n"
-            + "t014->t003[label=\"F,Q\"]\n"
-            + "t014->t004[label=\"Z\"]\n"
-            + "t015->t005[label=\"Q\"]\n"
-            + "t016->t007[label=\"Z\"]\n"
-            + "t016->t017[label=\"Q\"]\n"
-            + "t017->t008[label=\"Q\"]\n"
-            + "t018->t001[label=\"Q,Z\"]\n"
-            + "}";
-
-    CollationGraph collationGraph = testHyperCollation3(wF, wQ, wZ, expected);
-
-    // test matching tokens
-    TextNodeSketch n1 =
-        textNodeSketch()
-            .withWitnessSegmentSketch("F", "Hoe zoet moet nochtans zijn dit ")
-            .withWitnessSegmentSketch("Q", "Hoe zoet moet nochtans zijn dit ")
-            .withWitnessSegmentSketch("Z", "Hoe zoet moet nochtans zijn dit ");
-    TextNodeSketch n2 =
-        textNodeSketch().withWitnessSegmentSketch("F", " ").withWitnessSegmentSketch("Q", " ");
-    TextNodeSketch n3 =
-        textNodeSketch()
-            .withWitnessSegmentSketch("F", "een ")
-            .withWitnessSegmentSketch("Q", "een ")
-            .withWitnessSegmentSketch("Z", "een ");
-    TextNodeSketch n4 =
-        textNodeSketch()
-            .withWitnessSegmentSketch("F", "vrouw")
-            .withWitnessSegmentSketch("Q", "vrouw ")
-            .withWitnessSegmentSketch("Z", "vrouw ");
-    TextNodeSketch n5 =
-        textNodeSketch()
-            .withWitnessSegmentSketch("F", "ongewisheid ")
-            .withWitnessSegmentSketch("Z", "ongewisheid ");
-    TextNodeSketch n6 =
-        textNodeSketch()
-            .withWitnessSegmentSketch("F", "liefelijke toestemming")
-            .withWitnessSegmentSketch("Z", "liefelijke toestemming")
-            .withWitnessSegmentSketch("Q", "liefelijke toestemming");
-    TextNodeSketch trachten_naar =
-        textNodeSketch()
-            .withWitnessSegmentSketch("F", "trachten naar")
-            .withWitnessSegmentSketch("Q", "trachten naar")
-            .withWitnessSegmentSketch("Z", "trachten naar ");
-    TextNodeSketch werven_om =
-        textNodeSketch()
-            .withWitnessSegmentSketch("F", "werven om")
-            .withWitnessSegmentSketch("Q", "werven om");
-
-    assertThat(collationGraph)
-        .containsTextNodesMatching(n1, n2, n3, n4, n5, n6, trachten_naar, werven_om);
-
-    assertThat(collationGraph)
-        .containsMarkupNodesMatching(
-            markupNodeSketch("F", "text"),
-            markupNodeSketch("Q", "text"),
-            markupNodeSketch("Z", "text"));
-
-    MarkupNodeSketch f_del = markupNodeSketch("F", "del");
-    MarkupNodeSketch q_add = markupNodeSketch("Q", "add");
-    assertThat(collationGraph).hasTextNodeMatching(werven_om).withMarkupNodesMatching(f_del);
-    assertThat(collationGraph).hasMarkupNodeMatching(q_add).withTextNodesMatching(trachten_naar);
-  }
-
-  @Test(timeout = 10000)
-  public void testHierarchy() {
-    XMLImporter importer = new XMLImporter();
-    String fXML =
-        "<text>\n"
-            + "    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,\n"
-            + "        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>\n"
-            + "</text>";
-    VariantWitnessGraph wF = importer.importXML("F", fXML);
-    String qXML =
-        "<text>\n"
-            + "    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !\n"
-            + "        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>\n"
-            + "</text>";
-    VariantWitnessGraph wQ = importer.importXML("Q", qXML);
-    LOG.info(fXML);
-    LOG.info(qXML);
-
-    String expectedDotF =
-        "digraph VariantWitnessGraph{\n"
-            + "graph [rankdir=LR]\n"
-            + "labelloc=b\n"
-            + "begin [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "F_000 [label=<Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/><i>F: /text/s</i>>]\n"
-            + "F_006 [label=<<br/><i>F: /text/s/lb</i>>]\n"
-            + "F_007 [label=<werven&#9251;om<br/><i>F: /text/s/del</i>>]\n"
-            + "F_009 [label=<trachten&#9251;naar<br/><i>F: /text/s/add</i>>]\n"
-            + "F_011 [label=<&#9251;een&#9251;vrouw,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;vóór&#9251;de&#9251;<br/><i>F: /text/s</i>>]\n"
-            + "F_019 [label=<<br/><i>F: /text/s/lb</i>>]\n"
-            + "F_020 [label=<liefelijke&#9251;toestemming!<br/><i>F: /text/s</i>>]\n"
-            + "end [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "F_000->F_006\n"
-            + "F_006->F_007\n"
-            + "F_006->F_009\n"
-            + "F_007->F_011\n"
-            + "F_009->F_011\n"
-            + "F_011->F_019\n"
-            + "F_019->F_020\n"
-            + "F_020->end\n"
-            + "begin->F_000\n"
-            + "}";
-    verifyDotExport(wF, expectedDotF);
-
-    String expectedDotQ =
-        "digraph VariantWitnessGraph{\n"
-            + "graph [rankdir=LR]\n"
-            + "labelloc=b\n"
-            + "begin [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "Q_000 [label=<Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/><i>Q: /text/s</i>>]\n"
-            + "Q_006 [label=<werven&#9251;om<br/><i>Q: /text/s/del</i>>]\n"
-            + "Q_008 [label=<trachten&#9251;naar<br/><i>Q: /text/s/add</i>>]\n"
-            + "Q_010 [label=<&#9251;een&#9251;<br/><i>Q: /text/s</i>>]\n"
-            + "Q_012 [label=<<br/><i>Q: /text/s/lb</i>>]\n"
-            + "Q_013 [label=<vrouw&#9251;!&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;nerveuze&#9251;verwachting&#9251;vóór&#9251;de&#9251;liefelijke&#9251;toestemming.<br/><i>Q: /text/s</i>>]\n"
-            + "end [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "Q_000->Q_006\n"
-            + "Q_000->Q_008\n"
-            + "Q_006->Q_010\n"
-            + "Q_008->Q_010\n"
-            + "Q_010->Q_012\n"
-            + "Q_012->Q_013\n"
-            + "Q_013->end\n"
-            + "begin->Q_000\n"
-            + "}";
-    verifyDotExport(wQ, expectedDotQ);
-
-    String expected =
-        "digraph CollationGraph{\n"
-            + "labelloc=b\n"
-            + "t000 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t002 [label=<F,Q: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F,Q: <i>/text/s</i>>]\n"
-            + "t003 [label=<F,Q: &#9251;een&#9251;<br/>F,Q: <i>/text/s</i>>]\n"
-            + "t004 [label=<F: vrouw<br/>Q: vrouw&#9251;<br/>F,Q: <i>/text/s</i>>]\n"
-            + "t005 [label=<F: ,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;<br/>F: <i>/text/s</i>>]\n"
-            + "t006 [label=<F,Q: vóór&#9251;de&#9251;<br/>F,Q: <i>/text/s</i>>]\n"
-            + "t007 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n"
-            + "t008 [label=<F,Q: liefelijke&#9251;toestemming<br/>F,Q: <i>/text/s</i>>]\n"
-            + "t009 [label=<F: !<br/>F: <i>/text/s</i>>]\n"
-            + "t010 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n"
-            + "t011 [label=<F,Q: werven&#9251;om<br/>F,Q: <i>/text/s/del</i>>]\n"
-            + "t012 [label=<F,Q: trachten&#9251;naar<br/>F,Q: <i>/text/s/add</i>>]\n"
-            + "t013 [label=<Q: <br/>Q: <i>/text/s/lb</i>>]\n"
-            + "t014 [label=<Q: !&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;nerveuze&#9251;verwachting&#9251;<br/>Q: <i>/text/s</i>>]\n"
-            + "t015 [label=<Q: .<br/>Q: <i>/text/s</i>>]\n"
-            + "t000->t002[label=\"F,Q\"]\n"
-            + "t002->t010[label=\"F\"]\n"
-            + "t002->t011[label=\"Q\"]\n"
-            + "t002->t012[label=\"Q\"]\n"
-            + "t003->t004[label=\"F\"]\n"
-            + "t003->t013[label=\"Q\"]\n"
-            + "t004->t005[label=\"F\"]\n"
-            + "t004->t014[label=\"Q\"]\n"
-            + "t005->t006[label=\"F\"]\n"
-            + "t006->t007[label=\"F\"]\n"
-            + "t006->t008[label=\"Q\"]\n"
-            + "t007->t008[label=\"F\"]\n"
-            + "t008->t009[label=\"F\"]\n"
-            + "t008->t015[label=\"Q\"]\n"
-            + "t009->t001[label=\"F\"]\n"
-            + "t010->t011[label=\"F\"]\n"
-            + "t010->t012[label=\"F\"]\n"
-            + "t011->t003[label=\"F,Q\"]\n"
-            + "t012->t003[label=\"F,Q\"]\n"
-            + "t013->t004[label=\"Q\"]\n"
-            + "t014->t006[label=\"Q\"]\n"
-            + "t015->t001[label=\"Q\"]\n"
-            + "}";
-
-    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
-
-    // test matching tokens
-
-    assertThat(collationGraph)
-        .containsTextNodesMatching(
-            textNodeSketch()
+        // test matching tokens
+        val n1 = CollationGraphAssert.textNodeSketch()
                 .withWitnessSegmentSketch("F", "Hoe zoet moet nochtans zijn dit ")
-                .withWitnessSegmentSketch("Q", "Hoe zoet moet nochtans zijn dit "),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "trachten naar")
-                .withWitnessSegmentSketch("Q", "trachten naar"),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "werven om")
-                .withWitnessSegmentSketch("Q", "werven om"),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", " een ")
-                .withWitnessSegmentSketch("Q", " een "),
-            textNodeSketch()
+                .withWitnessSegmentSketch("Q", "Hoe zoet moet nochtans zijn dit ")
+                .withWitnessSegmentSketch("Z", "Hoe zoet moet nochtans zijn dit ")
+        val n2 = CollationGraphAssert.textNodeSketch().withWitnessSegmentSketch("F", " ").withWitnessSegmentSketch("Q", " ")
+        val n3 = CollationGraphAssert.textNodeSketch()
+                .withWitnessSegmentSketch("F", "een ")
+                .withWitnessSegmentSketch("Q", "een ")
+                .withWitnessSegmentSketch("Z", "een ")
+        val n4 = CollationGraphAssert.textNodeSketch()
                 .withWitnessSegmentSketch("F", "vrouw")
-                .withWitnessSegmentSketch("Q", "vrouw "),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "vóór de ")
-                .withWitnessSegmentSketch("Q", "vóór de "),
-            textNodeSketch()
+                .withWitnessSegmentSketch("Q", "vrouw ")
+                .withWitnessSegmentSketch("Z", "vrouw ")
+        val n5 = CollationGraphAssert.textNodeSketch()
+                .withWitnessSegmentSketch("F", "ongewisheid ")
+                .withWitnessSegmentSketch("Z", "ongewisheid ")
+        val n6 = CollationGraphAssert.textNodeSketch()
                 .withWitnessSegmentSketch("F", "liefelijke toestemming")
-                .withWitnessSegmentSketch("Q", "liefelijke toestemming"));
-  }
+                .withWitnessSegmentSketch("Z", "liefelijke toestemming")
+                .withWitnessSegmentSketch("Q", "liefelijke toestemming")
+        val trachten_naar = CollationGraphAssert.textNodeSketch()
+                .withWitnessSegmentSketch("F", "trachten naar")
+                .withWitnessSegmentSketch("Q", "trachten naar")
+                .withWitnessSegmentSketch("Z", "trachten naar ")
+        val werven_om = CollationGraphAssert.textNodeSketch()
+                .withWitnessSegmentSketch("F", "werven om")
+                .withWitnessSegmentSketch("Q", "werven om")
+        HyperCollateAssertions.assertThat(collationGraph)
+                .containsTextNodesMatching(n1, n2, n3, n4, n5, n6, trachten_naar, werven_om)
+        HyperCollateAssertions.assertThat(collationGraph)
+                .containsMarkupNodesMatching(
+                        CollationGraphAssert.markupNodeSketch("F", "text"),
+                        CollationGraphAssert.markupNodeSketch("Q", "text"),
+                        CollationGraphAssert.markupNodeSketch("Z", "text"))
+        val f_del = CollationGraphAssert.markupNodeSketch("F", "del")
+        val q_add = CollationGraphAssert.markupNodeSketch("Q", "add")
+        HyperCollateAssertions.assertThat(collationGraph).hasTextNodeMatching(werven_om).withMarkupNodesMatching(f_del)
+        HyperCollateAssertions.assertThat(collationGraph).hasMarkupNodeMatching(q_add).withTextNodesMatching(trachten_naar)
+    }
 
-  @Test(timeout = 10000)
-  public void testOrder() {
-    XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph wF =
-        importer.importXML(
-            "F",
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                + "<text>\n"
-                + "    <s>De vent was woedend en maakte <del type=\"instantCorrection\">Shiriar</del> den bedremmelden\n"
-                + "        Sultan uit voor \"lompen boer\".</s>\n"
-                + "</text>");
-    VariantWitnessGraph wQ =
-        importer.importXML(
-            "Q",
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                + "<text>\n"
-                + "    <s>De vent was woedend en maakte <del>Shiriar</del>\n"
-                + "        <add>den bedremmelden <del>man</del>\n"
-                + "            <add>Sultan</add></add> uit voor \"lompen boer\".</s>\n"
-                + "</text>");
+    @Test(timeout = 10000)
+    fun testHierarchy() {
+        val importer = XMLImporter()
+        val fXML = """<text>
+    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,
+        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>
+</text>"""
+        val wF = importer.importXML("F", fXML)
+        val qXML = """<text>
+    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !
+        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>
+</text>"""
+        val wQ = importer.importXML("Q", qXML)
+        LOG.info(fXML)
+        LOG.info(qXML)
+        val expectedDotF = """
+            digraph VariantWitnessGraph{
+            graph [rankdir=LR]
+            labelloc=b
+            begin [label="";shape=doublecircle,rank=middle]
+            F_000 [label=<Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/><i>F: /text/s</i>>]
+            F_006 [label=<<br/><i>F: /text/s/lb</i>>]
+            F_007 [label=<werven&#9251;om<br/><i>F: /text/s/del</i>>]
+            F_009 [label=<trachten&#9251;naar<br/><i>F: /text/s/add</i>>]
+            F_011 [label=<&#9251;een&#9251;vrouw,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;vóór&#9251;de&#9251;<br/><i>F: /text/s</i>>]
+            F_019 [label=<<br/><i>F: /text/s/lb</i>>]
+            F_020 [label=<liefelijke&#9251;toestemming!<br/><i>F: /text/s</i>>]
+            end [label="";shape=doublecircle,rank=middle]
+            F_000->F_006
+            F_006->F_007
+            F_006->F_009
+            F_007->F_011
+            F_009->F_011
+            F_011->F_019
+            F_019->F_020
+            F_020->end
+            begin->F_000
+            }
+            """.trimIndent()
+        verifyDotExport(wF, expectedDotF)
+        val expectedDotQ = """
+            digraph VariantWitnessGraph{
+            graph [rankdir=LR]
+            labelloc=b
+            begin [label="";shape=doublecircle,rank=middle]
+            Q_000 [label=<Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/><i>Q: /text/s</i>>]
+            Q_006 [label=<werven&#9251;om<br/><i>Q: /text/s/del</i>>]
+            Q_008 [label=<trachten&#9251;naar<br/><i>Q: /text/s/add</i>>]
+            Q_010 [label=<&#9251;een&#9251;<br/><i>Q: /text/s</i>>]
+            Q_012 [label=<<br/><i>Q: /text/s/lb</i>>]
+            Q_013 [label=<vrouw&#9251;!&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;nerveuze&#9251;verwachting&#9251;vóór&#9251;de&#9251;liefelijke&#9251;toestemming.<br/><i>Q: /text/s</i>>]
+            end [label="";shape=doublecircle,rank=middle]
+            Q_000->Q_006
+            Q_000->Q_008
+            Q_006->Q_010
+            Q_008->Q_010
+            Q_010->Q_012
+            Q_012->Q_013
+            Q_013->end
+            begin->Q_000
+            }
+            """.trimIndent()
+        verifyDotExport(wQ, expectedDotQ)
+        val expected = """
+            digraph CollationGraph{
+            labelloc=b
+            t000 [label="";shape=doublecircle,rank=middle]
+            t001 [label="";shape=doublecircle,rank=middle]
+            t002 [label=<F,Q: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F,Q: <i>/text/s</i>>]
+            t003 [label=<F,Q: &#9251;een&#9251;<br/>F,Q: <i>/text/s</i>>]
+            t004 [label=<F: vrouw<br/>Q: vrouw&#9251;<br/>F,Q: <i>/text/s</i>>]
+            t005 [label=<F: ,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;<br/>F: <i>/text/s</i>>]
+            t006 [label=<F,Q: vóór&#9251;de&#9251;<br/>F,Q: <i>/text/s</i>>]
+            t007 [label=<F: <br/>F: <i>/text/s/lb</i>>]
+            t008 [label=<F,Q: liefelijke&#9251;toestemming<br/>F,Q: <i>/text/s</i>>]
+            t009 [label=<F: !<br/>F: <i>/text/s</i>>]
+            t010 [label=<F: <br/>F: <i>/text/s/lb</i>>]
+            t011 [label=<F,Q: werven&#9251;om<br/>F,Q: <i>/text/s/del</i>>]
+            t012 [label=<F,Q: trachten&#9251;naar<br/>F,Q: <i>/text/s/add</i>>]
+            t013 [label=<Q: <br/>Q: <i>/text/s/lb</i>>]
+            t014 [label=<Q: !&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;nerveuze&#9251;verwachting&#9251;<br/>Q: <i>/text/s</i>>]
+            t015 [label=<Q: .<br/>Q: <i>/text/s</i>>]
+            t000->t002[label="F,Q"]
+            t002->t010[label="F"]
+            t002->t011[label="Q"]
+            t002->t012[label="Q"]
+            t003->t004[label="F"]
+            t003->t013[label="Q"]
+            t004->t005[label="F"]
+            t004->t014[label="Q"]
+            t005->t006[label="F"]
+            t006->t007[label="F"]
+            t006->t008[label="Q"]
+            t007->t008[label="F"]
+            t008->t009[label="F"]
+            t008->t015[label="Q"]
+            t009->t001[label="F"]
+            t010->t011[label="F"]
+            t010->t012[label="F"]
+            t011->t003[label="F,Q"]
+            t012->t003[label="F,Q"]
+            t013->t004[label="Q"]
+            t014->t006[label="Q"]
+            t015->t001[label="Q"]
+            }
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expected)
 
-    String expectedDotF =
-        "digraph VariantWitnessGraph{\n"
-            + "graph [rankdir=LR]\n"
-            + "labelloc=b\n"
-            + "begin [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "F_000 [label=<De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/><i>F: /text/s</i>>]\n"
-            + "F_006 [label=<Shiriar<br/><i>F: /text/s/del</i>>]\n"
-            + "F_007 [label=<&#9251;den&#9251;bedremmelden&#x21A9;<br/>&#9251;Sultan&#9251;uit&#9251;voor&#9251;\"lompen&#9251;boer\".<br/><i>F: /text/s</i>>]\n"
-            + "end [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "F_000->F_006\n"
-            + "F_000->F_007\n"
-            + "F_006->F_007\n"
-            + "F_007->end\n"
-            + "begin->F_000\n"
-            + "}";
-    verifyDotExport(wF, expectedDotF);
+        // test matching tokens
+        HyperCollateAssertions.assertThat(collationGraph)
+                .containsTextNodesMatching(
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "Hoe zoet moet nochtans zijn dit ")
+                                .withWitnessSegmentSketch("Q", "Hoe zoet moet nochtans zijn dit "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "trachten naar")
+                                .withWitnessSegmentSketch("Q", "trachten naar"),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "werven om")
+                                .withWitnessSegmentSketch("Q", "werven om"),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", " een ")
+                                .withWitnessSegmentSketch("Q", " een "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "vrouw")
+                                .withWitnessSegmentSketch("Q", "vrouw "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "vóór de ")
+                                .withWitnessSegmentSketch("Q", "vóór de "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "liefelijke toestemming")
+                                .withWitnessSegmentSketch("Q", "liefelijke toestemming"))
+    }
 
-    String expectedDotQ =
-        "digraph VariantWitnessGraph{\n"
-            + "graph [rankdir=LR]\n"
-            + "labelloc=b\n"
-            + "begin [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "Q_000 [label=<De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/><i>Q: /text/s</i>>]\n"
-            + "Q_006 [label=<Shiriar<br/><i>Q: /text/s/del</i>>]\n"
-            + "Q_007 [label=<den&#9251;bedremmelden&#9251;<br/><i>Q: /text/s/add</i>>]\n"
-            + "Q_011 [label=<&#9251;uit&#9251;voor&#9251;\"lompen&#9251;boer\".<br/><i>Q: /text/s</i>>]\n"
-            + "Q_009 [label=<man<br/><i>Q: /text/s/add/del</i>>]\n"
-            + "Q_010 [label=<Sultan<br/><i>Q: /text/s/add/add</i>>]\n"
-            + "end [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "Q_000->Q_006\n"
-            + "Q_000->Q_007\n"
-            + "Q_006->Q_011\n"
-            + "Q_007->Q_009\n"
-            + "Q_007->Q_010\n"
-            + "Q_009->Q_011\n"
-            + "Q_010->Q_011\n"
-            + "Q_011->end\n"
-            + "begin->Q_000\n"
-            + "}";
-    verifyDotExport(wQ, expectedDotQ);
+    @Test(timeout = 10000)
+    fun testOrder() {
+        val importer = XMLImporter()
+        val wF = importer.importXML(
+                "F",
+                """<?xml version="1.0" encoding="UTF-8"?>
+<text>
+    <s>De vent was woedend en maakte <del type="instantCorrection">Shiriar</del> den bedremmelden
+        Sultan uit voor "lompen boer".</s>
+</text>""")
+        val wQ = importer.importXML(
+                "Q",
+                """<?xml version="1.0" encoding="UTF-8"?>
+<text>
+    <s>De vent was woedend en maakte <del>Shiriar</del>
+        <add>den bedremmelden <del>man</del>
+            <add>Sultan</add></add> uit voor "lompen boer".</s>
+</text>""")
+        val expectedDotF = """
+            digraph VariantWitnessGraph{
+            graph [rankdir=LR]
+            labelloc=b
+            begin [label="";shape=doublecircle,rank=middle]
+            F_000 [label=<De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/><i>F: /text/s</i>>]
+            F_006 [label=<Shiriar<br/><i>F: /text/s/del</i>>]
+            F_007 [label=<&#9251;den&#9251;bedremmelden&#x21A9;<br/>&#9251;Sultan&#9251;uit&#9251;voor&#9251;"lompen&#9251;boer".<br/><i>F: /text/s</i>>]
+            end [label="";shape=doublecircle,rank=middle]
+            F_000->F_006
+            F_000->F_007
+            F_006->F_007
+            F_007->end
+            begin->F_000
+            }
+            """.trimIndent()
+        verifyDotExport(wF, expectedDotF)
+        val expectedDotQ = """
+            digraph VariantWitnessGraph{
+            graph [rankdir=LR]
+            labelloc=b
+            begin [label="";shape=doublecircle,rank=middle]
+            Q_000 [label=<De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/><i>Q: /text/s</i>>]
+            Q_006 [label=<Shiriar<br/><i>Q: /text/s/del</i>>]
+            Q_007 [label=<den&#9251;bedremmelden&#9251;<br/><i>Q: /text/s/add</i>>]
+            Q_011 [label=<&#9251;uit&#9251;voor&#9251;"lompen&#9251;boer".<br/><i>Q: /text/s</i>>]
+            Q_009 [label=<man<br/><i>Q: /text/s/add/del</i>>]
+            Q_010 [label=<Sultan<br/><i>Q: /text/s/add/add</i>>]
+            end [label="";shape=doublecircle,rank=middle]
+            Q_000->Q_006
+            Q_000->Q_007
+            Q_006->Q_011
+            Q_007->Q_009
+            Q_007->Q_010
+            Q_009->Q_011
+            Q_010->Q_011
+            Q_011->end
+            begin->Q_000
+            }
+            """.trimIndent()
+        verifyDotExport(wQ, expectedDotQ)
+        val expected = """
+            digraph CollationGraph{
+            labelloc=b
+            t000 [label="";shape=doublecircle,rank=middle]
+            t001 [label="";shape=doublecircle,rank=middle]
+            t002 [label=<F,Q: De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/>F,Q: <i>/text/s</i>>]
+            t003 [label=<F: Sultan&#9251;<br/>Q: Sultan<br/>F: <i>/text/s</i><br/>Q: <i>/text/s/add/add</i><br/>>]
+            t004 [label=<F,Q: uit&#9251;voor&#9251;"lompen&#9251;boer".<br/>F,Q: <i>/text/s</i>>]
+            t005 [label=<F,Q: Shiriar<br/>F,Q: <i>/text/s/del</i>>]
+            t006 [label=<F: &#9251;<br/>F: <i>/text/s</i>>]
+            t007 [label=<F: den&#9251;bedremmelden&#x21A9;<br/>&#9251;<br/>Q: den&#9251;bedremmelden&#9251;<br/>F: <i>/text/s</i><br/>Q: <i>/text/s/add</i><br/>>]
+            t008 [label=<Q: &#9251;<br/>Q: <i>/text/s</i>>]
+            t009 [label=<Q: man<br/>Q: <i>/text/s/add/del</i>>]
+            t000->t002[label="F,Q"]
+            t002->t005[label="F,Q"]
+            t002->t006[label="F"]
+            t002->t007[label="Q"]
+            t003->t004[label="F"]
+            t003->t008[label="Q"]
+            t004->t001[label="F,Q"]
+            t005->t006[label="F"]
+            t005->t008[label="Q"]
+            t006->t007[label="F"]
+            t007->t003[label="F,Q"]
+            t007->t009[label="Q"]
+            t008->t004[label="Q"]
+            t009->t008[label="Q"]
+            }
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expected)
+        HyperCollateAssertions.assertThat(collationGraph)
+                .containsTextNodesMatching(
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "De vent was woedend en maakte ")
+                                .withWitnessSegmentSketch("Q", "De vent was woedend en maakte "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "Shiriar")
+                                .withWitnessSegmentSketch("Q", "Shiriar"),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "den bedremmelden\n        ")
+                                .withWitnessSegmentSketch("Q", "den bedremmelden "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "Sultan ")
+                                .withWitnessSegmentSketch("Q", "Sultan"),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "uit voor \"lompen boer\".")
+                                .withWitnessSegmentSketch("Q", "uit voor \"lompen boer\"."))
+    }
 
-    String expected =
-        "digraph CollationGraph{\n"
-            + "labelloc=b\n"
-            + "t000 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t002 [label=<F,Q: De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/>F,Q: <i>/text/s</i>>]\n"
-            + "t003 [label=<F: Sultan&#9251;<br/>Q: Sultan<br/>F: <i>/text/s</i><br/>Q: <i>/text/s/add/add</i><br/>>]\n"
-            + "t004 [label=<F,Q: uit&#9251;voor&#9251;\"lompen&#9251;boer\".<br/>F,Q: <i>/text/s</i>>]\n"
-            + "t005 [label=<F,Q: Shiriar<br/>F,Q: <i>/text/s/del</i>>]\n"
-            + "t006 [label=<F: &#9251;<br/>F: <i>/text/s</i>>]\n"
-            + "t007 [label=<F: den&#9251;bedremmelden&#x21A9;<br/>&#9251;<br/>Q: den&#9251;bedremmelden&#9251;<br/>F: <i>/text/s</i><br/>Q: <i>/text/s/add</i><br/>>]\n"
-            + "t008 [label=<Q: &#9251;<br/>Q: <i>/text/s</i>>]\n"
-            + "t009 [label=<Q: man<br/>Q: <i>/text/s/add/del</i>>]\n"
-            + "t000->t002[label=\"F,Q\"]\n"
-            + "t002->t005[label=\"F,Q\"]\n"
-            + "t002->t006[label=\"F\"]\n"
-            + "t002->t007[label=\"Q\"]\n"
-            + "t003->t004[label=\"F\"]\n"
-            + "t003->t008[label=\"Q\"]\n"
-            + "t004->t001[label=\"F,Q\"]\n"
-            + "t005->t006[label=\"F\"]\n"
-            + "t005->t008[label=\"Q\"]\n"
-            + "t006->t007[label=\"F\"]\n"
-            + "t007->t003[label=\"F,Q\"]\n"
-            + "t007->t009[label=\"Q\"]\n"
-            + "t008->t004[label=\"Q\"]\n"
-            + "t009->t008[label=\"Q\"]\n"
-            + "}";
+    @Test
+    fun testTheDog() {
+        val importer = XMLImporter()
+        val wF = importer.importXML("A", "<text>The dog's big eyes.</text>")
+        val wQ = importer.importXML(
+                "B", "<text>The dog's <del>big black ears</del><add>brown eyes</add>.</text>")
+        val expected = """
+            digraph CollationGraph{
+            labelloc=b
+            t000 [label="";shape=doublecircle,rank=middle]
+            t001 [label="";shape=doublecircle,rank=middle]
+            t002 [label=<A,B: The&#9251;dog's&#9251;<br/>A,B: <i>/text</i>>]
+            t003 [label=<A,B: big&#9251;<br/>A: <i>/text</i><br/>B: <i>/text/del</i><br/>>]
+            t004 [label=<A,B: eyes<br/>A: <i>/text</i><br/>B: <i>/text/add</i><br/>>]
+            t005 [label=<A,B: .<br/>A,B: <i>/text</i>>]
+            t006 [label=<B: black&#9251;ears<br/>B: <i>/text/del</i>>]
+            t007 [label=<B: brown&#9251;<br/>B: <i>/text/add</i>>]
+            t000->t002[label="A,B"]
+            t002->t003[label="A,B"]
+            t002->t007[label="B"]
+            t003->t004[label="A"]
+            t003->t006[label="B"]
+            t004->t005[label="A,B"]
+            t005->t001[label="A,B"]
+            t006->t005[label="B"]
+            t007->t004[label="B"]
+            }
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expected)
+        HyperCollateAssertions.assertThat(collationGraph)
+                .containsOnlyTextNodesMatching(
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("A", "The dog's ")
+                                .withWitnessSegmentSketch("B", "The dog's "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("A", "big ")
+                                .withWitnessSegmentSketch("B", "big "),
+                        CollationGraphAssert.textNodeSketch().withWitnessSegmentSketch("B", "black ears"),
+                        CollationGraphAssert.textNodeSketch().withWitnessSegmentSketch("B", "brown "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("A", "eyes")
+                                .withWitnessSegmentSketch("B", "eyes"),
+                        CollationGraphAssert.textNodeSketch().withWitnessSegmentSketch("A", ".").withWitnessSegmentSketch("B", "."))
+    }
 
-    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
-    assertThat(collationGraph)
-        .containsTextNodesMatching(
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "De vent was woedend en maakte ")
-                .withWitnessSegmentSketch("Q", "De vent was woedend en maakte "),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "Shiriar")
-                .withWitnessSegmentSketch("Q", "Shiriar"),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "den bedremmelden\n        ")
-                .withWitnessSegmentSketch("Q", "den bedremmelden "),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "Sultan ")
-                .withWitnessSegmentSketch("Q", "Sultan"),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "uit voor \"lompen boer\".")
-                .withWitnessSegmentSketch("Q", "uit voor \"lompen boer\"."));
-  }
+    @Test(timeout = 10000)
+    fun testTranspositionAndDuplication() {
+        val importer = XMLImporter()
+        val wF = importer.importXML("A", "<text>T b b b b b b b Y</text>")
+        val wQ = importer.importXML("B", "<text>X b b b b b b b T</text>")
+        val expected = """
+            digraph CollationGraph{
+            labelloc=b
+            t000 [label="";shape=doublecircle,rank=middle]
+            t001 [label="";shape=doublecircle,rank=middle]
+            t002 [label=<A: T&#9251;<br/>A: <i>/text</i>>]
+            t003 [label=<A,B: b&#9251;b&#9251;b&#9251;b&#9251;b&#9251;b&#9251;b&#9251;<br/>A,B: <i>/text</i>>]
+            t004 [label=<A: Y<br/>A: <i>/text</i>>]
+            t005 [label=<B: X&#9251;<br/>B: <i>/text</i>>]
+            t006 [label=<B: T<br/>B: <i>/text</i>>]
+            t000->t002[label="A"]
+            t000->t005[label="B"]
+            t002->t003[label="A"]
+            t003->t004[label="A"]
+            t003->t006[label="B"]
+            t004->t001[label="A"]
+            t005->t003[label="B"]
+            t006->t001[label="B"]
+            }
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expected)
+        HyperCollateAssertions.assertThat(collationGraph)
+                .containsTextNodesMatching(
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("A", "b b b b b b b ")
+                                .withWitnessSegmentSketch("B", "b b b b b b b "))
+        HyperCollateAssertions.assertThat(collationGraph)
+                .doesNotContainTextNodesMatching(
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("A", "T ")
+                                .withWitnessSegmentSketch("B", "X "))
+    }
 
-  @Test
-  public void testTheDog() {
-    XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph wF = importer.importXML("A", "<text>The dog's big eyes.</text>");
-    VariantWitnessGraph wQ =
-        importer.importXML(
-            "B", "<text>The dog's <del>big black ears</del><add>brown eyes</add>.</text>");
-    String expected =
-        "digraph CollationGraph{\n"
-            + "labelloc=b\n"
-            + "t000 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t002 [label=<A,B: The&#9251;dog's&#9251;<br/>A,B: <i>/text</i>>]\n"
-            + "t003 [label=<A,B: big&#9251;<br/>A: <i>/text</i><br/>B: <i>/text/del</i><br/>>]\n"
-            + "t004 [label=<A,B: eyes<br/>A: <i>/text</i><br/>B: <i>/text/add</i><br/>>]\n"
-            + "t005 [label=<A,B: .<br/>A,B: <i>/text</i>>]\n"
-            + "t006 [label=<B: black&#9251;ears<br/>B: <i>/text/del</i>>]\n"
-            + "t007 [label=<B: brown&#9251;<br/>B: <i>/text/add</i>>]\n"
-            + "t000->t002[label=\"A,B\"]\n"
-            + "t002->t003[label=\"A,B\"]\n"
-            + "t002->t007[label=\"B\"]\n"
-            + "t003->t004[label=\"A\"]\n"
-            + "t003->t006[label=\"B\"]\n"
-            + "t004->t005[label=\"A,B\"]\n"
-            + "t005->t001[label=\"A,B\"]\n"
-            + "t006->t005[label=\"B\"]\n"
-            + "t007->t004[label=\"B\"]\n"
-            + "}";
+    @Test(timeout = 10000)
+    fun testDoubleTransposition() {
+        val importer = XMLImporter()
+        val wF = importer.importXML("A", "<text>A b C d E C f G H</text>")
+        val wQ = importer.importXML("B", "<text>A H i j E C G k</text>")
+        val expected = """
+            digraph CollationGraph{
+            labelloc=b
+            t000 [label="";shape=doublecircle,rank=middle]
+            t001 [label="";shape=doublecircle,rank=middle]
+            t002 [label=<A,B: A&#9251;<br/>A,B: <i>/text</i>>]
+            t003 [label=<A: b&#9251;C&#9251;d&#9251;<br/>A: <i>/text</i>>]
+            t004 [label=<A,B: E&#9251;C&#9251;<br/>A,B: <i>/text</i>>]
+            t005 [label=<A: f&#9251;<br/>A: <i>/text</i>>]
+            t006 [label=<A,B: G&#9251;<br/>A,B: <i>/text</i>>]
+            t007 [label=<A: H<br/>A: <i>/text</i>>]
+            t008 [label=<B: H&#9251;i&#9251;j&#9251;<br/>B: <i>/text</i>>]
+            t009 [label=<B: k<br/>B: <i>/text</i>>]
+            t000->t002[label="A,B"]
+            t002->t003[label="A"]
+            t002->t008[label="B"]
+            t003->t004[label="A"]
+            t004->t005[label="A"]
+            t004->t006[label="B"]
+            t005->t006[label="A"]
+            t006->t007[label="A"]
+            t006->t009[label="B"]
+            t007->t001[label="A"]
+            t008->t004[label="B"]
+            t009->t001[label="B"]
+            }
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expected)
+        HyperCollateAssertions.assertThat(collationGraph)
+                .containsTextNodesMatching(
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("A", "A ")
+                                .withWitnessSegmentSketch("B", "A "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("A", "E C ")
+                                .withWitnessSegmentSketch("B", "E C "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("A", "G ")
+                                .withWitnessSegmentSketch("B", "G "))
+        HyperCollateAssertions.assertThat(collationGraph)
+                .doesNotContainTextNodesMatching(
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("A", "H")
+                                .withWitnessSegmentSketch("B", "H "))
+    }
 
-    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
-    assertThat(collationGraph)
-        .containsOnlyTextNodesMatching(
-            textNodeSketch()
-                .withWitnessSegmentSketch("A", "The dog's ")
-                .withWitnessSegmentSketch("B", "The dog's "),
-            textNodeSketch()
-                .withWitnessSegmentSketch("A", "big ")
-                .withWitnessSegmentSketch("B", "big "),
-            textNodeSketch().withWitnessSegmentSketch("B", "black ears"),
-            textNodeSketch().withWitnessSegmentSketch("B", "brown "),
-            textNodeSketch()
-                .withWitnessSegmentSketch("A", "eyes")
-                .withWitnessSegmentSketch("B", "eyes"),
-            textNodeSketch().withWitnessSegmentSketch("A", ".").withWitnessSegmentSketch("B", "."));
-  }
+    @Test(timeout = 10000)
+    fun testVirginiaWoolfTimePassesFragment() {
+        val importer = XMLImporter()
+        val xml1 = """
+            <text>
+            <div n="2">
+            <s>Leaning her bony breast on the hard thorn she crooned out her forgiveness.</s>
+            </div>
+            <div n="3">
+            <s>Was it then that she had her consolations  </s>
+            </div>
+            </text>
+            """.trimIndent()
+        LOG.info("H: {}", xml1)
+        val wF = importer.importXML("H", xml1)
+        val xml2 = """
+            <text>
+            <p>
+            <s> granting, as she stood the chair straight by the dressing table, <add>leaning her bony breast on the hard thorn</add>, her forgiveness of it all.</s>
+            </p>
+            <p>
+            <s>Was it then that she had her consolations ... </s>
+            </p>
+            </text>
+            """.trimIndent()
+        LOG.info("T: {}", xml2)
+        val wQ = importer.importXML("T", xml2)
+        val expected = """
+            digraph CollationGraph{
+            labelloc=b
+            t000 [label="";shape=doublecircle,rank=middle]
+            t001 [label="";shape=doublecircle,rank=middle]
+            t002 [label=<H: Leaning&#9251;her&#9251;bony&#9251;breast&#9251;on&#9251;the&#9251;hard&#9251;thorn&#9251;<br/>T: leaning&#9251;her&#9251;bony&#9251;breast&#9251;on&#9251;the&#9251;hard&#9251;thorn<br/>H: <i>/text/div/s</i><br/>T: <i>/text/p/s/add</i><br/>>]
+            t003 [label=<H: her&#9251;forgiveness<br/>T: her&#9251;forgiveness&#9251;<br/>H: <i>/text/div/s</i><br/>T: <i>/text/p/s</i><br/>>]
+            t004 [label=<H,T: .Was&#9251;it&#9251;then&#9251;that&#9251;she&#9251;had&#9251;her&#9251;consolations&#9251;<br/>H: <i>/text/div/s</i><br/>T: <i>/text/p/s</i><br/>>]
+            t005 [label=<H: she&#9251;crooned&#9251;out&#9251;<br/>H: <i>/text/div/s</i>>]
+            t006 [label=<T: &#9251;granting,&#9251;as&#9251;she&#9251;stood&#9251;the&#9251;chair&#9251;straight&#9251;by&#9251;the&#9251;dressing&#9251;table,&#9251;<br/>T: <i>/text/p/s</i>>]
+            t007 [label=<T: ,&#9251;<br/>T: <i>/text/p/s</i>>]
+            t008 [label=<T: of&#9251;it&#9251;all<br/>T: <i>/text/p/s</i>>]
+            t009 [label=<T: ...&#9251;<br/>T: <i>/text/p/s</i>>]
+            t000->t002[label="H"]
+            t000->t006[label="T"]
+            t002->t005[label="H"]
+            t002->t007[label="T"]
+            t003->t004[label="H"]
+            t003->t008[label="T"]
+            t004->t001[label="H"]
+            t004->t009[label="T"]
+            t005->t003[label="H"]
+            t006->t002[label="T"]
+            t006->t007[label="T"]
+            t007->t003[label="T"]
+            t008->t004[label="T"]
+            t009->t001[label="T"]
+            }
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expected)
+        HyperCollateAssertions.assertThat(collationGraph)
+                .containsTextNodesMatching(
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("H", "Leaning her bony breast on the hard thorn ")
+                                .withWitnessSegmentSketch("T", "leaning her bony breast on the hard thorn"),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("H", "her forgiveness")
+                                .withWitnessSegmentSketch("T", "her forgiveness "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("H", ".Was it then that she had her consolations  ")
+                                .withWitnessSegmentSketch("T", ".Was it then that she had her consolations "))
+        HyperCollateAssertions.assertThat(collationGraph)
+                .doesNotContainTextNodesMatching(
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("H", ", ")
+                                .withWitnessSegmentSketch("T", ", "))
+    }
 
-  @Test(timeout = 10000)
-  public void testTranspositionAndDuplication() {
-    XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph wF = importer.importXML("A", "<text>T b b b b b b b Y</text>");
-    VariantWitnessGraph wQ = importer.importXML("B", "<text>X b b b b b b b T</text>");
-    String expected =
-        "digraph CollationGraph{\n"
-            + "labelloc=b\n"
-            + "t000 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t002 [label=<A: T&#9251;<br/>A: <i>/text</i>>]\n"
-            + "t003 [label=<A,B: b&#9251;b&#9251;b&#9251;b&#9251;b&#9251;b&#9251;b&#9251;<br/>A,B: <i>/text</i>>]\n"
-            + "t004 [label=<A: Y<br/>A: <i>/text</i>>]\n"
-            + "t005 [label=<B: X&#9251;<br/>B: <i>/text</i>>]\n"
-            + "t006 [label=<B: T<br/>B: <i>/text</i>>]\n"
-            + "t000->t002[label=\"A\"]\n"
-            + "t000->t005[label=\"B\"]\n"
-            + "t002->t003[label=\"A\"]\n"
-            + "t003->t004[label=\"A\"]\n"
-            + "t003->t006[label=\"B\"]\n"
-            + "t004->t001[label=\"A\"]\n"
-            + "t005->t003[label=\"B\"]\n"
-            + "t006->t001[label=\"B\"]\n"
-            + "}";
+    @Test(timeout = 10000)
+    fun testMaryShellyGodwinFrankensteinFragment1() {
+        val importer = XMLImporter()
+        val xmlN = """<text>
+<s>so destitute of every hope of consolation to live
+<del rend="strikethrough">-</del>
+<add place="overwritten" hand="#pbs">?</add> oh no - ...
+</s>
+</text>"""
+        val wF = importer.importXML("N", xmlN)
+        LOG.info("N: {}", xmlN)
+        val xmlF = """
+            <text>
+            <p>
+            <s>so infinitely miserable, so destitute of every hope of consolation to live?</s> <s>Oh, no! ... </s>
+            </p></text>
+            """.trimIndent()
+        LOG.info("F: {}", xmlF)
+        val wQ = importer.importXML("F", xmlF)
+        val expected = """
+            digraph CollationGraph{
+            labelloc=b
+            t000 [label="";shape=doublecircle,rank=middle]
+            t001 [label="";shape=doublecircle,rank=middle]
+            t002 [label=<F,N: so&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]
+            t003 [label=<F,N: ?<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s/add</i><br/>>]
+            t004 [label=<F,N: &#9251;<br/>F: <i>/text/p</i><br/>N: <i>/text/s</i><br/>>]
+            t005 [label=<F: Oh<br/>N: oh&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]
+            t006 [label=<F: ,&#9251;<br/>F: <i>/text/p/s</i>>]
+            t007 [label=<F: no<br/>N: no&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]
+            t008 [label=<F: !&#9251;<br/>F: <i>/text/p/s</i>>]
+            t009 [label=<F: ...&#9251;<br/>N: ...&#x21A9;<br/><br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]
+            t010 [label=<F: infinitely&#9251;miserable,&#9251;so&#9251;<br/>F: <i>/text/p/s</i>>]
+            t011 [label=<F,N: destitute&#9251;of&#9251;every&#9251;hope&#9251;of&#9251;consolation&#9251;to&#9251;live<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]
+            t012 [label=<N: -&#9251;<br/>N: <i>/text/s</i>>]
+            t013 [label=<N: -<br/>N: <i>/text/s/del</i>>]
+            t000->t002[label="F,N"]
+            t002->t010[label="F"]
+            t002->t011[label="N"]
+            t003->t004[label="F,N"]
+            t004->t005[label="F,N"]
+            t005->t006[label="F"]
+            t005->t007[label="N"]
+            t006->t007[label="F"]
+            t007->t008[label="F"]
+            t007->t012[label="N"]
+            t008->t009[label="F"]
+            t009->t001[label="F,N"]
+            t010->t011[label="F"]
+            t011->t003[label="F,N"]
+            t011->t013[label="N"]
+            t012->t009[label="N"]
+            t013->t004[label="N"]
+            }
+            """.trimIndent()
+        val expected1 = """
+            digraph CollationGraph{
+            labelloc=b
+            t000 [label="";shape=doublecircle,rank=middle]
+            t001 [label="";shape=doublecircle,rank=middle]
+            t002 [label=<F: so&#9251;infinitely&#9251;miserable,&#9251;<br/>F: <i>/text/p/s</i>>]
+            t003 [label=<F,N: ?<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s/add</i><br/>>]
+            t004 [label=<F,N: &#9251;<br/>F: <i>/text/p</i><br/>N: <i>/text/s</i><br/>>]
+            t005 [label=<F: Oh<br/>N: oh&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]
+            t006 [label=<F: ,&#9251;<br/>F: <i>/text/p/s</i>>]
+            t007 [label=<F: no<br/>N: no&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]
+            t008 [label=<F: !&#9251;<br/>F: <i>/text/p/s</i>>]
+            t009 [label=<F: ...&#9251;<br/>N: ...&#x21A9;<br/><br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]
+            t010 [label=<F,N: so&#9251;destitute&#9251;of&#9251;every&#9251;hope&#9251;of&#9251;consolation&#9251;to&#9251;live<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]
+            t011 [label=<N: -&#9251;<br/>N: <i>/text/s</i>>]
+            t012 [label=<N: -<br/>N: <i>/text/s/del</i>>]
+            t000->t002[label="F"]
+            t000->t010[label="N"]
+            t002->t010[label="F"]
+            t003->t004[label="F,N"]
+            t004->t005[label="F,N"]
+            t005->t006[label="F"]
+            t005->t007[label="N"]
+            t006->t007[label="F"]
+            t007->t008[label="F"]
+            t007->t011[label="N"]
+            t008->t009[label="F"]
+            t009->t001[label="F,N"]
+            t010->t003[label="F,N"]
+            t010->t012[label="N"]
+            t011->t009[label="N"]
+            t012->t004[label="N"]
+            }
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expected)
+        HyperCollateAssertions.assertThat(collationGraph)
+                .containsTextNodesMatching(
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "so ")
+                                .withWitnessSegmentSketch("N", "so "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "destitute of every hope of consolation to live")
+                                .withWitnessSegmentSketch("N", "destitute of every hope of consolation to live"),
+                        CollationGraphAssert.textNodeSketch().withWitnessSegmentSketch("F", " ").withWitnessSegmentSketch("N", " "),
+                        CollationGraphAssert.textNodeSketch().withWitnessSegmentSketch("F", "?").withWitnessSegmentSketch("N", "?"),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "Oh")
+                                .withWitnessSegmentSketch("N", "oh "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "no")
+                                .withWitnessSegmentSketch("N", "no "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "... ")
+                                .withWitnessSegmentSketch("N", "...\n"))
+    }
 
-    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
-    assertThat(collationGraph)
-        .containsTextNodesMatching(
-            textNodeSketch()
-                .withWitnessSegmentSketch("A", "b b b b b b b ")
-                .withWitnessSegmentSketch("B", "b b b b b b b "));
-    assertThat(collationGraph)
-        .doesNotContainTextNodesMatching(
-            textNodeSketch()
-                .withWitnessSegmentSketch("A", "T ")
-                .withWitnessSegmentSketch("B", "X "));
-  }
+    @Test(timeout = 10000)
+    fun testMaryShellyGodwinFrankensteinFragment2() {
+        val importer = XMLImporter()
+        val xmlN = """
+            <text>
+            <s>Frankenstein discovered that I detailed or made notes concerning his history he asked to see them &amp; himself corrected
+            <add place="superlinear">and augmented</add>
+            them in many places</s>
+            </text>
+            """.trimIndent()
+        val wF = importer.importXML("N", xmlN)
+        LOG.info("N: {}", xmlN)
+        val xmlF = """
+            <text>
+            <s>Frankenstein discovered
+            <del rend="strikethrough">or</del>
+            <add place="superlinear">that I</add> made notes concerning his history; he asked to see them and then himself corrected and augmented them in many places
+            </s>
+            </text>
+            """.trimIndent()
+        LOG.info("F: {}", xmlF)
+        val wQ = importer.importXML("F", xmlF)
+        val expected = """
+            digraph CollationGraph{
+            labelloc=b
+            t000 [label="";shape=doublecircle,rank=middle]
+            t001 [label="";shape=doublecircle,rank=middle]
+            t002 [label=<F: Frankenstein&#9251;discovered<br/>N: Frankenstein&#9251;discovered&#9251;<br/>F,N: <i>/text/s</i>>]
+            t003 [label=<F: ;&#9251;<br/>F: <i>/text/s</i>>]
+            t004 [label=<F,N: he&#9251;asked&#9251;to&#9251;see&#9251;them&#9251;<br/>F,N: <i>/text/s</i>>]
+            t005 [label=<F: and&#9251;then&#9251;<br/>F: <i>/text/s</i>>]
+            t006 [label=<F: himself&#9251;corrected&#9251;<br/>N: himself&#9251;corrected&#x21A9;<br/><br/>F,N: <i>/text/s</i>>]
+            t007 [label=<F: and&#9251;augmented&#9251;<br/>N: and&#9251;augmented<br/>F: <i>/text/s</i><br/>N: <i>/text/s/add</i><br/>>]
+            t008 [label=<F: them&#9251;in&#9251;many&#9251;places&#x21A9;<br/><br/>N: them&#9251;in&#9251;many&#9251;places<br/>F,N: <i>/text/s</i>>]
+            t009 [label=<F: or<br/>N: or&#9251;<br/>F: <i>/text/s/del</i><br/>N: <i>/text/s</i><br/>>]
+            t010 [label=<F: that&#9251;I<br/>N: that&#9251;I&#9251;<br/>F: <i>/text/s/add</i><br/>N: <i>/text/s</i><br/>>]
+            t011 [label=<F: &#9251;<br/>F: <i>/text/s</i>>]
+            t012 [label=<F: made&#9251;notes&#9251;concerning&#9251;his&#9251;history<br/>N: made&#9251;notes&#9251;concerning&#9251;his&#9251;history&#9251;<br/>F,N: <i>/text/s</i>>]
+            t013 [label=<N: &amp;&#9251;<br/>N: <i>/text/s</i>>]
+            t014 [label=<N: detailed&#9251;<br/>N: <i>/text/s</i>>]
+            t000->t002[label="F,N"]
+            t002->t009[label="F"]
+            t002->t010[label="F,N"]
+            t003->t004[label="F"]
+            t004->t005[label="F"]
+            t004->t013[label="N"]
+            t005->t006[label="F"]
+            t006->t007[label="F,N"]
+            t006->t008[label="N"]
+            t007->t008[label="F,N"]
+            t008->t001[label="F,N"]
+            t009->t011[label="F"]
+            t009->t012[label="N"]
+            t010->t011[label="F"]
+            t010->t014[label="N"]
+            t011->t012[label="F"]
+            t012->t003[label="F"]
+            t012->t004[label="N"]
+            t013->t006[label="N"]
+            t014->t009[label="N"]
+            }
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expected)
+        HyperCollateAssertions.assertThat(collationGraph)
+                .containsTextNodesMatching(
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "Frankenstein discovered")
+                                .withWitnessSegmentSketch("N", "Frankenstein discovered "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "that I")
+                                .withWitnessSegmentSketch("N", "that I "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "or")
+                                .withWitnessSegmentSketch("N", "or "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "made notes concerning his history")
+                                .withWitnessSegmentSketch("N", "made notes concerning his history "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "he asked to see them ")
+                                .withWitnessSegmentSketch("F", "he asked to see them ")
+                                .withWitnessSegmentSketch("N", "he asked to see them "),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "himself corrected ")
+                                .withWitnessSegmentSketch("N", "himself corrected\n"),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "and augmented ")
+                                .withWitnessSegmentSketch("N", "and augmented"),
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("F", "them in many places\n")
+                                .withWitnessSegmentSketch("N", "them in many places"))
+    }
 
-  @Test(timeout = 10000)
-  public void testDoubleTransposition() {
-    XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph wF = importer.importXML("A", "<text>A b C d E C f G H</text>");
-    VariantWitnessGraph wQ = importer.importXML("B", "<text>A H i j E C G k</text>");
-    String expected =
-        "digraph CollationGraph{\n"
-            + "labelloc=b\n"
-            + "t000 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t002 [label=<A,B: A&#9251;<br/>A,B: <i>/text</i>>]\n"
-            + "t003 [label=<A: b&#9251;C&#9251;d&#9251;<br/>A: <i>/text</i>>]\n"
-            + "t004 [label=<A,B: E&#9251;C&#9251;<br/>A,B: <i>/text</i>>]\n"
-            + "t005 [label=<A: f&#9251;<br/>A: <i>/text</i>>]\n"
-            + "t006 [label=<A,B: G&#9251;<br/>A,B: <i>/text</i>>]\n"
-            + "t007 [label=<A: H<br/>A: <i>/text</i>>]\n"
-            + "t008 [label=<B: H&#9251;i&#9251;j&#9251;<br/>B: <i>/text</i>>]\n"
-            + "t009 [label=<B: k<br/>B: <i>/text</i>>]\n"
-            + "t000->t002[label=\"A,B\"]\n"
-            + "t002->t003[label=\"A\"]\n"
-            + "t002->t008[label=\"B\"]\n"
-            + "t003->t004[label=\"A\"]\n"
-            + "t004->t005[label=\"A\"]\n"
-            + "t004->t006[label=\"B\"]\n"
-            + "t005->t006[label=\"A\"]\n"
-            + "t006->t007[label=\"A\"]\n"
-            + "t006->t009[label=\"B\"]\n"
-            + "t007->t001[label=\"A\"]\n"
-            + "t008->t004[label=\"B\"]\n"
-            + "t009->t001[label=\"B\"]\n"
-            + "}";
+    @Test(timeout = 10000)
+    fun testCollationGraphInitialization() {
+        val importer = XMLImporter()
+        val wF = importer.importXML(
+                "F",
+                """<text>
+    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,
+        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>
+</text>""")
+        val collationGraph = CollationGraph()
+        val map: Map<TokenVertex, TextNode> = HashMap()
+        val matches: List<Match> = ArrayList()
+        val markupNodeIndex: Map<Markup, MarkupNode> = HashMap()
+        hyperCollator.initialize(collationGraph, map, markupNodeIndex, wF)
+        val collation = CollationGraphNodeJoiner.join(collationGraph)
+        val dot = CollationGraphVisualizer.toDot(collation, true, false)
+        val expected = """
+            digraph CollationGraph{
+            labelloc=b
+            t000 [label="";shape=doublecircle,rank=middle]
+            t001 [label="";shape=doublecircle,rank=middle]
+            t002 [label=<F: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F: <i>/text/s</i>>]
+            t003 [label=<F: &#9251;een&#9251;vrouw,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;vóór&#9251;de&#9251;<br/>F: <i>/text/s</i>>]
+            t004 [label=<F: <br/>F: <i>/text/s/lb</i>>]
+            t005 [label=<F: liefelijke&#9251;toestemming!<br/>F: <i>/text/s</i>>]
+            t006 [label=<F: <br/>F: <i>/text/s/lb</i>>]
+            t007 [label=<F: werven&#9251;om<br/>F: <i>/text/s/del</i>>]
+            t008 [label=<F: trachten&#9251;naar<br/>F: <i>/text/s/add</i>>]
+            t000->t002[label="F"]
+            t002->t006[label="F"]
+            t003->t004[label="F"]
+            t004->t005[label="F"]
+            t005->t001[label="F"]
+            t006->t007[label="F"]
+            t006->t008[label="F"]
+            t007->t003[label="F"]
+            t008->t003[label="F"]
+            }
+            """.trimIndent()
+        Assertions.assertThat(dot).isEqualTo(expected)
+        val dotWithoutMarkupAndWhitespaceEmphasis = CollationGraphVisualizer.toDot(collation, false, true)
+        val expected2 = """
+            digraph CollationGraph{
+            labelloc=b
+            t000 [label="";shape=doublecircle,rank=middle]
+            t001 [label="";shape=doublecircle,rank=middle]
+            t002 [label=<F: Hoe&nbsp;zoet&nbsp;moet&nbsp;nochtans&nbsp;zijn&nbsp;dit&nbsp;>]
+            t003 [label=<F: &nbsp;een&nbsp;vrouw,&#x21A9;<br/>&nbsp;de&nbsp;ongewisheid&nbsp;vóór&nbsp;de&nbsp;>]
+            t004 [label=<F: >]
+            t005 [label=<F: liefelijke&nbsp;toestemming!>]
+            t006 [label=<F: >]
+            t007 [label=<F: werven&nbsp;om>]
+            t008 [label=<F: trachten&nbsp;naar>]
+            t000->t002[label="F"]
+            t002->t006[label="F"]
+            t003->t004[label="F"]
+            t004->t005[label="F"]
+            t005->t001[label="F"]
+            t006->t007[label="F"]
+            t006->t008[label="F"]
+            t007->t003[label="F"]
+            t008->t003[label="F"]
+            }
+            """.trimIndent()
+        Assertions.assertThat(dotWithoutMarkupAndWhitespaceEmphasis).isEqualTo(expected2)
 
-    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
-    assertThat(collationGraph)
-        .containsTextNodesMatching(
-            textNodeSketch()
-                .withWitnessSegmentSketch("A", "A ")
-                .withWitnessSegmentSketch("B", "A "),
-            textNodeSketch()
-                .withWitnessSegmentSketch("A", "E C ")
-                .withWitnessSegmentSketch("B", "E C "),
-            textNodeSketch()
-                .withWitnessSegmentSketch("A", "G ")
-                .withWitnessSegmentSketch("B", "G "));
-    assertThat(collationGraph)
-        .doesNotContainTextNodesMatching(
-            textNodeSketch()
-                .withWitnessSegmentSketch("A", "H")
-                .withWitnessSegmentSketch("B", "H "));
-  }
+        // System.out.println(dot);
+        // writeGraph(dot, "graph");
+    }
 
-  @Test(timeout = 10000)
-  public void testVirginiaWoolfTimePassesFragment() {
-    XMLImporter importer = new XMLImporter();
-    String xml1 =
-        "<text>\n"
-            + "<div n=\"2\">\n"
-            + "<s>Leaning her bony breast on the hard thorn she crooned out her forgiveness.</s>\n"
-            + "</div>\n"
-            + "<div n=\"3\">\n"
-            + "<s>Was it then that she had her consolations  </s>\n"
-            + "</div>\n"
-            + "</text>";
-    LOG.info("H: {}", xml1);
-    VariantWitnessGraph wF = importer.importXML("H", xml1);
-    String xml2 =
-        "<text>\n"
-            + "<p>\n"
-            + "<s> granting, as she stood the chair straight by the dressing table, <add>leaning her bony breast on the hard thorn</add>, her forgiveness of it all.</s>\n"
-            + "</p>\n"
-            + "<p>\n"
-            + "<s>Was it then that she had her consolations ... </s>\n"
-            + "</p>\n"
-            + "</text>";
-    LOG.info("T: {}", xml2);
-    VariantWitnessGraph wQ = importer.importXML("T", xml2);
-    String expected =
-        "digraph CollationGraph{\n"
-            + "labelloc=b\n"
-            + "t000 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t002 [label=<H: Leaning&#9251;her&#9251;bony&#9251;breast&#9251;on&#9251;the&#9251;hard&#9251;thorn&#9251;<br/>T: leaning&#9251;her&#9251;bony&#9251;breast&#9251;on&#9251;the&#9251;hard&#9251;thorn<br/>H: <i>/text/div/s</i><br/>T: <i>/text/p/s/add</i><br/>>]\n"
-            + "t003 [label=<H: her&#9251;forgiveness<br/>T: her&#9251;forgiveness&#9251;<br/>H: <i>/text/div/s</i><br/>T: <i>/text/p/s</i><br/>>]\n"
-            + "t004 [label=<H,T: .Was&#9251;it&#9251;then&#9251;that&#9251;she&#9251;had&#9251;her&#9251;consolations&#9251;<br/>H: <i>/text/div/s</i><br/>T: <i>/text/p/s</i><br/>>]\n"
-            + "t005 [label=<H: she&#9251;crooned&#9251;out&#9251;<br/>H: <i>/text/div/s</i>>]\n"
-            + "t006 [label=<T: &#9251;granting,&#9251;as&#9251;she&#9251;stood&#9251;the&#9251;chair&#9251;straight&#9251;by&#9251;the&#9251;dressing&#9251;table,&#9251;<br/>T: <i>/text/p/s</i>>]\n"
-            + "t007 [label=<T: ,&#9251;<br/>T: <i>/text/p/s</i>>]\n"
-            + "t008 [label=<T: of&#9251;it&#9251;all<br/>T: <i>/text/p/s</i>>]\n"
-            + "t009 [label=<T: ...&#9251;<br/>T: <i>/text/p/s</i>>]\n"
-            + "t000->t002[label=\"H\"]\n"
-            + "t000->t006[label=\"T\"]\n"
-            + "t002->t005[label=\"H\"]\n"
-            + "t002->t007[label=\"T\"]\n"
-            + "t003->t004[label=\"H\"]\n"
-            + "t003->t008[label=\"T\"]\n"
-            + "t004->t001[label=\"H\"]\n"
-            + "t004->t009[label=\"T\"]\n"
-            + "t005->t003[label=\"H\"]\n"
-            + "t006->t002[label=\"T\"]\n"
-            + "t006->t007[label=\"T\"]\n"
-            + "t007->t003[label=\"T\"]\n"
-            + "t008->t004[label=\"T\"]\n"
-            + "t009->t001[label=\"T\"]\n"
-            + "}";
+    @Test(timeout = 10000)
+    fun testPermute() {
+        val permute1 = hyperCollator.permute(3)
+        LOG.info("permute={}", visualize(permute1))
+        Assertions.assertThat(Sets.newHashSet(permute1)).hasSameSizeAs(permute1)
+        Assertions.assertThat(permute1).hasSize(3)
+        val permute2 = hyperCollator.permute(4)
+        LOG.info("permute={}", visualize(permute2))
+        Assertions.assertThat(Sets.newHashSet(permute2)).hasSameSizeAs(permute2)
+        Assertions.assertThat(permute2).hasSize(6)
+        val permute3 = hyperCollator.permute(10)
+        LOG.info("permute={}", visualize(permute3))
+        Assertions.assertThat(Sets.newHashSet(permute3)).hasSameSizeAs(permute3)
+        Assertions.assertThat(permute3).hasSize(45)
+    }
 
-    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
-    assertThat(collationGraph)
-        .containsTextNodesMatching(
-            textNodeSketch()
-                .withWitnessSegmentSketch("H", "Leaning her bony breast on the hard thorn ")
-                .withWitnessSegmentSketch("T", "leaning her bony breast on the hard thorn"),
-            textNodeSketch()
-                .withWitnessSegmentSketch("H", "her forgiveness")
-                .withWitnessSegmentSketch("T", "her forgiveness "),
-            textNodeSketch()
-                .withWitnessSegmentSketch("H", ".Was it then that she had her consolations  ")
-                .withWitnessSegmentSketch("T", ".Was it then that she had her consolations "));
-    assertThat(collationGraph)
-        .doesNotContainTextNodesMatching(
-            textNodeSketch()
-                .withWitnessSegmentSketch("H", ", ")
-                .withWitnessSegmentSketch("T", ", "));
-  }
+    @Test(timeout = 10000)
+    fun testPotentialMatches() {
+        val importer = XMLImporter()
+        val sigil1 = "A"
+        val sigil2 = "B"
+        val sigil3 = "C"
+        val w1 = importer.importXML(sigil1, "<x>the black cat</x>")
+        val w2 = importer.importXML(sigil2, "<x>the blue dog</x>")
+        val w3 = importer.importXML(sigil3, "<x>the black dog</x>")
+        val witnesses = Arrays.asList(w1, w2, w3)
+        val rankings = witnesses.stream().map { graph: VariantWitnessGraph? -> VariantWitnessGraphRanking.of(graph) }.collect(Collectors.toList())
+        val allPotentialMatches = hyperCollator.getPotentialMatches(witnesses, rankings)
+        LOG.info("allPotentialMatches={}", allPotentialMatches)
+        val match1 = "<A0,B0>"
+        val match2 = "<A0,C0>"
+        val match3 = "<A1,C1>"
+        val match4 = "<B0,C0>"
+        val match5 = "<B2,C2>"
+        val match6 = "<A:EndTokenVertex,B:EndTokenVertex>"
+        val match7 = "<A:EndTokenVertex,C:EndTokenVertex>"
+        val match8 = "<B:EndTokenVertex,C:EndTokenVertex>"
+        Assertions.assertThat(allPotentialMatches).hasSize(8)
+        val matchStrings = allPotentialMatches.stream().map { obj: Match -> obj.toString() }.collect(Collectors.toSet())
+        Assertions.assertThat(matchStrings)
+                .contains(match1, match2, match3, match4, match5, match6, match7, match8)
+        val sortAndFilterMatchesByWitness = hyperCollator.sortAndFilterMatchesByWitness(
+                allPotentialMatches, Arrays.asList(sigil1, sigil2, sigil3))
+        LOG.info("sortAndFilterMatchesByWitness={}", sortAndFilterMatchesByWitness)
+        Assertions.assertThat(sortAndFilterMatchesByWitness).containsOnlyKeys(sigil1, sigil2, sigil3)
+        val listA = stringList(sortAndFilterMatchesByWitness, sigil1)
+        Assertions.assertThat(listA).containsOnly(match1, match2, match3, match6, match7)
+        val listB = stringList(sortAndFilterMatchesByWitness, sigil2)
+        Assertions.assertThat(listB).containsOnly(match4, match1, match5, match6, match8)
+        val listC = stringList(sortAndFilterMatchesByWitness, sigil3)
+        Assertions.assertThat(listC).containsOnly(match4, match2, match3, match5, match7, match8)
+    }
 
-  @Test(timeout = 10000)
-  public void testMaryShellyGodwinFrankensteinFragment1() {
-    XMLImporter importer = new XMLImporter();
-    String xmlN =
-        "<text>\n"
-            + "<s>so destitute of every hope of consolation to live\n"
-            + "<del rend=\"strikethrough\">-</del>\n"
-            + "<add place=\"overwritten\" hand=\"#pbs\">?</add> oh no - ...\n"
-            + "</s>\n"
-            + "</text>";
-    VariantWitnessGraph wF = importer.importXML("N", xmlN);
-    LOG.info("N: {}", xmlN);
-    String xmlF =
-        "<text>\n"
-            + "<p>\n"
-            + "<s>so infinitely miserable, so destitute of every hope of consolation to live?</s> <s>Oh, no! ... </s>\n"
-            + "</p></text>";
-    LOG.info("F: {}", xmlF);
-    VariantWitnessGraph wQ = importer.importXML("F", xmlF);
-    String expected =
-        "digraph CollationGraph{\n"
-            + "labelloc=b\n"
-            + "t000 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t002 [label=<F,N: so&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n"
-            + "t003 [label=<F,N: ?<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s/add</i><br/>>]\n"
-            + "t004 [label=<F,N: &#9251;<br/>F: <i>/text/p</i><br/>N: <i>/text/s</i><br/>>]\n"
-            + "t005 [label=<F: Oh<br/>N: oh&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n"
-            + "t006 [label=<F: ,&#9251;<br/>F: <i>/text/p/s</i>>]\n"
-            + "t007 [label=<F: no<br/>N: no&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n"
-            + "t008 [label=<F: !&#9251;<br/>F: <i>/text/p/s</i>>]\n"
-            + "t009 [label=<F: ...&#9251;<br/>N: ...&#x21A9;<br/><br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n"
-            + "t010 [label=<F: infinitely&#9251;miserable,&#9251;so&#9251;<br/>F: <i>/text/p/s</i>>]\n"
-            + "t011 [label=<F,N: destitute&#9251;of&#9251;every&#9251;hope&#9251;of&#9251;consolation&#9251;to&#9251;live<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n"
-            + "t012 [label=<N: -&#9251;<br/>N: <i>/text/s</i>>]\n"
-            + "t013 [label=<N: -<br/>N: <i>/text/s/del</i>>]\n"
-            + "t000->t002[label=\"F,N\"]\n"
-            + "t002->t010[label=\"F\"]\n"
-            + "t002->t011[label=\"N\"]\n"
-            + "t003->t004[label=\"F,N\"]\n"
-            + "t004->t005[label=\"F,N\"]\n"
-            + "t005->t006[label=\"F\"]\n"
-            + "t005->t007[label=\"N\"]\n"
-            + "t006->t007[label=\"F\"]\n"
-            + "t007->t008[label=\"F\"]\n"
-            + "t007->t012[label=\"N\"]\n"
-            + "t008->t009[label=\"F\"]\n"
-            + "t009->t001[label=\"F,N\"]\n"
-            + "t010->t011[label=\"F\"]\n"
-            + "t011->t003[label=\"F,N\"]\n"
-            + "t011->t013[label=\"N\"]\n"
-            + "t012->t009[label=\"N\"]\n"
-            + "t013->t004[label=\"N\"]\n"
-            + "}";
-    String expected1 =
-        "digraph CollationGraph{\n"
-            + "labelloc=b\n"
-            + "t000 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t002 [label=<F: so&#9251;infinitely&#9251;miserable,&#9251;<br/>F: <i>/text/p/s</i>>]\n"
-            + "t003 [label=<F,N: ?<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s/add</i><br/>>]\n"
-            + "t004 [label=<F,N: &#9251;<br/>F: <i>/text/p</i><br/>N: <i>/text/s</i><br/>>]\n"
-            + "t005 [label=<F: Oh<br/>N: oh&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n"
-            + "t006 [label=<F: ,&#9251;<br/>F: <i>/text/p/s</i>>]\n"
-            + "t007 [label=<F: no<br/>N: no&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n"
-            + "t008 [label=<F: !&#9251;<br/>F: <i>/text/p/s</i>>]\n"
-            + "t009 [label=<F: ...&#9251;<br/>N: ...&#x21A9;<br/><br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n"
-            + "t010 [label=<F,N: so&#9251;destitute&#9251;of&#9251;every&#9251;hope&#9251;of&#9251;consolation&#9251;to&#9251;live<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]\n"
-            + "t011 [label=<N: -&#9251;<br/>N: <i>/text/s</i>>]\n"
-            + "t012 [label=<N: -<br/>N: <i>/text/s/del</i>>]\n"
-            + "t000->t002[label=\"F\"]\n"
-            + "t000->t010[label=\"N\"]\n"
-            + "t002->t010[label=\"F\"]\n"
-            + "t003->t004[label=\"F,N\"]\n"
-            + "t004->t005[label=\"F,N\"]\n"
-            + "t005->t006[label=\"F\"]\n"
-            + "t005->t007[label=\"N\"]\n"
-            + "t006->t007[label=\"F\"]\n"
-            + "t007->t008[label=\"F\"]\n"
-            + "t007->t011[label=\"N\"]\n"
-            + "t008->t009[label=\"F\"]\n"
-            + "t009->t001[label=\"F,N\"]\n"
-            + "t010->t003[label=\"F,N\"]\n"
-            + "t010->t012[label=\"N\"]\n"
-            + "t011->t009[label=\"N\"]\n"
-            + "t012->t004[label=\"N\"]\n"
-            + "}";
+    private fun stringList(
+            sortAndFilterMatchesByWitness: Map<String, List<Match>>, key: String): List<String> {
+        return sortAndFilterMatchesByWitness[key]!!.stream().map { obj: Match -> obj.toString() }.collect(Collectors.toList())
+    }
 
-    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
-    assertThat(collationGraph)
-        .containsTextNodesMatching(
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "so ")
-                .withWitnessSegmentSketch("N", "so "),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "destitute of every hope of consolation to live")
-                .withWitnessSegmentSketch("N", "destitute of every hope of consolation to live"),
-            textNodeSketch().withWitnessSegmentSketch("F", " ").withWitnessSegmentSketch("N", " "),
-            textNodeSketch().withWitnessSegmentSketch("F", "?").withWitnessSegmentSketch("N", "?"),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "Oh")
-                .withWitnessSegmentSketch("N", "oh "),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "no")
-                .withWitnessSegmentSketch("N", "no "),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "... ")
-                .withWitnessSegmentSketch("N", "...\n"));
-  }
+    private fun visualize(list: List<Tuple<Int?>?>): String {
+        return list.stream()
+                .map { t: Tuple<Int?>? -> MessageFormat.format("<{0},{1}>", t!!.left, t.right) }
+                .collect(Collectors.joining(""))
+    }
 
-  @Test(timeout = 10000)
-  public void testMaryShellyGodwinFrankensteinFragment2() {
-    XMLImporter importer = new XMLImporter();
-    String xmlN =
-        "<text>\n"
-            + "<s>Frankenstein discovered that I detailed or made notes concerning his history he asked to see them &amp; himself corrected\n"
-            + "<add place=\"superlinear\">and augmented</add>\n"
-            + "them in many places</s>\n"
-            + "</text>";
-    VariantWitnessGraph wF = importer.importXML("N", xmlN);
-    LOG.info("N: {}", xmlN);
-    String xmlF =
-        "<text>\n"
-            + "<s>Frankenstein discovered\n"
-            + "<del rend=\"strikethrough\">or</del>\n"
-            + "<add place=\"superlinear\">that I</add> made notes concerning his history; he asked to see them and then himself corrected and augmented them in many places\n"
-            + "</s>\n"
-            + "</text>";
-    LOG.info("F: {}", xmlF);
-    VariantWitnessGraph wQ = importer.importXML("F", xmlF);
-    String expected =
-        "digraph CollationGraph{\n"
-            + "labelloc=b\n"
-            + "t000 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t002 [label=<F: Frankenstein&#9251;discovered<br/>N: Frankenstein&#9251;discovered&#9251;<br/>F,N: <i>/text/s</i>>]\n"
-            + "t003 [label=<F: ;&#9251;<br/>F: <i>/text/s</i>>]\n"
-            + "t004 [label=<F,N: he&#9251;asked&#9251;to&#9251;see&#9251;them&#9251;<br/>F,N: <i>/text/s</i>>]\n"
-            + "t005 [label=<F: and&#9251;then&#9251;<br/>F: <i>/text/s</i>>]\n"
-            + "t006 [label=<F: himself&#9251;corrected&#9251;<br/>N: himself&#9251;corrected&#x21A9;<br/><br/>F,N: <i>/text/s</i>>]\n"
-            + "t007 [label=<F: and&#9251;augmented&#9251;<br/>N: and&#9251;augmented<br/>F: <i>/text/s</i><br/>N: <i>/text/s/add</i><br/>>]\n"
-            + "t008 [label=<F: them&#9251;in&#9251;many&#9251;places&#x21A9;<br/><br/>N: them&#9251;in&#9251;many&#9251;places<br/>F,N: <i>/text/s</i>>]\n"
-            + "t009 [label=<F: or<br/>N: or&#9251;<br/>F: <i>/text/s/del</i><br/>N: <i>/text/s</i><br/>>]\n"
-            + "t010 [label=<F: that&#9251;I<br/>N: that&#9251;I&#9251;<br/>F: <i>/text/s/add</i><br/>N: <i>/text/s</i><br/>>]\n"
-            + "t011 [label=<F: &#9251;<br/>F: <i>/text/s</i>>]\n"
-            + "t012 [label=<F: made&#9251;notes&#9251;concerning&#9251;his&#9251;history<br/>N: made&#9251;notes&#9251;concerning&#9251;his&#9251;history&#9251;<br/>F,N: <i>/text/s</i>>]\n"
-            + "t013 [label=<N: &amp;&#9251;<br/>N: <i>/text/s</i>>]\n"
-            + "t014 [label=<N: detailed&#9251;<br/>N: <i>/text/s</i>>]\n"
-            + "t000->t002[label=\"F,N\"]\n"
-            + "t002->t009[label=\"F\"]\n"
-            + "t002->t010[label=\"F,N\"]\n"
-            + "t003->t004[label=\"F\"]\n"
-            + "t004->t005[label=\"F\"]\n"
-            + "t004->t013[label=\"N\"]\n"
-            + "t005->t006[label=\"F\"]\n"
-            + "t006->t007[label=\"F,N\"]\n"
-            + "t006->t008[label=\"N\"]\n"
-            + "t007->t008[label=\"F,N\"]\n"
-            + "t008->t001[label=\"F,N\"]\n"
-            + "t009->t011[label=\"F\"]\n"
-            + "t009->t012[label=\"N\"]\n"
-            + "t010->t011[label=\"F\"]\n"
-            + "t010->t014[label=\"N\"]\n"
-            + "t011->t012[label=\"F\"]\n"
-            + "t012->t003[label=\"F\"]\n"
-            + "t012->t004[label=\"N\"]\n"
-            + "t013->t006[label=\"N\"]\n"
-            + "t014->t009[label=\"N\"]\n"
-            + "}";
+    private fun testHyperCollation(
+            witness1: VariantWitnessGraph, witness2: VariantWitnessGraph, expected: String): CollationGraph {
+        //    Map<String, Long> collationDuration = new HashMap<>();
+        val stopwatch = Stopwatch.createStarted()
+        val collation0 = hyperCollator.collate(witness1, witness2)
+        stopwatch.stop()
+        val duration = stopwatch.elapsed(TimeUnit.MILLISECONDS)
+        LOG.info("Collating took {} ms.", duration)
+        val collation = CollationGraphNodeJoiner.join(collation0)
+        val dot = CollationGraphVisualizer.toDot(collation, true, false)
+        LOG.debug("dot=\n{}", dot)
+        writeGraph(dot, "graph")
+        Assertions.assertThat(dot).isEqualTo(expected)
+        val table = CollationGraphVisualizer.toTableASCII(collation, false)
+        LOG.debug("table=\n{}", table)
+        return collation
+    }
 
-    CollationGraph collationGraph = testHyperCollation(wF, wQ, expected);
-    assertThat(collationGraph)
-        .containsTextNodesMatching(
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "Frankenstein discovered")
-                .withWitnessSegmentSketch("N", "Frankenstein discovered "),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "that I")
-                .withWitnessSegmentSketch("N", "that I "),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "or")
-                .withWitnessSegmentSketch("N", "or "),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "made notes concerning his history")
-                .withWitnessSegmentSketch("N", "made notes concerning his history "),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "he asked to see them ")
-                .withWitnessSegmentSketch("F", "he asked to see them ")
-                .withWitnessSegmentSketch("N", "he asked to see them "),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "himself corrected ")
-                .withWitnessSegmentSketch("N", "himself corrected\n"),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "and augmented ")
-                .withWitnessSegmentSketch("N", "and augmented"),
-            textNodeSketch()
-                .withWitnessSegmentSketch("F", "them in many places\n")
-                .withWitnessSegmentSketch("N", "them in many places"));
-  }
+    private fun testHyperCollation3(
+            witness1: VariantWitnessGraph,
+            witness2: VariantWitnessGraph,
+            witness3: VariantWitnessGraph,
+            expected: String): CollationGraph {
+        //    Map<String, Long> collationDuration = new HashMap<>();
+        val stopwatch = Stopwatch.createStarted()
+        var collation = hyperCollator.collate(witness1, witness2, witness3)
+        stopwatch.stop()
+        val duration = stopwatch.elapsed(TimeUnit.MILLISECONDS)
+        LOG.info("Collating took {} ms.", duration)
+        val markupBeforeJoin = collation.markupStream.collect(Collectors.toSet())
+        //    LOG.info("before join: collation markup = {}",
+        // collation.getMarkupStream().map(Markup::toString).sorted().collect(toList()));
+        collation = CollationGraphNodeJoiner.join(collation)
+        val markupAfterJoin = collation.markupStream.collect(Collectors.toSet())
+        //    LOG.info("after join: collation markup = {}",
+        // collation.getMarkupStream().map(Markup::toString).sorted().collect(toList()));
+        Assertions.assertThat(markupAfterJoin).containsExactlyElementsOf(markupBeforeJoin)
+        val dot = CollationGraphVisualizer.toDot(collation, true, false)
+        LOG.info("dot=\n{}", dot)
+        writeGraph(dot, "graph")
+        Assertions.assertThat(dot).isEqualTo(expected)
+        val table = CollationGraphVisualizer.toTableASCII(collation, true)
+        LOG.info("dot=\n{}", table)
+        HyperCollateAssertions.assertThat(collation).isNotNull
+        return collation
+    }
 
-  @Test(timeout = 10000)
-  public void testCollationGraphInitialization() {
-    XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph wF =
-        importer.importXML(
-            "F",
-            "<text>\n"
-                + "    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,\n"
-                + "        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>\n"
-                + "</text>");
-    CollationGraph collationGraph = new CollationGraph();
-    Map<TokenVertex, TextNode> map = new HashMap<>();
-    List<Match> matches = new ArrayList<>();
-    Map<Markup, MarkupNode> markupNodeIndex = new HashMap<>();
-    hyperCollator.initialize(collationGraph, map, markupNodeIndex, wF);
-    CollationGraph collation = CollationGraphNodeJoiner.join(collationGraph);
-
-    String dot = CollationGraphVisualizer.toDot(collation, true, false);
-    String expected =
-        "digraph CollationGraph{\n"
-            + "labelloc=b\n"
-            + "t000 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t002 [label=<F: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F: <i>/text/s</i>>]\n"
-            + "t003 [label=<F: &#9251;een&#9251;vrouw,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;vóór&#9251;de&#9251;<br/>F: <i>/text/s</i>>]\n"
-            + "t004 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n"
-            + "t005 [label=<F: liefelijke&#9251;toestemming!<br/>F: <i>/text/s</i>>]\n"
-            + "t006 [label=<F: <br/>F: <i>/text/s/lb</i>>]\n"
-            + "t007 [label=<F: werven&#9251;om<br/>F: <i>/text/s/del</i>>]\n"
-            + "t008 [label=<F: trachten&#9251;naar<br/>F: <i>/text/s/add</i>>]\n"
-            + "t000->t002[label=\"F\"]\n"
-            + "t002->t006[label=\"F\"]\n"
-            + "t003->t004[label=\"F\"]\n"
-            + "t004->t005[label=\"F\"]\n"
-            + "t005->t001[label=\"F\"]\n"
-            + "t006->t007[label=\"F\"]\n"
-            + "t006->t008[label=\"F\"]\n"
-            + "t007->t003[label=\"F\"]\n"
-            + "t008->t003[label=\"F\"]\n"
-            + "}";
-    assertThat(dot).isEqualTo(expected);
-
-    String dotWithoutMarkupAndWhitespaceEmphasis =
-        CollationGraphVisualizer.toDot(collation, false, true);
-    String expected2 =
-        "digraph CollationGraph{\n"
-            + "labelloc=b\n"
-            + "t000 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t001 [label=\"\";shape=doublecircle,rank=middle]\n"
-            + "t002 [label=<F: Hoe&nbsp;zoet&nbsp;moet&nbsp;nochtans&nbsp;zijn&nbsp;dit&nbsp;>]\n"
-            + "t003 [label=<F: &nbsp;een&nbsp;vrouw,&#x21A9;<br/>&nbsp;de&nbsp;ongewisheid&nbsp;vóór&nbsp;de&nbsp;>]\n"
-            + "t004 [label=<F: >]\n"
-            + "t005 [label=<F: liefelijke&nbsp;toestemming!>]\n"
-            + "t006 [label=<F: >]\n"
-            + "t007 [label=<F: werven&nbsp;om>]\n"
-            + "t008 [label=<F: trachten&nbsp;naar>]\n"
-            + "t000->t002[label=\"F\"]\n"
-            + "t002->t006[label=\"F\"]\n"
-            + "t003->t004[label=\"F\"]\n"
-            + "t004->t005[label=\"F\"]\n"
-            + "t005->t001[label=\"F\"]\n"
-            + "t006->t007[label=\"F\"]\n"
-            + "t006->t008[label=\"F\"]\n"
-            + "t007->t003[label=\"F\"]\n"
-            + "t008->t003[label=\"F\"]\n"
-            + "}";
-    assertThat(dotWithoutMarkupAndWhitespaceEmphasis).isEqualTo(expected2);
-
-    // System.out.println(dot);
-    // writeGraph(dot, "graph");
-  }
-
-  @Test(timeout = 10000)
-  public void testPermute() {
-    List<Tuple<Integer>> permute1 = hyperCollator.permute(3);
-    LOG.info("permute={}", visualize(permute1));
-    assertThat(Sets.newHashSet(permute1)).hasSameSizeAs(permute1);
-    assertThat(permute1).hasSize(3);
-
-    List<Tuple<Integer>> permute2 = hyperCollator.permute(4);
-    LOG.info("permute={}", visualize(permute2));
-    assertThat(Sets.newHashSet(permute2)).hasSameSizeAs(permute2);
-    assertThat(permute2).hasSize(6);
-
-    List<Tuple<Integer>> permute3 = hyperCollator.permute(10);
-    LOG.info("permute={}", visualize(permute3));
-    assertThat(Sets.newHashSet(permute3)).hasSameSizeAs(permute3);
-    assertThat(permute3).hasSize(45);
-  }
-
-  @Test(timeout = 10000)
-  public void testPotentialMatches() {
-    XMLImporter importer = new XMLImporter();
-    String sigil1 = "A";
-    String sigil2 = "B";
-    String sigil3 = "C";
-    VariantWitnessGraph w1 = importer.importXML(sigil1, "<x>the black cat</x>");
-    VariantWitnessGraph w2 = importer.importXML(sigil2, "<x>the blue dog</x>");
-    VariantWitnessGraph w3 = importer.importXML(sigil3, "<x>the black dog</x>");
-    List<VariantWitnessGraph> witnesses = asList(w1, w2, w3);
-    List<VariantWitnessGraphRanking> rankings =
-        witnesses.stream().map(VariantWitnessGraphRanking::of).collect(toList());
-    Set<Match> allPotentialMatches = hyperCollator.getPotentialMatches(witnesses, rankings);
-    LOG.info("allPotentialMatches={}", allPotentialMatches);
-    String match1 = "<A0,B0>";
-    String match2 = "<A0,C0>";
-    String match3 = "<A1,C1>";
-    String match4 = "<B0,C0>";
-    String match5 = "<B2,C2>";
-    String match6 = "<A:EndTokenVertex,B:EndTokenVertex>";
-    String match7 = "<A:EndTokenVertex,C:EndTokenVertex>";
-    String match8 = "<B:EndTokenVertex,C:EndTokenVertex>";
-    Assertions.assertThat(allPotentialMatches).hasSize(8);
-    Set<String> matchStrings = allPotentialMatches.stream().map(Match::toString).collect(toSet());
-    assertThat(matchStrings)
-        .contains(match1, match2, match3, match4, match5, match6, match7, match8);
-
-    Map<String, List<Match>> sortAndFilterMatchesByWitness =
-        hyperCollator.sortAndFilterMatchesByWitness(
-            allPotentialMatches, asList(sigil1, sigil2, sigil3));
-    LOG.info("sortAndFilterMatchesByWitness={}", sortAndFilterMatchesByWitness);
-    assertThat(sortAndFilterMatchesByWitness).containsOnlyKeys(sigil1, sigil2, sigil3);
-
-    List<String> listA = stringList(sortAndFilterMatchesByWitness, sigil1);
-    assertThat(listA).containsOnly(match1, match2, match3, match6, match7);
-
-    List<String> listB = stringList(sortAndFilterMatchesByWitness, sigil2);
-    assertThat(listB).containsOnly(match4, match1, match5, match6, match8);
-
-    List<String> listC = stringList(sortAndFilterMatchesByWitness, sigil3);
-    assertThat(listC).containsOnly(match4, match2, match3, match5, match7, match8);
-  }
-
-  private List<String> stringList(
-      Map<String, List<Match>> sortAndFilterMatchesByWitness, String key) {
-    return sortAndFilterMatchesByWitness.get(key).stream().map(Match::toString).collect(toList());
-  }
-
-  private String visualize(List<Tuple<Integer>> list) {
-    return list.stream()
-        .map(t -> MessageFormat.format("<{0},{1}>", t.left, t.right))
-        .collect(joining(""));
-  }
-
-  private CollationGraph testHyperCollation(
-      VariantWitnessGraph witness1, VariantWitnessGraph witness2, String expected) {
-    //    Map<String, Long> collationDuration = new HashMap<>();
-    Stopwatch stopwatch = Stopwatch.createStarted();
-    CollationGraph collation0 = hyperCollator.collate(witness1, witness2);
-    stopwatch.stop();
-    long duration = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-    LOG.info("Collating took {} ms.", duration);
-
-    CollationGraph collation = CollationGraphNodeJoiner.join(collation0);
-
-    String dot = CollationGraphVisualizer.toDot(collation, true, false);
-    LOG.debug("dot=\n{}", dot);
-    writeGraph(dot, "graph");
-    assertThat(dot).isEqualTo(expected);
-
-    String table = CollationGraphVisualizer.toTableASCII(collation, false);
-    LOG.debug("table=\n{}", table);
-    return collation;
-  }
-
-  private CollationGraph testHyperCollation3(
-      VariantWitnessGraph witness1,
-      VariantWitnessGraph witness2,
-      VariantWitnessGraph witness3,
-      String expected) {
-    //    Map<String, Long> collationDuration = new HashMap<>();
-    Stopwatch stopwatch = Stopwatch.createStarted();
-    CollationGraph collation = hyperCollator.collate(witness1, witness2, witness3);
-    stopwatch.stop();
-    long duration = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-    LOG.info("Collating took {} ms.", duration);
-
-    Set<Markup> markupBeforeJoin = collation.getMarkupStream().collect(toSet());
-    //    LOG.info("before join: collation markup = {}",
-    // collation.getMarkupStream().map(Markup::toString).sorted().collect(toList()));
-
-    collation = CollationGraphNodeJoiner.join(collation);
-
-    Set<Markup> markupAfterJoin = collation.getMarkupStream().collect(toSet());
-    //    LOG.info("after join: collation markup = {}",
-    // collation.getMarkupStream().map(Markup::toString).sorted().collect(toList()));
-
-    assertThat(markupAfterJoin).containsExactlyElementsOf(markupBeforeJoin);
-
-    String dot = CollationGraphVisualizer.toDot(collation, true, false);
-    LOG.info("dot=\n{}", dot);
-    writeGraph(dot, "graph");
-    assertThat(dot).isEqualTo(expected);
-
-    String table = CollationGraphVisualizer.toTableASCII(collation, true);
-    LOG.info("dot=\n{}", table);
-
-    assertThat(collation).isNotNull();
-    return collation;
-  }
+    companion object {
+        private val LOG = LoggerFactory.getLogger(HyperCollateTest::class.java)
+    }
 }
