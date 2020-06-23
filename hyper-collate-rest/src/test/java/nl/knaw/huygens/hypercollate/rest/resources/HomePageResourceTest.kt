@@ -1,4 +1,7 @@
-package nl.knaw.huygens.hypercollate.rest.resources;
+package nl.knaw.huygens.hypercollate.rest.resources
+
+import org.assertj.core.api.AssertionsForClassTypes
+import org.junit.Test
 
 /*-
  * #%L
@@ -18,17 +21,15 @@ package nl.knaw.huygens.hypercollate.rest.resources;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import org.junit.Test;
-
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-
-public class HomePageResourceTest {
-  @Test
-  public void testNoRobots() {
-    HomePageResource resource = new HomePageResource();
-    String noRobots = resource.noRobots();
-    assertThat(noRobots).isEqualTo("User-agent: *\n" + "Disallow: /\n");
-  }
+ */   class HomePageResourceTest {
+    @Test
+    fun testNoRobots() {
+        val resource = HomePageResource()
+        val noRobots = resource.noRobots()
+        AssertionsForClassTypes.assertThat(noRobots).isEqualTo("""
+    User-agent: *
+    Disallow: /
+    
+    """.trimIndent())
+    }
 }

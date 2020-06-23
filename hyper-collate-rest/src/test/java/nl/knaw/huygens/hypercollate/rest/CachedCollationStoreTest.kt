@@ -1,4 +1,14 @@
-package nl.knaw.huygens.hypercollate.rest;
+package nl.knaw.huygens.hypercollate.rest
+
+import org.apache.commons.io.FileUtils
+import org.assertj.core.api.Assertions
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+import org.slf4j.LoggerFactory
+import java.io.File
+import java.io.IOException
+import java.nio.file.Files
 
 /*-
  * #%L
@@ -18,77 +28,60 @@ package nl.knaw.huygens.hypercollate.rest;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+ */   class CachedCollationStoreTest {
+    var config = TestConfiguration()
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Set;
+    class TestConfiguration : HyperCollateConfiguration {
+        override fun getBaseURI(): String {
+            return "https://test.hypercollate.com"
+        }
 
-import static org.assertj.core.api.Assertions.assertThat;
+        override fun getProjectDir(): File {
+            return File(System.getProperty("java.io.tmpdir") + "/.hypercollate")
+        }
 
-public class CachedCollationStoreTest {
+        override fun getCollationsDir(): File {
+            return File(projectDir, "collations")
+        }
 
-  private static final Logger LOG = LoggerFactory.getLogger(CachedCollationStore.class);
-  TestConfiguration config = new TestConfiguration();
+        override fun hasPathToDotExecutable(): Boolean {
+            return false
+        }
 
-  static class TestConfiguration implements HyperCollateConfiguration {
-    TestConfiguration() {
-      try {
-        Files.createDirectories(getCollationsDir().toPath());
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+        override fun getPathToDotExecutable(): String {
+            return ""
+        }
+
+        init {
+            try {
+                Files.createDirectories(collationsDir.toPath())
+            } catch (e: IOException) {
+                throw RuntimeException(e)
+            }
+        }
     }
 
-    @Override
-    public String getBaseURI() {
-      return "https://test.hypercollate.com";
+    @Before
+    fun before() {
+        Assertions.assertThat(config.collationsDir).isDirectory()
     }
 
-    @Override
-    public File getProjectDir() {
-      return new File(System.getProperty("java.io.tmpdir") + "/.hypercollate");
+    @After
+    @Throws(IOException::class)
+    fun after() {
+        FileUtils.deleteDirectory(config.projectDir)
     }
 
-    @Override
-    public File getCollationsDir() {
-      return new File(getProjectDir(), "collations");
+    @Test
+    fun testAddSampleCollations() {
+        val store = CachedCollationStore(config)
+        val collationIds = store.collationIds
+        LOG.info("collationIds={}", collationIds)
+        Assertions.assertThat(collationIds).isNotEmpty
+        Assertions.assertThat(collationIds).allSatisfy { id: String -> id.startsWith("sample-") }
     }
 
-    @Override
-    public boolean hasPathToDotExecutable() {
-      return false;
+    companion object {
+        private val LOG = LoggerFactory.getLogger(CachedCollationStore::class.java)
     }
-
-    @Override
-    public String getPathToDotExecutable() {
-      return "";
-    }
-  }
-
-  @Before
-  public void before() {
-    assertThat(config.getCollationsDir()).isDirectory();
-  }
-
-  @After
-  public void after() throws IOException {
-    FileUtils.deleteDirectory(config.getProjectDir());
-  }
-
-  @Test
-  public void testAddSampleCollations() {
-    CachedCollationStore store = new CachedCollationStore(config);
-    Set<String> collationIds = store.getCollationIds();
-    LOG.info("collationIds={}", collationIds);
-    assertThat(collationIds).isNotEmpty();
-    assertThat(collationIds).allSatisfy(id -> id.startsWith("sample-"));
-  }
 }
