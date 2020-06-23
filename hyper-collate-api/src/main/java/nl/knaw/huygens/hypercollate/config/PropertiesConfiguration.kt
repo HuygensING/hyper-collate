@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.config;
+package nl.knaw.huygens.hypercollate.config
 
 /*-
  * #%L
@@ -9,9 +9,9 @@ package nl.knaw.huygens.hypercollate.config;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,55 +20,53 @@ package nl.knaw.huygens.hypercollate.config;
  * #L%
  */
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory
+import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
+import java.util.*
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
+class PropertiesConfiguration(propertiesFile: String, isResource: Boolean) {
+    private var propertyResourceBundle: PropertyResourceBundle? = null
 
-public class PropertiesConfiguration {
-  private static final Logger LOG = LoggerFactory.getLogger(PropertiesConfiguration.class);
-  private PropertyResourceBundle propertyResourceBundle;
-
-  public PropertiesConfiguration(String propertiesFile, boolean isResource) {
-    try {
-      InputStream inputStream =
-          isResource
-              ? Thread.currentThread().getContextClassLoader().getResourceAsStream(propertiesFile)
-              : new FileInputStream(new File(propertiesFile));
-      propertyResourceBundle = new PropertyResourceBundle(inputStream);
-    } catch (IOException e) {
-      e.printStackTrace();
-      throw new RuntimeException(
-          "Couldn't read properties file " + propertiesFile + ": " + e.getMessage());
+    @Synchronized
+    fun getProperty(key: String): Optional<String> {
+        return Optional.ofNullable(getValue(key))
     }
-  }
 
-  public synchronized Optional<String> getProperty(String key) {
-    return Optional.ofNullable(getValue(key));
-  }
-
-  public synchronized String getProperty(String key, String defaultValue) {
-    String value = getValue(key);
-    return value != null ? value : defaultValue;
-  }
-
-  private String getValue(String key) {
-    String value = null;
-    try {
-      value = propertyResourceBundle.getString(key);
-    } catch (MissingResourceException e) {
-      LOG.warn("Missing expected resource: [{}]", key);
-    } catch (ClassCastException e) {
-      LOG.warn("Property value for key [{}] cannot be transformed to String", key);
+    @Synchronized
+    fun getProperty(key: String, defaultValue: String?): String {
+        val value = getValue(key)
+        return value ?: defaultValue!!
     }
-    return value;
-  }
 
-  public List<String> getKeys() {
-    return Collections.list(propertyResourceBundle.getKeys());
-  }
+    private fun getValue(key: String): String? {
+        var value: String? = null
+        try {
+            value = propertyResourceBundle!!.getString(key)
+        } catch (e: MissingResourceException) {
+            LOG.warn("Missing expected resource: [{}]", key)
+        } catch (e: ClassCastException) {
+            LOG.warn("Property value for key [{}] cannot be transformed to String", key)
+        }
+        return value
+    }
+
+    val keys: List<String>
+        get() = Collections.list(propertyResourceBundle!!.keys)
+
+    companion object {
+        private val LOG = LoggerFactory.getLogger(PropertiesConfiguration::class.java)
+    }
+
+    init {
+        propertyResourceBundle = try {
+            val inputStream = if (isResource) Thread.currentThread().contextClassLoader.getResourceAsStream(propertiesFile) else FileInputStream(File(propertiesFile))
+            PropertyResourceBundle(inputStream)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            throw RuntimeException(
+                    "Couldn't read properties file " + propertiesFile + ": " + e.message)
+        }
+    }
 }

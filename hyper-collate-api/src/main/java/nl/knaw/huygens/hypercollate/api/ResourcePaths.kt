@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.api;
+package nl.knaw.huygens.hypercollate.api
 
 /*
  * #%L
@@ -9,9 +9,9 @@ package nl.knaw.huygens.hypercollate.api;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,14 +20,15 @@ package nl.knaw.huygens.hypercollate.api;
  * #L%
  */
 
-public class ResourcePaths {
-  public static final String ABOUT = "about";
-  public static final String DOCUMENTS = "documents";
-  public static final String COLLATIONS = "collations";
-  public static final String COLLATIONS_DOT = "dot";
-  public static final String COLLATIONS_SVG = "svg";
-  public static final String COLLATIONS_PNG = "png";
-  public static final String COLLATIONS_ASCII_TABLE = "ascii_table";
-  public static final String COLLATIONS_HTML_TABLE = "html_table";
-  public static final String WITNESSES = "witnesses";
+
+object ResourcePaths {
+    const val ABOUT = "about"
+    const val DOCUMENTS = "documents"
+    const val COLLATIONS = "collations"
+    const val COLLATIONS_DOT = "dot"
+    const val COLLATIONS_SVG = "svg"
+    const val COLLATIONS_PNG = "png"
+    const val COLLATIONS_ASCII_TABLE = "ascii_table"
+    const val COLLATIONS_HTML_TABLE = "html_table"
+    const val WITNESSES = "witnesses"
 }
