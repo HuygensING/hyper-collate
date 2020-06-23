@@ -87,20 +87,15 @@ public class CollatedMatch {
 
   @Override
   public String toString() {
-    Set<String> sigils = collatedNode instanceof TextNode
-        ? collatedNode.getSigils()
-        : this.sigils;
+    Set<String> sigils = collatedNode instanceof TextNode ? collatedNode.getSigils() : this.sigils;
     String sigilString = sigils.stream().sorted().collect(joining(","));
-    StringBuilder stringBuilder = new StringBuilder("<[")//
-        .append(sigilString)//
-        .append("]")//
-        .append(nodeRank);
+    StringBuilder stringBuilder =
+        new StringBuilder("<[").append(sigilString).append("]").append(nodeRank);
 
     StringBuilder vString = new StringBuilder();
     if (witnessVertex instanceof SimpleTokenVertex) {
       SimpleTokenVertex sv = (SimpleTokenVertex) witnessVertex;
-      vString.append(sv.getSigil())//
-          .append(sv.getIndexNumber());
+      vString.append(sv.getSigil()).append(sv.getIndexNumber());
     } else {
       vString.append(witnessVertex.getSigil()).append(witnessVertex.getClass().getSimpleName());
     }
@@ -118,7 +113,6 @@ public class CollatedMatch {
       CollatedMatch other = (CollatedMatch) obj;
       return collatedNode.equals(other.collatedNode) && witnessVertex.equals(other.witnessVertex);
 
-    } else
-      return false;
+    } else return false;
   }
 }

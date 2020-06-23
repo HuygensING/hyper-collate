@@ -34,5 +34,4 @@ public class SimpleWitness implements Witness {
   public String getSigil() {
     return sigil;
   }
-
 }

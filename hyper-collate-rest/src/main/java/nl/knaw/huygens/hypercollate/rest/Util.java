@@ -29,17 +29,24 @@ import java.util.logging.Level;
 
 public class Util {
 
-  private static final java.util.logging.Logger LOG = java.util.logging.Logger.getLogger(Util.class.getName());
+  private static final java.util.logging.Logger LOG =
+      java.util.logging.Logger.getLogger(Util.class.getName());
 
   public static String detectDotPath() {
     for (String detectionCommand : new String[]{"where dot.exe", "which dot"}) {
       try {
         final Process process = Runtime.getRuntime().exec(detectionCommand);
-        try (BufferedReader processReader = new BufferedReader(new InputStreamReader(process.getInputStream(), Charset.defaultCharset()))) {
-          final CompletableFuture<Optional<String>> path = CompletableFuture.supplyAsync(() -> processReader.lines()
-              .map(String::trim)
-              .filter(l -> l.toLowerCase().contains("dot"))
-              .findFirst());
+        try (BufferedReader processReader =
+                 new BufferedReader(
+                     new InputStreamReader(process.getInputStream(), Charset.defaultCharset()))) {
+          final CompletableFuture<Optional<String>> path =
+              CompletableFuture.supplyAsync(
+                  () ->
+                      processReader
+                          .lines()
+                          .map(String::trim)
+                          .filter(l -> l.toLowerCase().contains("dot"))
+                          .findFirst());
           process.waitFor();
           final String dotPath = path.get().get();
           LOG.info(() -> "Detected GraphViz' dot at '" + dotPath + "'");
@@ -51,5 +58,4 @@ public class Util {
     }
     return null;
   }
-
 }

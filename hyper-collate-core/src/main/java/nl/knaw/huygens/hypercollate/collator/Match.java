@@ -59,11 +59,10 @@ public class Match {
   }
 
   public Integer getLowestRankForWitnessesOtherThan(String s) {
-    return rankingMap.entrySet()//
-        .stream()//
-        .filter(e -> !e.getKey().equals(s))//
-        .mapToInt(Map.Entry::getValue)//
-        .min()//
+    return rankingMap.entrySet().stream()
+        .filter(e -> !e.getKey().equals(s))
+        .mapToInt(Map.Entry::getValue)
+        .min()
         .getAsInt();
   }
 
@@ -71,25 +70,25 @@ public class Match {
   public String toString() {
     StringBuilder stringBuilder = new StringBuilder("<");
     List<String> vertexStrings = new ArrayList<>();
-    tokenVertexMap.forEach((sigil, vertex) -> {//
-      StringBuilder vString = new StringBuilder();
-      if (vertex instanceof SimpleTokenVertex) {
-        SimpleTokenVertex sv = (SimpleTokenVertex) vertex;
-        vString.append(sigil)//
-            .append(sv.getIndexNumber());
-        // vString.append(sigil)//
-        // .append("[")//
-        // .append(sv.getIndexNumber())//
-        // .append(",r")//
-        // .append(rankingMap.get(sigil))//
-        // .append("]:'")//
-        // .append(sv.getContent().replace("\n", "\\n"))//
-        // .append("'");
-      } else {
-        vString.append(sigil).append(":").append(vertex.getClass().getSimpleName());
-      }
-      vertexStrings.add(vString.toString());
-    });
+    tokenVertexMap.forEach(
+        (sigil, vertex) -> {
+          StringBuilder vString = new StringBuilder();
+          if (vertex instanceof SimpleTokenVertex) {
+            SimpleTokenVertex sv = (SimpleTokenVertex) vertex;
+            vString.append(sigil).append(sv.getIndexNumber());
+            // vString.append(sigil)
+            // .append("[")
+            // .append(sv.getIndexNumber())
+            // .append(",r")
+            // .append(rankingMap.get(sigil))
+            // .append("]:'")
+            // .append(sv.getContent().replace("\n", "\\n"))
+            // .append("'");
+          } else {
+            vString.append(sigil).append(":").append(vertex.getClass().getSimpleName());
+          }
+          vertexStrings.add(vString.toString());
+        });
     return stringBuilder.append(Joiner.on(",").join(vertexStrings)).append(">").toString();
   }
 
@@ -105,5 +104,4 @@ public class Match {
   public boolean hasWitness(String sigil) {
     return tokenVertexMap.containsKey(sigil);
   }
-
 }

@@ -71,9 +71,8 @@ public class HyperCollateApplication extends Application {
     Set<Object> singletons = new HashSet<>();
     String[] strings = {"about", "collations", "swagger.json", "swagger.yaml"};
     List<String> endpoints = new ArrayList<>(asList(strings));
-    List<String> rootEndpointURLs = endpoints.stream()//
-        .map(e -> configuration.getBaseURI() + "/" + e)//
-        .collect(toList());
+    List<String> rootEndpointURLs =
+        endpoints.stream().map(e -> configuration.getBaseURI() + "/" + e).collect(toList());
     singletons.add(new SimpleHomePageResource(rootEndpointURLs));
     singletons.add(new AboutResource(configuration, "HyperCollate Server"));
     CollationStore collationStore = new CachedCollationStore(configuration);
@@ -88,8 +87,8 @@ public class HyperCollateApplication extends Application {
       InitialContext initialContext = new InitialContext();
       String baseURI = (String) initialContext.lookup("java:comp/env/baseURI");
       String projectDir = (String) initialContext.lookup("java:comp/env/projectDir");
-      return new SimpleConfiguration()//
-          .setBaseURI(baseURI)//
+      return new SimpleConfiguration()
+          .setBaseURI(baseURI)
           .setProjectDir(projectDir)
           .setPathToDotExecutable(Util.detectDotPath());
 
@@ -98,5 +97,4 @@ public class HyperCollateApplication extends Application {
       throw new RuntimeException(e);
     }
   }
-
 }

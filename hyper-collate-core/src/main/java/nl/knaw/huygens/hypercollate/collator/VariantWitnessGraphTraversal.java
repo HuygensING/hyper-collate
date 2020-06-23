@@ -52,21 +52,22 @@ public class VariantWitnessGraphTraversal implements Iterable<TokenVertex> {
       @Override
       public TokenVertex next() {
         final TokenVertex next = this.next.get();
-        next.getOutgoingTokenVertexStream().forEach(outgoing -> {
+        next.getOutgoingTokenVertexStream()
+            .forEach(
+                outgoing -> {
+                  final long endEncountered =
+                      Optional.ofNullable(encountered.get(outgoing)).orElse(0L);
+                  final long endIncoming = outgoing.getIncomingTokenVertexStream().count();
 
-          final long endEncountered = Optional.ofNullable(encountered.get(outgoing)).orElse(0L);
-          final long endIncoming = outgoing.getIncomingTokenVertexStream()//
-              .count();
+                  if (endIncoming == endEncountered) {
+                    throw new IllegalStateException(
+                        String.format("Encountered cycle traversing %s to %s", next, outgoing));
+                  } else if ((endIncoming - endEncountered) == 1) {
+                    queue.add(outgoing);
+                  }
 
-          if (endIncoming == endEncountered) {
-            throw new IllegalStateException(String.format("Encountered cycle traversing %s to %s", next, outgoing));
-          } else if ((endIncoming - endEncountered) == 1) {
-            queue.add(outgoing);
-          }
-
-          encountered.put(outgoing, endEncountered + 1);
-
-        });
+                  encountered.put(outgoing, endEncountered + 1);
+                });
         this.next = Optional.ofNullable(queue.poll());
         return next;
       }

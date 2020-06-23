@@ -68,5 +68,4 @@ public class StartTokenVertex implements TokenVertex {
   public void addOutgoingTokenVertex(TokenVertex outgoing) {
     this.outgoingTokenVertices.add(outgoing);
   }
-
 }

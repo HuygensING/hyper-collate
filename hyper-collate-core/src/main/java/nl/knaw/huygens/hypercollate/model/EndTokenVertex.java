@@ -69,6 +69,4 @@ public class EndTokenVertex implements TokenVertex {
   public void addOutgoingTokenVertex(TokenVertex outgoing) {
     throw new RuntimeException(this.getClass().getName() + " has no outgoing TokenVertex");
   }
-
-
 }

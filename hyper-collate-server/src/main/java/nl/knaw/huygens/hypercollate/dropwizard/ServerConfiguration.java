@@ -65,7 +65,8 @@ public class ServerConfiguration extends Configuration implements HyperCollateCo
     baseURI = HTTP_LOCALHOST + port;
 
     DefaultServerFactory serverFactory = (DefaultServerFactory) getServerFactory();
-    HttpConnectorFactory httpConnectorFactory = (HttpConnectorFactory) serverFactory.getApplicationConnectors().get(0);
+    HttpConnectorFactory httpConnectorFactory =
+        (HttpConnectorFactory) serverFactory.getApplicationConnectors().get(0);
     httpConnectorFactory.setPort(port);
 
     DefaultLoggingFactory loggingFactory = (DefaultLoggingFactory) getLoggingFactory();
@@ -129,5 +130,4 @@ public class ServerConfiguration extends Configuration implements HyperCollateCo
       throw new RuntimeException(e);
     }
   }
-
 }

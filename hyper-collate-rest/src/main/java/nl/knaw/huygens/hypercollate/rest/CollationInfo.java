@@ -37,11 +37,15 @@ import java.util.Optional;
 @JsonInclude(Include.NON_NULL)
 
 // to make these fields read-only
-@JsonIgnoreProperties(value = {"^dot", "^png", "^svg", "^ascii_table"}, allowGetters = true)
+@JsonIgnoreProperties(
+    value = {"^dot", "^png", "^svg", "^ascii_table"},
+    allowGetters = true)
 public class CollationInfo {
 
   public enum State {
-    needs_witness, ready_to_collate, is_collated
+    needs_witness,
+    ready_to_collate,
+    is_collated
   }
 
   private String id;
@@ -113,22 +117,22 @@ public class CollationInfo {
     return collationState;
   }
 
-  @JsonProperty(value = "^png"/* , access = JsonProperty.Access.READ_ONLY */)
+  @JsonProperty(value = "^png" /* , access = JsonProperty.Access.READ_ONLY */)
   public URI getPNGURI() {
     return URI.create(uriBase + "." + ResourcePaths.COLLATIONS_PNG);
   }
 
-  @JsonProperty(value = "^svg"/* , access = JsonProperty.Access.READ_ONLY */)
+  @JsonProperty(value = "^svg" /* , access = JsonProperty.Access.READ_ONLY */)
   public URI getSVGURI() {
     return URI.create(uriBase + "." + ResourcePaths.COLLATIONS_SVG);
   }
 
-  @JsonProperty(value = "^dot"/* , access = JsonProperty.Access.READ_ONLY */)
+  @JsonProperty(value = "^dot" /* , access = JsonProperty.Access.READ_ONLY */)
   public URI getDotURI() {
     return URI.create(uriBase + "." + ResourcePaths.COLLATIONS_DOT);
   }
 
-  @JsonProperty(value = "^ascii_table"/* , access = JsonProperty.Access.READ_ONLY */)
+  @JsonProperty(value = "^ascii_table" /* , access = JsonProperty.Access.READ_ONLY */)
   public URI getAsciiTableURI() {
     return URI.create(uriBase + "/" + ResourcePaths.COLLATIONS_ASCII_TABLE);
   }
@@ -136,18 +140,21 @@ public class CollationInfo {
   @JsonProperty(value = "witness_visualisations")
   public Map<String, Map<String, URI>> getWitnessVisualisationURIs() {
     Map<String, Map<String, URI>> wvu = new HashMap<>();
-    witnesses.keySet().forEach(sigil -> {
-      String witnessBaseURI = String.format("%s/%s/%s.", uriBase, ResourcePaths.WITNESSES, sigil);
-      Map<String, URI> uriMap = new HashMap<>();
-      uriMap.put("^png", URI.create(witnessBaseURI + ResourcePaths.COLLATIONS_PNG));
-      uriMap.put("^svg", URI.create(witnessBaseURI + ResourcePaths.COLLATIONS_SVG));
-      uriMap.put("^dot", URI.create(witnessBaseURI + ResourcePaths.COLLATIONS_DOT));
-      uriMap.put("^xml", URI.create(witnessBaseURI + "xml"));
-      wvu.put(sigil, uriMap);
-    });
+    witnesses
+        .keySet()
+        .forEach(
+            sigil -> {
+              String witnessBaseURI =
+                  String.format("%s/%s/%s.", uriBase, ResourcePaths.WITNESSES, sigil);
+              Map<String, URI> uriMap = new HashMap<>();
+              uriMap.put("^png", URI.create(witnessBaseURI + ResourcePaths.COLLATIONS_PNG));
+              uriMap.put("^svg", URI.create(witnessBaseURI + ResourcePaths.COLLATIONS_SVG));
+              uriMap.put("^dot", URI.create(witnessBaseURI + ResourcePaths.COLLATIONS_DOT));
+              uriMap.put("^xml", URI.create(witnessBaseURI + "xml"));
+              wvu.put(sigil, uriMap);
+            });
     return wvu;
   }
-
 
   public void setCollationDurationInMilliseconds(long collationDuration) {
     this.collationDuration = collationDuration;
@@ -173,5 +180,4 @@ public class CollationInfo {
   public void setJoin(boolean join) {
     this.join = join;
   }
-
 }

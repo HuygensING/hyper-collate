@@ -18,13 +18,13 @@
   #L%
   -->
 <TEI>
-  <div type="chapter" n="1">
-    <p>
-      <s>dresser to carpet.</s>
-      <add place="margin">
-        <head>2</head>
-      </add>
-      <s>Further, what is one night?</s>
-    </p>
-  </div>
+    <div type="chapter" n="1">
+        <p>
+            <s>dresser to carpet.</s>
+            <add place="margin">
+                <head>2</head>
+            </add>
+            <s>Further, what is one night?</s>
+        </p>
+    </div>
 </TEI>

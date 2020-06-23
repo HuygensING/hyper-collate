@@ -88,18 +88,23 @@ public class MarkedUpToken implements Token {
 
   @Override
   public String toString() {
-    return witness.getSigil() + index + ":" + getParentXPath() + "='" + content.replace("\n", "\\n") + "'";
+    return witness.getSigil()
+        + index
+        + ":"
+        + getParentXPath()
+        + "='"
+        + content.replace("\n", "\\n")
+        + "'";
   }
 
   @Override
   public MarkedUpToken clone() {
-    return new MarkedUpToken()//
-        .setWitness(witness)//
-        .setContent(content)//
-        .setRdg(rdg)//
-        .setNormalizedContent(normalizedContent)//
-        .setIndexNumber(index)//
+    return new MarkedUpToken()
+        .setWitness(witness)
+        .setContent(content)
+        .setRdg(rdg)
+        .setNormalizedContent(normalizedContent)
+        .setIndexNumber(index)
         .setParentXPath(parentXPath);
   }
-
 }

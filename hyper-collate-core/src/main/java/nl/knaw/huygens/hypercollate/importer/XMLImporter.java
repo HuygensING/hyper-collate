@@ -49,7 +49,8 @@ public class XMLImporter {
   private final Function<String, Stream<String>> tokenizer;
   private final Function<String, String> normalizer;
 
-  public XMLImporter(Function<String, Stream<String>> tokenizer, Function<String, String> normalizer) {
+  public XMLImporter(
+      Function<String, Stream<String>> tokenizer, Function<String, String> normalizer) {
     this.tokenizer = tokenizer;
     this.normalizer = normalizer;
   }
@@ -137,7 +138,6 @@ public class XMLImporter {
           default:
             break;
         }
-
       }
 
       return graph;
@@ -156,12 +156,15 @@ public class XMLImporter {
   private void handleStartElement(StartElement startElement, Context context) {
     String tagName = startElement.getName().toString();
     Markup markup = new Markup(tagName).setDepth(context.openMarkup.size());
-    startElement.getAttributes().forEachRemaining((Object object) -> {
-      Attribute attribute = (Attribute) object;
-      String attributeName = attribute.getName().toString();
-      String attributeValue = ((Attribute) object).getValue();
-      markup.addAttribute(attributeName, attributeValue);
-    });
+    startElement
+        .getAttributes()
+        .forEachRemaining(
+            (Object object) -> {
+              Attribute attribute = (Attribute) object;
+              String attributeName = attribute.getName().toString();
+              String attributeValue = ((Attribute) object).getValue();
+              markup.addAttribute(attributeName, attributeValue);
+            });
     context.openMarkup(markup);
   }
 
@@ -173,7 +176,7 @@ public class XMLImporter {
 
   private void handleCharacters(Characters characters, Context context) {
     String data = characters.getData();
-    if (data.startsWith(" ")) {// because the tokenizer will lose these leading whitespaces;
+    if (data.startsWith(" ")) { // because the tokenizer will lose these leading whitespaces;
       context.addNewToken(" ");
     }
     tokenizer.apply(data).forEach(context::addNewToken);
@@ -224,9 +227,14 @@ public class XMLImporter {
     private final Deque<Markup> openMarkup = new LinkedList<>();
     private TokenVertex lastTokenVertex;
     private long tokenCounter = 0L;
-    private final Deque<TokenVertex> variationStartVertices = new LinkedList<>(); // the tokenvertices whose outgoing vertices are the variant vertices (add/del)
-    private final Deque<TokenVertex> variationEndVertices = new LinkedList<>(); // the tokenvertices that are the last in a <del>
-    private final Deque<TokenVertex> unconnectedVertices = new LinkedList<>(); // the last tokenvertex in an <add> which hasn't been linked to the tokenvertex after the </del> yet
+    private final Deque<TokenVertex> variationStartVertices =
+        new LinkedList<>(); // the tokenvertices whose outgoing vertices are the variant vertices
+    // (add/del)
+    private final Deque<TokenVertex> variationEndVertices =
+        new LinkedList<>(); // the tokenvertices that are the last in a <del>
+    private final Deque<TokenVertex> unconnectedVertices =
+        new LinkedList<>(); // the last tokenvertex in an <add> which hasn't been linked to the
+    // tokenvertex after the </del> yet
     private final Function<String, String> normalizer;
     private final SimpleWitness witness;
     private String rdg = "";
@@ -277,8 +285,9 @@ public class XMLImporter {
           lastTokenVertex = variationStartVertices.pop();
 
         } else { // add without immediately preceding del
-          unconnectedVertices.push(lastTokenVertex); // add link from vertex preceding the <add> to vertex following </add>
-
+          unconnectedVertices.push(
+              lastTokenVertex); // add link from vertex preceding the <add> to vertex following
+          // </add>
         }
         afterDel = false;
         branchIds.push(nextBranchId());
@@ -300,7 +309,6 @@ public class XMLImporter {
           lastTokenVertex = variationStartVertices.peek();
           branchIds.push(nextBranchId());
         }
-
       }
     }
 
@@ -338,7 +346,8 @@ public class XMLImporter {
       String closingTag = markup.getTagName();
       String expectedTag = firstToClose.getTagName();
       if (!expectedTag.equals(closingTag)) {
-        throw new RuntimeException("XML error: expected </" + expectedTag + ">, got </" + closingTag + ">");
+        throw new RuntimeException(
+            "XML error: expected </" + expectedTag + ">, got </" + closingTag + ">");
       }
 
       if (!inAppStack.peek() && isVariationStartingMarkup(markup)) {
@@ -358,7 +367,6 @@ public class XMLImporter {
       } else if (isRdg(markup)) {
         unconnectedRdgVerticesStack.peek().add(lastTokenVertex);
         branchIds.pop();
-
       }
     }
 
@@ -371,13 +379,14 @@ public class XMLImporter {
         return;
       }
 
-      MarkedUpToken token = new MarkedUpToken()//
-          .setContent(content)//
-          .setWitness(witness)//
-          .setRdg(rdg)//
-          .setIndexNumber(tokenCounter++)//
-          .setParentXPath(parentXPath)//
-          .setNormalizedContent(normalizer.apply(content));
+      MarkedUpToken token =
+          new MarkedUpToken()
+              .setContent(content)
+              .setWitness(witness)
+              .setRdg(rdg)
+              .setIndexNumber(tokenCounter++)
+              .setParentXPath(parentXPath)
+              .setNormalizedContent(normalizer.apply(content));
       SimpleTokenVertex tokenVertex = new SimpleTokenVertex(token);
       Integer[] ascendingBranchIds = toArray(branchIds.descendingIterator(), Integer.class);
       List<Integer> branchPath = asList(ascendingBranchIds);
@@ -392,13 +401,14 @@ public class XMLImporter {
       }
 
       while (afterAppStack.peek()) {
-        unconnectedRdgVerticesStack.pop().stream()//
-            .filter(v -> !v.equals(lastTokenVertex))//
+        unconnectedRdgVerticesStack.pop().stream()
+            .filter(v -> !v.equals(lastTokenVertex))
             .forEach(v -> graph.addOutgoingTokenVertexToTokenVertex(v, tokenVertex));
         afterAppStack.pop();
       }
 
-      this.openMarkup.descendingIterator()//
+      this.openMarkup
+          .descendingIterator()
           .forEachRemaining(markup -> graph.addMarkupToTokenVertex(tokenVertex, markup));
       checkUnconnectedVertices(tokenVertex);
       lastTokenVertex = tokenVertex;
@@ -432,7 +442,8 @@ public class XMLImporter {
     }
 
     private String buildParentXPath() {
-      return "/" + stream(openMarkup.descendingIterator()).map(Markup::getTagName).collect(joining("/"));
+      return "/"
+          + stream(openMarkup.descendingIterator()).map(Markup::getTagName).collect(joining("/"));
     }
   }
 }

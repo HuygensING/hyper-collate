@@ -43,9 +43,6 @@ public class SimpleHomePageResource {
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(value = "List the root endpoint URLs")
   public Response getHomePage() throws IOException {
-    return Response//
-        .ok(rootEndpointURLs)//
-        .build();
+    return Response.ok(rootEndpointURLs).build();
   }
-
 }

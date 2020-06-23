@@ -30,8 +30,11 @@ import java.util.concurrent.TimeUnit;
 
 import static java.util.stream.Collectors.toList;
 
-public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCollatedMatchList, LostPotential> implements OptimalCollatedMatchListFinder {
-  private static final Logger LOG = LoggerFactory.getLogger(OptimalCollatedMatchListAlgorithm.class);
+public class OptimalCollatedMatchListAlgorithm
+    extends AstarAlgorithm<QuantumCollatedMatchList, LostPotential>
+    implements OptimalCollatedMatchListFinder {
+  private static final Logger LOG =
+      LoggerFactory.getLogger(OptimalCollatedMatchListAlgorithm.class);
 
   private List<CollatedMatch> matchesSortedByNode;
   private List<CollatedMatch> matchesSortedByWitness;
@@ -43,11 +46,13 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
   }
 
   @Override
-  public List<CollatedMatch> getOptimalCollatedMatchList(Collection<CollatedMatch> allPotentialMatches) {
+  public List<CollatedMatch> getOptimalCollatedMatchList(
+      Collection<CollatedMatch> allPotentialMatches) {
     maxPotential = allPotentialMatches.size();
     matchesSortedByNode = sortMatchesByNode(allPotentialMatches);
     matchesSortedByWitness = sortMatchesByWitness(allPotentialMatches);
-    QuantumCollatedMatchList startNode = new QuantumCollatedMatchList(Collections.EMPTY_LIST, new ArrayList<>(allPotentialMatches));
+    QuantumCollatedMatchList startNode =
+        new QuantumCollatedMatchList(Collections.EMPTY_LIST, new ArrayList<>(allPotentialMatches));
     LostPotential startCost = new LostPotential(0);
     Stopwatch sw = Stopwatch.createStarted();
     List<QuantumCollatedMatchList> winningPath = aStar(startNode, startCost);
@@ -58,19 +63,24 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
   }
 
   private static List<CollatedMatch> sortMatchesByNode(Collection<CollatedMatch> matches) {
-    Comparator<CollatedMatch> matchComparator = Comparator.comparing(CollatedMatch::getNodeRank).thenComparing(CollatedMatch::getVertexRank);
+    Comparator<CollatedMatch> matchComparator =
+        Comparator.comparing(CollatedMatch::getNodeRank)
+            .thenComparing(CollatedMatch::getVertexRank);
     return sortMatches(matches, matchComparator);
   }
 
   private static List<CollatedMatch> sortMatchesByWitness(Collection<CollatedMatch> matches) {
-    Comparator<CollatedMatch> matchComparator = Comparator.comparing(CollatedMatch::getVertexRank).thenComparing(CollatedMatch::getNodeRank);
+    Comparator<CollatedMatch> matchComparator =
+        Comparator.comparing(CollatedMatch::getVertexRank)
+            .thenComparing(CollatedMatch::getNodeRank);
     return sortMatches(matches, matchComparator);
   }
 
-  private static List<CollatedMatch> sortMatches(Collection<CollatedMatch> matches, Comparator<CollatedMatch> matchComparator) {
-    return matches.stream()//
-//        .peek(System.out::println)//
-        .sorted(matchComparator)//
+  private static List<CollatedMatch> sortMatches(
+      Collection<CollatedMatch> matches, Comparator<CollatedMatch> matchComparator) {
+    return matches.stream()
+        //        .peek(System.out::println)
+        .sorted(matchComparator)
         .collect(toList());
   }
 
@@ -83,7 +93,8 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
   protected Iterable<QuantumCollatedMatchList> neighborNodes(QuantumCollatedMatchList matchList) {
     Set<QuantumCollatedMatchList> nextPotentialMatches = new LinkedHashSet<>();
 
-    CollatedMatch firstPotentialMatch1 = getFirstPotentialMatch(this.matchesSortedByNode, matchList);
+    CollatedMatch firstPotentialMatch1 =
+        getFirstPotentialMatch(this.matchesSortedByNode, matchList);
     addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1);
 
     List<CollatedMatch> matchesSortedByWitness = this.matchesSortedByWitness;
@@ -95,7 +106,10 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
     return nextPotentialMatches;
   }
 
-  private void addNeighborNodes(QuantumCollatedMatchList matchList, Set<QuantumCollatedMatchList> nextPotentialMatches, CollatedMatch firstPotentialMatch) {
+  private void addNeighborNodes(
+      QuantumCollatedMatchList matchList,
+      Set<QuantumCollatedMatchList> nextPotentialMatches,
+      CollatedMatch firstPotentialMatch) {
     // TODO: more neighbournodes: find a set of matches with same potential
     // TODO: neighbournodes op basis van matching tokens
     QuantumCollatedMatchList quantumMatchSet1 = matchList.chooseMatch(firstPotentialMatch);
@@ -104,7 +118,8 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
     nextPotentialMatches.add(quantumMatchSet2);
   }
 
-  private CollatedMatch getFirstPotentialMatch(List<CollatedMatch> matches, QuantumCollatedMatchList matchSet) {
+  private CollatedMatch getFirstPotentialMatch(
+      List<CollatedMatch> matches, QuantumCollatedMatchList matchSet) {
     List<CollatedMatch> potentialMatches = new ArrayList<>(matches);
     potentialMatches.retainAll(matchSet.getPotentialMatches());
     return potentialMatches.get(0);
@@ -116,8 +131,8 @@ public class OptimalCollatedMatchListAlgorithm extends AstarAlgorithm<QuantumCol
   }
 
   @Override
-  protected LostPotential distBetween(QuantumCollatedMatchList matchList0, QuantumCollatedMatchList matchList1) {
+  protected LostPotential distBetween(
+      QuantumCollatedMatchList matchList0, QuantumCollatedMatchList matchList1) {
     return new LostPotential(Math.abs(matchList0.totalSize() - matchList1.totalSize()));
   }
-
 }

@@ -38,7 +38,9 @@ public class VariantWitnessGraphRankingTest extends HyperCollateTest {
   @Test
   public void test() {
     XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph wg0 = importer.importXML("A", "<xml>Een ongeluk komt <del>nooit</del><add>zelden</add> alleen.</xml>");
+    VariantWitnessGraph wg0 =
+        importer.importXML(
+            "A", "<xml>Een ongeluk komt <del>nooit</del><add>zelden</add> alleen.</xml>");
     VariantWitnessGraph witnessGraph = TokenMerger.merge(wg0);
 
     VariantWitnessGraphRanking ranking = VariantWitnessGraphRanking.of(witnessGraph);
@@ -71,5 +73,4 @@ public class VariantWitnessGraphRankingTest extends HyperCollateTest {
     // Map<TokenVertex, Integer> byVertex = ranking.getByVertex();
 
   }
-
 }

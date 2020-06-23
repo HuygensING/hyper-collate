@@ -91,5 +91,4 @@ public class VariantWitnessGraph {
   public Iterable<TokenVertex> vertices() {
     return VariantWitnessGraphTraversal.of(this);
   }
-
 }

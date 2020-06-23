@@ -24,8 +24,23 @@ import java.util.Map;
 
 public class ColorContext {
   private Map<String, String> assignedColors = new HashMap<>();
-  private String[] colors = {"yellow", "orange", "#9aed7d", "lightblue", "grey", "#4286f4", "#ef10eb",
-      "#9091D4", "#B190D4", "#B3D490", "#D49091", "#E62023", "#86E620", "#8020E6", "#20E6E3"};
+  private String[] colors = {
+      "yellow",
+      "orange",
+      "#9aed7d",
+      "lightblue",
+      "grey",
+      "#4286f4",
+      "#ef10eb",
+      "#9091D4",
+      "#B190D4",
+      "#B3D490",
+      "#D49091",
+      "#E62023",
+      "#86E620",
+      "#8020E6",
+      "#20E6E3"
+  };
   private int colorIndex = 0;
 
   public String colorFor(String tagName) {

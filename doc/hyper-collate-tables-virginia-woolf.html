@@ -1,6 +1,6 @@
 <html>
-    <head>
-        <style type="text/css">
+<head>
+    <style type="text/css">
         .tg  {border-collapse:collapse;border-spacing:0;white-space:nowrap;text-align: center;}
         .tg .tg-top {font-weight:bold;vertical-align:top}
         .tg .tg-bottom {vertical-align:bottom;text-align: left;}
@@ -15,34 +15,37 @@
         span.del::before{content:'[-] ';text-align: center;}
         span.add::before{content:'[+] ';text-align: center;}
         span.match {color:green;background-color: #bff442;}
-        </style>
-    </head>
-    <body>
 
-        <h2>Legenda</h2>
-        <table class="tg">
-            <tr>
-                <td class="tg-right">non-matching text</td>
-            </tr>
-            <tr>
-                <td class="tg-right"><span class="match">matching text</span></td>
-            </tr>
-            <tr>
-                <td class="tg-markup tg-right">non-matching markup</td>
-            </tr>
-            <tr>
-                <td class="tg-markup-match tg-right">matching markup</td>
-            </tr>
-            <tr>
-                <td class="tg-bottom tg-right"><span class="add">added text</span><br><span class="del">deleted text</span></td>
-            </tr>
-        </table>
 
-        <h2>Witnesses</h2>
-        <table class="tg">
-          <tr>
-            <th class="tg-top">H</td>
-            <td class="tg-bottom"><pre>
+    </style>
+</head>
+<body>
+
+<h2>Legenda</h2>
+<table class="tg">
+    <tr>
+        <td class="tg-right">non-matching text</td>
+    </tr>
+    <tr>
+        <td class="tg-right"><span class="match">matching text</span></td>
+    </tr>
+    <tr>
+        <td class="tg-markup tg-right">non-matching markup</td>
+    </tr>
+    <tr>
+        <td class="tg-markup-match tg-right">matching markup</td>
+    </tr>
+    <tr>
+        <td class="tg-bottom tg-right"><span class="add">added text</span><br><span class="del">deleted text</span></td>
+    </tr>
+</table>
+
+<h2>Witnesses</h2>
+<table class="tg">
+    <tr>
+        <th class="tg-top">H
+        </td>
+        <td class="tg-bottom"><pre>
 &lt;text&gt;
   &lt;div n="2"&gt;
     &lt;s&gt;Leaning her bony breast on the hard thorn she crooned out her forgiveness.&lt;/s&gt;
@@ -51,11 +54,12 @@
     &lt;s&gt;Was it then that she had her consolations  &lt;/s&gt;
   &lt;/div&gt;
 &lt;/text&gt;</pre>
-            </td>
-          </tr>
-          <tr>
-            <th class="tg-top">T</td>
-            <td class="tg-bottom"><pre>
+        </td>
+    </tr>
+    <tr>
+        <th class="tg-top">T
+        </td>
+        <td class="tg-bottom"><pre>
 &lt;text&gt;
   &lt;p&gt;
     &lt;s&gt; granting, as she stood the chair straight by the dressing table, &lt;add&gt;leaning her bony breast on the hard thorn&lt;/add&gt;, her forgiveness of it all.&lt;/s&gt;
@@ -64,13 +68,13 @@
     &lt;s&gt;Was it then that she had her consolations ... &lt;/s&gt;
   &lt;/p&gt;
 &lt;/text&gt;</pre>
-            </td>
-          </tr>
-        </table>
-        <hr/>
+        </td>
+    </tr>
+</table>
+<hr/>
 
-        <h1>Visualization 1: ASCII table</h1>
-        <pre>
+<h1>Visualization 1: ASCII table</h1>
+<pre>
 ┌───┬──────────────────────────────────────────────────────────────────┬─────────────────────────────────────────────┬────────────────┬────────────────┬─────────┬───────────────────────────────────────────┬────┐
 │[H]│                                                                  │Leaning her bony breast on the hard thorn    │she crooned out │her forgiveness │         │.Was it then that she had her consolations │    │
 ├───┼──────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────┼────────────────┼────────────────┼─────────┼───────────────────────────────────────────┼────┤
@@ -78,289 +82,310 @@
 │   │ granting, as she stood the chair straight by the dressing table, │                                             │,               │her forgiveness │of it all│.Was it then that she had her consolations │... │
 └───┴──────────────────────────────────────────────────────────────────┴─────────────────────────────────────────────┴────────────────┴────────────────┴─────────┴───────────────────────────────────────────┴────┘
         </pre>
-        <hr/>
+<hr/>
 
-        <h1>Visualization 2: HTML table, with colors</h1>
-        <table class="tg">
-          <tr>
-            <th class="tg-top">H</td>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom"><span class="match">Leaning her bony breast on the hard thorn</span></td>
-            <td class="tg-bottom">she crooned out</td>
-            <td class="tg-bottom"><span class="match">her forgiveness</span></td>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom"><span class="match">.</span></td>
-            <td class="tg-bottom"><span class="match">Was it then that she had her consolations</span></td>
-            <td class="tg-bottom"></td>
-          </tr>
-          <tr>
-            <th class="tg-top">T</td>
-            <td class="tg-bottom">granting, as she stood the chair straight by the dressing table,</td>
-            <td class="tg-bottom"><span class="match">leaning her bony breast on the hard thorn</span><br>&nbsp;</td>
-            <td class="tg-bottom">,</td>
-            <td class="tg-bottom"><span class="match">her forgiveness</span></td>
-            <td class="tg-bottom">of it all</td>
-            <td class="tg-bottom"><span class="match">.</span></td>
-            <td class="tg-bottom"><span class="match">Was it then that she had her consolations</span></td>
-            <td class="tg-bottom">...</td>
-          </tr>
-        </table>
-        <hr/>
+<h1>Visualization 2: HTML table, with colors</h1>
+<table class="tg">
+    <tr>
+        <th class="tg-top">H
+        </td>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom"><span class="match">Leaning her bony breast on the hard thorn</span></td>
+        <td class="tg-bottom">she crooned out</td>
+        <td class="tg-bottom"><span class="match">her forgiveness</span></td>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom"><span class="match">.</span></td>
+        <td class="tg-bottom"><span class="match">Was it then that she had her consolations</span></td>
+        <td class="tg-bottom"></td>
+    </tr>
+    <tr>
+        <th class="tg-top">T
+        </td>
+        <td class="tg-bottom">granting, as she stood the chair straight by the dressing table,</td>
+        <td class="tg-bottom"><span class="match">leaning her bony breast on the hard thorn</span><br>&nbsp;</td>
+        <td class="tg-bottom">,</td>
+        <td class="tg-bottom"><span class="match">her forgiveness</span></td>
+        <td class="tg-bottom">of it all</td>
+        <td class="tg-bottom"><span class="match">.</span></td>
+        <td class="tg-bottom"><span class="match">Was it then that she had her consolations</span></td>
+        <td class="tg-bottom">...</td>
+    </tr>
+</table>
+<hr/>
 
-        <h1>Visualization 3: HTML table, with markup tags</h1>
-        <table class="tg">
-          <tr>
-            <th class="tg-top">H</td>
-            <td class="tg-bottom tg-markup-match">&lt;text&gt;</td>
-            <td class="tg-bottom tg-markup">&lt;div n="2"&gt;</td>
-            <td class="tg-bottom tg-markup-match">&lt;s&gt;</td>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">Leaning her bony breast on the hard thorn</td>
-            <td class="tg-bottom">she crooned out</td>
-            <td class="tg-bottom">her forgiveness</td>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">.</td>
-            <td class="tg-bottom tg-markup-match">&lt;/s&gt;</td>
-            <td class="tg-bottom tg-markup">&lt;/div&gt;</td>
-            <td class="tg-bottom tg-markup">&lt;div n="3"&gt;</td>
-            <td class="tg-bottom tg-markup-match">&lt;s&gt;</td>
-            <td class="tg-bottom">Was it then that she had her consolations</td>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom tg-markup-match">&lt;/s&gt;</td>
-            <td class="tg-bottom tg-markup">&lt;/div&gt;</td>
-            <td class="tg-bottom tg-markup-match">&lt;/text&gt;</td>
-          </tr>
-          <tr>
-            <th class="tg-top">T</td>
-            <td class="tg-bottom tg-markup-match">&lt;text&gt;</td>
-            <td class="tg-bottom tg-markup">&lt;p&gt;</td>
-            <td class="tg-bottom tg-markup-match">&lt;s&gt;</td>
-            <td class="tg-bottom">granting, as she stood the chair straight by the dressing table,</td>
-            <td class="tg-bottom"><span class="add">leaning her bony breast on the hard thorn</span><br>&nbsp;</td>
-            <td class="tg-bottom">,</td>
-            <td class="tg-bottom">her forgiveness</td>
-            <td class="tg-bottom">of it all</td>
-            <td class="tg-bottom">.</td>
-            <td class="tg-bottom tg-markup-match">&lt;/s&gt;</td>
-            <td class="tg-bottom tg-markup">&lt;/p&gt;</td>
-            <td class="tg-bottom tg-markup">&lt;p&gt;</td>
-            <td class="tg-bottom tg-markup-match">&lt;s&gt;</td>
-            <td class="tg-bottom">Was it then that she had her consolations</td>
-            <td class="tg-bottom">...</td>
-            <td class="tg-bottom tg-markup-match">&lt;/s&gt;</td>
-            <td class="tg-bottom tg-markup">&lt;/p&gt;</td>
-            <td class="tg-bottom tg-markup-match">&lt;/text&gt;</td>
-          </tr>
-        </table>
-        <hr/>
+<h1>Visualization 3: HTML table, with markup tags</h1>
+<table class="tg">
+    <tr>
+        <th class="tg-top">H
+        </td>
+        <td class="tg-bottom tg-markup-match">&lt;text&gt;</td>
+        <td class="tg-bottom tg-markup">&lt;div n="2"&gt;</td>
+        <td class="tg-bottom tg-markup-match">&lt;s&gt;</td>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">Leaning her bony breast on the hard thorn</td>
+        <td class="tg-bottom">she crooned out</td>
+        <td class="tg-bottom">her forgiveness</td>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">.</td>
+        <td class="tg-bottom tg-markup-match">&lt;/s&gt;</td>
+        <td class="tg-bottom tg-markup">&lt;/div&gt;</td>
+        <td class="tg-bottom tg-markup">&lt;div n="3"&gt;</td>
+        <td class="tg-bottom tg-markup-match">&lt;s&gt;</td>
+        <td class="tg-bottom">Was it then that she had her consolations</td>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom tg-markup-match">&lt;/s&gt;</td>
+        <td class="tg-bottom tg-markup">&lt;/div&gt;</td>
+        <td class="tg-bottom tg-markup-match">&lt;/text&gt;</td>
+    </tr>
+    <tr>
+        <th class="tg-top">T
+        </td>
+        <td class="tg-bottom tg-markup-match">&lt;text&gt;</td>
+        <td class="tg-bottom tg-markup">&lt;p&gt;</td>
+        <td class="tg-bottom tg-markup-match">&lt;s&gt;</td>
+        <td class="tg-bottom">granting, as she stood the chair straight by the dressing table,</td>
+        <td class="tg-bottom"><span class="add">leaning her bony breast on the hard thorn</span><br>&nbsp;</td>
+        <td class="tg-bottom">,</td>
+        <td class="tg-bottom">her forgiveness</td>
+        <td class="tg-bottom">of it all</td>
+        <td class="tg-bottom">.</td>
+        <td class="tg-bottom tg-markup-match">&lt;/s&gt;</td>
+        <td class="tg-bottom tg-markup">&lt;/p&gt;</td>
+        <td class="tg-bottom tg-markup">&lt;p&gt;</td>
+        <td class="tg-bottom tg-markup-match">&lt;s&gt;</td>
+        <td class="tg-bottom">Was it then that she had her consolations</td>
+        <td class="tg-bottom">...</td>
+        <td class="tg-bottom tg-markup-match">&lt;/s&gt;</td>
+        <td class="tg-bottom tg-markup">&lt;/p&gt;</td>
+        <td class="tg-bottom tg-markup-match">&lt;/text&gt;</td>
+    </tr>
+</table>
+<hr/>
 
-        <h1>Visualization 4a: HTML table, with markup layers (mirrored)</h1>
-        <table class="tg">
-          <tr>
-            <th class="tg-top" rowspan="4">H</td>
-            <td class="tg-center tg-markup-match" colspan="8">text</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup" colspan="6">div (n="2")</td>
-            <td class="tg-center tg-markup" colspan="2">div (n="3")</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="6">s</td>
-            <td class="tg-center tg-markup-match" colspan="2">s</td>
-          </tr>
-          <tr>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">Leaning her bony breast on the hard thorn</td>
-            <td class="tg-bottom">she crooned out</td>
-            <td class="tg-bottom">her forgiveness</td>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">.</td>
-            <td class="tg-bottom">Was it then that she had her consolations</td>
-            <td class="tg-bottom"></td>
-          </tr>
-          <tr>
-            <th class="tg-top" rowspan="4">T</td>
-            <td class="tg-bottom">granting, as she stood the chair straight by the dressing table,</td>
-            <td class="tg-bottom"><span class="add">leaning her bony breast on the hard thorn</span><br>&nbsp;</td>
-            <td class="tg-bottom">,</td>
-            <td class="tg-bottom">her forgiveness</td>
-            <td class="tg-bottom">of it all</td>
-            <td class="tg-bottom">.</td>
-            <td class="tg-bottom">Was it then that she had her consolations</td>
-            <td class="tg-bottom">...</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="6">s</td>
-            <td class="tg-center tg-markup-match" colspan="2">s</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup" colspan="6">p</td>
-            <td class="tg-center tg-markup" colspan="2">p</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="12">text</td>
-          </tr>
-        </table>
-        <hr/>
+<h1>Visualization 4a: HTML table, with markup layers (mirrored)</h1>
+<table class="tg">
+    <tr>
+        <th class="tg-top" rowspan="4">H
+        </td>
+        <td class="tg-center tg-markup-match" colspan="8">text</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup" colspan="6">div (n="2")</td>
+        <td class="tg-center tg-markup" colspan="2">div (n="3")</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="6">s</td>
+        <td class="tg-center tg-markup-match" colspan="2">s</td>
+    </tr>
+    <tr>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">Leaning her bony breast on the hard thorn</td>
+        <td class="tg-bottom">she crooned out</td>
+        <td class="tg-bottom">her forgiveness</td>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">.</td>
+        <td class="tg-bottom">Was it then that she had her consolations</td>
+        <td class="tg-bottom"></td>
+    </tr>
+    <tr>
+        <th class="tg-top" rowspan="4">T
+        </td>
+        <td class="tg-bottom">granting, as she stood the chair straight by the dressing table,</td>
+        <td class="tg-bottom"><span class="add">leaning her bony breast on the hard thorn</span><br>&nbsp;</td>
+        <td class="tg-bottom">,</td>
+        <td class="tg-bottom">her forgiveness</td>
+        <td class="tg-bottom">of it all</td>
+        <td class="tg-bottom">.</td>
+        <td class="tg-bottom">Was it then that she had her consolations</td>
+        <td class="tg-bottom">...</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="6">s</td>
+        <td class="tg-center tg-markup-match" colspan="2">s</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup" colspan="6">p</td>
+        <td class="tg-center tg-markup" colspan="2">p</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="12">text</td>
+    </tr>
+</table>
+<hr/>
 
-        <h1>Visualization 4c: HTML table, with markup layers (with add/del)</h1>
-        <table class="tg">
-          <tr>
-            <th class="tg-top" rowspan="4">H</td>
-            <td class="tg-center tg-markup-match" colspan="8">text</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup" colspan="6">div (n="2")</td>
-            <td class="tg-center tg-markup" colspan="2">div (n="3")</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="6">s</td>
-            <td class="tg-center tg-markup-match" colspan="2">s</td>
-          </tr>
+<h1>Visualization 4c: HTML table, with markup layers (with add/del)</h1>
+<table class="tg">
+    <tr>
+        <th class="tg-top" rowspan="4">H
+        </td>
+        <td class="tg-center tg-markup-match" colspan="8">text</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup" colspan="6">div (n="2")</td>
+        <td class="tg-center tg-markup" colspan="2">div (n="3")</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="6">s</td>
+        <td class="tg-center tg-markup-match" colspan="2">s</td>
+    </tr>
 
-          <tr>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">Leaning her bony breast on the hard thorn</td>
-            <td class="tg-bottom">she crooned out</td>
-            <td class="tg-bottom">her forgiveness</td>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">.</td>
-            <td class="tg-bottom">Was it then that she had her consolations</td>
-            <td class="tg-bottom"></td>
-          </tr>
-          <tr>
-            <th class="tg-top" rowspan="5">T</td>
-            <td class="tg-bottom">granting, as she stood the chair straight by the dressing table,</td>
-            <td class="tg-bottom"><span class="add">leaning her bony breast on the hard thorn</span><br>&nbsp;</td>
-            <td class="tg-bottom">,</td>
-            <td class="tg-bottom">her forgiveness</td>
-            <td class="tg-bottom">of it all</td>
-            <td class="tg-bottom">.</td>
-            <td class="tg-bottom">Was it then that she had her consolations</td>
-            <td class="tg-bottom">...</td>
-          </tr>
-          <tr>
-            <td colspan="1"></td>
-            <td class="tg-center tg-markup" colspan="1">add</td>
-            <td colspan="10"></td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="6">s</td>
-            <td class="tg-center tg-markup-match" colspan="2">s</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup" colspan="6">p</td>
-            <td class="tg-center tg-markup" colspan="2">p</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="12">text</td>
-          </tr>
-        </table>
-        <hr/>
+    <tr>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">Leaning her bony breast on the hard thorn</td>
+        <td class="tg-bottom">she crooned out</td>
+        <td class="tg-bottom">her forgiveness</td>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">.</td>
+        <td class="tg-bottom">Was it then that she had her consolations</td>
+        <td class="tg-bottom"></td>
+    </tr>
+    <tr>
+        <th class="tg-top" rowspan="5">T
+        </td>
+        <td class="tg-bottom">granting, as she stood the chair straight by the dressing table,</td>
+        <td class="tg-bottom"><span class="add">leaning her bony breast on the hard thorn</span><br>&nbsp;</td>
+        <td class="tg-bottom">,</td>
+        <td class="tg-bottom">her forgiveness</td>
+        <td class="tg-bottom">of it all</td>
+        <td class="tg-bottom">.</td>
+        <td class="tg-bottom">Was it then that she had her consolations</td>
+        <td class="tg-bottom">...</td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td class="tg-center tg-markup" colspan="1">add</td>
+        <td colspan="10"></td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="6">s</td>
+        <td class="tg-center tg-markup-match" colspan="2">s</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup" colspan="6">p</td>
+        <td class="tg-center tg-markup" colspan="2">p</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="12">text</td>
+    </tr>
+</table>
+<hr/>
 
-        <h1>Visualization 4d: HTML table, with markup layers (with add/del, not seperated)</h1>
-        <table class="tg">
-          <tr>
-            <th class="tg-top" rowspan="4">H</td>
-            <td class="tg-center tg-markup-match" colspan="8">text</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup" colspan="6">div (n="2")</td>
-            <td class="tg-center tg-markup" colspan="2">div (n="3")</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="6">s</td>
-            <td class="tg-center tg-markup-match" colspan="2">s</td>
-          </tr>
+<h1>Visualization 4d: HTML table, with markup layers (with add/del, not seperated)</h1>
+<table class="tg">
+    <tr>
+        <th class="tg-top" rowspan="4">H
+        </td>
+        <td class="tg-center tg-markup-match" colspan="8">text</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup" colspan="6">div (n="2")</td>
+        <td class="tg-center tg-markup" colspan="2">div (n="3")</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="6">s</td>
+        <td class="tg-center tg-markup-match" colspan="2">s</td>
+    </tr>
 
-          <tr>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">Leaning her bony breast on the hard thorn</td>
-            <td class="tg-bottom">she crooned out</td>
-            <td class="tg-bottom">her forgiveness</td>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">.</td>
-            <td class="tg-bottom">Was it then that she had her consolations</td>
-            <td class="tg-bottom"></td>
-          </tr>
-          <tr>
-            <th class="tg-top" rowspan="4">T</td>
-            <td class="tg-bottom">granting, as she stood the chair straight by the dressing table,</td>
-            <td class="sub"><table class="tg">
-              <tr><td class="tg-center tg-markup" colspan="1">add</td></tr>
-              <tr><td class="tg-center tg-bottom"><span class="add">leaning her bony breast on the hard thorn</span></td></tr>
-              <tr><td>&nbsp;</td></tr>
-            </table></td>
-            <td class="tg-bottom">,</td>
-            <td class="tg-bottom">her forgiveness</td>
-            <td class="tg-bottom">of it all</td>
-            <td class="tg-bottom">.</td>
-            <td class="tg-bottom">Was it then that she had her consolations</td>
-            <td class="tg-bottom">...</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="6">s</td>
-            <td class="tg-center tg-markup-match" colspan="2">s</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup" colspan="6">p</td>
-            <td class="tg-center tg-markup" colspan="2">p</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="12">text</td>
-          </tr>
-        </table>
-        <hr/>
+    <tr>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">Leaning her bony breast on the hard thorn</td>
+        <td class="tg-bottom">she crooned out</td>
+        <td class="tg-bottom">her forgiveness</td>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">.</td>
+        <td class="tg-bottom">Was it then that she had her consolations</td>
+        <td class="tg-bottom"></td>
+    </tr>
+    <tr>
+        <th class="tg-top" rowspan="4">T
+        </td>
+        <td class="tg-bottom">granting, as she stood the chair straight by the dressing table,</td>
+        <td class="sub">
+            <table class="tg">
+                <tr>
+                    <td class="tg-center tg-markup" colspan="1">add</td>
+                </tr>
+                <tr>
+                    <td class="tg-center tg-bottom"><span class="add">leaning her bony breast on the hard thorn</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                </tr>
+            </table>
+        </td>
+        <td class="tg-bottom">,</td>
+        <td class="tg-bottom">her forgiveness</td>
+        <td class="tg-bottom">of it all</td>
+        <td class="tg-bottom">.</td>
+        <td class="tg-bottom">Was it then that she had her consolations</td>
+        <td class="tg-bottom">...</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="6">s</td>
+        <td class="tg-center tg-markup-match" colspan="2">s</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup" colspan="6">p</td>
+        <td class="tg-center tg-markup" colspan="2">p</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="12">text</td>
+    </tr>
+</table>
+<hr/>
 
-        <h1>Visualization 4b: HTML table, with markup layers (deprecated)</h1>
-        <table class="tg">
-          <tr>
-            <th class="tg-top" rowspan="4">H</td>
-            <td class="tg-center tg-markup-match" colspan="8">text</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup" colspan="6">div (n="2")</td>
-            <td class="tg-center tg-markup" colspan="2">div (n="3")</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="6">s</td>
-            <td class="tg-center tg-markup-match" colspan="2">s</td>
-          </tr>
-          <tr>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">Leaning her bony breast on the hard thorn</td>
-            <td class="tg-bottom">she crooned out</td>
-            <td class="tg-bottom">her forgiveness</td>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">.</td>
-            <td class="tg-bottom">Was it then that she had her consolations</td>
-            <td class="tg-bottom"></td>
-          </tr>
+<h1>Visualization 4b: HTML table, with markup layers (deprecated)</h1>
+<table class="tg">
+    <tr>
+        <th class="tg-top" rowspan="4">H
+        </td>
+        <td class="tg-center tg-markup-match" colspan="8">text</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup" colspan="6">div (n="2")</td>
+        <td class="tg-center tg-markup" colspan="2">div (n="3")</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="6">s</td>
+        <td class="tg-center tg-markup-match" colspan="2">s</td>
+    </tr>
+    <tr>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">Leaning her bony breast on the hard thorn</td>
+        <td class="tg-bottom">she crooned out</td>
+        <td class="tg-bottom">her forgiveness</td>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">.</td>
+        <td class="tg-bottom">Was it then that she had her consolations</td>
+        <td class="tg-bottom"></td>
+    </tr>
 
-          <tr>
-            <th class="tg-top" rowspan="4">T</td>
-            <td class="tg-center tg-markup-match" colspan="12">text</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup" colspan="6">p</td>
-            <td class="tg-center tg-markup" colspan="2">p</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="6">s</td>
-            <td class="tg-center tg-markup-match" colspan="2">s</td>
-          </tr>
-          <tr>
-            <td class="tg-bottom">granting, as she stood the chair straight by the dressing table,</td>
-            <td class="tg-bottom"><span class="add">leaning her bony breast on the hard thorn</span><br>&nbsp;</td>
-            <td class="tg-bottom">,</td>
-            <td class="tg-bottom">her forgiveness</td>
-            <td class="tg-bottom">of it all</td>
-            <td class="tg-bottom">.</td>
-            <td class="tg-bottom">Was it then that she had her consolations</td>
-            <td class="tg-bottom">...</td>
-          </tr>
+    <tr>
+        <th class="tg-top" rowspan="4">T
+        </td>
+        <td class="tg-center tg-markup-match" colspan="12">text</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup" colspan="6">p</td>
+        <td class="tg-center tg-markup" colspan="2">p</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="6">s</td>
+        <td class="tg-center tg-markup-match" colspan="2">s</td>
+    </tr>
+    <tr>
+        <td class="tg-bottom">granting, as she stood the chair straight by the dressing table,</td>
+        <td class="tg-bottom"><span class="add">leaning her bony breast on the hard thorn</span><br>&nbsp;</td>
+        <td class="tg-bottom">,</td>
+        <td class="tg-bottom">her forgiveness</td>
+        <td class="tg-bottom">of it all</td>
+        <td class="tg-bottom">.</td>
+        <td class="tg-bottom">Was it then that she had her consolations</td>
+        <td class="tg-bottom">...</td>
+    </tr>
 
-        </table>
-        <hr/>
-    </body>
+</table>
+<hr/>
+</body>
 </html>

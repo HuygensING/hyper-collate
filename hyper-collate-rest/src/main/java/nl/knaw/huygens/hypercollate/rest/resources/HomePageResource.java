@@ -42,18 +42,16 @@ public class HomePageResource {
    * @return HTML representation of the homepage
    * @throws IOException
    */
-
   @GET
   @Timed
   @Produces(MediaType.TEXT_HTML)
   @ApiOperation(value = "Show the server homepage")
   public Response getHomePage() throws IOException {
-    InputStream resourceAsStream = Thread.currentThread()//
-        .getContextClassLoader().getResourceAsStream("index.html");
-    return Response//
-        .ok(resourceAsStream)//
-        .header("Pragma", "public")//
-        .header("Cache-Control", "public")//
+    InputStream resourceAsStream =
+        Thread.currentThread().getContextClassLoader().getResourceAsStream("index.html");
+    return Response.ok(resourceAsStream)
+        .header("Pragma", "public")
+        .header("Cache-Control", "public")
         .build();
   }
 

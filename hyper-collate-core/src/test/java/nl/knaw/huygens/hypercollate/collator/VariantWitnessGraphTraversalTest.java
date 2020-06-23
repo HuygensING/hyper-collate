@@ -37,7 +37,8 @@ public class VariantWitnessGraphTraversalTest extends HyperCollateTest {
   @Test
   public void testVariantWitnessGraphTraversal() {
     XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph wg0 = importer.importXML("A", "<xml>Eeny, meeny, miny, <del>curly</del><add>moe</add>!</xml>");
+    VariantWitnessGraph wg0 =
+        importer.importXML("A", "<xml>Eeny, meeny, miny, <del>curly</del><add>moe</add>!</xml>");
     VariantWitnessGraph witnessGraph = TokenMerger.merge(wg0);
 
     VariantWitnessGraphTraversal traversal = VariantWitnessGraphTraversal.of(witnessGraph);
@@ -79,14 +80,11 @@ public class VariantWitnessGraphTraversalTest extends HyperCollateTest {
     assertThat(tokenVertex).isInstanceOf(EndTokenVertex.class);
 
     assertThat(iterator.hasNext()).isFalse();
-
   }
 
   private List<String> markupTags(VariantWitnessGraph witnessGraph, TokenVertex tokenVertex) {
-    return witnessGraph.getMarkupListForTokenVertex(tokenVertex)//
-        .stream()//
-        .map(Markup::getTagName)//
+    return witnessGraph.getMarkupListForTokenVertex(tokenVertex).stream()
+        .map(Markup::getTagName)
         .collect(toList());
   }
-
 }

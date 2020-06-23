@@ -36,7 +36,8 @@ public class QuantumCollatedMatchList {
   private final List<CollatedMatch> chosenMatches;
   private final List<CollatedMatch> potentialMatches;
 
-  public QuantumCollatedMatchList(List<CollatedMatch> chosenMatches, List<CollatedMatch> potentialMatches) {
+  public QuantumCollatedMatchList(
+      List<CollatedMatch> chosenMatches, List<CollatedMatch> potentialMatches) {
     this.chosenMatches = Collections.unmodifiableList(chosenMatches);
     this.potentialMatches = Collections.unmodifiableList(potentialMatches);
   }
@@ -67,7 +68,8 @@ public class QuantumCollatedMatchList {
     return new ArrayList<>(chosenMatches);
   }
 
-  private List<CollatedMatch> calculateNewPotential(List<CollatedMatch> potentialMatches, CollatedMatch match) {
+  private List<CollatedMatch> calculateNewPotential(
+      List<CollatedMatch> potentialMatches, CollatedMatch match) {
     List<CollatedMatch> newPotential = new ArrayList<>(potentialMatches);
     List<CollatedMatch> invalidatedMatches = calculateInvalidatedMatches(potentialMatches, match);
     newPotential.removeAll(invalidatedMatches);
@@ -82,27 +84,31 @@ public class QuantumCollatedMatchList {
     return chosenMatches.size() + potentialMatches.size();
   }
 
-  private List<CollatedMatch> calculateInvalidatedMatches(List<CollatedMatch> potentialMatches, CollatedMatch match) {
+  private List<CollatedMatch> calculateInvalidatedMatches(
+      List<CollatedMatch> potentialMatches, CollatedMatch match) {
     TextNode node = match.getCollatedNode();
     TokenVertex tokenVertexForWitness = match.getWitnessVertex();
     int minNodeRank = match.getNodeRank();
     int minVertexRank = match.getVertexRank();
 
-    return potentialMatches.stream()//
-        .filter(m -> m.getCollatedNode().equals(node) //
-            || m.getWitnessVertex().equals(tokenVertexForWitness) //
-            || (hasSigilOverlap(m, node) && m.getNodeRank() < minNodeRank) //
-            || m.getVertexRank() < minVertexRank)//
+    return potentialMatches.stream()
+        .filter(
+            m ->
+                m.getCollatedNode().equals(node)
+                    || m.getWitnessVertex().equals(tokenVertexForWitness)
+                    || (hasSigilOverlap(m, node) && m.getNodeRank() < minNodeRank)
+                    || m.getVertexRank() < minVertexRank)
         .collect(toList());
   }
 
   private boolean hasSigilOverlap(CollatedMatch m, TextNode node) {
     Set<String> nodeSigils = node.getSigils();
     // m and node have witnesses in common
-    // for those witnesses they have in common, the branchpath of one is the startsubpath otf the other.
-    return m.getSigils().stream().filter(nodeSigils::contains).anyMatch(s ->
-        branchPathsOverlap(m.getBranchPath(s), node.getBranchPath(s))
-    );
+    // for those witnesses they have in common, the branchpath of one is the startsubpath otf the
+    // other.
+    return m.getSigils().stream()
+        .filter(nodeSigils::contains)
+        .anyMatch(s -> branchPathsOverlap(m.getBranchPath(s), node.getBranchPath(s)));
   }
 
   static boolean branchPathsOverlap(List<Integer> matchBranchPath, List<Integer> nodeBranchPath) {
@@ -139,7 +145,7 @@ public class QuantumCollatedMatchList {
       return false;
     }
     QuantumCollatedMatchList other = (QuantumCollatedMatchList) obj;
-    return chosenMatches.equals(other.chosenMatches) && potentialMatches.equals(other.potentialMatches);
+    return chosenMatches.equals(other.chosenMatches)
+        && potentialMatches.equals(other.potentialMatches);
   }
-
 }

@@ -42,13 +42,13 @@ public class DotFactory {
    * Generates a .dot format string for visualizing a variant witness graph.
    *
    * @param graph The variant witness graph for which we are generating a dot file.
-   * @return A string containing the contents of a .dot representation of the
-   * variant witness graph.
+   * @return A string containing the contents of a .dot representation of the variant witness graph.
    */
   public String fromVariantWitnessGraphColored(VariantWitnessGraph graph) {
-    StringBuilder dotBuilder = new StringBuilder("digraph VariantWitnessGraph{\n")
-        .append("graph [rankdir=LR]\n") //
-        .append("node [style=\"filled\";fillcolor=\"white\"]\n");
+    StringBuilder dotBuilder =
+        new StringBuilder("digraph VariantWitnessGraph{\n")
+            .append("graph [rankdir=LR]\n")
+            .append("node [style=\"filled\";fillcolor=\"white\"]\n");
 
     List<String> edges = new ArrayList<>();
     Set<Markup> openMarkup = new HashSet<>();
@@ -69,7 +69,8 @@ public class DotFactory {
       markupToOpen.addAll(markupListForTokenVertex);
       markupToOpen.removeAll(opened);
       markupToOpen.sort(comparingInt(Markup::getDepth));
-      markupToOpen.forEach(m -> openMarkup(m, dotBuilder, clusterCounter.getAndIncrement(), colorContext));
+      markupToOpen.forEach(
+          m -> openMarkup(m, dotBuilder, clusterCounter.getAndIncrement(), colorContext));
 
       openMarkup.removeAll(markupToClose);
       openMarkup.addAll(markupToOpen);
@@ -77,29 +78,40 @@ public class DotFactory {
       String tokenVariable = vertexVariable(tokenVertex);
       if (tokenVertex instanceof SimpleTokenVertex) {
         SimpleTokenVertex stv = (SimpleTokenVertex) tokenVertex;
-        dotBuilder.append(tokenVariable)//
-            .append(" [label=<")//
-            .append(asLabel(stv.getContent(), whitespaceCharacter))//
+        dotBuilder
+            .append(tokenVariable)
+            .append(" [label=<")
+            .append(asLabel(stv.getContent(), whitespaceCharacter))
             .append(">]\n");
       } else {
-        dotBuilder.append(tokenVariable)//
-            .append(" [label=\"\";shape=doublecircle,rank=middle]\n");
+        dotBuilder.append(tokenVariable).append(" [label=\"\";shape=doublecircle,rank=middle]\n");
       }
-      tokenVertex.getOutgoingTokenVertexStream().forEach(ot -> {
-        String vertexVariable = vertexVariable(ot);
-        edges.add(tokenVariable + "->" + vertexVariable);
-      });
+      tokenVertex
+          .getOutgoingTokenVertexStream()
+          .forEach(
+              ot -> {
+                String vertexVariable = vertexVariable(ot);
+                edges.add(tokenVariable + "->" + vertexVariable);
+              });
     }
     edges.stream().sorted().forEach(e -> dotBuilder.append(e).append("\n"));
     dotBuilder.append("}");
     return dotBuilder.toString();
   }
 
-  private void openMarkup(Markup m, StringBuilder dotBuilder, int clusterNum, ColorContext colorContext) {
+  private void openMarkup(
+      Markup m, StringBuilder dotBuilder, int clusterNum, ColorContext colorContext) {
     String color = colorContext.colorFor(m.getTagName());
-    dotBuilder.append("subgraph cluster_").append(clusterNum).append(" {\n")//
-        .append("label=<<i><b>").append(m.getTagName()).append("</b></i>>\n")//
-        .append("graph[style=\"rounded,filled\";fillcolor=\"").append(color).append("\"]\n");
+    dotBuilder
+        .append("subgraph cluster_")
+        .append(clusterNum)
+        .append(" {\n")
+        .append("label=<<i><b>")
+        .append(m.getTagName())
+        .append("</b></i>>\n")
+        .append("graph[style=\"rounded,filled\";fillcolor=\"")
+        .append(color)
+        .append("\"]\n");
   }
 
   private void closeMarkup(Markup m, StringBuilder dotBuilder) {
@@ -107,7 +119,8 @@ public class DotFactory {
   }
 
   public String fromVariantWitnessGraphSimple(VariantWitnessGraph graph) {
-    StringBuilder dotBuilder = new StringBuilder("digraph VariantWitnessGraph{\ngraph [rankdir=LR]\nlabelloc=b\n");
+    StringBuilder dotBuilder =
+        new StringBuilder("digraph VariantWitnessGraph{\ngraph [rankdir=LR]\nlabelloc=b\n");
 
     List<String> edges = new ArrayList<>();
     Deque<TokenVertex> nextTokens = new LinkedList<>();
@@ -120,22 +133,25 @@ public class DotFactory {
         if (tokenVertex instanceof SimpleTokenVertex) {
           SimpleTokenVertex stv = (SimpleTokenVertex) tokenVertex;
           String markup = graph.getSigil() + ": " + stv.getParentXPath();
-          dotBuilder.append(tokenVariable)//
-              .append(" [label=<")//
-              .append(asLabel(stv.getContent(), whitespaceCharacter))//
-              .append("<br/><i>")//
-              .append(markup)//
-              .append("</i>")//
+          dotBuilder
+              .append(tokenVariable)
+              .append(" [label=<")
+              .append(asLabel(stv.getContent(), whitespaceCharacter))
+              .append("<br/><i>")
+              .append(markup)
+              .append("</i>")
               .append(">]\n");
         } else {
-          dotBuilder.append(tokenVariable)//
-              .append(" [label=\"\";shape=doublecircle,rank=middle]\n");
+          dotBuilder.append(tokenVariable).append(" [label=\"\";shape=doublecircle,rank=middle]\n");
         }
-        tokenVertex.getOutgoingTokenVertexStream().forEach(ot -> {
-          String vertexVariable = vertexVariable(ot);
-          edges.add(tokenVariable + "->" + vertexVariable);
-          nextTokens.add(ot);
-        });
+        tokenVertex
+            .getOutgoingTokenVertexStream()
+            .forEach(
+                ot -> {
+                  String vertexVariable = vertexVariable(ot);
+                  edges.add(tokenVariable + "->" + vertexVariable);
+                  nextTokens.add(ot);
+                });
         verticesDone.add(tokenVertex);
       }
     }
@@ -178,33 +194,38 @@ public class DotFactory {
     return dotBuilder.toString();
   }
 
-  private void appendEdgeLines(StringBuilder dotBuilder, CollationGraph collation, Map<TextNode, String> nodeIdentifiers, List<TextNode> nodes) {
+  private void appendEdgeLines(
+      StringBuilder dotBuilder,
+      CollationGraph collation,
+      Map<TextNode, String> nodeIdentifiers,
+      List<TextNode> nodes) {
     Set<String> edgeLines = new TreeSet<>();
     for (TextNode node : nodes) {
-      collation.getIncomingTextEdgeStream(node)//
-          .forEach(e -> {
-            Node source = collation.getSource(e);
-            Node target = collation.getTarget(e);
-            String edgeLabel = e.getSigils().stream().sorted().collect(joining(","));
-            String line = String.format("%s->%s[label=\"%s\"]\n",//
-                nodeIdentifiers.get(source), nodeIdentifiers.get(target), edgeLabel);
-            edgeLines.add(line);
-          });
+      collation
+          .getIncomingTextEdgeStream(node)
+          .forEach(
+              e -> {
+                Node source = collation.getSource(e);
+                Node target = collation.getTarget(e);
+                String edgeLabel = e.getSigils().stream().sorted().collect(joining(","));
+                String line =
+                    String.format(
+                        "%s->%s[label=\"%s\"]\n",
+                        nodeIdentifiers.get(source), nodeIdentifiers.get(target), edgeLabel);
+                edgeLines.add(line);
+              });
     }
     edgeLines.forEach(dotBuilder::append);
   }
 
-  private void appendNodeLine(StringBuilder dotBuilder, TextNode node, String nodeId, final boolean hideMarkup) {
+  private void appendNodeLine(
+      StringBuilder dotBuilder, TextNode node, String nodeId, final boolean hideMarkup) {
     String labelString = generateNodeLabel(node, hideMarkup);
     if (labelString.isEmpty()) {
-      dotBuilder.append(nodeId)//
-          .append(" [label=\"\";shape=doublecircle,rank=middle]\n");
+      dotBuilder.append(nodeId).append(" [label=\"\";shape=doublecircle,rank=middle]\n");
 
     } else {
-      dotBuilder.append(nodeId)//
-          .append(" [label=<")//
-          .append(labelString)//
-          .append(">]\n");
+      dotBuilder.append(nodeId).append(" [label=<").append(labelString).append(">]\n");
     }
   }
 
@@ -227,54 +248,62 @@ public class DotFactory {
     return label.toString();
   }
 
-  private void prepare(TextNode node, Map<String, String> contentLabel, Map<String, String> markupLabel, List<String> sortedSigils) {
-    sortedSigils.forEach(s -> {
-      Token token = node.getTokenForWitness(s);
-      if (token != null) {
-        MarkedUpToken mToken = (MarkedUpToken) token;
-        String markup = mToken.getParentXPath();
-        contentLabel.put(s, asLabel(mToken.getContent(), whitespaceCharacter));
-        markupLabel.put(s, markup);
-      }
-    });
+  private void prepare(
+      TextNode node,
+      Map<String, String> contentLabel,
+      Map<String, String> markupLabel,
+      List<String> sortedSigils) {
+    sortedSigils.forEach(
+        s -> {
+          Token token = node.getTokenForWitness(s);
+          if (token != null) {
+            MarkedUpToken mToken = (MarkedUpToken) token;
+            String markup = mToken.getParentXPath();
+            contentLabel.put(s, asLabel(mToken.getContent(), whitespaceCharacter));
+            markupLabel.put(s, markup);
+          }
+        });
   }
 
-  private void appendMarkup(StringBuilder label, Map<String, String> markupLabel, List<String> sortedSigils, String joinedSigils) {
+  private void appendMarkup(
+      StringBuilder label,
+      Map<String, String> markupLabel,
+      List<String> sortedSigils,
+      String joinedSigils) {
     Set<String> markupLabelSet = new HashSet<>(markupLabel.values());
     if (markupLabelSet.size() == 1) {
-      label.append(joinedSigils)//
-          .append(": <i>")//
-          .append(markupLabelSet.iterator().next())//
+      label
+          .append(joinedSigils)
+          .append(": <i>")
+          .append(markupLabelSet.iterator().next())
           .append("</i>");
 
     } else {
-      sortedSigils.forEach(s -> label.append(s)//
-          .append(": <i>")//
-          .append(markupLabel.get(s))//
-          .append("</i><br/>"));
+      sortedSigils.forEach(
+          s -> label.append(s).append(": <i>").append(markupLabel.get(s)).append("</i><br/>"));
     }
   }
 
-  private void appendContent(StringBuilder label, Map<String, String> contentLabel, List<String> sortedSigils, String joinedSigils) {
+  private void appendContent(
+      StringBuilder label,
+      Map<String, String> contentLabel,
+      List<String> sortedSigils,
+      String joinedSigils) {
     Set<String> contentLabelSet = new HashSet<>(contentLabel.values());
     if (contentLabelSet.size() == 1) {
-      label.append(joinedSigils)//
-          .append(": ")//
-          .append(contentLabelSet.iterator().next());
+      label.append(joinedSigils).append(": ").append(contentLabelSet.iterator().next());
 
     } else {
-      String witnessLines = sortedSigils.stream()
-          .map(s -> s + ": " + contentLabel.get(s))
-          .collect(joining("<br/>"));
+      String witnessLines =
+          sortedSigils.stream().map(s -> s + ": " + contentLabel.get(s)).collect(joining("<br/>"));
       label.append(witnessLines);
-
     }
   }
 
   private String asLabel(String content, String whitespaceCharacter) {
-    return content.replaceAll("&", "&amp;")//
-        .replaceAll("\n", "&#x21A9;<br/>")//
+    return content
+        .replaceAll("&", "&amp;")
+        .replaceAll("\n", "&#x21A9;<br/>")
         .replaceAll(" +", whitespaceCharacter);
   }
-
 }

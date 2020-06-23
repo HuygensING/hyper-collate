@@ -29,7 +29,6 @@ public class HomePageResourceTest {
   public void testNoRobots() {
     HomePageResource resource = new HomePageResource();
     String noRobots = resource.noRobots();
-    assertThat(noRobots).isEqualTo("User-agent: *\n" +
-        "Disallow: /\n");
+    assertThat(noRobots).isEqualTo("User-agent: *\n" + "Disallow: /\n");
   }
 }

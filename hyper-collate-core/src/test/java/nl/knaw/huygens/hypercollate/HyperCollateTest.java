@@ -44,7 +44,8 @@ public class HyperCollateTest {
     verifyDotExport(variantWitnessGraph, expectedDot, "graph");
   }
 
-  protected void verifyDotExport(VariantWitnessGraph variantWitnessGraph, String expectedDot, String name) {
+  protected void verifyDotExport(
+      VariantWitnessGraph variantWitnessGraph, String expectedDot, String name) {
     VariantWitnessGraph wg = TokenMerger.merge(variantWitnessGraph);
     // VariantWitnessGraph wg = variantWitnessGraph;
 
@@ -76,5 +77,4 @@ public class HyperCollateTest {
       e.printStackTrace();
     }
   }
-
 }

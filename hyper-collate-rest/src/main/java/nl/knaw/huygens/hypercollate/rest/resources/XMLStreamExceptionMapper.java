@@ -32,10 +32,9 @@ public class XMLStreamExceptionMapper implements ExceptionMapper<XMLStreamExcept
 
   @Override
   public Response toResponse(XMLStreamException exception) {
-    return Response.status(Status.BAD_REQUEST)//
-        .entity(exception.getMessage())//
-        .type(MediaType.TEXT_PLAIN)//
+    return Response.status(Status.BAD_REQUEST)
+        .entity(exception.getMessage())
+        .type(MediaType.TEXT_PLAIN)
         .build();
   }
-
 }

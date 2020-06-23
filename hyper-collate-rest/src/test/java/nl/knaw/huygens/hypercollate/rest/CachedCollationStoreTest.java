@@ -91,5 +91,4 @@ public class CachedCollationStoreTest {
     assertThat(collationIds).isNotEmpty();
     assertThat(collationIds).allSatisfy(id -> id.startsWith("sample-"));
   }
-
 }

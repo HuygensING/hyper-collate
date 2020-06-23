@@ -42,5 +42,4 @@ public class WitnessInput {
   public String getXml() {
     return this.xml;
   }
-
 }

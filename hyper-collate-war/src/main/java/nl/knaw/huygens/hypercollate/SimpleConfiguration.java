@@ -86,5 +86,4 @@ public class SimpleConfiguration implements HyperCollateConfiguration {
       setProjectDir(Paths.get(System.getProperty("user.home"), ".hypercollate").toString());
     }
   }
-
 }

@@ -49,5 +49,4 @@ public class StreamUtil {
   private static <S> Stream<S> stream(Iterable<S> input, boolean parallel) {
     return StreamSupport.stream(input.spliterator(), parallel);
   }
-
 }

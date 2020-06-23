@@ -37,31 +37,47 @@ public class TokenMerger {
 
     Map<Long, TokenVertex> originalToMergedMap = new HashMap<>();
     TokenVertex originaltokenVertex = originalGraph.getStartTokenVertex();
-    List<TokenVertex> verticesToAdd = originaltokenVertex.getOutgoingTokenVertexStream().collect(Collectors.toList());
+    List<TokenVertex> verticesToAdd =
+        originaltokenVertex.getOutgoingTokenVertexStream().collect(Collectors.toList());
     List<Long> handledTokens = new ArrayList<>();
     AtomicBoolean endTokenHandled = new AtomicBoolean(false);
     TokenVertex mergedVertexToLinkTo = mergedGraph.getStartTokenVertex();
-    verticesToAdd.forEach(originalVertex -> handle(originalGraph, mergedGraph, originalToMergedMap, handledTokens, //
-        endTokenHandled, originalVertex, mergedVertexToLinkTo));
+    verticesToAdd.forEach(
+        originalVertex ->
+            handle(
+                originalGraph,
+                mergedGraph,
+                originalToMergedMap,
+                handledTokens,
+                endTokenHandled,
+                originalVertex,
+                mergedVertexToLinkTo));
     return mergedGraph;
   }
 
   // TODO: introduce context to avoid passing so many parameters
-  private static void handle(VariantWitnessGraph originalGraph, VariantWitnessGraph mergedGraph, //
-      Map<Long, TokenVertex> originalToMergedMap, List<Long> handledTokens, //
-      AtomicBoolean endTokenHandled, //
-      TokenVertex originalVertex, TokenVertex mergedVertexToLinkTo) {
+  private static void handle(
+      VariantWitnessGraph originalGraph,
+      VariantWitnessGraph mergedGraph,
+      Map<Long, TokenVertex> originalToMergedMap,
+      List<Long> handledTokens,
+      AtomicBoolean endTokenHandled,
+      TokenVertex originalVertex,
+      TokenVertex mergedVertexToLinkTo) {
 
     if (originalVertex instanceof EndTokenVertex) {
       if (endTokenHandled.get()) {
         return;
       }
       TokenVertex endTokenVertex = mergedGraph.getEndTokenVertex();
-      originalVertex.getIncomingTokenVertexStream().forEach(tv -> {
-        Long indexNumber = ((MarkedUpToken) tv.getToken()).getIndexNumber();
-        TokenVertex mergedTokenVertex = originalToMergedMap.get(indexNumber);
-        mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedTokenVertex, endTokenVertex);
-      });
+      originalVertex
+          .getIncomingTokenVertexStream()
+          .forEach(
+              tv -> {
+                Long indexNumber = ((MarkedUpToken) tv.getToken()).getIndexNumber();
+                TokenVertex mergedTokenVertex = originalToMergedMap.get(indexNumber);
+                mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedTokenVertex, endTokenVertex);
+              });
       endTokenHandled.set(true);
       return;
     }
@@ -74,37 +90,55 @@ public class TokenMerger {
       return;
     }
 
-    MarkedUpToken mergedToken = new MarkedUpToken()//
-        .setContent(originalToken.getContent())//
-        .setNormalizedContent(originalToken.getNormalizedContent())//
-        .setParentXPath(originalToken.getParentXPath())//
-        .setWitness((SimpleWitness) originalToken.getWitness())//
-        .setRdg(originalToken.getRdg())//
-        .setIndexNumber(tokenNumber);
+    MarkedUpToken mergedToken =
+        new MarkedUpToken()
+            .setContent(originalToken.getContent())
+            .setNormalizedContent(originalToken.getNormalizedContent())
+            .setParentXPath(originalToken.getParentXPath())
+            .setWitness((SimpleWitness) originalToken.getWitness())
+            .setRdg(originalToken.getRdg())
+            .setIndexNumber(tokenNumber);
 
-    SimpleTokenVertex mergedVertex = new SimpleTokenVertex(mergedToken)//
-        .setBranchPath(originalVertex.getBranchPath());
-    originalGraph.getMarkupListForTokenVertex(originalVertex)//
+    SimpleTokenVertex mergedVertex =
+        new SimpleTokenVertex(mergedToken).setBranchPath(originalVertex.getBranchPath());
+    originalGraph
+        .getMarkupListForTokenVertex(originalVertex)
         .forEach(markup -> mergedGraph.addMarkupToTokenVertex(mergedVertex, markup));
     originalToMergedMap.put(tokenNumber, mergedVertex);
     mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedVertexToLinkTo, mergedVertex);
     handledTokens.add(tokenNumber);
-    List<TokenVertex> originalOutgoingVertices = originalVertex.getOutgoingTokenVertexStream().collect(Collectors.toList());
+    List<TokenVertex> originalOutgoingVertices =
+        originalVertex.getOutgoingTokenVertexStream().collect(Collectors.toList());
     while (canMerge(originalGraph, originalVertex, originalOutgoingVertices)) {
       MarkedUpToken nextOriginalToken = (MarkedUpToken) originalOutgoingVertices.get(0).getToken();
-      mergedToken//
-          .setContent(mergedToken.getContent() + nextOriginalToken.getContent())//
-          .setNormalizedContent(mergedToken.getNormalizedContent() + nextOriginalToken.getNormalizedContent());
+      mergedToken
+          .setContent(mergedToken.getContent() + nextOriginalToken.getContent())
+          .setNormalizedContent(
+              mergedToken.getNormalizedContent() + nextOriginalToken.getNormalizedContent());
       originalToMergedMap.put(nextOriginalToken.getIndexNumber(), mergedVertex);
       originalVertex = originalOutgoingVertices.get(0);
-      originalOutgoingVertices = originalVertex.getOutgoingTokenVertexStream().collect(Collectors.toList());
+      originalOutgoingVertices =
+          originalVertex.getOutgoingTokenVertexStream().collect(Collectors.toList());
     }
-    originalOutgoingVertices.forEach(oVertex -> handle(originalGraph, mergedGraph, originalToMergedMap, handledTokens, endTokenHandled, oVertex, mergedVertex));
+    originalOutgoingVertices.forEach(
+        oVertex ->
+            handle(
+                originalGraph,
+                mergedGraph,
+                originalToMergedMap,
+                handledTokens,
+                endTokenHandled,
+                oVertex,
+                mergedVertex));
   }
 
-  private static boolean canMerge(VariantWitnessGraph originalGraph, TokenVertex originalVertex, List<TokenVertex> originalOutgoingVertices) {
-    return originalOutgoingVertices.size() == 1//
-        && originalGraph.getMarkupListForTokenVertex(originalVertex).equals(originalGraph.getMarkupListForTokenVertex(originalOutgoingVertices.get(0)));
+  private static boolean canMerge(
+      VariantWitnessGraph originalGraph,
+      TokenVertex originalVertex,
+      List<TokenVertex> originalOutgoingVertices) {
+    return originalOutgoingVertices.size() == 1
+        && originalGraph
+        .getMarkupListForTokenVertex(originalVertex)
+        .equals(originalGraph.getMarkupListForTokenVertex(originalOutgoingVertices.get(0)));
   }
-
 }

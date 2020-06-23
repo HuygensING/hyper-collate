@@ -18,9 +18,10 @@
   #L%
   -->
 <text>
-  <s>Frankenstein discovered
-    <del rend="strikethrough">or</del>
-    <add place="superlinear">that I</add>
-    made notes concerning his history; he asked to see them and then himself corrected and augmented them in many places
-  </s>
+    <s>Frankenstein discovered
+        <del rend="strikethrough">or</del>
+        <add place="superlinear">that I</add>
+        made notes concerning his history; he asked to see them and then himself corrected and augmented them in many
+        places
+    </s>
 </text>

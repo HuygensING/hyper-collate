@@ -43,5 +43,4 @@ public class CollationInput {
   public Boolean getJoin() {
     return this.join;
   }
-
 }

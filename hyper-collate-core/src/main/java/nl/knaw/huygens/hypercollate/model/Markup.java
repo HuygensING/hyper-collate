@@ -61,6 +61,6 @@ public class Markup {
   }
 
   public int getDepth() {
-    return this. depth;
+    return this.depth;
   }
 }

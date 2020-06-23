@@ -123,6 +123,7 @@ public class Hypergraph<N, H> {
   }
 
   public enum GraphType {
-    ORDERED, UNORDERED
+    ORDERED,
+    UNORDERED
   }
 }

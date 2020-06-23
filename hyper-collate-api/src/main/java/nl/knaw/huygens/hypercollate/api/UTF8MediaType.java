@@ -27,5 +27,4 @@ public class UTF8MediaType {
   public static final String TEXT_PLAIN = MediaType.TEXT_PLAIN + CHARSET_UTF8;
   public static final String TEXT_XML = MediaType.TEXT_XML + CHARSET_UTF8;
   public static final String APPLICATION_JSON = MediaType.APPLICATION_JSON + CHARSET_UTF8;
-
 }

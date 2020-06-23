@@ -36,7 +36,7 @@ public class DotHealthCheck extends HealthCheck {
 
   @Override
   protected Result check() throws Exception {
-    if (dotPath==null){
+    if (dotPath == null) {
       return Result.healthy();
     }
     File dotFile = new File(dotPath);
@@ -48,7 +48,7 @@ public class DotHealthCheck extends HealthCheck {
     }
     final Process dotProc = new ProcessBuilder(dotPath, "-V").start();
     boolean terminated = dotProc.waitFor(2, TimeUnit.SECONDS);
-    if (!terminated){
+    if (!terminated) {
       return Result.unhealthy("%s -V timed out.", dotPath);
     }
 

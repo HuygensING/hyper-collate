@@ -18,15 +18,15 @@
   #L%
   -->
 <TEI>
-  <div type="chapter" n="2">
-    <p>
-      <s>washing away in water.</s>
-    </p>
-  </div>
-  <div type="chapter" n="3">
-    <head>III</head>
-    <p>
-      <s>But what after all, is one night?</s>
-    </p>
-  </div>
+    <div type="chapter" n="2">
+        <p>
+            <s>washing away in water.</s>
+        </p>
+    </div>
+    <div type="chapter" n="3">
+        <head>III</head>
+        <p>
+            <s>But what after all, is one night?</s>
+        </p>
+    </div>
 </TEI>

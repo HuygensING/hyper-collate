@@ -28,5 +28,4 @@ interface OptimalCollatedMatchListFinder {
   List<CollatedMatch> getOptimalCollatedMatchList(Collection<CollatedMatch> allPotentialMatches);
 
   String getName();
-
 }

@@ -29,7 +29,8 @@ public class HyperCollateAssertions extends Assertions {
   }
 
   /**
-   * Creates a new instance of <code>{@link nl.knaw.huygens.hypercollate.model.CollationGraphAssert}</code>.
+   * Creates a new instance of <code>{@link nl.knaw.huygens.hypercollate.model.CollationGraphAssert}
+   * </code>.
    *
    * @param actual the actual value.
    * @return the created assertion object.

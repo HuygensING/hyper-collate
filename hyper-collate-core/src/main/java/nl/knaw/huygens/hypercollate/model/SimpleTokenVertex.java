@@ -97,5 +97,4 @@ public class SimpleTokenVertex implements TokenVertex, Comparable<SimpleTokenVer
   public Long getIndexNumber() {
     return token.getIndexNumber();
   }
-
 }

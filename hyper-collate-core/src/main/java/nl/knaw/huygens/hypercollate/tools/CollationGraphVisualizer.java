@@ -69,25 +69,28 @@ public class CollationGraphVisualizer {
         continue;
       }
       Map<String, List<MarkedUpToken>> nodeTokensPerWitness = new HashMap<>();
-      sigils.forEach(sigil -> {
-        nodeTokensPerWitness.put(sigil, new ArrayList<>());
-        nodeSet.stream()//
-            .filter(TextNode.class::isInstance)//
-            .map(TextNode.class::cast)//
-            .forEach(node -> {
-              Token token = node.getTokenForWitness(sigil);
-              if (token != null) {
-                MarkedUpToken mToken = (MarkedUpToken) token;
-                nodeTokensPerWitness.get(sigil).add(mToken);
-              }
-            });
-      });
-      sigils.forEach(sigil -> {
-        List<MarkedUpToken> tokens = nodeTokensPerWitness.get(sigil);
-        maxLayers.put(sigil, Math.max(maxLayers.get(sigil), tokens.size()));
-        Cell cell = newCell(tokens, whitespaceCharacter);
-        rowMap.get(sigil).add(cell);
-      });
+      sigils.forEach(
+          sigil -> {
+            nodeTokensPerWitness.put(sigil, new ArrayList<>());
+            nodeSet.stream()
+                .filter(TextNode.class::isInstance)
+                .map(TextNode.class::cast)
+                .forEach(
+                    node -> {
+                      Token token = node.getTokenForWitness(sigil);
+                      if (token != null) {
+                        MarkedUpToken mToken = (MarkedUpToken) token;
+                        nodeTokensPerWitness.get(sigil).add(mToken);
+                      }
+                    });
+          });
+      sigils.forEach(
+          sigil -> {
+            List<MarkedUpToken> tokens = nodeTokensPerWitness.get(sigil);
+            maxLayers.put(sigil, Math.max(maxLayers.get(sigil), tokens.size()));
+            Cell cell = newCell(tokens, whitespaceCharacter);
+            rowMap.get(sigil).add(cell);
+          });
     }
 
     return asciiTable(graph.getSigils(), rowMap, maxLayers).render();
@@ -108,29 +111,29 @@ public class CollationGraphVisualizer {
     if (tokens.isEmpty()) {
       setCellLayer(cell, " ");
     } else {
-      tokens.forEach(token -> {
-        String content = token.getContent()//
-            .replaceAll("\n", " ")//
-            .replaceAll(" +", whitespaceCharacter);
-        String parentXPath = token.getParentXPath();
-        if (parentXPath.endsWith("/del/add")) {
-          content = "[za] " + content;
-        } else if (parentXPath.endsWith("/add")) {
-          content = "[z] " + content;
-        } else if (parentXPath.endsWith("/del")) {
-          content = "[a] " + content;
-        }
-        if (parentXPath.contains("/rdg")) {
-          String rdg = token.getRdg();
-          content = ("<" + rdg + "> " + content).replaceAll("\\>\\s+\\[", ">[");
-        }
+      tokens.forEach(
+          token -> {
+            String content =
+                token.getContent().replaceAll("\n", " ").replaceAll(" +", whitespaceCharacter);
+            String parentXPath = token.getParentXPath();
+            if (parentXPath.endsWith("/del/add")) {
+              content = "[za] " + content;
+            } else if (parentXPath.endsWith("/add")) {
+              content = "[z] " + content;
+            } else if (parentXPath.endsWith("/del")) {
+              content = "[a] " + content;
+            }
+            if (parentXPath.contains("/rdg")) {
+              String rdg = token.getRdg();
+              content = ("<" + rdg + "> " + content).replaceAll("\\>\\s+\\[", ">[");
+            }
 
-        if (content.isEmpty()) {
-          content = "<" + parentXPath.replaceAll(".*/", "") + "/>";
-        }
-//        String layerName = determineLayerName(parentXPath);
-        setCellLayer(cell, content);
-      });
+            if (content.isEmpty()) {
+              content = "<" + parentXPath.replaceAll(".*/", "") + "/>";
+            }
+            //        String layerName = determineLayerName(parentXPath);
+            setCellLayer(cell, content);
+          });
     }
     return cell;
   }
@@ -148,25 +151,27 @@ public class CollationGraphVisualizer {
 
   private static void setCellLayer(Cell cell, String content) {
     cell.getLayerContent().add(content);
-//    String previousContent = cell.getLayerContent().put(layerName, content);
-//    Preconditions.checkState(previousContent == null, "layerName " + layerName + " used twice!");
+    //    String previousContent = cell.getLayerContent().put(layerName, content);
+    //    Preconditions.checkState(previousContent == null, "layerName " + layerName + " used
+    // twice!");
   }
 
-  private static AsciiTable asciiTable(List<String> sigils, Map<String, List<Cell>> rowMap, Map<String, Integer> cellHeights) {
-    AsciiTable table = new AsciiTable()//
-        .setTextAlignment(TextAlignment.LEFT);
+  private static AsciiTable asciiTable(
+      List<String> sigils, Map<String, List<Cell>> rowMap, Map<String, Integer> cellHeights) {
+    AsciiTable table = new AsciiTable().setTextAlignment(TextAlignment.LEFT);
     CWC_LongestLine cwc = new CWC_LongestLine();
     table.getRenderer().setCWC(cwc);
     table.addRule();
-    sigils.forEach(sigil -> {
-      List<String> row = rowMap.get(sigil)//
-          .stream()//
-          .map(cell -> toASCII(cell, cellHeights.get(sigil)))//
-          .collect(toList());//
-      row.add(0, "[" + sigil + "]");
-      table.addRow(row);
-      table.addRule();
-    });
+    sigils.forEach(
+        sigil -> {
+          List<String> row =
+              rowMap.get(sigil).stream()
+                  .map(cell -> toASCII(cell, cellHeights.get(sigil)))
+                  .collect(toList());
+          row.add(0, "[" + sigil + "]");
+          table.addRow(row);
+          table.addRule();
+        });
     return table;
   }
 
@@ -175,28 +180,30 @@ public class CollationGraphVisualizer {
     // ASCIITable has no TextAlignment.BOTTOM option, so add empty lines manually
     int emptyLinesToAdd = cellHeight - cell.getLayerContent().size();
     for (int i = 0; i < emptyLinesToAdd; i++) {
-      contentBuilder.append(NBSP + "<br>"); // regular space or just <br> leads to ASCIITable error when rendering
+      contentBuilder.append(
+          NBSP + "<br>"); // regular space or just <br> leads to ASCIITable error when rendering
     }
     List<String> layerContent = new ArrayList<>(cell.getLayerContent());
     sort(layerContent);
     reverse(layerContent);
     StringJoiner joiner = new StringJoiner("<br>");
     for (String s : layerContent) {
-      joiner.add(s.replaceAll("\\[z]", "[+]").replaceAll("\\[a]", "[-]").replaceAll("\\[za]", "[+-]"));
+      joiner.add(
+          s.replaceAll("\\[z]", "[+]").replaceAll("\\[a]", "[-]").replaceAll("\\[za]", "[+-]"));
     }
     String content = joiner.toString();
     return contentBuilder.append(content).toString();
   }
 
-//  private static String cellLine(Cell cell, String lName) {
-//    String content = cell.getLayerContent().get(lName);
-////    if (lName.equals("add")) {
-////      content = "[+] " + content;
-////    } else if (lName.equals("del")) {
-////      content = "[-] " + content;
-////    }
-//    return content;
-//  }
+  //  private static String cellLine(Cell cell, String lName) {
+  //    String content = cell.getLayerContent().get(lName);
+  ////    if (lName.equals("add")) {
+  ////      content = "[+] " + content;
+  ////    } else if (lName.equals("del")) {
+  ////      content = "[-] " + content;
+  ////    }
+  //    return content;
+  //  }
 
   public static String toTableHTML(CollationGraph graph) {
     // TODO
@@ -210,8 +217,8 @@ public class CollationGraphVisualizer {
         .toString();
   }
 
-  public static String toDot(CollationGraph graph, boolean emphasizeWhitespace, final boolean hideMarkup) {
+  public static String toDot(
+      CollationGraph graph, boolean emphasizeWhitespace, final boolean hideMarkup) {
     return new DotFactory(emphasizeWhitespace).fromCollationGraph(graph, hideMarkup);
   }
-
 }

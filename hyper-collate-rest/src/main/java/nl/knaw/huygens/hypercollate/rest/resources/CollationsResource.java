@@ -62,11 +62,16 @@ public class CollationsResource {
   private static final String COLLATION_PATH = "{" + PATHPARAM_NAME + "}";
   private static final String COLLATION_SUBPATH = COLLATION_PATH + "/";
   private static final String COLLATION_FORMATPATH = COLLATION_PATH + ".";
-  private static final String COLLATION_ASCII_TABLE_PATH = COLLATION_SUBPATH + ResourcePaths.COLLATIONS_ASCII_TABLE;
-  private static final String COLLATION_DOT_PATH = COLLATION_FORMATPATH + ResourcePaths.COLLATIONS_DOT;
-  private static final String COLLATION_SVG_PATH = COLLATION_FORMATPATH + ResourcePaths.COLLATIONS_SVG;
-  private static final String COLLATION_PNG_PATH = COLLATION_FORMATPATH + ResourcePaths.COLLATIONS_PNG;
-  private static final String COLLATION_WITNESS_PATH = COLLATION_SUBPATH + ResourcePaths.WITNESSES + "/{" + PATHPARAM_SIGIL + "}";
+  private static final String COLLATION_ASCII_TABLE_PATH =
+      COLLATION_SUBPATH + ResourcePaths.COLLATIONS_ASCII_TABLE;
+  private static final String COLLATION_DOT_PATH =
+      COLLATION_FORMATPATH + ResourcePaths.COLLATIONS_DOT;
+  private static final String COLLATION_SVG_PATH =
+      COLLATION_FORMATPATH + ResourcePaths.COLLATIONS_SVG;
+  private static final String COLLATION_PNG_PATH =
+      COLLATION_FORMATPATH + ResourcePaths.COLLATIONS_PNG;
+  private static final String COLLATION_WITNESS_PATH =
+      COLLATION_SUBPATH + ResourcePaths.WITNESSES + "/{" + PATHPARAM_SIGIL + "}";
   private static final String COLLATION_WITNESS_XML_PATH = COLLATION_WITNESS_PATH + ".xml";
   private static final String COLLATION_WITNESS_SVG_PATH = COLLATION_WITNESS_PATH + ".svg";
   private static final String COLLATION_WITNESS_PNG_PATH = COLLATION_WITNESS_PATH + ".png";
@@ -91,7 +96,8 @@ public class CollationsResource {
   private final DotEngine dotEngine;
   private final boolean dotEngineAvailable;
 
-  public CollationsResource(HyperCollateConfiguration configuration, CollationStore collationStore) {
+  public CollationsResource(
+      HyperCollateConfiguration configuration, CollationStore collationStore) {
     this.configuration = configuration;
     this.collationStore = collationStore;
     if (configuration.hasPathToDotExecutable()) {
@@ -107,10 +113,11 @@ public class CollationsResource {
   @Timed
   @ApiOperation(value = "List all collation names")
   public List<String> getCollationNames() {
-    return collationStore.getCollationIds()//
-        .stream()//
-        .map(id -> String.format("%s/%s/%s", configuration.getBaseURI(), ResourcePaths.COLLATIONS, id))//
-        .sorted()//
+    return collationStore.getCollationIds().stream()
+        .map(
+            id ->
+                String.format("%s/%s/%s", configuration.getBaseURI(), ResourcePaths.COLLATIONS, id))
+        .sorted()
         .collect(toList());
   }
 
@@ -119,9 +126,11 @@ public class CollationsResource {
   @Path(COLLATION_PATH)
   @ApiOperation(value = "Create a new collation with the given name")
   @Produces(UTF8MediaType.TEXT_PLAIN)
-  public Response addCollation(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name) {
+  public Response addCollation(
+      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name) {
     if (collationStore.idInUse(name)) {
-      throw new BadRequestException(String.format("%s '%s' is already in use.", APIPARAM_NAME, name));
+      throw new BadRequestException(
+          String.format("%s '%s' is already in use.", APIPARAM_NAME, name));
     }
     try {
       collationStore.addCollation(name);
@@ -137,7 +146,8 @@ public class CollationsResource {
   @Timed
   @Path(COLLATION_PATH)
   @ApiOperation(value = "Delete the collation with the given name")
-  public Response deleteCollation(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name) {
+  public Response deleteCollation(
+      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name) {
     if (!collationStore.idInUse(name)) {
       throw collationNotFoundException(name);
     }
@@ -156,7 +166,8 @@ public class CollationsResource {
   @Timed
   @Produces(UTF8MediaType.APPLICATION_JSON)
   @ApiOperation(value = "Get information about the collation")
-  public Response getCollationInfo(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name) {
+  public Response getCollationInfo(
+      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     return Response.ok(collationInfo).build();
   }
@@ -166,8 +177,9 @@ public class CollationsResource {
   @Timed
   @Consumes(UTF8MediaType.TEXT_XML)
   @ApiOperation(value = "Add a witness to the collation")
-  public Response addXMLWitness(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) @NotNull final String name, //
-      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) @NotNull final String sigil, //
+  public Response addXMLWitness(
+      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) @NotNull final String name,
+      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) @NotNull final String sigil,
       @ApiParam(APIPARAM_XML) @NotNull @Valid String xml) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     VariantWitnessGraph variantWitnessGraph = new XMLImporter().importXML(sigil, xml);
@@ -182,11 +194,17 @@ public class CollationsResource {
   @Timed
   @Produces(UTF8MediaType.TEXT_XML)
   @ApiOperation(value = "Return the XML source of the witness")
-  public Response getWitnessXML(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name, //
+  public Response getWitnessXML(
+      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,
       @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
-    String xml = collationInfo.getWitness(sigil)
-        .orElseThrow(() -> new NotFoundException(String.format("No witness '%s' found for collation '%s'.", sigil, name)));
+    String xml =
+        collationInfo
+            .getWitness(sigil)
+            .orElseThrow(
+                () ->
+                    new NotFoundException(
+                        String.format("No witness '%s' found for collation '%s'.", sigil, name)));
     return Response.ok(xml).build();
   }
 
@@ -194,13 +212,14 @@ public class CollationsResource {
   @Path(COLLATION_WITNESS_DOT_PATH)
   @Timed
   @Produces(UTF8MediaType.TEXT_PLAIN)
-  @ApiOperation(value = "Get a .dot visualization of the witness graph, with optional emphasizing of whitespace and optional joining of tokens.")
+  @ApiOperation(
+      value =
+          "Get a .dot visualization of the witness graph, with optional emphasizing of whitespace and optional joining of tokens.")
   public Response getWitnessDot(
-      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,//
-      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,//
-      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace,//
-      @DefaultValue(FALSE) @QueryParam(JOIN_TOKENS) final boolean joinTokens//
-  ) {
+      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,
+      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,
+      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace,
+      @DefaultValue(FALSE) @QueryParam(JOIN_TOKENS) final boolean joinTokens) {
     String dot = getDot(name, sigil, emphasizeWhitespace, joinTokens);
     return Response.ok(dot).build();
   }
@@ -209,12 +228,14 @@ public class CollationsResource {
   @Path(COLLATION_WITNESS_SVG_PATH)
   @Timed
   @Produces(IMAGE_SVG)
-  @ApiOperation(value = "Return an SVG visualization of the witness graph, with optional emphasizing of whitespace and optional joining of tokens.")
-  public Response getWitnessSVG(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name, //
-      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,//
-      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace,//
-      @DefaultValue(FALSE) @QueryParam(JOIN_TOKENS) final boolean joinTokens//
-  ) {
+  @ApiOperation(
+      value =
+          "Return an SVG visualization of the witness graph, with optional emphasizing of whitespace and optional joining of tokens.")
+  public Response getWitnessSVG(
+      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,
+      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,
+      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace,
+      @DefaultValue(FALSE) @QueryParam(JOIN_TOKENS) final boolean joinTokens) {
     return renderWitnessGraphAs(name, sigil, emphasizeWhitespace, joinTokens, SVG);
   }
 
@@ -222,12 +243,14 @@ public class CollationsResource {
   @Path(COLLATION_WITNESS_PNG_PATH)
   @Timed
   @Produces(IMAGE_PNG)
-  @ApiOperation(value = "Return a PNG visualization of the witness graph, with optional emphasizing of whitespace and optional joining of tokens.")
-  public Response getWitnessPNG(@ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name, //
-      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,//
-      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace,//
-      @DefaultValue(FALSE) @QueryParam(JOIN_TOKENS) final boolean joinTokens//
-  ) {
+  @ApiOperation(
+      value =
+          "Return a PNG visualization of the witness graph, with optional emphasizing of whitespace and optional joining of tokens.")
+  public Response getWitnessPNG(
+      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,
+      @ApiParam(APIPARAM_SIGIL) @PathParam(PATHPARAM_SIGIL) final String sigil,
+      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) boolean emphasizeWhitespace,
+      @DefaultValue(FALSE) @QueryParam(JOIN_TOKENS) final boolean joinTokens) {
     return renderWitnessGraphAs(name, sigil, emphasizeWhitespace, joinTokens, PNG);
   }
 
@@ -235,12 +258,13 @@ public class CollationsResource {
   @Path(COLLATION_DOT_PATH)
   @Timed
   @Produces(UTF8MediaType.TEXT_PLAIN)
-  @ApiOperation(value = "Get a .dot visualization of the collation graph, with optional emphasizing of whitespace and optional hiding of markup.")
+  @ApiOperation(
+      value =
+          "Get a .dot visualization of the collation graph, with optional emphasizing of whitespace and optional hiding of markup.")
   public Response getDotVisualization(
-      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,//
-      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace,//
-      @DefaultValue(FALSE) @QueryParam(HIDE_MARKUP) final boolean hideMarkup//
-  ) {
+      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,
+      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace,
+      @DefaultValue(FALSE) @QueryParam(HIDE_MARKUP) final boolean hideMarkup) {
     String dot = getDot(name, emphasizeWhitespace, hideMarkup);
     return Response.ok(dot).build();
   }
@@ -249,12 +273,13 @@ public class CollationsResource {
   @Path(COLLATION_SVG_PATH)
   @Timed
   @Produces(IMAGE_SVG)
-  @ApiOperation(value = "Get an SVG visualization of the collation graph, with optional emphasizing of whitespace and optional hiding of markup.")
+  @ApiOperation(
+      value =
+          "Get an SVG visualization of the collation graph, with optional emphasizing of whitespace and optional hiding of markup.")
   public Response getSVGVisualization(
-      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,//
-      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace,//
-      @DefaultValue(FALSE) @QueryParam(HIDE_MARKUP) final boolean hideMarkup//
-  ) {
+      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,
+      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace,
+      @DefaultValue(FALSE) @QueryParam(HIDE_MARKUP) final boolean hideMarkup) {
     return getCollationGraphVisualization(name, emphasizeWhitespace, hideMarkup, SVG);
   }
 
@@ -262,12 +287,13 @@ public class CollationsResource {
   @Path(COLLATION_PNG_PATH)
   @Timed
   @Produces(IMAGE_PNG)
-  @ApiOperation(value = "Get a PNG visualization of the collation graph, with optional emphasizing of whitespace and optional hiding of markup.")
+  @ApiOperation(
+      value =
+          "Get a PNG visualization of the collation graph, with optional emphasizing of whitespace and optional hiding of markup.")
   public Response getPNGVisualization(
-      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,//
-      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace,//
-      @DefaultValue(FALSE) @QueryParam(HIDE_MARKUP) final boolean hideMarkup//
-  ) {
+      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,
+      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace,
+      @DefaultValue(FALSE) @QueryParam(HIDE_MARKUP) final boolean hideMarkup) {
     return getCollationGraphVisualization(name, emphasizeWhitespace, hideMarkup, PNG);
   }
 
@@ -275,22 +301,26 @@ public class CollationsResource {
   @Path(COLLATION_ASCII_TABLE_PATH)
   @Timed
   @Produces(UTF8MediaType.TEXT_PLAIN)
-  @ApiOperation(value = "Get an ASCII table visualization of the collation graph, with optional emphasizing of whitespace.")
+  @ApiOperation(
+      value =
+          "Get an ASCII table visualization of the collation graph, with optional emphasizing of whitespace.")
   public Response getAsciiTableVisualization(
-      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,//
-      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace//
-  ) {
+      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,
+      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace) {
     CollationGraph collation = getExistingCollationGraph(name);
     String table = CollationGraphVisualizer.toTableASCII(collation, emphasizeWhitespace);
     return Response.ok(table).build();
   }
 
   private URI collationURI(String collationId) {
-    return URI.create(String.format("%s/%s/%s", configuration.getBaseURI(), ResourcePaths.COLLATIONS, collationId));
+    return URI.create(
+        String.format(
+            "%s/%s/%s", configuration.getBaseURI(), ResourcePaths.COLLATIONS, collationId));
   }
 
   private CollationInfo getExistingCollationInfo(final String name) {
-    return collationStore.getCollationInfo(name)//
+    return collationStore
+        .getCollationInfo(name)
         .orElseThrow(() -> collationNotFoundException(name));
   }
 
@@ -298,12 +328,14 @@ public class CollationsResource {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     CollationInfo.State collationState = collationInfo.getCollationState();
     if (collationState.equals(CollationInfo.State.needs_witness)) {
-      throw new BadRequestException(String.format("Collation '%s' has no witnesses yet. Please add them first.", name));
+      throw new BadRequestException(
+          String.format("Collation '%s' has no witnesses yet. Please add them first.", name));
     }
     if (collationState.equals(CollationInfo.State.ready_to_collate)) {
       collate(collationInfo);
     }
-    return collationStore.getCollationGraph(name)//
+    return collationStore
+        .getCollationGraph(name)
         .orElseThrow(() -> collationNotFoundException(name));
   }
 
@@ -313,9 +345,8 @@ public class CollationsResource {
 
   private void collate(CollationInfo collationInfo) {
     Stopwatch stopwatch = Stopwatch.createStarted();
-    VariantWitnessGraph[] variantWitnessGraphs = collationInfo.getWitnessGraphMap()//
-        .values()//
-        .toArray(new VariantWitnessGraph[]{});
+    VariantWitnessGraph[] variantWitnessGraphs =
+        collationInfo.getWitnessGraphMap().values().toArray(new VariantWitnessGraph[]{});
 
     CollationGraph collationGraph = hypercollator.collate(variantWitnessGraphs);
     if (collationInfo.getJoin()) {
@@ -326,16 +357,17 @@ public class CollationsResource {
     collationStore.setCollation(collationInfo, collationGraph);
   }
 
-  private Response getCollationGraphVisualization(String name, boolean emphasizeWhitespace, boolean hideMarkup, String format) {
+  private Response getCollationGraphVisualization(
+      String name, boolean emphasizeWhitespace, boolean hideMarkup, String format) {
     String dot = getDot(name, emphasizeWhitespace, hideMarkup);
     return renderDotAs(dot, format);
   }
 
   private Response renderDotAs(String dot, String format) {
     if (!dotEngineAvailable) {
-      return Response.status(Response.Status.BAD_REQUEST)//
-          .entity("Cannot render, pathToDotExecutable not set in server config file.")//
-          .type(MediaType.TEXT_PLAIN)//
+      return Response.status(Response.Status.BAD_REQUEST)
+          .entity("Cannot render, pathToDotExecutable not set in server config file.")
+          .type(MediaType.TEXT_PLAIN)
           .build();
     }
 
@@ -348,12 +380,14 @@ public class CollationsResource {
     return CollationGraphVisualizer.toDot(collation, emphasizeWhitespace, hideMarkup);
   }
 
-  private Response renderWitnessGraphAs(String name, String sigil, boolean emphasizeWhitespace, boolean joinTokens, String format) {
+  private Response renderWitnessGraphAs(
+      String name, String sigil, boolean emphasizeWhitespace, boolean joinTokens, String format) {
     String dot = getDot(name, sigil, emphasizeWhitespace, joinTokens);
     return renderDotAs(dot, format);
   }
 
-  private String getDot(String name, String sigil, boolean emphasizeWhitespace, boolean joinTokens) {
+  private String getDot(
+      String name, String sigil, boolean emphasizeWhitespace, boolean joinTokens) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     VariantWitnessGraph variantWitnessGraph = collationInfo.getWitnessGraphMap().get(sigil);
     if (joinTokens) {

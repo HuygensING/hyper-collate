@@ -27,7 +27,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-public class VariantWitnessGraphRanking implements Iterable<Set<TokenVertex>>, Function<TokenVertex, Integer> {
+public class VariantWitnessGraphRanking
+    implements Iterable<Set<TokenVertex>>, Function<TokenVertex, Integer> {
 
   private final Map<TokenVertex, Integer> byVertex = new HashMap<>();
   private final SortedMap<Integer, Set<TokenVertex>> byRank = new TreeMap<>();
@@ -41,7 +42,8 @@ public class VariantWitnessGraphRanking implements Iterable<Set<TokenVertex>>, F
     final VariantWitnessGraphRanking ranking = new VariantWitnessGraphRanking();
     for (TokenVertex v : graph.vertices()) {
       AtomicInteger rank = new AtomicInteger(-1);
-      v.getIncomingTokenVertexStream().forEach(incoming -> rank.set(Math.max(rank.get(), ranking.byVertex.get(incoming))));
+      v.getIncomingTokenVertexStream()
+          .forEach(incoming -> rank.set(Math.max(rank.get(), ranking.byVertex.get(incoming))));
       rank.getAndIncrement();
       ranking.byVertex.put(v, rank.get());
       ranking.byRank.computeIfAbsent(rank.get(), r -> new HashSet<>()).add(v);
@@ -74,5 +76,4 @@ public class VariantWitnessGraphRanking implements Iterable<Set<TokenVertex>>, F
   public Comparator<TokenVertex> comparator() {
     return Comparator.comparingInt(byVertex::get);
   }
-
 }

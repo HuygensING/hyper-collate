@@ -38,11 +38,8 @@ public class MatchTest extends HyperCollateTest {
     TokenVertex v2 = mockVertexWithSigil("B");
     TokenVertex v3 = mockVertexWithSigil("C");
     TokenVertex v4 = mockVertexWithSigil("D");
-    Match match = new Match(v1, v2, v3, v4)//
-        .setRank("A", 1)//
-        .setRank("B", 2)//
-        .setRank("C", 3)//
-        .setRank("D", 4);
+    Match match =
+        new Match(v1, v2, v3, v4).setRank("A", 1).setRank("B", 2).setRank("C", 3).setRank("D", 4);
     Integer lowestRankForWitnessesOtherThan = match.getLowestRankForWitnessesOtherThan("A");
     assertThat(lowestRankForWitnessesOtherThan).isEqualTo(2);
   }
@@ -83,5 +80,4 @@ public class MatchTest extends HyperCollateTest {
       }
     };
   }
-
 }

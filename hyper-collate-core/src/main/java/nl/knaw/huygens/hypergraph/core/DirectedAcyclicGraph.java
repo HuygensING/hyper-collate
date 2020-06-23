@@ -82,5 +82,4 @@ public class DirectedAcyclicGraph<N> extends Hypergraph<N, TraditionalEdge> {
     }
     return nodes.iterator().next();
   }
-
 }

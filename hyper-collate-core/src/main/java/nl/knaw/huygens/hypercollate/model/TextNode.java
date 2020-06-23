@@ -56,12 +56,12 @@ public class TextNode implements Node {
 
   @Override
   public String toString() {
-    String tokensString = getSigils()//
-        .stream()//
-        .sorted()//
-        .map(tokenMap::get)//
-        .map(Token::toString)//
-        .collect(joining(", "));
+    String tokensString =
+        getSigils().stream()
+            .sorted()
+            .map(tokenMap::get)
+            .map(Token::toString)
+            .collect(joining(", "));
     return "(" + tokensString + ")";
   }
 

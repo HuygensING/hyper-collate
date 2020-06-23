@@ -10,8 +10,8 @@ baseURI: http://localhost:2018/
 
 server:
   applicationConnectors:
-  - type: http
-    port: 2018
+    - type: http
+      port: 2018
 
 logging:
   level: INFO

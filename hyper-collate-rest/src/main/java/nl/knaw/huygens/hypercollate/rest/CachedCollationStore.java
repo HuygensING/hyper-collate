@@ -50,12 +50,10 @@ public class CachedCollationStore implements CollationStore {
   private static final Logger LOG = LoggerFactory.getLogger(CachedCollationStore.class);
   private final Set<String> collationIds = new LinkedHashSet<>();
   private static String baseURI;
-  private static final Cache<String, CollationInfo> CollationInfoCache = CacheBuilder.newBuilder()//
-      .maximumSize(100)//
-      .build();
-  private static final Cache<String, CollationGraph> CollationGraphCache = CacheBuilder.newBuilder()//
-      .maximumSize(100)//
-      .build();
+  private static final Cache<String, CollationInfo> CollationInfoCache =
+      CacheBuilder.newBuilder().maximumSize(100).build();
+  private static final Cache<String, CollationGraph> CollationGraphCache =
+      CacheBuilder.newBuilder().maximumSize(100).build();
   private final File projectDir;
   private final File collationsDir;
 
@@ -70,7 +68,8 @@ public class CachedCollationStore implements CollationStore {
   public Optional<CollationGraph> getCollationGraph(String collationId) {
     if (collationIds.contains(collationId)) {
       try {
-        CollationGraph document = CollationGraphCache.get(collationId, readCollationGraph(collationId));
+        CollationGraph document =
+            CollationGraphCache.get(collationId, readCollationGraph(collationId));
         return Optional.of(document);
       } catch (ExecutionException e) {
         e.printStackTrace();
@@ -81,8 +80,8 @@ public class CachedCollationStore implements CollationStore {
 
   @Override
   public CollationInfo addCollation(String collationId) {
-    CollationInfo collationInfo = getCollationInfo(collationId)//
-        .orElseGet(() -> newCollationInfo(collationId));
+    CollationInfo collationInfo =
+        getCollationInfo(collationId).orElseGet(() -> newCollationInfo(collationId));
     collationInfo.setModified(Instant.now());
     CollationInfoCache.put(collationId, collationInfo);
     collationIds.add(collationId);
@@ -100,7 +99,7 @@ public class CachedCollationStore implements CollationStore {
   }
 
   // public void addWitness(String name, String sigil, String xml) {
-  // CollationInfo docInfo = getCollationInfo(name)//
+  // CollationInfo docInfo = getCollationInfo(name)
   // .orElseGet(() -> newCollationInfo(name));
   // docInfo.addWitness(sigil, xml);
   // docInfo.setModified(Instant.now());
@@ -116,7 +115,8 @@ public class CachedCollationStore implements CollationStore {
   public Optional<CollationInfo> getCollationInfo(String collationId) {
     if (collationIds.contains(collationId)) {
       try {
-        CollationInfo CollationInfo = CollationInfoCache.get(collationId, () -> readCollationInfo(collationId).orElse(null));
+        CollationInfo CollationInfo =
+            CollationInfoCache.get(collationId, () -> readCollationInfo(collationId).orElse(null));
         return Optional.ofNullable(CollationInfo);
       } catch (ExecutionException e) {
         e.printStackTrace();
@@ -138,8 +138,8 @@ public class CachedCollationStore implements CollationStore {
   public void persist(String collationId) {
     storeCollationIds();
     storeCollationInfo(getCollationInfo(collationId).get());
-    // CollationInfoCache.asMap()//
-    // .values()//
+    // CollationInfoCache.asMap()
+    // .values()
     // .forEach(this::storeCollationInfo);
   }
 
@@ -183,28 +183,34 @@ public class CachedCollationStore implements CollationStore {
         new TypeReference<HashMap<String, HashMap<String, String>>>() {
         };
     try {
-      HashMap<String, HashMap<String, String>> map = objectMapper().readValue(sampleMapStream, typeRef);
-      map.forEach((name, witnessMap) -> {
-        String collationId = "sample-" + name;
-        CollationInfo collationInfo = addCollation(collationId);
-        witnessMap.forEach((sigil, xmlPath) ->
-            processWitnessXML(classLoader, collationId, collationInfo, sigil, xmlPath)
-        );
-      });
+      HashMap<String, HashMap<String, String>> map =
+          objectMapper().readValue(sampleMapStream, typeRef);
+      map.forEach(
+          (name, witnessMap) -> {
+            String collationId = "sample-" + name;
+            CollationInfo collationInfo = addCollation(collationId);
+            witnessMap.forEach(
+                (sigil, xmlPath) ->
+                    processWitnessXML(classLoader, collationId, collationInfo, sigil, xmlPath));
+          });
     } catch (IOException e) {
       e.printStackTrace();
       throw new RuntimeException(e);
     }
   }
 
-  private void processWitnessXML(final ClassLoader classLoader, final String collationId, final CollationInfo collationInfo, final String sigil, final String xmlPath) {
+  private void processWitnessXML(
+      final ClassLoader classLoader,
+      final String collationId,
+      final CollationInfo collationInfo,
+      final String sigil,
+      final String xmlPath) {
     InputStream xmlStream = classLoader.getResourceAsStream(xmlPath);
     try {
       String xml = null;
       xml = IOUtils.toString(xmlStream, "UTF-8");
       VariantWitnessGraph variantWitnessGraph = xmlImporter.importXML(sigil, xml);
-      collationInfo.addWitness(sigil, xml)
-          .addWitnessGraph(sigil, variantWitnessGraph);
+      collationInfo.addWitness(sigil, xml).addWitnessGraph(sigil, variantWitnessGraph);
       persist(collationId);
     } catch (IOException e) {
       e.printStackTrace();
@@ -215,9 +221,9 @@ public class CachedCollationStore implements CollationStore {
   XMLImporter xmlImporter = new XMLImporter();
 
   private ObjectMapper objectMapper() {
-    return new ObjectMapper()//
-        .registerModule(new ParameterNamesModule())//
-        .registerModule(new Jdk8Module())//
+    return new ObjectMapper()
+        .registerModule(new ParameterNamesModule())
+        .registerModule(new Jdk8Module())
         .registerModule(new JavaTimeModule());
   }
 
@@ -249,10 +255,13 @@ public class CachedCollationStore implements CollationStore {
     if (collationInfo.getCollationState().equals(State.is_collated)) {
       collationInfo.collationState = State.ready_to_collate;
     }
-    collationInfo.getWitnesses().forEach((sigil, xml) -> {
-      VariantWitnessGraph variantWitnessGraph = new XMLImporter().importXML(sigil, xml);
-      collationInfo.addWitnessGraph(sigil, variantWitnessGraph);
-    });
+    collationInfo
+        .getWitnesses()
+        .forEach(
+            (sigil, xml) -> {
+              VariantWitnessGraph variantWitnessGraph = new XMLImporter().importXML(sigil, xml);
+              collationInfo.addWitnessGraph(sigil, variantWitnessGraph);
+            });
   }
 
   private File getCollationInfoFile(String id) {
@@ -260,9 +269,7 @@ public class CachedCollationStore implements CollationStore {
   }
 
   private static CollationInfo newCollationInfo(String name) {
-    return new CollationInfo(name, baseURI)//
-        .setCreated(Instant.now())//
-        .setModified(Instant.now());
+    return new CollationInfo(name, baseURI).setCreated(Instant.now()).setModified(Instant.now());
   }
 
   private static Callable<CollationGraph> readCollationGraph(String name) {

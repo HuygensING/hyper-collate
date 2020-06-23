@@ -31,10 +31,9 @@ public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException>
 
   @Override
   public Response toResponse(RuntimeException exception) {
-    return Response.status(Status.BAD_REQUEST)//
-        .entity(exception.getMessage())//
-        .type(MediaType.TEXT_PLAIN)//
+    return Response.status(Status.BAD_REQUEST)
+        .entity(exception.getMessage())
+        .type(MediaType.TEXT_PLAIN)
         .build();
   }
-
 }

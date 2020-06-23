@@ -26,7 +26,7 @@ public class TraditionalEdge {
 
   private Set<String> sigils;
 
-  TraditionalEdge(Set<String> label){
+  TraditionalEdge(Set<String> label) {
     this.sigils = label;
   }
 

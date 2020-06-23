@@ -21,5 +21,4 @@ package nl.knaw.huygens.hypercollate.model;
  */
 public class MarkupHyperEdge implements Edge {
   public static final String LABEL = "MarksupTextNodes";
-
 }

@@ -2,7 +2,15 @@
 <TEI>
     <text>
         <p>
-            <s>a board creaks <add>on the <choice><sic>landg</sic><corr>landing</corr></choice></add>;</s>
+            <s>a board creaks
+                <add>on the
+                    <choice>
+                        <sic>landg</sic>
+                        <corr>landing</corr>
+                    </choice>
+                </add>
+                ;
+            </s>
         </p>
     </text>
 </TEI>

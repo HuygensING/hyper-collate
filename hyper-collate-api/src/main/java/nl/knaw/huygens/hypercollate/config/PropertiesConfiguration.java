@@ -35,13 +35,15 @@ public class PropertiesConfiguration {
 
   public PropertiesConfiguration(String propertiesFile, boolean isResource) {
     try {
-      InputStream inputStream = isResource //
-          ? Thread.currentThread().getContextClassLoader().getResourceAsStream(propertiesFile)//
-          : new FileInputStream(new File(propertiesFile));
+      InputStream inputStream =
+          isResource
+              ? Thread.currentThread().getContextClassLoader().getResourceAsStream(propertiesFile)
+              : new FileInputStream(new File(propertiesFile));
       propertyResourceBundle = new PropertyResourceBundle(inputStream);
     } catch (IOException e) {
       e.printStackTrace();
-      throw new RuntimeException("Couldn't read properties file " + propertiesFile + ": " + e.getMessage());
+      throw new RuntimeException(
+          "Couldn't read properties file " + propertiesFile + ": " + e.getMessage());
     }
   }
 
@@ -69,5 +71,4 @@ public class PropertiesConfiguration {
   public List<String> getKeys() {
     return Collections.list(propertyResourceBundle.getKeys());
   }
-
 }
