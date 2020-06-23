@@ -19,6 +19,7 @@ package nl.knaw.huygens.hypercollate.collator
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huygens.hypercollate.HyperCollateTest
 import nl.knaw.huygens.hypercollate.importer.XMLImporter
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken

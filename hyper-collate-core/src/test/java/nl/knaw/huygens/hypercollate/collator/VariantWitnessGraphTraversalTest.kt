@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.collator;
+package nl.knaw.huygens.hypercollate.collator
 
 /*-
  * #%L
@@ -20,71 +20,68 @@ package nl.knaw.huygens.hypercollate.collator;
  * #L%
  */
 
-import nl.knaw.huygens.hypercollate.HyperCollateTest;
-import nl.knaw.huygens.hypercollate.importer.XMLImporter;
-import nl.knaw.huygens.hypercollate.model.*;
-import nl.knaw.huygens.hypercollate.tools.TokenMerger;
-import org.junit.Test;
+import nl.knaw.huygens.hypercollate.HyperCollateTest
+import nl.knaw.huygens.hypercollate.importer.XMLImporter
+import nl.knaw.huygens.hypercollate.model.*
+import nl.knaw.huygens.hypercollate.tools.TokenMerger
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.Test
+import java.util.stream.Collectors
 
-import java.util.Iterator;
-import java.util.List;
+class VariantWitnessGraphTraversalTest : HyperCollateTest() {
+    @Test
+    fun testVariantWitnessGraphTraversal() {
+        val importer = XMLImporter()
+        val wg0 = importer.importXML("A", "<xml>Eeny, meeny, miny, <del>curly</del><add>moe</add>!</xml>")
+        val witnessGraph = TokenMerger.merge(wg0)
+        val traversal = VariantWitnessGraphTraversal.of(witnessGraph)
+        // for (TokenVertex tv : traversal) {
+        // if (tv instanceof SimpleTokenVertex) {
+        // MarkedUpToken markedUpToken = (MarkedUpToken) tv.getToken();
+        // System.out.println("'" + markedUpToken.getContent() + "'");
+        // }
+        // }
+        val iterator: Iterator<TokenVertex> = traversal.iterator()
+        var tokenVertex = iterator.next()
+        assert(tokenVertex is StartTokenVertex)
 
-import static java.util.stream.Collectors.toList;
-import static org.assertj.core.api.Assertions.assertThat;
+        tokenVertex = iterator.next()
+        assert(tokenVertex is SimpleTokenVertex)
 
-public class VariantWitnessGraphTraversalTest extends HyperCollateTest {
+        var markedUpToken = tokenVertex.token as MarkedUpToken
+        assertThat(markedUpToken.content).isEqualTo("Eeny, meeny, miny, ")
 
-  @Test
-  public void testVariantWitnessGraphTraversal() {
-    XMLImporter importer = new XMLImporter();
-    VariantWitnessGraph wg0 =
-        importer.importXML("A", "<xml>Eeny, meeny, miny, <del>curly</del><add>moe</add>!</xml>");
-    VariantWitnessGraph witnessGraph = TokenMerger.merge(wg0);
+        tokenVertex = iterator.next()
+        assert(tokenVertex is SimpleTokenVertex)
 
-    VariantWitnessGraphTraversal traversal = VariantWitnessGraphTraversal.of(witnessGraph);
-    // for (TokenVertex tv : traversal) {
-    // if (tv instanceof SimpleTokenVertex) {
-    // MarkedUpToken markedUpToken = (MarkedUpToken) tv.getToken();
-    // System.out.println("'" + markedUpToken.getContent() + "'");
-    // }
-    // }
-    Iterator<TokenVertex> iterator = traversal.iterator();
-    TokenVertex tokenVertex = iterator.next();
-    assertThat(tokenVertex).isInstanceOf(StartTokenVertex.class);
+        markedUpToken = tokenVertex.token as MarkedUpToken
+        assertThat(markedUpToken.content).isEqualTo("curly")
 
-    tokenVertex = iterator.next();
-    assertThat(tokenVertex).isInstanceOf(SimpleTokenVertex.class);
-    MarkedUpToken markedUpToken = (MarkedUpToken) tokenVertex.getToken();
-    assertThat(markedUpToken.getContent()).isEqualTo("Eeny, meeny, miny, ");
+        var markupTagListForTokenVertex = markupTags(witnessGraph, tokenVertex)
+        assertThat(markupTagListForTokenVertex).contains("del")
 
-    tokenVertex = iterator.next();
-    assertThat(tokenVertex).isInstanceOf(SimpleTokenVertex.class);
-    markedUpToken = (MarkedUpToken) tokenVertex.getToken();
-    assertThat(markedUpToken.getContent()).isEqualTo("curly");
-    List<String> markupTagListForTokenVertex = markupTags(witnessGraph, tokenVertex);
-    assertThat(markupTagListForTokenVertex).contains("del");
+        tokenVertex = iterator.next()
+        assert(tokenVertex is SimpleTokenVertex)
 
-    tokenVertex = iterator.next();
-    assertThat(tokenVertex).isInstanceOf(SimpleTokenVertex.class);
-    markedUpToken = (MarkedUpToken) tokenVertex.getToken();
-    assertThat(markedUpToken.getContent()).isEqualTo("moe");
-    markupTagListForTokenVertex = markupTags(witnessGraph, tokenVertex);
-    assertThat(markupTagListForTokenVertex).contains("add");
+        markedUpToken = tokenVertex.token as MarkedUpToken
+        assertThat(markedUpToken.content).isEqualTo("moe")
 
-    tokenVertex = iterator.next();
-    assertThat(tokenVertex).isInstanceOf(SimpleTokenVertex.class);
-    markedUpToken = (MarkedUpToken) tokenVertex.getToken();
-    assertThat(markedUpToken.getContent()).isEqualTo("!");
+        markupTagListForTokenVertex = markupTags(witnessGraph, tokenVertex)
+        assertThat(markupTagListForTokenVertex).contains("add")
 
-    tokenVertex = iterator.next();
-    assertThat(tokenVertex).isInstanceOf(EndTokenVertex.class);
+        tokenVertex = iterator.next()
+        assert(tokenVertex is SimpleTokenVertex)
 
-    assertThat(iterator.hasNext()).isFalse();
-  }
+        markedUpToken = tokenVertex.token as MarkedUpToken
+        assertThat(markedUpToken.content).isEqualTo("!")
 
-  private List<String> markupTags(VariantWitnessGraph witnessGraph, TokenVertex tokenVertex) {
-    return witnessGraph.getMarkupListForTokenVertex(tokenVertex).stream()
-        .map(Markup::getTagName)
-        .collect(toList());
-  }
+        tokenVertex = iterator.next()
+        assert(tokenVertex is EndTokenVertex)
+        assertThat(iterator.hasNext()).isFalse()
+    }
+
+    private fun markupTags(witnessGraph: VariantWitnessGraph, tokenVertex: TokenVertex): List<String> =
+            witnessGraph.getMarkupListForTokenVertex(tokenVertex).stream()
+                    .map { obj: Markup -> obj.tagName }
+                    .collect(Collectors.toList())
 }
