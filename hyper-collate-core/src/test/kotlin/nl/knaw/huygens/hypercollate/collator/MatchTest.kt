@@ -37,7 +37,7 @@ class MatchTest : HyperCollateTest() {
         val v2 = mockVertexWithSigil("B")
         val v3 = mockVertexWithSigil("C")
         val v4 = mockVertexWithSigil("D")
-        val match = Match(v1, v2, v3, v4).setRank("A", 1).setRank("B", 2).setRank("C", 3).setRank("D", 4)
+        val match = Match(v1, v2, v3, v4).withRank("A", 1).withRank("B", 2).withRank("C", 3).withRank("D", 4)
         val lowestRankForWitnessesOtherThan = match.getLowestRankForWitnessesOtherThan("A")
         Assertions.assertThat(lowestRankForWitnessesOtherThan).isEqualTo(2)
     }

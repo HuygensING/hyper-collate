@@ -1,13 +1,4 @@
-package nl.knaw.huygens.hypercollate.collator;
-
-import com.google.common.base.Joiner;
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+package nl.knaw.huygens.hypercollate.collator
 
 /*-
  * #%L
@@ -29,79 +20,73 @@ import java.util.TreeMap;
  * #L%
  */
 
-public class Match {
+import com.google.common.base.Joiner
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex
+import nl.knaw.huygens.hypercollate.model.TokenVertex
+import java.util.*
 
-  private final Map<String, TokenVertex> tokenVertexMap = new TreeMap<>();
-  private final Map<String, Integer> rankingMap = new TreeMap<>();
+class Match(vararg matchingTokenVertices: TokenVertex) {
+    private val tokenVertexMap: MutableMap<String, TokenVertex> = TreeMap()
+    private val rankingMap: MutableMap<String, Int> = TreeMap()
 
-  public Match(TokenVertex... matchingTokenVertices) {
-    for (TokenVertex mtv : matchingTokenVertices) {
-      String sigil = mtv.getSigil();
-      tokenVertexMap.put(sigil, mtv);
+    val tokenVertexList: Iterable<TokenVertex>
+        get() = tokenVertexMap.values
+
+    fun getTokenVertexForWitness(sigil: String): TokenVertex? =
+            tokenVertexMap[sigil]
+
+    fun withRank(sigil: String, rank: Int): Match {
+        rankingMap[sigil] = rank
+        return this
     }
-  }
 
-  public Iterable<TokenVertex> getTokenVertexList() {
-    return tokenVertexMap.values();
-  }
+    fun getRankForWitness(sigil: String): Int? =
+            rankingMap[sigil]
 
-  public TokenVertex getTokenVertexForWitness(String sigil) {
-    return tokenVertexMap.get(sigil);
-  }
+    fun getLowestRankForWitnessesOtherThan(s: String): Int =
+            rankingMap.entries
+                    .filter { it.key != s }
+                    .map { it.value }
+                    .min() ?: error("no minimum found")
 
-  public Match setRank(String sigil, Integer rank) {
-    rankingMap.put(sigil, rank);
-    return this;
-  }
+    override fun toString(): String {
+        val stringBuilder = StringBuilder("<")
+        val vertexStrings: MutableList<String> = ArrayList()
+        tokenVertexMap.forEach { (sigil: String, vertex: TokenVertex) ->
+            val vString = StringBuilder()
+            if (vertex is SimpleTokenVertex) {
+                vString.append(sigil).append(vertex.indexNumber)
+                // vString.append(sigil)
+                // .append("[")
+                // .append(sv.getIndexNumber())
+                // .append(",r")
+                // .append(rankingMap.get(sigil))
+                // .append("]:'")
+                // .append(sv.getContent().replace("\n", "\\n"))
+                // .append("'");
+            } else {
+                vString.append(sigil).append(":").append(vertex.javaClass.getSimpleName())
+            }
+            vertexStrings.add(vString.toString())
+        }
+        return stringBuilder.append(Joiner.on(",").join(vertexStrings)).append(">").toString()
+    }
 
-  public Integer getRankForWitness(String sigil) {
-    return rankingMap.get(sigil);
-  }
+    val witnessSigils: List<String>
+        get() = ArrayList(tokenVertexMap.keys)
 
-  public Integer getLowestRankForWitnessesOtherThan(String s) {
-    return rankingMap.entrySet().stream()
-        .filter(e -> !e.getKey().equals(s))
-        .mapToInt(Map.Entry::getValue)
-        .min()
-        .getAsInt();
-  }
+    fun addTokenVertex(tokenVertex: SimpleTokenVertex): Match {
+        tokenVertexMap[tokenVertex.sigil] = tokenVertex
+        return this
+    }
 
-  @Override
-  public String toString() {
-    StringBuilder stringBuilder = new StringBuilder("<");
-    List<String> vertexStrings = new ArrayList<>();
-    tokenVertexMap.forEach(
-        (sigil, vertex) -> {
-          StringBuilder vString = new StringBuilder();
-          if (vertex instanceof SimpleTokenVertex) {
-            SimpleTokenVertex sv = (SimpleTokenVertex) vertex;
-            vString.append(sigil).append(sv.getIndexNumber());
-            // vString.append(sigil)
-            // .append("[")
-            // .append(sv.getIndexNumber())
-            // .append(",r")
-            // .append(rankingMap.get(sigil))
-            // .append("]:'")
-            // .append(sv.getContent().replace("\n", "\\n"))
-            // .append("'");
-          } else {
-            vString.append(sigil).append(":").append(vertex.getClass().getSimpleName());
-          }
-          vertexStrings.add(vString.toString());
-        });
-    return stringBuilder.append(Joiner.on(",").join(vertexStrings)).append(">").toString();
-  }
+    fun hasWitness(sigil: String): Boolean =
+            tokenVertexMap.containsKey(sigil)
 
-  public List<String> witnessSigils() {
-    return new ArrayList<>(tokenVertexMap.keySet());
-  }
-
-  public Match addTokenVertex(SimpleTokenVertex tokenVertex) {
-    tokenVertexMap.put(tokenVertex.getSigil(), tokenVertex);
-    return this;
-  }
-
-  public boolean hasWitness(String sigil) {
-    return tokenVertexMap.containsKey(sigil);
-  }
+    init {
+        for (mtv in matchingTokenVertices) {
+            val sigil = mtv.sigil
+            tokenVertexMap[sigil] = mtv
+        }
+    }
 }
