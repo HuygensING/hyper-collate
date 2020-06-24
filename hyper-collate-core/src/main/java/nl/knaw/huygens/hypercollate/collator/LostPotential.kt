@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.collator;
+package nl.knaw.huygens.hypercollate.collator
 
 /*-
  * #%L
@@ -19,32 +19,18 @@ package nl.knaw.huygens.hypercollate.collator;
  * limitations under the License.
  * #L%
  */
-import eu.interedition.collatex.dekker.astar.Cost;
 
-public class LostPotential extends Cost<LostPotential> {
+import eu.interedition.collatex.dekker.astar.Cost
 
-  private final Integer cost;
+class LostPotential(private val cost: Int) : Cost<LostPotential>() {
 
-  public LostPotential(int cost) {
-    this.cost = cost;
-  }
+    override fun plus(other: LostPotential): LostPotential =
+            LostPotential(cost + other.cost)
 
-  @Override
-  protected LostPotential plus(LostPotential other) {
-    return new LostPotential(cost + other.getCost());
-  }
+    override fun compareTo(other: LostPotential): Int =
+            cost.compareTo(other.cost)
 
-  @Override
-  public int compareTo(LostPotential other) {
-    return cost.compareTo(other.getCost());
-  }
+    override fun toString(): String =
+            "LostPotential:$cost"
 
-  private Integer getCost() {
-    return cost;
-  }
-
-  @Override
-  public String toString() {
-    return "LostPotential:" + cost;
-  }
 }
