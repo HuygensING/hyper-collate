@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.collator;
+package nl.knaw.huygens.hypercollate.collator
 
 /*-
  * #%L
@@ -20,57 +20,41 @@ package nl.knaw.huygens.hypercollate.collator;
  * #L%
  */
 
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+import nl.knaw.huygens.hypercollate.model.TokenVertex
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
+import java.util.*
 
-import java.util.*;
+class VariantWitnessGraphTraversal private constructor(private val graph: VariantWitnessGraph) : Iterable<TokenVertex> {
+    override fun iterator(): Iterator<TokenVertex> =
+            object : Iterator<TokenVertex> {
+                private val encountered: MutableMap<TokenVertex, Long> = HashMap()
+                private val queue: Queue<TokenVertex> = ArrayDeque()
+                private var next = Optional.of(graph.startTokenVertex)
 
-public class VariantWitnessGraphTraversal implements Iterable<TokenVertex> {
-  private final VariantWitnessGraph graph;
+                override fun hasNext(): Boolean =
+                        next.isPresent
 
-  private VariantWitnessGraphTraversal(VariantWitnessGraph graph) {
-    this.graph = graph;
-  }
+                override fun next(): TokenVertex {
+                    val next = next.get()
+                    next.outgoingTokenVertexStream
+                            .forEach { outgoing: TokenVertex ->
+                                val endEncountered = Optional.ofNullable(encountered[outgoing]).orElse(0L)
+                                val endIncoming = outgoing.incomingTokenVertexStream.count()
+                                check(endIncoming != endEncountered) { String.format("Encountered cycle traversing %s to %s", next, outgoing) }
+                                if (endIncoming - endEncountered == 1L) {
+                                    queue.add(outgoing)
+                                }
+                                encountered[outgoing] = endEncountered + 1
+                            }
+                    this.next = Optional.ofNullable(queue.poll())
+                    return next
+                }
+            }
 
-  public static VariantWitnessGraphTraversal of(VariantWitnessGraph graph) {
-    return new VariantWitnessGraphTraversal(graph);
-  }
+    companion object {
+        @JvmStatic
+        fun of(graph: VariantWitnessGraph): VariantWitnessGraphTraversal =
+                VariantWitnessGraphTraversal(graph)
+    }
 
-  @Override
-  public Iterator<TokenVertex> iterator() {
-    return new Iterator<TokenVertex>() {
-
-      private final Map<TokenVertex, Long> encountered = new HashMap<>();
-      private final Queue<TokenVertex> queue = new ArrayDeque<>();
-      private Optional<TokenVertex> next = Optional.of(graph.getStartTokenVertex());
-
-      @Override
-      public boolean hasNext() {
-        return next.isPresent();
-      }
-
-      @Override
-      public TokenVertex next() {
-        final TokenVertex next = this.next.get();
-        next.getOutgoingTokenVertexStream()
-            .forEach(
-                outgoing -> {
-                  final long endEncountered =
-                      Optional.ofNullable(encountered.get(outgoing)).orElse(0L);
-                  final long endIncoming = outgoing.getIncomingTokenVertexStream().count();
-
-                  if (endIncoming == endEncountered) {
-                    throw new IllegalStateException(
-                        String.format("Encountered cycle traversing %s to %s", next, outgoing));
-                  } else if ((endIncoming - endEncountered) == 1) {
-                    queue.add(outgoing);
-                  }
-
-                  encountered.put(outgoing, endEncountered + 1);
-                });
-        this.next = Optional.ofNullable(queue.poll());
-        return next;
-      }
-    };
-  }
 }

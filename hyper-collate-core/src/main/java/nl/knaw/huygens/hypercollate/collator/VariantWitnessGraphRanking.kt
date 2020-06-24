@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.collator;
+package nl.knaw.huygens.hypercollate.collator
 
 /*-
  * #%L
@@ -20,60 +20,51 @@ package nl.knaw.huygens.hypercollate.collator;
  * #L%
  */
 
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
+import nl.knaw.huygens.hypercollate.model.TokenVertex
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
+import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.function.Function
+import kotlin.math.max
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
+class VariantWitnessGraphRanking : Iterable<Set<TokenVertex>>, Function<TokenVertex, Int> {
+    private val _byVertex: MutableMap<TokenVertex, Int> = HashMap()
+    private val _byRank: SortedMap<Int, MutableSet<TokenVertex>> = TreeMap()
 
-public class VariantWitnessGraphRanking
-    implements Iterable<Set<TokenVertex>>, Function<TokenVertex, Integer> {
+    val byVertex: Map<TokenVertex, Int>
+        get() = _byVertex.toMap()
 
-  private final Map<TokenVertex, Integer> byVertex = new HashMap<>();
-  private final SortedMap<Integer, Set<TokenVertex>> byRank = new TreeMap<>();
-  // private final VariantWitnessGraph graph;
+    val byRank: Map<Int, Set<TokenVertex>>
+        get() = _byRank.toMap()
 
-  // VariantWitnessGraphRanking(VariantWitnessGraph graph) {
-  // this.graph = graph;
-  // }
+    val size: Int
+        get() = _byRank.keys.size
 
-  public static VariantWitnessGraphRanking of(VariantWitnessGraph graph) {
-    final VariantWitnessGraphRanking ranking = new VariantWitnessGraphRanking();
-    for (TokenVertex v : graph.vertices()) {
-      AtomicInteger rank = new AtomicInteger(-1);
-      v.getIncomingTokenVertexStream()
-          .forEach(incoming -> rank.set(Math.max(rank.get(), ranking.byVertex.get(incoming))));
-      rank.getAndIncrement();
-      ranking.byVertex.put(v, rank.get());
-      ranking.byRank.computeIfAbsent(rank.get(), r -> new HashSet<>()).add(v);
+    override fun iterator(): MutableIterator<Set<TokenVertex>> =
+            _byRank.values.iterator()
+
+    override fun apply(vertex: TokenVertex): Int =
+            _byVertex[vertex]!!
+
+//    val comparator: Comparator<TokenVertex>
+//        get() = Comparator.comparingInt(ToIntFunction { key: TokenVertex -> _byVertex.get(key) })
+
+    companion object {
+        // private final VariantWitnessGraph graph;
+        // VariantWitnessGraphRanking(VariantWitnessGraph graph) {
+        // this.graph = graph;
+        // }
+        fun of(graph: VariantWitnessGraph): VariantWitnessGraphRanking {
+            val ranking = VariantWitnessGraphRanking()
+            for (v in graph.vertices()) {
+                val rank = AtomicInteger(-1)
+                v.incomingTokenVertexStream
+                        .forEach { incoming: TokenVertex -> rank.set(max(rank.get(), ranking._byVertex[incoming]!!)) }
+                rank.getAndIncrement()
+                ranking._byVertex[v] = rank.get()
+                ranking._byRank.computeIfAbsent(rank.get()) { r: Int? -> HashSet() }.add(v)
+            }
+            return ranking
+        }
     }
-    return ranking;
-  }
-
-  public Map<TokenVertex, Integer> getByVertex() {
-    return Collections.unmodifiableMap(byVertex);
-  }
-
-  public Map<Integer, Set<TokenVertex>> getByRank() {
-    return Collections.unmodifiableMap(byRank);
-  }
-
-  public int size() {
-    return byRank.keySet().size();
-  }
-
-  @Override
-  public Iterator<Set<TokenVertex>> iterator() {
-    return byRank.values().iterator();
-  }
-
-  @Override
-  public Integer apply(TokenVertex vertex) {
-    return byVertex.get(vertex);
-  }
-
-  public Comparator<TokenVertex> comparator() {
-    return Comparator.comparingInt(byVertex::get);
-  }
 }
