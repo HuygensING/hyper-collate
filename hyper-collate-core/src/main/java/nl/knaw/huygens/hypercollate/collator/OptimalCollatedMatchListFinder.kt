@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.collator;
+package nl.knaw.huygens.hypercollate.collator
 
 /*-
  * #%L
@@ -20,12 +20,7 @@ package nl.knaw.huygens.hypercollate.collator;
  * #L%
  */
 
-import java.util.Collection;
-import java.util.List;
-
-interface OptimalCollatedMatchListFinder {
-
-  List<CollatedMatch> getOptimalCollatedMatchList(Collection<CollatedMatch> allPotentialMatches);
-
-  String getName();
+internal interface OptimalCollatedMatchListFinder {
+    fun getOptimalCollatedMatchList(allPotentialMatches: Collection<CollatedMatch>): List<CollatedMatch>
+    val name: String
 }

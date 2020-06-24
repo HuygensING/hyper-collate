@@ -121,7 +121,7 @@ class HyperCollator {
                 .findFirst()
                 .orElseThrow { RuntimeException("No vertex!") }
         val tokenVertexForWitness = match.getTokenVertexForWitness(sigil)
-        val node = collatedTokenVertexMap[vertex]
+        val node = collatedTokenVertexMap[vertex] ?: error("no node found for vertex")
         return CollatedMatch(node, tokenVertexForWitness)
                 .setVertexRank(match.getRankForWitness(sigil))
     }

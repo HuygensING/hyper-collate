@@ -32,9 +32,8 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
     private var matchesSortedByWitness: List<CollatedMatch> = listOf()
     private var maxPotential: Int? = null
 
-    override fun getName(): String {
-        return "Four-Neighbours"
-    }
+    override val name: String
+        get() = "Four-Neighbours"
 
     override fun getOptimalCollatedMatchList(allPotentialMatches: Collection<CollatedMatch>): MutableList<CollatedMatch> {
         maxPotential = allPotentialMatches.size
@@ -46,8 +45,8 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
         val winningPath = aStar(startNode, startCost)
         sw.stop()
         LOG.debug("aStar took {} ms", sw.elapsed(TimeUnit.MILLISECONDS))
-        val winningGoal = winningPath[winningPath.size - 1]
-        return ArrayList(winningGoal!!.chosenMatches)
+        val winningGoal = winningPath[winningPath.size - 1] ?: error("no winningPath found")
+        return ArrayList(winningGoal.chosenMatches)
     }
 
     override fun isGoal(matchList: QuantumCollatedMatchList): Boolean =

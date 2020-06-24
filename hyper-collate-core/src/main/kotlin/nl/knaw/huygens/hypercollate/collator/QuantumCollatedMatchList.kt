@@ -77,7 +77,7 @@ class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val poten
         // other.
         return m.sigils
                 .filter { nodeSigils.contains(it) }
-                .any { branchPathsOverlap(m.getBranchPath(it), node.getBranchPath(it)) }
+                .any { branchPathsOverlap(m.getBranchPath(it)!!, node.getBranchPath(it)) }
     }
 
     override fun toString(): String =

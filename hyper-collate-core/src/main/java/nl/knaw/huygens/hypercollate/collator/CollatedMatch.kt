@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.collator;
+package nl.knaw.huygens.hypercollate.collator
 
 /*-
  * #%L
@@ -20,99 +20,61 @@ package nl.knaw.huygens.hypercollate.collator;
  * #L%
  */
 
-import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex;
-import nl.knaw.huygens.hypercollate.model.TextNode;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex
+import nl.knaw.huygens.hypercollate.model.TextNode
+import nl.knaw.huygens.hypercollate.model.TokenVertex
+import java.util.*
+import java.util.stream.Collectors
 
-import java.util.*;
+class CollatedMatch(val collatedNode: TextNode, val witnessVertex: TokenVertex) {
+    var nodeRank = 0
+    var vertexRank = 0
+        private set
 
-import static java.util.stream.Collectors.joining;
+    var sigils: Set<String>
+    private val branchPaths: MutableMap<String, List<Int>> = HashMap()
 
-public class CollatedMatch {
+    fun hasWitness(sigil: String): Boolean =
+            sigils.contains(sigil)
 
-  private final TextNode collatedNode;
-  private int nodeRank;
-  private final TokenVertex witnessVertex;
-  private int vertexRank;
-  private final Set<String> sigils = new HashSet<>();
-  private final Map<String, List<Integer>> branchPaths = new HashMap<>();
-
-  public CollatedMatch(TextNode collatedNode, TokenVertex witnessVertex) {
-    this.collatedNode = collatedNode;
-    this.witnessVertex = witnessVertex;
-    sigils.add(witnessVertex.getSigil());
-    branchPaths.put(witnessVertex.getSigil(), witnessVertex.getBranchPath());
-    sigils.addAll(collatedNode.getSigils());
-    for (String s : collatedNode.getSigils()) {
-      branchPaths.put(s, collatedNode.getBranchPath(s));
+    fun setVertexRank(vertexRank: Int): CollatedMatch {
+        this.vertexRank = vertexRank
+        return this
     }
-  }
 
-  public TextNode getCollatedNode() {
-    return collatedNode;
-  }
+    fun getBranchPath(s: String): List<Int>? =
+            branchPaths[s]
 
-  public TokenVertex getWitnessVertex() {
-    return witnessVertex;
-  }
-
-  public boolean hasWitness(String sigil) {
-    return sigils.contains(sigil);
-  }
-
-  public int getNodeRank() {
-    return nodeRank;
-  }
-
-  public void setNodeRank(int nodeRank) {
-    this.nodeRank = nodeRank;
-  }
-
-  public int getVertexRank() {
-    return vertexRank;
-  }
-
-  public CollatedMatch setVertexRank(int vertexRank) {
-    this.vertexRank = vertexRank;
-    return this;
-  }
-
-  public Set<String> getSigils() {
-    return sigils;
-  }
-
-  public List<Integer> getBranchPath(String s) {
-    return branchPaths.get(s);
-  }
-
-  @Override
-  public String toString() {
-    Set<String> sigils = collatedNode instanceof TextNode ? collatedNode.getSigils() : this.sigils;
-    String sigilString = sigils.stream().sorted().collect(joining(","));
-    StringBuilder stringBuilder =
-        new StringBuilder("<[").append(sigilString).append("]").append(nodeRank);
-
-    StringBuilder vString = new StringBuilder();
-    if (witnessVertex instanceof SimpleTokenVertex) {
-      SimpleTokenVertex sv = (SimpleTokenVertex) witnessVertex;
-      vString.append(sv.getSigil()).append(sv.getIndexNumber());
-    } else {
-      vString.append(witnessVertex.getSigil()).append(witnessVertex.getClass().getSimpleName());
+    override fun toString(): String {
+        val sigils = if (collatedNode is TextNode) collatedNode.sigils else sigils
+        val sigilString = sigils.stream().sorted().collect(Collectors.joining(","))
+        val stringBuilder = StringBuilder("<[").append(sigilString).append("]").append(nodeRank)
+        val vString = StringBuilder()
+        if (witnessVertex is SimpleTokenVertex) {
+            val sv = witnessVertex
+            vString.append(sv.sigil).append(sv.indexNumber)
+        } else {
+            vString.append(witnessVertex.sigil).append(witnessVertex.javaClass.simpleName)
+        }
+        return stringBuilder.append(",").append(vString.toString()).append(">").toString()
     }
-    return stringBuilder.append(",").append(vString.toString()).append(">").toString();
-  }
 
-  @Override
-  public int hashCode() {
-    return collatedNode.hashCode() * witnessVertex.hashCode();
-  }
+    override fun hashCode(): Int =
+            collatedNode.hashCode() * witnessVertex.hashCode()
 
-  @Override
-  public boolean equals(Object obj) {
-    if (obj instanceof CollatedMatch) {
-      CollatedMatch other = (CollatedMatch) obj;
-      return collatedNode.equals(other.collatedNode) && witnessVertex.equals(other.witnessVertex);
+    override fun equals(other: Any?): Boolean {
+        return if (other is CollatedMatch) {
+            collatedNode == other.collatedNode && witnessVertex == other.witnessVertex
+        } else false
+    }
 
-    } else return false;
-  }
+    init {
+        val tmp: MutableList<String> = mutableListOf(witnessVertex.sigil)
+        branchPaths[witnessVertex.sigil] = witnessVertex.branchPath
+        tmp.addAll(collatedNode.sigils)
+        sigils = tmp.toSet()
+        for (s in collatedNode.sigils) {
+            branchPaths[s] = collatedNode.getBranchPath(s)
+        }
+    }
 }
