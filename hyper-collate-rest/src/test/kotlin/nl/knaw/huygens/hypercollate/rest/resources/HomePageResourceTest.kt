@@ -1,8 +1,5 @@
 package nl.knaw.huygens.hypercollate.rest.resources
 
-import org.assertj.core.api.AssertionsForClassTypes
-import org.junit.Test
-
 /*-
  * #%L
  * hyper-collate-rest
@@ -21,15 +18,20 @@ import org.junit.Test
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */   class HomePageResourceTest {
+ */
+
+import org.assertj.core.api.AssertionsForClassTypes.assertThat
+import org.junit.Test
+
+class HomePageResourceTest {
     @Test
     fun testNoRobots() {
         val resource = HomePageResource()
         val noRobots = resource.noRobots()
-        AssertionsForClassTypes.assertThat(noRobots).isEqualTo("""
-    User-agent: *
-    Disallow: /
-    
-    """.trimIndent())
+        assertThat(noRobots).isEqualTo("""
+            User-agent: *
+            Disallow: /
+            
+            """.trimIndent())
     }
 }

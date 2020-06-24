@@ -1,14 +1,5 @@
 package nl.knaw.huygens.hypercollate.rest
 
-import org.apache.commons.io.FileUtils
-import org.assertj.core.api.Assertions
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import org.slf4j.LoggerFactory
-import java.io.File
-import java.io.IOException
-import java.nio.file.Files
 
 /*-
  * #%L
@@ -28,7 +19,19 @@ import java.nio.file.Files
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */   class CachedCollationStoreTest {
+ */
+
+import org.apache.commons.io.FileUtils
+import org.assertj.core.api.Assertions
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+import org.slf4j.LoggerFactory
+import java.io.File
+import java.io.IOException
+import java.nio.file.Files
+
+class CachedCollationStoreTest {
     var config = TestConfiguration()
 
     class TestConfiguration : HyperCollateConfiguration {
