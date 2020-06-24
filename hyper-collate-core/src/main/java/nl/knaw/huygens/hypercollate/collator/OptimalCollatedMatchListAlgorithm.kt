@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.collator;
+package nl.knaw.huygens.hypercollate.collator
 
 /*-
  * #%L
@@ -20,119 +20,88 @@ package nl.knaw.huygens.hypercollate.collator;
  * #L%
  */
 
-import com.google.common.base.Stopwatch;
-import eu.interedition.collatex.dekker.astar.AstarAlgorithm;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.google.common.base.Stopwatch
+import eu.interedition.collatex.dekker.astar.AstarAlgorithm
+import org.slf4j.LoggerFactory
+import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchList, LostPotential>(), OptimalCollatedMatchListFinder {
+    private var matchesSortedByNode: List<CollatedMatch> = listOf()
+    private var matchesSortedByWitness: List<CollatedMatch> = listOf()
+    private var maxPotential: Int? = null
 
-import static java.util.stream.Collectors.toList;
-
-public class OptimalCollatedMatchListAlgorithm
-    extends AstarAlgorithm<QuantumCollatedMatchList, LostPotential>
-    implements OptimalCollatedMatchListFinder {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(OptimalCollatedMatchListAlgorithm.class);
-
-  private List<CollatedMatch> matchesSortedByNode;
-  private List<CollatedMatch> matchesSortedByWitness;
-  private Integer maxPotential;
-
-  @Override
-  public String getName() {
-    return "Four-Neighbours";
-  }
-
-  @Override
-  public List<CollatedMatch> getOptimalCollatedMatchList(
-      Collection<CollatedMatch> allPotentialMatches) {
-    maxPotential = allPotentialMatches.size();
-    matchesSortedByNode = sortMatchesByNode(allPotentialMatches);
-    matchesSortedByWitness = sortMatchesByWitness(allPotentialMatches);
-    QuantumCollatedMatchList startNode =
-        new QuantumCollatedMatchList(Collections.EMPTY_LIST, new ArrayList<>(allPotentialMatches));
-    LostPotential startCost = new LostPotential(0);
-    Stopwatch sw = Stopwatch.createStarted();
-    List<QuantumCollatedMatchList> winningPath = aStar(startNode, startCost);
-    sw.stop();
-    LOG.debug("aStar took {} ms", sw.elapsed(TimeUnit.MILLISECONDS));
-    QuantumCollatedMatchList winningGoal = winningPath.get(winningPath.size() - 1);
-    return new ArrayList<>(winningGoal.getChosenMatches());
-  }
-
-  private static List<CollatedMatch> sortMatchesByNode(Collection<CollatedMatch> matches) {
-    Comparator<CollatedMatch> matchComparator =
-        Comparator.comparing(CollatedMatch::getNodeRank)
-            .thenComparing(CollatedMatch::getVertexRank);
-    return sortMatches(matches, matchComparator);
-  }
-
-  private static List<CollatedMatch> sortMatchesByWitness(Collection<CollatedMatch> matches) {
-    Comparator<CollatedMatch> matchComparator =
-        Comparator.comparing(CollatedMatch::getVertexRank)
-            .thenComparing(CollatedMatch::getNodeRank);
-    return sortMatches(matches, matchComparator);
-  }
-
-  private static List<CollatedMatch> sortMatches(
-      Collection<CollatedMatch> matches, Comparator<CollatedMatch> matchComparator) {
-    return matches.stream()
-        //        .peek(System.out::println)
-        .sorted(matchComparator)
-        .collect(toList());
-  }
-
-  @Override
-  protected boolean isGoal(QuantumCollatedMatchList matchList) {
-    return matchList.isDetermined();
-  }
-
-  @Override
-  protected Iterable<QuantumCollatedMatchList> neighborNodes(QuantumCollatedMatchList matchList) {
-    Set<QuantumCollatedMatchList> nextPotentialMatches = new LinkedHashSet<>();
-
-    CollatedMatch firstPotentialMatch1 =
-        getFirstPotentialMatch(this.matchesSortedByNode, matchList);
-    addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1);
-
-    List<CollatedMatch> matchesSortedByWitness = this.matchesSortedByWitness;
-    CollatedMatch firstPotentialMatch2 = getFirstPotentialMatch(matchesSortedByWitness, matchList);
-    if (!firstPotentialMatch1.equals(firstPotentialMatch2)) {
-      addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch2);
+    override fun getName(): String {
+        return "Four-Neighbours"
     }
 
-    return nextPotentialMatches;
-  }
+    override fun getOptimalCollatedMatchList(allPotentialMatches: Collection<CollatedMatch>): MutableList<CollatedMatch> {
+        maxPotential = allPotentialMatches.size
+        matchesSortedByNode = sortMatchesByNode(allPotentialMatches)
+        matchesSortedByWitness = sortMatchesByWitness(allPotentialMatches)
+        val startNode = QuantumCollatedMatchList(listOf(), ArrayList(allPotentialMatches))
+        val startCost = LostPotential(0)
+        val sw = Stopwatch.createStarted()
+        val winningPath = aStar(startNode, startCost)
+        sw.stop()
+        LOG.debug("aStar took {} ms", sw.elapsed(TimeUnit.MILLISECONDS))
+        val winningGoal = winningPath[winningPath.size - 1]
+        return ArrayList(winningGoal!!.chosenMatches)
+    }
 
-  private void addNeighborNodes(
-      QuantumCollatedMatchList matchList,
-      Set<QuantumCollatedMatchList> nextPotentialMatches,
-      CollatedMatch firstPotentialMatch) {
-    // TODO: more neighbournodes: find a set of matches with same potential
-    // TODO: neighbournodes op basis van matching tokens
-    QuantumCollatedMatchList quantumMatchSet1 = matchList.chooseMatch(firstPotentialMatch);
-    QuantumCollatedMatchList quantumMatchSet2 = matchList.discardMatch(firstPotentialMatch);
-    nextPotentialMatches.add(quantumMatchSet1);
-    nextPotentialMatches.add(quantumMatchSet2);
-  }
+    override fun isGoal(matchList: QuantumCollatedMatchList): Boolean =
+            matchList.isDetermined
 
-  private CollatedMatch getFirstPotentialMatch(
-      List<CollatedMatch> matches, QuantumCollatedMatchList matchSet) {
-    List<CollatedMatch> potentialMatches = new ArrayList<>(matches);
-    potentialMatches.retainAll(matchSet.getPotentialMatches());
-    return potentialMatches.get(0);
-  }
+    override fun neighborNodes(matchList: QuantumCollatedMatchList): Iterable<QuantumCollatedMatchList> {
+        val nextPotentialMatches: MutableSet<QuantumCollatedMatchList> = LinkedHashSet()
+        val firstPotentialMatch1 = getFirstPotentialMatch(matchesSortedByNode, matchList)
+        addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1)
+        val matchesSortedByWitness = matchesSortedByWitness
+        val firstPotentialMatch2 = getFirstPotentialMatch(matchesSortedByWitness, matchList)
+        if (firstPotentialMatch1 != firstPotentialMatch2) {
+            addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch2)
+        }
+        return nextPotentialMatches
+    }
 
-  @Override
-  protected LostPotential heuristicCostEstimate(QuantumCollatedMatchList matchList) {
-    return new LostPotential(maxPotential - matchList.totalSize());
-  }
+    private fun addNeighborNodes(
+            matchList: QuantumCollatedMatchList,
+            nextPotentialMatches: MutableSet<QuantumCollatedMatchList>,
+            firstPotentialMatch: CollatedMatch) {
+        // TODO: more neighbournodes: find a set of matches with same potential
+        // TODO: neighbournodes op basis van matching tokens
+        val quantumMatchSet1 = matchList.chooseMatch(firstPotentialMatch)
+        val quantumMatchSet2 = matchList.discardMatch(firstPotentialMatch)
+        nextPotentialMatches.add(quantumMatchSet1)
+        nextPotentialMatches.add(quantumMatchSet2)
+    }
 
-  @Override
-  protected LostPotential distBetween(
-      QuantumCollatedMatchList matchList0, QuantumCollatedMatchList matchList1) {
-    return new LostPotential(Math.abs(matchList0.totalSize() - matchList1.totalSize()));
-  }
+    private fun getFirstPotentialMatch(matches: List<CollatedMatch>, matchSet: QuantumCollatedMatchList): CollatedMatch {
+        val potentialMatches: MutableList<CollatedMatch> = matches.toMutableList()
+        potentialMatches.retainAll(matchSet.potentialMatches)
+        return potentialMatches[0]
+    }
+
+    override fun heuristicCostEstimate(matchList: QuantumCollatedMatchList): LostPotential =
+            LostPotential(maxPotential!! - matchList.totalSize())
+
+    override fun distBetween(matchList0: QuantumCollatedMatchList, matchList1: QuantumCollatedMatchList): LostPotential =
+            LostPotential(abs(matchList0.totalSize() - matchList1.totalSize()))
+
+    companion object {
+        private val LOG = LoggerFactory.getLogger(OptimalCollatedMatchListAlgorithm::class.java)
+
+        private val matchNodeComparator = Comparator.comparing { obj: CollatedMatch -> obj.nodeRank }
+                .thenComparing { obj: CollatedMatch -> obj.vertexRank }
+
+        private fun sortMatchesByNode(matches: Collection<CollatedMatch>): List<CollatedMatch> =
+                matches.sortedWith(matchNodeComparator)
+
+        private val matchWitnessComparator = Comparator.comparing { obj: CollatedMatch -> obj.vertexRank }
+                .thenComparing { obj: CollatedMatch -> obj.nodeRank }
+
+        private fun sortMatchesByWitness(matches: Collection<CollatedMatch>): List<CollatedMatch> =
+                matches.sortedWith(matchWitnessComparator)
+    }
 }
