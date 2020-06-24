@@ -84,10 +84,10 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
     }
 
     override fun heuristicCostEstimate(matchList: QuantumCollatedMatchList): LostPotential =
-            LostPotential(maxPotential!! - matchList.totalSize())
+            LostPotential(maxPotential!! - matchList.totalSize)
 
     override fun distBetween(matchList0: QuantumCollatedMatchList, matchList1: QuantumCollatedMatchList): LostPotential =
-            LostPotential(abs(matchList0.totalSize() - matchList1.totalSize()))
+            LostPotential(abs(matchList0.totalSize - matchList1.totalSize))
 
     companion object {
         private val LOG = LoggerFactory.getLogger(OptimalCollatedMatchListAlgorithm::class.java)

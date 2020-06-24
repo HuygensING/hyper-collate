@@ -33,7 +33,6 @@ import org.junit.Ignore
 import org.junit.Test
 import org.slf4j.LoggerFactory
 import java.text.MessageFormat.format
-import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.stream.Collectors
 
@@ -921,7 +920,6 @@ class HyperCollatorTest : HyperCollateTest() {
 </text>""")
         val collationGraph = CollationGraph()
         val map: MutableMap<TokenVertex, TextNode> = mutableMapOf()
-        val matches: List<Match> = ArrayList()
         val markupNodeIndex: MutableMap<Markup, MarkupNode> = mutableMapOf()
         hyperCollator.initialize(collationGraph, map, markupNodeIndex, wF)
         val collation = CollationGraphNodeJoiner.join(collationGraph)
@@ -1044,8 +1042,7 @@ class HyperCollatorTest : HyperCollateTest() {
             list.map { format("<{0},{1}>", it.left, it.right) }
                     .joinToString { "" }
 
-    private fun testHyperCollation(
-            witness1: VariantWitnessGraph, witness2: VariantWitnessGraph, expected: String): CollationGraph {
+    private fun testHyperCollation(witness1: VariantWitnessGraph, witness2: VariantWitnessGraph, expected: String): CollationGraph {
         //    Map<String, Long> collationDuration = new HashMap<>();
         val stopwatch = Stopwatch.createStarted()
         val collation0 = hyperCollator.collate(witness1, witness2)

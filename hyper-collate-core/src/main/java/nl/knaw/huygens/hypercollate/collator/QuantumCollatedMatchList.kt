@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.collator;
+package nl.knaw.huygens.hypercollate.collator
 
 /*-
  * #%L
@@ -20,132 +20,88 @@ package nl.knaw.huygens.hypercollate.collator;
  * #L%
  */
 
-import nl.knaw.huygens.hypercollate.model.TextNode;
-import nl.knaw.huygens.hypercollate.model.TokenVertex;
+import com.google.common.base.Preconditions
+import nl.knaw.huygens.hypercollate.model.TextNode
+import java.util.*
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val potentialMatches: List<CollatedMatch>) {
 
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.stream.Collectors.toList;
+    val isDetermined: Boolean
+        get() = potentialMatches.isEmpty()
 
-public class QuantumCollatedMatchList {
+    val totalSize: Int
+        get() = chosenMatches.size + potentialMatches.size
 
-  private final List<CollatedMatch> chosenMatches;
-  private final List<CollatedMatch> potentialMatches;
-
-  public QuantumCollatedMatchList(
-      List<CollatedMatch> chosenMatches, List<CollatedMatch> potentialMatches) {
-    this.chosenMatches = Collections.unmodifiableList(chosenMatches);
-    this.potentialMatches = Collections.unmodifiableList(potentialMatches);
-  }
-
-  public QuantumCollatedMatchList chooseMatch(CollatedMatch match) {
-    checkState(potentialMatches.contains(match));
-
-    List<CollatedMatch> newChosen = cloneChosenMatches();
-    newChosen.add(match);
-
-    List<CollatedMatch> newPotential = calculateNewPotential(potentialMatches, match);
-
-    return new QuantumCollatedMatchList(newChosen, newPotential);
-  }
-
-  public QuantumCollatedMatchList discardMatch(CollatedMatch match) {
-    checkState(potentialMatches.contains(match));
-
-    List<CollatedMatch> newChosen = cloneChosenMatches();
-
-    List<CollatedMatch> newPotential = new ArrayList<>(potentialMatches);
-    newPotential.remove(match);
-
-    return new QuantumCollatedMatchList(newChosen, newPotential);
-  }
-
-  private List<CollatedMatch> cloneChosenMatches() {
-    return new ArrayList<>(chosenMatches);
-  }
-
-  private List<CollatedMatch> calculateNewPotential(
-      List<CollatedMatch> potentialMatches, CollatedMatch match) {
-    List<CollatedMatch> newPotential = new ArrayList<>(potentialMatches);
-    List<CollatedMatch> invalidatedMatches = calculateInvalidatedMatches(potentialMatches, match);
-    newPotential.removeAll(invalidatedMatches);
-    return newPotential;
-  }
-
-  public boolean isDetermined() {
-    return potentialMatches.isEmpty();
-  }
-
-  public int totalSize() {
-    return chosenMatches.size() + potentialMatches.size();
-  }
-
-  private List<CollatedMatch> calculateInvalidatedMatches(
-      List<CollatedMatch> potentialMatches, CollatedMatch match) {
-    TextNode node = match.getCollatedNode();
-    TokenVertex tokenVertexForWitness = match.getWitnessVertex();
-    int minNodeRank = match.getNodeRank();
-    int minVertexRank = match.getVertexRank();
-
-    return potentialMatches.stream()
-        .filter(
-            m ->
-                m.getCollatedNode().equals(node)
-                    || m.getWitnessVertex().equals(tokenVertexForWitness)
-                    || (hasSigilOverlap(m, node) && m.getNodeRank() < minNodeRank)
-                    || m.getVertexRank() < minVertexRank)
-        .collect(toList());
-  }
-
-  private boolean hasSigilOverlap(CollatedMatch m, TextNode node) {
-    Set<String> nodeSigils = node.getSigils();
-    // m and node have witnesses in common
-    // for those witnesses they have in common, the branchpath of one is the startsubpath otf the
-    // other.
-    return m.getSigils().stream()
-        .filter(nodeSigils::contains)
-        .anyMatch(s -> branchPathsOverlap(m.getBranchPath(s), node.getBranchPath(s)));
-  }
-
-  static boolean branchPathsOverlap(List<Integer> matchBranchPath, List<Integer> nodeBranchPath) {
-    int minSize = Math.min(matchBranchPath.size(), nodeBranchPath.size());
-    for (int i = 0; i < minSize; i++) {
-      if (!matchBranchPath.get(i).equals(nodeBranchPath.get(i))) {
-        return false;
-      }
+    fun chooseMatch(match: CollatedMatch): QuantumCollatedMatchList {
+        Preconditions.checkState(potentialMatches.contains(match))
+        val newChosen = cloneChosenMatches()
+        newChosen.add(match)
+        val newPotential = calculateNewPotential(potentialMatches, match)
+        return QuantumCollatedMatchList(newChosen, newPotential)
     }
-    return true;
-  }
 
-  public List<CollatedMatch> getChosenMatches() {
-    return chosenMatches;
-  }
-
-  @Override
-  public String toString() {
-    return "(" + chosenMatches + " | " + potentialMatches + ")";
-  }
-
-  public List<CollatedMatch> getPotentialMatches() {
-    return potentialMatches;
-  }
-
-  @Override
-  public int hashCode() {
-    return chosenMatches.hashCode() + potentialMatches.hashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (!(obj instanceof QuantumCollatedMatchList)) {
-      return false;
+    fun discardMatch(match: CollatedMatch?): QuantumCollatedMatchList {
+        Preconditions.checkState(potentialMatches.contains(match))
+        val newChosen: List<CollatedMatch> = cloneChosenMatches()
+        val newPotential: MutableList<CollatedMatch> = ArrayList(potentialMatches)
+        newPotential.remove(match)
+        return QuantumCollatedMatchList(newChosen, newPotential)
     }
-    QuantumCollatedMatchList other = (QuantumCollatedMatchList) obj;
-    return chosenMatches.equals(other.chosenMatches)
-        && potentialMatches.equals(other.potentialMatches);
-  }
+
+    private fun cloneChosenMatches(): MutableList<CollatedMatch> =
+            ArrayList(chosenMatches)
+
+    private fun calculateNewPotential(
+            potentialMatches: List<CollatedMatch>, match: CollatedMatch): List<CollatedMatch> {
+        val newPotential: MutableList<CollatedMatch> = ArrayList(potentialMatches)
+        val invalidatedMatches = calculateInvalidatedMatches(potentialMatches, match)
+        newPotential.removeAll(invalidatedMatches)
+        return newPotential
+    }
+
+    private fun calculateInvalidatedMatches(potentialMatches: List<CollatedMatch>, match: CollatedMatch): List<CollatedMatch> {
+        val node = match.collatedNode
+        val tokenVertexForWitness = match.witnessVertex
+        val minNodeRank = match.nodeRank
+        val minVertexRank = match.vertexRank
+        return potentialMatches
+                .filter { m: CollatedMatch ->
+                    m.collatedNode == node || m.witnessVertex == tokenVertexForWitness || hasSigilOverlap(m, node) && m.nodeRank < minNodeRank || m.vertexRank < minVertexRank
+                }
+    }
+
+    private fun hasSigilOverlap(m: CollatedMatch, node: TextNode): Boolean {
+        val nodeSigils = node.sigils
+        // m and node have witnesses in common
+        // for those witnesses they have in common, the branchpath of one is the startsubpath otf the
+        // other.
+        return m.sigils
+                .filter { nodeSigils.contains(it) }
+                .any { branchPathsOverlap(m.getBranchPath(it), node.getBranchPath(it)) }
+    }
+
+    override fun toString(): String =
+            "($chosenMatches | $potentialMatches)"
+
+    override fun hashCode(): Int =
+            chosenMatches.hashCode() + potentialMatches.hashCode()
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is QuantumCollatedMatchList) {
+            return false
+        }
+        return chosenMatches == other.chosenMatches && potentialMatches == other.potentialMatches
+    }
+
+    companion object {
+        fun branchPathsOverlap(matchBranchPath: List<Int>, nodeBranchPath: List<Int>): Boolean {
+            val minSize = Math.min(matchBranchPath.size, nodeBranchPath.size)
+            for (i in 0 until minSize) {
+                if (matchBranchPath[i] != nodeBranchPath[i]) {
+                    return false
+                }
+            }
+            return true
+        }
+    }
 }
