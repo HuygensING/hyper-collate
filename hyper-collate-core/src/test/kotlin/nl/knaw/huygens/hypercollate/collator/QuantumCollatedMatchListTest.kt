@@ -1,9 +1,5 @@
 package nl.knaw.huygens.hypercollate.collator
 
-import org.assertj.core.api.AssertionsForClassTypes
-import org.junit.Test
-import java.util.*
-
 /*-
  * #%L
  * hyper-collate-core
@@ -22,17 +18,24 @@ import java.util.*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */   class QuantumCollatedMatchListTest {
+ */
+
+import org.assertj.core.api.AssertionsForClassTypes.assertThat
+import org.junit.Test
+
+class QuantumCollatedMatchListTest {
     @Test
     fun testBranchPathsOverlap() {
-        val matchBranchPath = Arrays.asList(0, 1, 3)
-        val nodeBranchPath = Arrays.asList(0, 1)
-        val matchBranchPath1 = Arrays.asList(0, 4, 6)
+        val matchBranchPath = listOf(0, 1, 3)
+        val nodeBranchPath = listOf(0, 1)
+        val matchBranchPath1 = listOf(0, 4, 6)
         val branchPathsOverlap1 = QuantumCollatedMatchList.branchPathsOverlap(matchBranchPath, nodeBranchPath)
-        AssertionsForClassTypes.assertThat(branchPathsOverlap1).isTrue()
+        assertThat(branchPathsOverlap1).isTrue()
+
         val branchPathsOverlap2 = QuantumCollatedMatchList.branchPathsOverlap(nodeBranchPath, matchBranchPath)
-        AssertionsForClassTypes.assertThat(branchPathsOverlap2).isTrue()
+        assertThat(branchPathsOverlap2).isTrue()
+
         val branchPathsOverlap3 = QuantumCollatedMatchList.branchPathsOverlap(matchBranchPath1, nodeBranchPath)
-        AssertionsForClassTypes.assertThat(branchPathsOverlap3).isFalse()
+        assertThat(branchPathsOverlap3).isFalse()
     }
 }

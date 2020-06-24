@@ -1,23 +1,5 @@
 package nl.knaw.huygens.hypercollate.collator
 
-import com.google.common.base.Stopwatch
-import eu.interedition.collatex.dekker.Tuple
-import nl.knaw.huygens.hypercollate.HyperCollateAssertions
-import nl.knaw.huygens.hypercollate.HyperCollateTest
-import nl.knaw.huygens.hypercollate.importer.XMLImporter
-import nl.knaw.huygens.hypercollate.model.*
-import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner
-import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer
-import org.assertj.core.api.Assertions
-import org.assertj.core.util.Sets
-import org.junit.Ignore
-import org.junit.Test
-import org.slf4j.LoggerFactory
-import java.text.MessageFormat
-import java.util.*
-import java.util.concurrent.TimeUnit
-import java.util.stream.Collectors
-
 /*-
  * #%L
  * hyper-collate-core
@@ -36,8 +18,27 @@ import java.util.stream.Collectors
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */   class HyperCollatorTest : HyperCollateTest() {
-    val hyperCollator = HyperCollator()
+ */
+
+import com.google.common.base.Stopwatch
+import eu.interedition.collatex.dekker.Tuple
+import nl.knaw.huygens.hypercollate.HyperCollateAssertions.assertThat
+import nl.knaw.huygens.hypercollate.HyperCollateTest
+import nl.knaw.huygens.hypercollate.importer.XMLImporter
+import nl.knaw.huygens.hypercollate.model.*
+import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner
+import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer
+import org.assertj.core.util.Sets
+import org.junit.Ignore
+import org.junit.Test
+import org.slf4j.LoggerFactory
+import java.text.MessageFormat
+import java.util.*
+import java.util.concurrent.TimeUnit
+import java.util.stream.Collectors
+
+class HyperCollatorTest : HyperCollateTest() {
+    private val hyperCollator = HyperCollator()
 
     @Ignore("takes too long")
     @Test(timeout = 10000)
@@ -242,17 +243,17 @@ import java.util.stream.Collectors
         val werven_om = CollationGraphAssert.textNodeSketch()
                 .withWitnessSegmentSketch("F", "werven om")
                 .withWitnessSegmentSketch("Q", "werven om")
-        HyperCollateAssertions.assertThat(collationGraph)
+        assertThat(collationGraph)
                 .containsTextNodesMatching(n1, n2, n3, n4, n5, n6, trachten_naar, werven_om)
-        HyperCollateAssertions.assertThat(collationGraph)
+        assertThat(collationGraph)
                 .containsMarkupNodesMatching(
                         CollationGraphAssert.markupNodeSketch("F", "text"),
                         CollationGraphAssert.markupNodeSketch("Q", "text"),
                         CollationGraphAssert.markupNodeSketch("Z", "text"))
         val f_del = CollationGraphAssert.markupNodeSketch("F", "del")
         val q_add = CollationGraphAssert.markupNodeSketch("Q", "add")
-        HyperCollateAssertions.assertThat(collationGraph).hasTextNodeMatching(werven_om).withMarkupNodesMatching(f_del)
-        HyperCollateAssertions.assertThat(collationGraph).hasMarkupNodeMatching(q_add).withTextNodesMatching(trachten_naar)
+        assertThat(collationGraph).hasTextNodeMatching(werven_om).withMarkupNodesMatching(f_del)
+        assertThat(collationGraph).hasMarkupNodeMatching(q_add).withTextNodesMatching(trachten_naar)
     }
 
     @Test(timeout = 10000)
@@ -364,7 +365,7 @@ import java.util.stream.Collectors
         val collationGraph = testHyperCollation(wF, wQ, expected)
 
         // test matching tokens
-        HyperCollateAssertions.assertThat(collationGraph)
+        assertThat(collationGraph)
                 .containsTextNodesMatching(
                         CollationGraphAssert.textNodeSketch()
                                 .withWitnessSegmentSketch("F", "Hoe zoet moet nochtans zijn dit ")
@@ -478,7 +479,7 @@ import java.util.stream.Collectors
             }
             """.trimIndent()
         val collationGraph = testHyperCollation(wF, wQ, expected)
-        HyperCollateAssertions.assertThat(collationGraph)
+        assertThat(collationGraph)
                 .containsTextNodesMatching(
                         CollationGraphAssert.textNodeSketch()
                                 .withWitnessSegmentSketch("F", "De vent was woedend en maakte ")
@@ -526,7 +527,7 @@ import java.util.stream.Collectors
             }
             """.trimIndent()
         val collationGraph = testHyperCollation(wF, wQ, expected)
-        HyperCollateAssertions.assertThat(collationGraph)
+        assertThat(collationGraph)
                 .containsOnlyTextNodesMatching(
                         CollationGraphAssert.textNodeSketch()
                                 .withWitnessSegmentSketch("A", "The dog's ")
@@ -568,12 +569,12 @@ import java.util.stream.Collectors
             }
             """.trimIndent()
         val collationGraph = testHyperCollation(wF, wQ, expected)
-        HyperCollateAssertions.assertThat(collationGraph)
+        assertThat(collationGraph)
                 .containsTextNodesMatching(
                         CollationGraphAssert.textNodeSketch()
                                 .withWitnessSegmentSketch("A", "b b b b b b b ")
                                 .withWitnessSegmentSketch("B", "b b b b b b b "))
-        HyperCollateAssertions.assertThat(collationGraph)
+        assertThat(collationGraph)
                 .doesNotContainTextNodesMatching(
                         CollationGraphAssert.textNodeSketch()
                                 .withWitnessSegmentSketch("A", "T ")
@@ -613,7 +614,7 @@ import java.util.stream.Collectors
             }
             """.trimIndent()
         val collationGraph = testHyperCollation(wF, wQ, expected)
-        HyperCollateAssertions.assertThat(collationGraph)
+        assertThat(collationGraph)
                 .containsTextNodesMatching(
                         CollationGraphAssert.textNodeSketch()
                                 .withWitnessSegmentSketch("A", "A ")
@@ -624,7 +625,7 @@ import java.util.stream.Collectors
                         CollationGraphAssert.textNodeSketch()
                                 .withWitnessSegmentSketch("A", "G ")
                                 .withWitnessSegmentSketch("B", "G "))
-        HyperCollateAssertions.assertThat(collationGraph)
+        assertThat(collationGraph)
                 .doesNotContainTextNodesMatching(
                         CollationGraphAssert.textNodeSketch()
                                 .withWitnessSegmentSketch("A", "H")
@@ -688,7 +689,7 @@ import java.util.stream.Collectors
             }
             """.trimIndent()
         val collationGraph = testHyperCollation(wF, wQ, expected)
-        HyperCollateAssertions.assertThat(collationGraph)
+        assertThat(collationGraph)
                 .containsTextNodesMatching(
                         CollationGraphAssert.textNodeSketch()
                                 .withWitnessSegmentSketch("H", "Leaning her bony breast on the hard thorn ")
@@ -699,7 +700,7 @@ import java.util.stream.Collectors
                         CollationGraphAssert.textNodeSketch()
                                 .withWitnessSegmentSketch("H", ".Was it then that she had her consolations  ")
                                 .withWitnessSegmentSketch("T", ".Was it then that she had her consolations "))
-        HyperCollateAssertions.assertThat(collationGraph)
+        assertThat(collationGraph)
                 .doesNotContainTextNodesMatching(
                         CollationGraphAssert.textNodeSketch()
                                 .withWitnessSegmentSketch("H", ", ")
@@ -796,7 +797,7 @@ import java.util.stream.Collectors
             }
             """.trimIndent()
         val collationGraph = testHyperCollation(wF, wQ, expected)
-        HyperCollateAssertions.assertThat(collationGraph)
+        assertThat(collationGraph)
                 .containsTextNodesMatching(
                         CollationGraphAssert.textNodeSketch()
                                 .withWitnessSegmentSketch("F", "so ")
@@ -880,7 +881,7 @@ import java.util.stream.Collectors
             }
             """.trimIndent()
         val collationGraph = testHyperCollation(wF, wQ, expected)
-        HyperCollateAssertions.assertThat(collationGraph)
+        assertThat(collationGraph)
                 .containsTextNodesMatching(
                         CollationGraphAssert.textNodeSketch()
                                 .withWitnessSegmentSketch("F", "Frankenstein discovered")
@@ -948,7 +949,7 @@ import java.util.stream.Collectors
             t008->t003[label="F"]
             }
             """.trimIndent()
-        Assertions.assertThat(dot).isEqualTo(expected)
+        assertThat(dot).isEqualTo(expected)
         val dotWithoutMarkupAndWhitespaceEmphasis = CollationGraphVisualizer.toDot(collation, false, true)
         val expected2 = """
             digraph CollationGraph{
@@ -973,7 +974,7 @@ import java.util.stream.Collectors
             t008->t003[label="F"]
             }
             """.trimIndent()
-        Assertions.assertThat(dotWithoutMarkupAndWhitespaceEmphasis).isEqualTo(expected2)
+        assertThat(dotWithoutMarkupAndWhitespaceEmphasis).isEqualTo(expected2)
 
         // System.out.println(dot);
         // writeGraph(dot, "graph");
@@ -983,16 +984,16 @@ import java.util.stream.Collectors
     fun testPermute() {
         val permute1 = hyperCollator.permute(3)
         LOG.info("permute={}", visualize(permute1))
-        Assertions.assertThat(Sets.newHashSet(permute1)).hasSameSizeAs(permute1)
-        Assertions.assertThat(permute1).hasSize(3)
+        assertThat(Sets.newHashSet(permute1)).hasSameSizeAs(permute1)
+        assertThat(permute1).hasSize(3)
         val permute2 = hyperCollator.permute(4)
         LOG.info("permute={}", visualize(permute2))
-        Assertions.assertThat(Sets.newHashSet(permute2)).hasSameSizeAs(permute2)
-        Assertions.assertThat(permute2).hasSize(6)
+        assertThat(Sets.newHashSet(permute2)).hasSameSizeAs(permute2)
+        assertThat(permute2).hasSize(6)
         val permute3 = hyperCollator.permute(10)
         LOG.info("permute={}", visualize(permute3))
-        Assertions.assertThat(Sets.newHashSet(permute3)).hasSameSizeAs(permute3)
-        Assertions.assertThat(permute3).hasSize(45)
+        assertThat(Sets.newHashSet(permute3)).hasSameSizeAs(permute3)
+        assertThat(permute3).hasSize(45)
     }
 
     @Test(timeout = 10000)
@@ -1016,20 +1017,20 @@ import java.util.stream.Collectors
         val match6 = "<A:EndTokenVertex,B:EndTokenVertex>"
         val match7 = "<A:EndTokenVertex,C:EndTokenVertex>"
         val match8 = "<B:EndTokenVertex,C:EndTokenVertex>"
-        Assertions.assertThat(allPotentialMatches).hasSize(8)
+        assertThat(allPotentialMatches).hasSize(8)
         val matchStrings = allPotentialMatches.stream().map { obj: Match -> obj.toString() }.collect(Collectors.toSet())
-        Assertions.assertThat(matchStrings)
+        assertThat(matchStrings)
                 .contains(match1, match2, match3, match4, match5, match6, match7, match8)
         val sortAndFilterMatchesByWitness = hyperCollator.sortAndFilterMatchesByWitness(
                 allPotentialMatches, Arrays.asList(sigil1, sigil2, sigil3))
         LOG.info("sortAndFilterMatchesByWitness={}", sortAndFilterMatchesByWitness)
-        Assertions.assertThat(sortAndFilterMatchesByWitness).containsOnlyKeys(sigil1, sigil2, sigil3)
+        assertThat(sortAndFilterMatchesByWitness).containsOnlyKeys(sigil1, sigil2, sigil3)
         val listA = stringList(sortAndFilterMatchesByWitness, sigil1)
-        Assertions.assertThat(listA).containsOnly(match1, match2, match3, match6, match7)
+        assertThat(listA).containsOnly(match1, match2, match3, match6, match7)
         val listB = stringList(sortAndFilterMatchesByWitness, sigil2)
-        Assertions.assertThat(listB).containsOnly(match4, match1, match5, match6, match8)
+        assertThat(listB).containsOnly(match4, match1, match5, match6, match8)
         val listC = stringList(sortAndFilterMatchesByWitness, sigil3)
-        Assertions.assertThat(listC).containsOnly(match4, match2, match3, match5, match7, match8)
+        assertThat(listC).containsOnly(match4, match2, match3, match5, match7, match8)
     }
 
     private fun stringList(
@@ -1055,7 +1056,7 @@ import java.util.stream.Collectors
         val dot = CollationGraphVisualizer.toDot(collation, true, false)
         LOG.debug("dot=\n{}", dot)
         writeGraph(dot, "graph")
-        Assertions.assertThat(dot).isEqualTo(expected)
+        assertThat(dot).isEqualTo(expected)
         val table = CollationGraphVisualizer.toTableASCII(collation, false)
         LOG.debug("table=\n{}", table)
         return collation
@@ -1079,14 +1080,16 @@ import java.util.stream.Collectors
         val markupAfterJoin = collation.markupStream.collect(Collectors.toSet())
         //    LOG.info("after join: collation markup = {}",
         // collation.getMarkupStream().map(Markup::toString).sorted().collect(toList()));
-        Assertions.assertThat(markupAfterJoin).containsExactlyElementsOf(markupBeforeJoin)
+        assertThat(markupAfterJoin).containsExactlyElementsOf(markupBeforeJoin)
+
         val dot = CollationGraphVisualizer.toDot(collation, true, false)
         LOG.info("dot=\n{}", dot)
         writeGraph(dot, "graph")
-        Assertions.assertThat(dot).isEqualTo(expected)
+        assertThat(dot).isEqualTo(expected)
+
         val table = CollationGraphVisualizer.toTableASCII(collation, true)
         LOG.info("dot=\n{}", table)
-        HyperCollateAssertions.assertThat(collation).isNotNull
+        assertThat(collation).isNotNull
         return collation
     }
 

@@ -1,12 +1,5 @@
 package nl.knaw.huygens.hypercollate.model
 
-import nl.knaw.huygens.hypercollate.HyperCollateTest
-import nl.knaw.huygens.hypercollate.tools.DotFactory
-import org.assertj.core.api.Assertions
-import org.junit.Test
-import org.slf4j.LoggerFactory
-import java.util.stream.Collectors
-
 /*-
  * #%L
  * hyper-collate-core
@@ -25,7 +18,16 @@ import java.util.stream.Collectors
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */   class VariantWitnessGraphTest : HyperCollateTest() {
+ */
+
+import nl.knaw.huygens.hypercollate.HyperCollateTest
+import nl.knaw.huygens.hypercollate.tools.DotFactory
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.Test
+import org.slf4j.LoggerFactory
+import java.util.stream.Collectors
+
+class VariantWitnessGraphTest : HyperCollateTest() {
     @Test
     fun test() {
         //    String xml = "<s>Collating is <del>NP hard</del><add>easy</add>.</s>";
@@ -61,9 +63,11 @@ import java.util.stream.Collectors
         vwg1.addOutgoingTokenVertexToTokenVertex(mtv5, endTokenVertex) // (.)->(END)
         vwg1.addMarkupToTokenVertex(mtv5, sMarkup)
         val hardMarkup = vwg1.getMarkupListForTokenVertex(mtv3)
-        Assertions.assertThat(hardMarkup).containsExactly(sMarkup, delMarkup)
+        assertThat(hardMarkup).containsExactly(sMarkup, delMarkup)
+
         val incoming = mtv5.incomingTokenVertexStream.collect(Collectors.toList())
-        Assertions.assertThat(incoming).containsOnly(mtv3, mtv4)
+        assertThat(incoming).containsOnly(mtv3, mtv4)
+
         val dot = DotFactory(false).fromVariantWitnessGraphSimple(vwg1)
         LOG.info("dot=\n{}", dot)
         val expected = """
@@ -88,7 +92,8 @@ import java.util.stream.Collectors
             begin->A_000
             }
             """.trimIndent()
-        Assertions.assertThat(dot).isEqualTo(expected)
+        assertThat(dot).isEqualTo(expected)
+
         val expected2 = """
             digraph VariantWitnessGraph{
             graph [rankdir=LR]
@@ -111,7 +116,11 @@ import java.util.stream.Collectors
     }
 
     private fun aTokenVertex(
-            string: String, index: Long, parentXPath: String, witness: SimpleWitness): SimpleTokenVertex {
+            string: String,
+            index: Long,
+            parentXPath: String,
+            witness: SimpleWitness
+    ): SimpleTokenVertex {
         val token = MarkedUpToken()
                 .setContent(string)
                 .setNormalizedContent(string.toLowerCase())

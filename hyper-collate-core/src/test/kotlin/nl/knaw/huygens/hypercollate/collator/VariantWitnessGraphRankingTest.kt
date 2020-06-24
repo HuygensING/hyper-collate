@@ -45,18 +45,24 @@ class VariantWitnessGraphRankingTest : HyperCollateTest() {
         assert(byRank[0]!!.iterator().next() is StartTokenVertex)
         assertThat(byRank[1]).hasSize(1)
         assert(byRank[1]!!.iterator().next() is SimpleTokenVertex)
+
         val tokenVertex = byRank[1]!!.iterator().next()!!
         assert(tokenVertex is SimpleTokenVertex)
+
         val content = (tokenVertex.token as MarkedUpToken).content
         assertThat(content).isEqualTo("Een ongeluk komt ")
         assertThat(byRank[2]).hasSize(2)
+
         val tokenVertices = byRank[2]!!.stream().sorted().collect(Collectors.toList())
         val tokenVertex1 = tokenVertices[0]
         assert(tokenVertex1 is SimpleTokenVertex)
+
         val content1 = (tokenVertex1.token as MarkedUpToken).content
         assertThat(content1).isEqualTo("nooit")
+
         val tokenVertex2 = tokenVertices[1]
         assert(tokenVertex2 is SimpleTokenVertex)
+
         val content2 = (tokenVertex2.token as MarkedUpToken).content
         assertThat(content2).isEqualTo("zelden")
 

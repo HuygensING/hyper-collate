@@ -1,15 +1,5 @@
 package nl.knaw.huygens.hypercollate.importer
 
-import nl.knaw.huygens.hypercollate.HyperCollateTest
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
-import nl.knaw.huygens.hypercollate.tools.DotFactory
-import nl.knaw.huygens.hypercollate.tools.TokenMerger
-import org.assertj.core.api.Assertions
-import org.junit.Ignore
-import org.junit.Test
-import org.slf4j.LoggerFactory
-import java.util.stream.Collectors
-
 /*-
  * #%L
  * hyper-collate-core
@@ -28,7 +18,19 @@ import java.util.stream.Collectors
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */   class XMLImporterTest : HyperCollateTest() {
+ */
+
+import nl.knaw.huygens.hypercollate.HyperCollateTest
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
+import nl.knaw.huygens.hypercollate.tools.DotFactory
+import nl.knaw.huygens.hypercollate.tools.TokenMerger
+import org.assertj.core.api.Assertions
+import org.junit.Ignore
+import org.junit.Test
+import org.slf4j.LoggerFactory
+import java.util.stream.Collectors
+
+class XMLImporterTest : HyperCollateTest() {
     @Test
     fun testHoeLanger() {
         val importer = XMLImporter()
