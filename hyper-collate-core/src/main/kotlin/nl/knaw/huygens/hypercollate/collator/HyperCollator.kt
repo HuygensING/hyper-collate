@@ -28,8 +28,7 @@ import nl.knaw.huygens.hypercollate.tools.StreamUtil
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.function.BiFunction
-import java.util.function.Consumer
-import java.util.stream.Collectors
+import java.util.stream.Collectors.toList
 
 class HyperCollator {
 
@@ -185,13 +184,11 @@ class HyperCollator {
             matchingNode: TextNode) {
         witnessGraph
                 .getMarkupListForTokenVertex(tokenVertexForWitnessGraph)
-                .forEach(
-                        Consumer { markup: Markup? -> collationGraph.linkMarkupToText(markupNodeIndex[markup], matchingNode) })
+                .forEach { markup: Markup -> collationGraph.linkMarkupToText(markupNodeIndex[markup], matchingNode) }
     }
 
-    private fun getOptimalMatchList(matchList: List<CollatedMatch>): MutableList<CollatedMatch> {
-        return OptimalCollatedMatchListAlgorithm().getOptimalCollatedMatchList(matchList)
-    }
+    private fun getOptimalMatchList(matchList: List<CollatedMatch>): MutableList<CollatedMatch> =
+            OptimalCollatedMatchListAlgorithm().getOptimalCollatedMatchList(matchList)
 
     private fun adjustRankForCollatedNode(
             m: CollatedMatch, baseRanking: CollationGraphRanking): CollatedMatch {
@@ -245,11 +242,10 @@ class HyperCollator {
 
     fun sortAndFilterMatchesByWitness(matches: Set<Match>, sigils: List<String>): Map<String, List<Match>> {
         val map: MutableMap<String, List<Match>> = HashMap()
-        sigils.forEach(
-                Consumer { s: String ->
-                    val sortedMatchesForWitness = filterAndSortMatchesForWitness(matches, s)
-                    map[s] = sortedMatchesForWitness
-                })
+        sigils.forEach { s: String ->
+            val sortedMatchesForWitness = filterAndSortMatchesForWitness(matches, s)
+            map[s] = sortedMatchesForWitness
+        }
         return map
     }
 
@@ -365,20 +361,16 @@ class HyperCollator {
                     .forEach { tv: TokenVertex ->
                         tv.incomingTokenVertexStream
                                 .forEach { itv: TokenVertex ->
-                                    val source = collatedTokenVertexMap[itv]
-                                    val target = collatedTokenVertexMap[tv]
-                                    if (source == null || target == null) {
-                                        throw RuntimeException("source or target is null!")
-                                    }
+                                    val source = collatedTokenVertexMap[itv] ?: error("source is null!")
+                                    val target = collatedTokenVertexMap[tv] ?: error("target is null!")
                                     val existingTargetNodes = collationGraph
                                             .getOutgoingTextEdgeStream(source)
                                             .map { edge: TextEdge? -> collationGraph.getTarget(edge) }
-                                            .map { obj: TextNode -> TextNode::class.java.cast(obj) }
-                                            .collect(Collectors.toList())
+                                            .map { it as TextNode }
+                                            .collect(toList())
                                     val sigil = tv.sigil
                                     if (!existingTargetNodes.contains(target)) {
-                                        val sigils: MutableSet<String> = HashSet()
-                                        sigils.add(sigil)
+                                        val sigils: MutableSet<String> = mutableSetOf(sigil)
                                         collationGraph.addDirectedEdge(source, target, sigils)
                                         // System.out.println("> " + source + " -> " + target);
                                     } else {
