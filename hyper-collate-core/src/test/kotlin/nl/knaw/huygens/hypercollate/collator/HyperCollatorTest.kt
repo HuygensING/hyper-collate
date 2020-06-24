@@ -32,7 +32,7 @@ import org.assertj.core.util.Sets
 import org.junit.Ignore
 import org.junit.Test
 import org.slf4j.LoggerFactory
-import java.text.MessageFormat
+import java.text.MessageFormat.format
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.stream.Collectors
@@ -920,9 +920,9 @@ class HyperCollatorTest : HyperCollateTest() {
         de ongewisheid vóór de <lb/>liefelijke toestemming!</s>
 </text>""")
         val collationGraph = CollationGraph()
-        val map: Map<TokenVertex, TextNode> = HashMap()
+        val map: MutableMap<TokenVertex, TextNode> = mutableMapOf()
         val matches: List<Match> = ArrayList()
-        val markupNodeIndex: Map<Markup, MarkupNode> = HashMap()
+        val markupNodeIndex: MutableMap<Markup, MarkupNode> = mutableMapOf()
         hyperCollator.initialize(collationGraph, map, markupNodeIndex, wF)
         val collation = CollationGraphNodeJoiner.join(collationGraph)
         val dot = CollationGraphVisualizer.toDot(collation, true, false)
@@ -1005,8 +1005,8 @@ class HyperCollatorTest : HyperCollateTest() {
         val w1 = importer.importXML(sigil1, "<x>the black cat</x>")
         val w2 = importer.importXML(sigil2, "<x>the blue dog</x>")
         val w3 = importer.importXML(sigil3, "<x>the black dog</x>")
-        val witnesses = Arrays.asList(w1, w2, w3)
-        val rankings = witnesses.stream().map { graph: VariantWitnessGraph? -> VariantWitnessGraphRanking.of(graph) }.collect(Collectors.toList())
+        val witnesses = listOf(w1, w2, w3)
+        val rankings = witnesses.map { VariantWitnessGraphRanking.of(it) }
         val allPotentialMatches = hyperCollator.getPotentialMatches(witnesses, rankings)
         LOG.info("allPotentialMatches={}", allPotentialMatches)
         val match1 = "<A0,B0>"
@@ -1018,11 +1018,11 @@ class HyperCollatorTest : HyperCollateTest() {
         val match7 = "<A:EndTokenVertex,C:EndTokenVertex>"
         val match8 = "<B:EndTokenVertex,C:EndTokenVertex>"
         assertThat(allPotentialMatches).hasSize(8)
-        val matchStrings = allPotentialMatches.stream().map { obj: Match -> obj.toString() }.collect(Collectors.toSet())
+        val matchStrings = allPotentialMatches.map { it.toString() }.toSet()
         assertThat(matchStrings)
                 .contains(match1, match2, match3, match4, match5, match6, match7, match8)
         val sortAndFilterMatchesByWitness = hyperCollator.sortAndFilterMatchesByWitness(
-                allPotentialMatches, Arrays.asList(sigil1, sigil2, sigil3))
+                allPotentialMatches, listOf(sigil1, sigil2, sigil3))
         LOG.info("sortAndFilterMatchesByWitness={}", sortAndFilterMatchesByWitness)
         assertThat(sortAndFilterMatchesByWitness).containsOnlyKeys(sigil1, sigil2, sigil3)
         val listA = stringList(sortAndFilterMatchesByWitness, sigil1)
@@ -1034,15 +1034,15 @@ class HyperCollatorTest : HyperCollateTest() {
     }
 
     private fun stringList(
-            sortAndFilterMatchesByWitness: Map<String, List<Match>>, key: String): List<String> {
-        return sortAndFilterMatchesByWitness[key]!!.stream().map { obj: Match -> obj.toString() }.collect(Collectors.toList())
-    }
+            sortAndFilterMatchesByWitness: Map<String, List<Match>>,
+            key: String
+    ): List<String> =
+            (sortAndFilterMatchesByWitness[key] ?: error("key $key not found in sortAndFilterMatchesByWitness"))
+                    .map(Match::toString)
 
-    private fun visualize(list: List<Tuple<Int?>?>): String {
-        return list.stream()
-                .map { t: Tuple<Int?>? -> MessageFormat.format("<{0},{1}>", t!!.left, t.right) }
-                .collect(Collectors.joining(""))
-    }
+    private fun visualize(list: List<Tuple<Int>>): String =
+            list.map { format("<{0},{1}>", it.left, it.right) }
+                    .joinToString { "" }
 
     private fun testHyperCollation(
             witness1: VariantWitnessGraph, witness2: VariantWitnessGraph, expected: String): CollationGraph {
@@ -1057,6 +1057,7 @@ class HyperCollatorTest : HyperCollateTest() {
         LOG.debug("dot=\n{}", dot)
         writeGraph(dot, "graph")
         assertThat(dot).isEqualTo(expected)
+
         val table = CollationGraphVisualizer.toTableASCII(collation, false)
         LOG.debug("table=\n{}", table)
         return collation
