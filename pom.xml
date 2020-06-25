@@ -8,7 +8,7 @@
     <groupId>nl.knaw.huygens</groupId>
     <artifactId>hyper-collate</artifactId>
     <name>HyperCollate</name>
-    <version>1.2-trd-578</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <inceptionYear>2017</inceptionYear>
 
