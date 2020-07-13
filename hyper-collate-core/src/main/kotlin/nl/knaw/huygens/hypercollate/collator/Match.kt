@@ -35,7 +35,7 @@ class Match(vararg matchingTokenVertices: TokenVertex) {
     fun getTokenVertexForWitness(sigil: String): TokenVertex? =
             tokenVertexMap[sigil]
 
-    fun withRank(sigil: String, rank: Int): Match {
+    fun setRank(sigil: String, rank: Int): Match {
         rankingMap[sigil] = rank
         return this
     }
@@ -65,7 +65,7 @@ class Match(vararg matchingTokenVertices: TokenVertex) {
                 // .append(sv.getContent().replace("\n", "\\n"))
                 // .append("'");
             } else {
-                vString.append(sigil).append(":").append(vertex.javaClass.getSimpleName())
+                vString.append(sigil).append(":").append(vertex.javaClass.simpleName)
             }
             vertexStrings.add(vString.toString())
         }

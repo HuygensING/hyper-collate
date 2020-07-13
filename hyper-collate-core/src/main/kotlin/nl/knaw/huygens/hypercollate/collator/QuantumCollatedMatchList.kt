@@ -32,6 +32,12 @@ class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val poten
     val totalSize: Int
         get() = chosenMatches.size + potentialMatches.size
 
+    val fingerprint by lazy {
+        val chosen = chosenMatches.joinToString(" ") { it.content }
+        val potential = potentialMatches.joinToString(" ") { it.content }
+        "$chosen|$potential"
+    }
+
     fun chooseMatch(match: CollatedMatch): QuantumCollatedMatchList {
         Preconditions.checkState(potentialMatches.contains(match))
         val newChosen = cloneChosenMatches()
@@ -76,6 +82,7 @@ class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val poten
         // for those witnesses they have in common, the branchpath of one is the startsubpath otf the
         // other.
         return m.sigils
+                .asSequence()
                 .filter { nodeSigils.contains(it) }
                 .any { branchPathsOverlap(m.getBranchPath(it)!!, node.getBranchPath(it)) }
     }

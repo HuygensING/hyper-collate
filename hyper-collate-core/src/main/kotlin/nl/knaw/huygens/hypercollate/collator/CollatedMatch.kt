@@ -20,6 +20,7 @@ package nl.knaw.huygens.hypercollate.collator
  * #L%
  */
 
+import nl.knaw.huygens.hypercollate.model.MarkedUpToken
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex
 import nl.knaw.huygens.hypercollate.model.TextNode
 import nl.knaw.huygens.hypercollate.model.TokenVertex
@@ -33,6 +34,16 @@ class CollatedMatch(val collatedNode: TextNode, val witnessVertex: TokenVertex) 
 
     var sigils: Set<String>
     private val branchPaths: MutableMap<String, List<Int>> = HashMap()
+
+    val content: String by lazy {
+        if (collatedNode.sigils.isEmpty()) {
+            ""
+        } else {
+            val sigil = collatedNode.sigils.iterator().next()
+            val token = collatedNode.getTokenForWitness(sigil) as MarkedUpToken
+            token.normalizedContent
+        }
+    }
 
     fun hasWitness(sigil: String): Boolean =
             sigils.contains(sigil)

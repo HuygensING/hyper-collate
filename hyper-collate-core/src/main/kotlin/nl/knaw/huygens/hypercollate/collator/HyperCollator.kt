@@ -49,7 +49,7 @@ class HyperCollator {
         val matchesSortedByRankPerWitness = sortAndFilterMatchesByWitness(matches, sigils)
         val markupNodeIndex: MutableMap<Markup, MarkupNode> = HashMap()
         initialize(collationGraph, collatedTokenVertexMap, markupNodeIndex, first)
-        visualize(collationGraph)
+//        visualize(collationGraph)
         for (witnessGraph in witnesses) {
             val sortedMatchesForWitness = matchesSortedByRankPerWitness[witnessGraph.sigil] ?: error("sigil not found")
             collate(
@@ -130,7 +130,8 @@ class HyperCollator {
             markupNodeIndex: MutableMap<Markup, MarkupNode>,
             collatedTokenVertexMap: MutableMap<TokenVertex, TextNode>) {
         val baseRanking = CollationGraphRanking.of(collationGraph)
-        val filteredSortedMatchesForWitness = sortedMatchesForWitness.filter { m: Match -> collationGraph.sigils.any { m.hasWitness(it) } }
+        val filteredSortedMatchesForWitness = sortedMatchesForWitness
+                .filter { m: Match -> collationGraph.sigils.any { m.hasWitness(it) } }
         val witnessSigil = witnessGraph.sigil
         collationGraph.sigils.add(witnessSigil)
         addMarkupNodes(collationGraph, markupNodeIndex, witnessGraph)
@@ -198,7 +199,7 @@ class HyperCollator {
     private fun logCollated(collatedTokenVertexMap: Map<TokenVertex, TextNode>) {
         val lines: MutableList<String> = ArrayList()
         collatedTokenVertexMap.forEach { (k: TokenVertex, v: TextNode) -> lines.add(k.sigil + ":" + k.token + " -> " + v) }
-        LOG.debug("collated={}", lines.sorted().joinToString { "\n" })
+        LOG.debug("collated={}", lines.sorted().joinToString("\n"))
     }
 
     private fun advanceWitness(
@@ -286,10 +287,10 @@ class HyperCollator {
         val endMatch = Match(endTokenVertex1, endTokenVertex2)
         val sigil1 = witness1.sigil
         val rank1 = ranking1.apply(endTokenVertex1)
-        endMatch.withRank(sigil1, rank1)
+        endMatch.setRank(sigil1, rank1)
         val sigil2 = witness2.sigil
         val rank2 = ranking2.apply(endTokenVertex2)
-        endMatch.withRank(sigil2, rank2)
+        endMatch.setRank(sigil2, rank2)
         return endMatch
     }
 
@@ -322,8 +323,8 @@ class HyperCollator {
                             .forEach { tv2: SimpleTokenVertex ->
                                 if (matcher.apply(tv1, tv2)) {
                                     val match = Match(tv1, tv2)
-                                            .withRank(sigil1, ranking1.apply(tv1))
-                                            .withRank(sigil2, ranking2.apply(tv2))
+                                            .setRank(sigil1, ranking1.apply(tv1))
+                                            .setRank(sigil2, ranking2.apply(tv2))
                                     allPotentialMatches.add(match)
                                     vertexToMatch[tv1] = match
                                     vertexToMatch[tv2] = match

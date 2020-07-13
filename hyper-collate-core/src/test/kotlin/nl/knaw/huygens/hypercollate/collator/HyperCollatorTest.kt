@@ -29,7 +29,6 @@ import nl.knaw.huygens.hypercollate.model.*
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer
 import org.assertj.core.util.Sets
-import org.junit.Ignore
 import org.junit.Test
 import org.slf4j.LoggerFactory
 import java.text.MessageFormat.format
@@ -39,8 +38,9 @@ import java.util.stream.Collectors
 class HyperCollatorTest : HyperCollateTest() {
     private val hyperCollator = HyperCollator()
 
-    @Ignore("takes too long")
-    @Test(timeout = 10000)
+    //    @Ignore("takes too long")
+    @Test(timeout = 10_000)
+//    @Test
     fun testCollationWithManyMatches() {
         val importer = XMLImporter()
         val w1 = importer.importXML(
@@ -1040,7 +1040,7 @@ class HyperCollatorTest : HyperCollateTest() {
 
     private fun visualize(list: List<Tuple<Int>>): String =
             list.map { format("<{0},{1}>", it.left, it.right) }
-                    .joinToString { "" }
+                    .joinToString("")
 
     private fun testHyperCollation(witness1: VariantWitnessGraph, witness2: VariantWitnessGraph, expected: String): CollationGraph {
         //    Map<String, Long> collationDuration = new HashMap<>();
