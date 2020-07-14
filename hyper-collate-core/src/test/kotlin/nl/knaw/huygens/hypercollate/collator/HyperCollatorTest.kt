@@ -29,6 +29,7 @@ import nl.knaw.huygens.hypercollate.model.*
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer
 import org.assertj.core.util.Sets
+import org.junit.Ignore
 import org.junit.Test
 import org.slf4j.LoggerFactory
 import java.text.MessageFormat.format
@@ -38,8 +39,8 @@ import java.util.stream.Collectors
 class HyperCollatorTest : HyperCollateTest() {
     private val hyperCollator = HyperCollator()
 
-    //    @Ignore("takes too long")
-    @Test(timeout = 10_000)
+    @Ignore("takes too long")
+//    @Test(timeout = 10_000)
 //    @Test
     fun testCollationWithManyMatches() {
         val importer = XMLImporter()

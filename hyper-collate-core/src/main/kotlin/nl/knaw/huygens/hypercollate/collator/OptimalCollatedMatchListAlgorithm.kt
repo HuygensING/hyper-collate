@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
+import kotlin.math.min
 
 class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchList, LostPotential>(), OptimalCollatedMatchListFinder {
     private var matchesSortedByNode: List<CollatedMatch> = listOf()
@@ -41,24 +42,25 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
         var distBetweenCalled = 0
         var decisionTreeNodes = 0
 
-        override fun toString(): String {
-            return """
-                |method called:
-                |               isGoal: $isGoalCalled
-                |        neighborNodes: $neighborNodesCalled
-                |heuristicCostEstimate: $heuristicCostEstimateCalled
-                |          distBetween: $distBetweenCalled
-                |    decisionTreeNodes: $decisionTreeNodes
-            """.trimMargin()
-        }
-
+        override fun toString(): String = """
+            |method called:
+            |               isGoal: $isGoalCalled
+            |        neighborNodes: $neighborNodesCalled
+            |heuristicCostEstimate: $heuristicCostEstimateCalled
+            |          distBetween: $distBetweenCalled
+            |    decisionTreeNodes: $decisionTreeNodes
+        """.trimMargin()
     }
 
     override val name: String
         get() = "Four-Neighbours"
 
     override fun getOptimalCollatedMatchList(allPotentialMatches: Collection<CollatedMatch>): MutableList<CollatedMatch> {
-        maxPotential = allPotentialMatches.size
+        val uniqueNodesInMatches = allPotentialMatches.map { it.collatedNode }.distinct().size
+        val uniqueVerticesInMatches = allPotentialMatches.map { it.witnessVertex }.distinct().size
+        maxPotential = min(uniqueNodesInMatches, uniqueVerticesInMatches)
+        println("allPotentialMatches.size=${allPotentialMatches.size} uniqueNodes=$uniqueNodesInMatches, uniqueVertices=$uniqueVerticesInMatches, maxPotential=$maxPotential")
+
         matchesSortedByNode = sortMatchesByNode(allPotentialMatches)
         matchesSortedByWitness = sortMatchesByWitness(allPotentialMatches)
         val startNode = QuantumCollatedMatchList(listOf(), ArrayList(allPotentialMatches))
@@ -119,12 +121,18 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
 
     override fun heuristicCostEstimate(matchList: QuantumCollatedMatchList): LostPotential {
         callCounter.heuristicCostEstimateCalled += 1
-        return LostPotential(maxPotential!! - matchList.totalSize)
+        return LostPotential(maxPotential!! - matchList.maxPotentialSize())
     }
 
     override fun distBetween(matchList0: QuantumCollatedMatchList, matchList1: QuantumCollatedMatchList): LostPotential {
         callCounter.distBetweenCalled += 1
-        return LostPotential(abs(matchList0.totalSize - matchList1.totalSize))
+        return LostPotential(abs(matchList0.maxPotentialSize() - matchList1.maxPotentialSize()))
+    }
+
+    private fun QuantumCollatedMatchList.maxPotentialSize(): Int {
+        val uniquePotentialNodeMatches = this.potentialMatches.map { it.collatedNode }.distinct().size
+        val uniquePotentialVertexMatches = this.potentialMatches.map { it.witnessVertex }.distinct().size
+        return this.chosenMatches.size + min(uniquePotentialNodeMatches, uniquePotentialVertexMatches)
     }
 
     companion object {
