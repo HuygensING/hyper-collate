@@ -69,7 +69,7 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
         val winningPath = aStar(startNode, startCost)
         sw.stop()
         LOG.debug("aStar took {} ms", sw.elapsed(TimeUnit.MILLISECONDS))
-        val winningGoal = winningPath[winningPath.size - 1] ?: error("no winningPath found")
+        val winningGoal = winningPath.last() ?: error("no winningPath found")
         println(callCounter)
         return ArrayList(winningGoal.chosenMatches)
     }
@@ -81,10 +81,52 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
 
     override fun neighborNodes(matchList: QuantumCollatedMatchList): Iterable<QuantumCollatedMatchList> {
         callCounter.neighborNodesCalled += 1
+        val nextPotentialMatches: MutableSet<QuantumCollatedMatchList> = mutableSetOf()
+        val nextMatchSequence: MutableList<CollatedMatch> = mutableListOf()
+        val cms1 = matchesSortedByNode.filter { matchList.potentialMatches.contains(it) }.iterator()
+        val cms2 = matchesSortedByWitness.filter { matchList.potentialMatches.contains(it) }.iterator()
+        var goOn = cms1.hasNext()
+        while (goOn) {
+            val next1 = cms1.next()
+            val next2 = cms2.next()
+            if (next1 == next2) {
+                nextMatchSequence += next1
+                goOn = cms1.hasNext()
+            } else {
+                goOn = false
+            }
+        }
+        if (nextMatchSequence.isEmpty()) {
+            val firstPotentialMatch1 = getFirstPotentialMatchSequence(matchesSortedByNode, matchList)
+            addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1)
+            val firstPotentialMatch2 = getFirstPotentialMatchSequence(matchesSortedByWitness, matchList)
+            if (firstPotentialMatch1 != firstPotentialMatch2) {
+                addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch2)
+            }
+        } else {
+            addNeighborNodes(matchList, nextPotentialMatches, nextMatchSequence)
+        }
+
+        callCounter.decisionTreeNodes += nextPotentialMatches.size
+        return nextPotentialMatches
+    }
+
+    override fun heuristicCostEstimate(matchList: QuantumCollatedMatchList): LostPotential {
+        callCounter.heuristicCostEstimateCalled += 1
+        return LostPotential(maxPotential!! - matchList.maxPotentialSize())
+    }
+
+    override fun distBetween(matchList0: QuantumCollatedMatchList, matchList1: QuantumCollatedMatchList): LostPotential {
+        callCounter.distBetweenCalled += 1
+        return LostPotential(abs(matchList0.maxPotentialSize() - matchList1.maxPotentialSize()))
+    }
+
+    fun neighborNodes0(matchList: QuantumCollatedMatchList): Iterable<QuantumCollatedMatchList> {
+        callCounter.neighborNodesCalled += 1
         val nextPotentialMatches: MutableSet<QuantumCollatedMatchList> = LinkedHashSet()
-        val firstPotentialMatch1 = getFirstPotentialMatch(matchesSortedByNode, matchList)
+        val firstPotentialMatch1 = getFirstPotentialMatchSequence(matchesSortedByNode, matchList)
         addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1)
-        val firstPotentialMatch2 = getFirstPotentialMatch(matchesSortedByWitness, matchList)
+        val firstPotentialMatch2 = getFirstPotentialMatchSequence(matchesSortedByWitness, matchList)
         if (firstPotentialMatch1 != firstPotentialMatch2) {
             addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch2)
         }
@@ -96,8 +138,6 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
             matchList: QuantumCollatedMatchList,
             nextPotentialMatches: MutableSet<QuantumCollatedMatchList>,
             firstPotentialMatch: CollatedMatch) {
-        // TODO: more neighbour nodes: find a set of matches with same potential
-        // TODO: neighbour nodes op basis van matching tokens
         val quantumMatchSet1 = matchList.chooseMatch(firstPotentialMatch)
         val fingerprint1 = quantumMatchSet1.fingerprint
         if (!quantumCollatedMatchFingerprints.contains(fingerprint1)) {
@@ -116,18 +156,36 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
         }
     }
 
-    private fun getFirstPotentialMatch(matches: List<CollatedMatch>, matchSet: QuantumCollatedMatchList): CollatedMatch =
-            matches.first { matchSet.potentialMatches.contains(it) }
-
-    override fun heuristicCostEstimate(matchList: QuantumCollatedMatchList): LostPotential {
-        callCounter.heuristicCostEstimateCalled += 1
-        return LostPotential(maxPotential!! - matchList.maxPotentialSize())
+    private fun addNeighborNodes(
+            matchList: QuantumCollatedMatchList,
+            nextPotentialMatches: MutableSet<QuantumCollatedMatchList>,
+            matchSequence: List<CollatedMatch>) {
+        var chooseMatchSet = matchList
+        var discardMatchSet = matchList
+        matchSequence.forEach { cm ->
+            if (chooseMatchSet.potentialMatches.contains(cm)) {
+                chooseMatchSet = chooseMatchSet.chooseMatch(cm)
+                discardMatchSet = discardMatchSet.discardMatch(cm)
+            }
+        }
+        val fingerprint1 = chooseMatchSet.fingerprint
+        if (!quantumCollatedMatchFingerprints.contains(fingerprint1)) {
+            nextPotentialMatches.add(chooseMatchSet)
+            quantumCollatedMatchFingerprints.add(fingerprint1)
+        } else {
+//            println("cache hit: $fingerprint1")
+        }
+        val fingerprint2 = discardMatchSet.fingerprint
+        if (!quantumCollatedMatchFingerprints.contains(fingerprint2)) {
+            nextPotentialMatches.add(discardMatchSet)
+            quantumCollatedMatchFingerprints.add(fingerprint2)
+        } else {
+//            println("cache hit: $fingerprint2")
+        }
     }
 
-    override fun distBetween(matchList0: QuantumCollatedMatchList, matchList1: QuantumCollatedMatchList): LostPotential {
-        callCounter.distBetweenCalled += 1
-        return LostPotential(abs(matchList0.maxPotentialSize() - matchList1.maxPotentialSize()))
-    }
+    private fun getFirstPotentialMatchSequence(matches: List<CollatedMatch>, matchList: QuantumCollatedMatchList): CollatedMatch =
+            matches.first { matchList.potentialMatches.contains(it) }
 
     private fun QuantumCollatedMatchList.maxPotentialSize(): Int {
         val uniquePotentialNodeMatches = this.potentialMatches.map { it.collatedNode }.distinct().size
