@@ -38,8 +38,9 @@ import java.util.stream.Collectors
 class HyperCollatorTest : HyperCollateTest() {
     private val hyperCollator = HyperCollator()
 
-    //    @Ignore("takes too long")
-    @Test(timeout = 80_000)
+
+//    @Ignore("takes too long")
+    @Test(timeout = 420_000)
 //    @Test
     fun testCollationWithManyMatches() {
         val importer = XMLImporter()

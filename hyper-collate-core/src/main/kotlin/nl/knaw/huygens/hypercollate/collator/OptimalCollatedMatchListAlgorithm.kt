@@ -32,23 +32,30 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
     private var matchesSortedByNode: List<CollatedMatch> = listOf()
     private var matchesSortedByWitness: List<CollatedMatch> = listOf()
     private var maxPotential: Int? = null
-    private val callCounter = CallCounter()
+    private val profiler = Profiler()
     private val quantumCollatedMatchFingerprints: MutableSet<String> = mutableSetOf()
 
-    class CallCounter() {
+    class Profiler() {
         var isGoalCalled = 0
+        val isGoalStopWatch: Stopwatch = Stopwatch.createUnstarted()
+
         var neighborNodesCalled = 0
+        val neighborNodesStopWatch: Stopwatch = Stopwatch.createUnstarted()
+
         var heuristicCostEstimateCalled = 0
+        val heuristicCostEstimateStopwatch: Stopwatch = Stopwatch.createUnstarted()
+
         var distBetweenCalled = 0
+        val distBetweenStopwatch: Stopwatch = Stopwatch.createUnstarted()
+
         var decisionTreeNodes = 0
 
         override fun toString(): String = """
-            |method called:
-            |               isGoal: $isGoalCalled
-            |        neighborNodes: $neighborNodesCalled
-            |heuristicCostEstimate: $heuristicCostEstimateCalled
-            |          distBetween: $distBetweenCalled
-            |    decisionTreeNodes: $decisionTreeNodes
+            |               isGoal(): times called: $isGoalCalled; total time spent: ${isGoalStopWatch.elapsed(TimeUnit.MILLISECONDS)} ms
+            |        neighborNodes(): times called: $neighborNodesCalled; total time spent: ${neighborNodesStopWatch.elapsed(TimeUnit.MILLISECONDS)} ms
+            |heuristicCostEstimate(): times called: $heuristicCostEstimateCalled; total time spent: ${heuristicCostEstimateStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms
+            |          distBetween(): times called: $distBetweenCalled; total time spent: ${distBetweenStopwatch.elapsed(TimeUnit.MILLISECONDS)} ms
+            |      decisionTreeNodes: $decisionTreeNodes
         """.trimMargin()
     }
 
@@ -70,59 +77,68 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
         sw.stop()
         LOG.debug("aStar took {} ms", sw.elapsed(TimeUnit.MILLISECONDS))
         val winningGoal = winningPath.last() ?: error("no winningPath found")
-        println(callCounter)
+        println(profiler)
         return ArrayList(winningGoal.chosenMatches)
     }
 
     override fun isGoal(matchList: QuantumCollatedMatchList): Boolean {
-        callCounter.isGoalCalled += 1
-        return matchList.isDetermined
+        profiler.isGoalCalled += 1
+        return runWithStopwatch(profiler.isGoalStopWatch) {
+            matchList.isDetermined
+        }
     }
 
     override fun neighborNodes(matchList: QuantumCollatedMatchList): Iterable<QuantumCollatedMatchList> {
-        callCounter.neighborNodesCalled += 1
-        val nextPotentialMatches: MutableSet<QuantumCollatedMatchList> = mutableSetOf()
-        val nextMatchSequence: MutableList<CollatedMatch> = mutableListOf()
-        val cms1 = matchesSortedByNode.filter { matchList.potentialMatches.contains(it) }.iterator()
-        val cms2 = matchesSortedByWitness.filter { matchList.potentialMatches.contains(it) }.iterator()
-        var goOn = cms1.hasNext()
-        while (goOn) {
-            val next1 = cms1.next()
-            val next2 = cms2.next()
-            if (next1 == next2) {
-                nextMatchSequence += next1
-                goOn = cms1.hasNext()
+        profiler.neighborNodesCalled += 1
+        val nextPotentialMatches = runWithStopwatch(profiler.neighborNodesStopWatch) {
+            val nextPotentialMatches: MutableSet<QuantumCollatedMatchList> = mutableSetOf()
+            val nextMatchSequence: MutableList<CollatedMatch> = mutableListOf()
+            val cms1 = matchesSortedByNode.asSequence().filter { matchList.potentialMatches.contains(it) }.iterator()
+            val cms2 = matchesSortedByWitness.asSequence().filter { matchList.potentialMatches.contains(it) }.iterator()
+            var goOn = cms1.hasNext()
+            while (goOn) {
+                val next1 = cms1.next()
+                val next2 = cms2.next()
+                if (next1 == next2) {
+                    nextMatchSequence += next1
+                    goOn = cms1.hasNext()
+                } else {
+                    goOn = false
+                }
+            }
+            if (nextMatchSequence.isEmpty()) {
+                val firstPotentialMatch1 = getFirstPotentialMatchSequence(matchesSortedByNode, matchList)
+                addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1)
+                val firstPotentialMatch2 = getFirstPotentialMatchSequence(matchesSortedByWitness, matchList)
+                if (firstPotentialMatch1 != firstPotentialMatch2) {
+                    addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch2)
+                }
             } else {
-                goOn = false
+                addNeighborNodes(matchList, nextPotentialMatches, nextMatchSequence)
             }
-        }
-        if (nextMatchSequence.isEmpty()) {
-            val firstPotentialMatch1 = getFirstPotentialMatchSequence(matchesSortedByNode, matchList)
-            addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1)
-            val firstPotentialMatch2 = getFirstPotentialMatchSequence(matchesSortedByWitness, matchList)
-            if (firstPotentialMatch1 != firstPotentialMatch2) {
-                addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch2)
-            }
-        } else {
-            addNeighborNodes(matchList, nextPotentialMatches, nextMatchSequence)
+            nextPotentialMatches
         }
 
-        callCounter.decisionTreeNodes += nextPotentialMatches.size
+        profiler.decisionTreeNodes += nextPotentialMatches.size
         return nextPotentialMatches
     }
 
     override fun heuristicCostEstimate(matchList: QuantumCollatedMatchList): LostPotential {
-        callCounter.heuristicCostEstimateCalled += 1
-        return LostPotential(maxPotential!! - matchList.maxPotentialSize())
+        profiler.heuristicCostEstimateCalled += 1
+        return runWithStopwatch(profiler.heuristicCostEstimateStopwatch) {
+            LostPotential(maxPotential!! - matchList.maxPotentialSize())
+        }
     }
 
     override fun distBetween(matchList0: QuantumCollatedMatchList, matchList1: QuantumCollatedMatchList): LostPotential {
-        callCounter.distBetweenCalled += 1
-        return LostPotential(abs(matchList0.maxPotentialSize() - matchList1.maxPotentialSize()))
+        profiler.distBetweenCalled += 1
+        return runWithStopwatch(profiler.distBetweenStopwatch) {
+            LostPotential(abs(matchList0.maxPotentialSize() - matchList1.maxPotentialSize()))
+        }
     }
 
     fun neighborNodes0(matchList: QuantumCollatedMatchList): Iterable<QuantumCollatedMatchList> {
-        callCounter.neighborNodesCalled += 1
+        profiler.neighborNodesCalled += 1
         val nextPotentialMatches: MutableSet<QuantumCollatedMatchList> = LinkedHashSet()
         val firstPotentialMatch1 = getFirstPotentialMatchSequence(matchesSortedByNode, matchList)
         addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1)
@@ -130,7 +146,7 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
         if (firstPotentialMatch1 != firstPotentialMatch2) {
             addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch2)
         }
-        callCounter.decisionTreeNodes += nextPotentialMatches.size
+        profiler.decisionTreeNodes += nextPotentialMatches.size
         return nextPotentialMatches
     }
 
@@ -207,5 +223,12 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
 
         private fun sortMatchesByWitness(matches: Collection<CollatedMatch>): List<CollatedMatch> =
                 matches.sortedWith(matchWitnessComparator)
+
+        private fun <A> runWithStopwatch(stopwatch: Stopwatch, func: () -> A): A {
+            stopwatch.start()
+            val result = func()
+            stopwatch.stop()
+            return result
+        }
     }
 }
