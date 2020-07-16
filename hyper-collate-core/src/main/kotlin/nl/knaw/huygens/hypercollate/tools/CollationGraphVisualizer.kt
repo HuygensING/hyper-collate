@@ -41,7 +41,7 @@ object CollationGraphVisualizer {
         sigils.forEach(Consumer { sigil: String -> rowMap[sigil] = ArrayList() })
         val ranking = CollationGraphRanking.of(graph) // TODO: make faster
         val maxLayers: MutableMap<String, Int> = HashMap()
-        sigils.forEach(Consumer { sigil: String -> maxLayers[sigil] = 1 })
+        sigils.forEach { sigil: String -> maxLayers[sigil] = 1 }
         for (nodeSet in ranking) {
             if (isBorderNode(nodeSet, graph)) {
                 // skip start and end nodes

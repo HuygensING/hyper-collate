@@ -57,10 +57,10 @@ class CollationGraphRanking : Iterable<Set<TextNode>>, Function<TextNode, Int> {
                 val node = nodesToRank.removeAt(0)
                 val canRank = AtomicBoolean(true)
                 val rank = AtomicInteger(-1)
-                graph.getIncomingEdges(node).stream()
+                graph.getIncomingEdges(node)
                         .filter { obj: Edge? -> TextEdge::class.java.isInstance(obj) }
                         .map { e: Edge -> graph.getSource(e) }
-                        .forEach { incomingTextNode: Node? ->
+                        .forEach { incomingTextNode: Node ->
                             val currentRank = rank.get()
                             val incomingRank = ranking._byNode[incomingTextNode]
                             if (incomingRank == null) {
@@ -74,13 +74,13 @@ class CollationGraphRanking : Iterable<Set<TextNode>>, Function<TextNode, Int> {
                         }
                 graph
                         .getOutgoingTextEdgeStream(node)
-                        .map { edge: TextEdge? -> graph.getTarget(edge) }
-                        .map { obj: TextNode? -> TextNode::class.java.cast(obj) }
+                        .map { edge: TextEdge -> graph.getTarget(edge) }
+                        .map { obj: TextNode -> TextNode::class.java.cast(obj) }
                         .forEach { e: TextNode -> nodesToRank.add(e) }
                 if (canRank.get()) {
                     rank.getAndIncrement()
                     ranking._byNode[node] = rank.get()
-                    ranking._byRank.computeIfAbsent(rank.get()) { r: Int? -> HashSet() }.add(node)
+                    ranking._byRank.computeIfAbsent(rank.get()) { HashSet() }.add(node)
                 } else {
                     nodesToRank.add(node)
                 }
