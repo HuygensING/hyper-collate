@@ -56,7 +56,7 @@ class CollatedMatch(val collatedNode: TextNode, val witnessVertex: TokenVertex) 
             branchPaths[s]
 
     override fun toString(): String {
-        val sigils = if (collatedNode is TextNode) collatedNode.sigils else sigils
+        val sigils = collatedNode.sigils
         val sigilString = sigils.sorted().joinToString(",")
         val stringBuilder = StringBuilder("<[").append(sigilString).append("]").append(nodeRank)
         val vString = StringBuilder()

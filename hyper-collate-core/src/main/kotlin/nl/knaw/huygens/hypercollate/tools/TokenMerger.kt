@@ -19,6 +19,7 @@ package nl.knaw.huygens.hypercollate.tools
  * limitations under the License.
  * #L%
  */
+
 import nl.knaw.huygens.hypercollate.model.*
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -90,7 +91,7 @@ object TokenMerger {
         val mergedVertex = SimpleTokenVertex(mergedToken).setBranchPath(originalVertex.branchPath)
         originalGraph
                 .getMarkupListForTokenVertex(originalVertex)
-                .forEach { markup: Markup? -> mergedGraph.addMarkupToTokenVertex(mergedVertex, markup) }
+                .forEach { markup: Markup -> mergedGraph.addMarkupToTokenVertex(mergedVertex, markup) }
         originalToMergedMap[tokenNumber] = mergedVertex
         mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedVertexToLinkTo, mergedVertex)
         handledTokens.add(tokenNumber)

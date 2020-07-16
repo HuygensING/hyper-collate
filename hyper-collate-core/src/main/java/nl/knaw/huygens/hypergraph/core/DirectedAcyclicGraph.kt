@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypergraph.core;
+package nl.knaw.huygens.hypergraph.core
 
 /*-
  * #%L
@@ -20,66 +20,59 @@ package nl.knaw.huygens.hypergraph.core;
  * #L%
  */
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
+import org.slf4j.LoggerFactory
+import java.util.*
 
 // nu zou ik wel topological sort willen hebben
 // teveel gedoe, kan ook gewoon een root node maken
-public class DirectedAcyclicGraph<N> extends Hypergraph<N, TraditionalEdge> {
-  private static final Logger LOG = LoggerFactory.getLogger(DirectedAcyclicGraph.class);
-  private N root;
+open class DirectedAcyclicGraph<N> protected constructor() : Hypergraph<N, TraditionalEdge>(GraphType.ORDERED) {
+    private var root: N? = null
 
-  protected DirectedAcyclicGraph() {
-    super(GraphType.ORDERED);
-  }
+    public override fun addNode(node: N, label: String) {
+        super.addNode(node, label)
+    }
 
-  @Override
-  public void addNode(N node, String label) {
-    super.addNode(node, label);
-  }
+    protected fun setRootNode(root: N) {
+        this.root = root
+    }
 
-  protected void setRootNode(N root) {
-    this.root = root;
-  }
+    // Question: do we want labels here?
+    fun addDirectedEdge(source: N, target: N, sigils: Set<String>) {
+        val edge = TraditionalEdge(sigils)
+        super.addDirectedHyperEdge(edge, "", source, target)
+    }
 
-  // Question: do we want labels here?
-  public void addDirectedEdge(N source, N target, Set<String> sigils) {
-    TraditionalEdge edge = new TraditionalEdge(sigils);
-    super.addDirectedHyperEdge(edge, "", source, target);
-  }
-
-  public List<N> traverse() {
-    Set<N> visitedNodes = new HashSet<>();
-    Stack<N> nodesToVisit = new Stack<>();
-    nodesToVisit.add(root);
-    List<N> result = new ArrayList<>();
-    while (!nodesToVisit.isEmpty()) {
-      N pop = nodesToVisit.pop();
-      if (!visitedNodes.contains(pop)) {
-        result.add(pop);
-        Collection<TraditionalEdge> outgoingEdges = this.getOutgoingEdges(pop);
-        visitedNodes.add(pop);
-        for (TraditionalEdge e : outgoingEdges) {
-          N target = this.getTarget(e);
-          if (target == null) {
-            throw new RuntimeException("edge target is null for edge " + pop + "->");
-          }
-          nodesToVisit.add(target);
+    fun traverse(): List<N?> {
+        val visitedNodes: MutableSet<N?> = HashSet()
+        val nodesToVisit = Stack<N?>()
+        nodesToVisit.add(root)
+        val result: MutableList<N?> = ArrayList()
+        while (!nodesToVisit.isEmpty()) {
+            val pop = nodesToVisit.pop()!!
+            if (!visitedNodes.contains(pop)) {
+                result.add(pop)
+                val outgoingEdges = getOutgoingEdges(pop)
+                visitedNodes.add(pop)
+                for (e in outgoingEdges!!) {
+                    val target = getTarget(e) ?: throw RuntimeException("edge target is null for edge $pop->")
+                    nodesToVisit.add(target)
+                }
+            } else {
+                LOG.debug("revisiting node {}", pop)
+            }
         }
-      } else {
-        LOG.debug("revisiting node {}", pop);
-      }
+        return result
     }
-    return result;
-  }
 
-  public N getTarget(TraditionalEdge e) {
-    Collection<N> nodes = super.getTargets(e);
-    if (nodes.size() != 1) {
-      throw new RuntimeException("trouble!");
+    private fun getTarget(e: TraditionalEdge): N {
+        val nodes = super.getTargets(e)
+        if (nodes!!.size != 1) {
+            throw RuntimeException("trouble!")
+        }
+        return nodes.iterator().next()
     }
-    return nodes.iterator().next();
-  }
+
+    companion object {
+        private val LOG = LoggerFactory.getLogger(DirectedAcyclicGraph::class.java)
+    }
 }
