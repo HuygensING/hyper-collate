@@ -1,12 +1,4 @@
-package nl.knaw.huygens.hypercollate.tools;
-
-import com.google.common.base.Preconditions;
-import eu.interedition.collatex.Token;
-import nl.knaw.huygens.hypercollate.model.*;
-
-import java.util.*;
-
-import static java.util.stream.Collectors.toList;
+package nl.knaw.huygens.hypercollate.tools
 
 /*-
  * #%L
@@ -28,149 +20,142 @@ import static java.util.stream.Collectors.toList;
  * #L%
  */
 
-public class CollationGraphNodeJoiner {
+import com.google.common.base.Preconditions
+import eu.interedition.collatex.Token
+import nl.knaw.huygens.hypercollate.model.*
+import java.util.*
+import java.util.stream.Collectors
 
-  public static CollationGraph join(CollationGraph originalGraph) {
-    CollationGraph mergedGraph = new CollationGraph(originalGraph.getSigils());
-    originalGraph
-        .getMarkupNodeStream()
-        .forEach(
-            markupNode -> mergedGraph.addMarkupNode(markupNode.getSigil(), markupNode.getMarkup()));
-    Map<TextNode, TextNode> originalToMerged = mergeNodes(originalGraph, mergedGraph);
-    copyIncomingEdges(originalGraph, originalToMerged, mergedGraph);
-    copyMarkupHyperEdges(originalGraph, originalToMerged, mergedGraph);
-    return mergedGraph;
-  }
-
-  private static Map<TextNode, TextNode> mergeNodes(
-      CollationGraph originalGraph, CollationGraph mergedGraph) {
-    Map<TextNode, TextNode> originalToMerged = new HashMap<>();
-    TextNode mergedNode = mergedGraph.getTextStartNode();
-    Boolean isRootNode = true;
-    for (TextNode originalNode : originalGraph.traverseTextNodes()) {
-      if (isRootNode) {
-        isRootNode = false;
-        originalToMerged.put(originalNode, mergedNode);
-        continue;
-      }
-
-      if (canMergeNodes(mergedNode, originalNode, originalGraph)) {
-        mergeNodeTokens(mergedNode, originalNode);
-
-      } else {
-        mergedNode = copyNode(originalNode, mergedGraph);
-      }
-      originalToMerged.put(originalNode, mergedNode);
+object CollationGraphNodeJoiner {
+    @JvmStatic
+    fun join(originalGraph: CollationGraph): CollationGraph {
+        val mergedGraph = CollationGraph(originalGraph.sigils)
+        originalGraph
+                .markupNodeStream
+                .forEach { markupNode: MarkupNode -> mergedGraph.addMarkupNode(markupNode.sigil, markupNode.markup) }
+        val originalToMerged = mergeNodes(originalGraph, mergedGraph)
+        copyIncomingEdges(originalGraph, originalToMerged, mergedGraph)
+        copyMarkupHyperEdges(originalGraph, originalToMerged, mergedGraph)
+        return mergedGraph
     }
-    return originalToMerged;
-  }
 
-  private static boolean canMergeNodes(
-      TextNode mergedNode, TextNode originalNode, CollationGraph originalGraph) {
-    Collection<TextEdge> incomingEdges =
-        originalGraph.getIncomingTextEdgeStream(originalNode).collect(toList());
-    if (incomingEdges.size() != 1) {
-      return false;
-    }
-    if (!mergedNode.getSigils().equals(originalNode.getSigils())) {
-      return false;
-    }
-    TextEdge incomingEdge = incomingEdges.iterator().next();
-    TextNode prevNode = (TextNode) originalGraph.getSource(incomingEdge);
-    Boolean sigilsMatch = prevNode.getSigils().equals(mergedNode.getSigils());
-    if (sigilsMatch) {
-      Boolean parentXPathsMatch = true;
-      for (String s : mergedNode.getSigils()) {
-        Token mWitnessToken = mergedNode.getTokenForWitness(s);
-        Token nWitnessToken = originalNode.getTokenForWitness(s);
-        if (nWitnessToken == null) {
-          // it's an endtoken, so not mergeable
-          parentXPathsMatch = false;
+    private fun mergeNodes(
+            originalGraph: CollationGraph, mergedGraph: CollationGraph): Map<TextNode, TextNode> {
+        val originalToMerged: MutableMap<TextNode, TextNode> = HashMap()
+        var mergedNode: TextNode = mergedGraph.textStartNode
+        var isRootNode = true
+        for (originalNode in originalGraph.traverseTextNodes()) {
+            if (isRootNode) {
+                isRootNode = false
+                originalToMerged[originalNode] = mergedNode
+                continue
+            }
+            if (canMergeNodes(mergedNode, originalNode, originalGraph)) {
+                mergeNodeTokens(mergedNode, originalNode)
+            } else {
+                mergedNode = copyNode(originalNode, mergedGraph)
+            }
+            originalToMerged[originalNode] = mergedNode
         }
-        String mParentXPath = ((MarkedUpToken) mWitnessToken).getParentXPath();
-        String nParentXPath = ((MarkedUpToken) nWitnessToken).getParentXPath();
-        parentXPathsMatch = parentXPathsMatch && mParentXPath.equals(nParentXPath);
-      }
-      return parentXPathsMatch;
+        return originalToMerged
     }
-    return false;
-  }
 
-  private static void mergeNodeTokens(TextNode lastNode, TextNode originalNode) {
-    originalNode.getSigils().forEach(s -> lastNode.addBranchPath(s, originalNode.getBranchPath(s)));
-    for (String s : lastNode.getSigils()) {
-      MarkedUpToken tokenForWitness = (MarkedUpToken) lastNode.getTokenForWitness(s);
-      MarkedUpToken tokenToMerge = (MarkedUpToken) originalNode.getTokenForWitness(s);
-      tokenForWitness
-          .setContent(tokenForWitness.getContent() + tokenToMerge.getContent())
-          .setNormalizedContent(
-              tokenForWitness.getNormalizedContent() + tokenToMerge.getNormalizedContent());
+    private fun canMergeNodes(
+            mergedNode: TextNode, originalNode: TextNode, originalGraph: CollationGraph): Boolean {
+        val incomingEdges: Collection<TextEdge> = originalGraph.getIncomingTextEdgeStream(originalNode).collect(Collectors.toList())
+        if (incomingEdges.size != 1) {
+            return false
+        }
+        if (mergedNode.sigils != originalNode.sigils) {
+            return false
+        }
+        val incomingEdge = incomingEdges.iterator().next()
+        val prevNode = originalGraph.getSource(incomingEdge) as TextNode
+        val sigilsMatch = prevNode.sigils == mergedNode.sigils
+        if (sigilsMatch) {
+            var parentXPathsMatch = true
+            for (s in mergedNode.sigils) {
+                val mWitnessToken = mergedNode.getTokenForWitness(s)
+                val nWitnessToken = originalNode.getTokenForWitness(s)
+                if (nWitnessToken == null) {
+                    // it's an endtoken, so not mergeable
+                    parentXPathsMatch = false
+                }
+                val mParentXPath = (mWitnessToken as MarkedUpToken).parentXPath
+                val nParentXPath = (nWitnessToken as MarkedUpToken).parentXPath
+                parentXPathsMatch = parentXPathsMatch && mParentXPath == nParentXPath
+            }
+            return parentXPathsMatch
+        }
+        return false
     }
-  }
 
-  private static TextNode copyNode(TextNode originalNode, CollationGraph mergedGraph) {
-    Token[] tokens =
-        originalNode.getSigils().stream()
-            .map(originalNode::getTokenForWitness)
-            .map(CollationGraphNodeJoiner::cloneToken)
-            .collect(toList())
-            .toArray(new Token[]{});
-    TextNode newNode = mergedGraph.addTextNodeWithTokens(tokens);
-    originalNode.getSigils().forEach(s -> newNode.addBranchPath(s, originalNode.getBranchPath(s)));
-    return newNode;
-  }
-
-  private static Token cloneToken(Token original) {
-    if (original instanceof MarkedUpToken) {
-      return ((MarkedUpToken) original).clone();
+    private fun mergeNodeTokens(lastNode: TextNode, originalNode: TextNode) {
+        originalNode.sigils.forEach { s: String -> lastNode.addBranchPath(s, originalNode.getBranchPath(s)) }
+        for (s in lastNode.sigils) {
+            val tokenForWitness = lastNode.getTokenForWitness(s) as MarkedUpToken
+            val tokenToMerge = originalNode.getTokenForWitness(s) as MarkedUpToken
+            tokenForWitness
+                    .setContent(tokenForWitness.content + tokenToMerge.content)
+                    .normalizedContent = tokenForWitness.normalizedContent + tokenToMerge.normalizedContent
+        }
     }
-    throw new RuntimeException("Can't clone token of type " + original.getClass());
-  }
 
-  private static void copyIncomingEdges(
-      CollationGraph originalGraph,
-      Map<TextNode, TextNode> originalToMerged,
-      CollationGraph mergedGraph) {
-    Set<Node> linkedNodes = new HashSet<>();
-    originalGraph
-        .traverseTextNodes()
-        .forEach(
-            node -> {
-              Node mergedNode = originalToMerged.get(node);
-              if (!linkedNodes.contains(mergedNode)) {
-                originalGraph
-                    .getIncomingTextEdgeStream(node)
-                    .forEach(
-                        e -> {
-                          Node oSource = originalGraph.getSource(e);
-                          Node mSource = originalToMerged.get(oSource);
-                          Preconditions.checkNotNull(mSource);
-                          Node oTarget = originalGraph.getTarget(e);
-                          Node mTarget = originalToMerged.get(oTarget);
-                          Preconditions.checkNotNull(mTarget);
-                          mergedGraph.addDirectedEdge(mSource, mTarget, e.getSigils());
-                        });
-                linkedNodes.add(mergedNode);
-              }
-            });
-  }
+    private fun copyNode(originalNode: TextNode, mergedGraph: CollationGraph): TextNode {
+        val tokens: Array<Token> = originalNode.sigils
+                .map { originalNode.getTokenForWitness(it) }
+                .map { cloneToken(it) }
+                .toTypedArray()
+        val newNode = mergedGraph.addTextNodeWithTokens(*tokens)
+        originalNode.sigils.forEach { s: String -> newNode.addBranchPath(s, originalNode.getBranchPath(s)) }
+        return newNode
+    }
 
-  private static void copyMarkupHyperEdges(
-      CollationGraph originalGraph,
-      Map<TextNode, TextNode> originalToMerged,
-      CollationGraph mergedGraph) {
-    originalGraph
-        .getMarkupStream()
-        .forEach(
-            m -> {
-              MarkupNode mergedMarkupNode = mergedGraph.getMarkupNode(m);
-              originalGraph
-                  .getTextNodeStreamForMarkup(m)
-                  .map(originalToMerged::get)
-                  .distinct()
-                  .forEach(
-                      mergedTextNode ->
-                          mergedGraph.linkMarkupToText(mergedMarkupNode, mergedTextNode));
-            });
-  }
+    private fun cloneToken(original: Token): Token {
+        if (original is MarkedUpToken) {
+            return original.clone()
+        }
+        throw RuntimeException("Can't clone token of type " + original.javaClass)
+    }
+
+    private fun copyIncomingEdges(
+            originalGraph: CollationGraph,
+            originalToMerged: Map<TextNode, TextNode>,
+            mergedGraph: CollationGraph) {
+        val linkedNodes: MutableSet<Node?> = HashSet()
+        originalGraph
+                .traverseTextNodes()
+                .forEach { node: TextNode ->
+                    val mergedNode: Node? = originalToMerged[node]
+                    if (!linkedNodes.contains(mergedNode)) {
+                        originalGraph
+                                .getIncomingTextEdgeStream(node)
+                                .forEach { e: TextEdge ->
+                                    val oSource = originalGraph.getSource(e)
+                                    val mSource: Node? = originalToMerged[oSource]
+                                    Preconditions.checkNotNull(mSource)
+                                    val oTarget: Node = originalGraph.getTarget(e)
+                                    val mTarget: Node? = originalToMerged[oTarget]
+                                    Preconditions.checkNotNull(mTarget)
+                                    mergedGraph.addDirectedEdge(mSource, mTarget, e.sigils)
+                                }
+                        linkedNodes.add(mergedNode)
+                    }
+                }
+    }
+
+    private fun copyMarkupHyperEdges(
+            originalGraph: CollationGraph,
+            originalToMerged: Map<TextNode, TextNode>,
+            mergedGraph: CollationGraph) =
+            originalGraph
+                    .markupStream
+                    .forEach { m: Markup ->
+                        val mergedMarkupNode = mergedGraph.getMarkupNode(m)
+                        originalGraph
+                                .getTextNodeStreamForMarkup(m)
+                                .map { key: TextNode -> originalToMerged[key] }
+                                .distinct()
+                                .forEach { mergedTextNode -> mergedGraph.linkMarkupToText(mergedMarkupNode, mergedTextNode) }
+                    }
 }
