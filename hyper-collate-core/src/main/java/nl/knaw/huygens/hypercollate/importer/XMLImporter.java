@@ -9,9 +9,9 @@ package nl.knaw.huygens.hypercollate.importer;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,18 +31,15 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Iterators.toArray;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.joining;
-import static nl.knaw.huygens.hypercollate.tools.StreamUtil.stream;
 
 public class XMLImporter {
 
@@ -146,8 +143,7 @@ public class XMLImporter {
     }
   }
 
-  private void handleStartDocument(XMLEvent event, Context context) {
-  }
+  private void handleStartDocument(XMLEvent event, Context context) {}
 
   private void handleEndDocument(XMLEvent event, Context context) {
     context.closeDocument();
@@ -214,8 +210,7 @@ public class XMLImporter {
     throw new RuntimeException("unexpected event: Space");
   }
 
-  private void handleComment(XMLEvent event, Context context) {
-  }
+  private void handleComment(XMLEvent event, Context context) {}
 
   private void handleProcessingInstruction(XMLEvent event, Context context) {
     throw new RuntimeException("unexpected event: ProcessingInstruction");
@@ -443,7 +438,15 @@ public class XMLImporter {
 
     private String buildParentXPath() {
       return "/"
-          + stream(openMarkup.descendingIterator()).map(Markup::getTagName).collect(joining("/"));
+          + streamIterator(openMarkup.descendingIterator())
+              .map(Markup::getTagName)
+              .collect(joining("/"));
+    }
+
+    private Stream<Markup> streamIterator(Iterator<Markup> iterator) {
+      Spliterator<Markup> spliterator =
+          Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED);
+      return StreamSupport.stream(spliterator, false);
     }
   }
 }
