@@ -26,7 +26,6 @@ import nl.knaw.huygens.hypercollate.model.*
 import nl.knaw.huygens.hypercollate.tools.TokenMerger
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import java.util.stream.Collectors
 
 class VariantWitnessGraphTraversalTest : HyperCollateTest() {
     @Test
@@ -81,7 +80,7 @@ class VariantWitnessGraphTraversalTest : HyperCollateTest() {
     }
 
     private fun markupTags(witnessGraph: VariantWitnessGraph, tokenVertex: TokenVertex): List<String> =
-            witnessGraph.getMarkupListForTokenVertex(tokenVertex).stream()
-                    .map { obj: Markup -> obj.tagName }
-                    .collect(Collectors.toList())
+            witnessGraph.getMarkupListForTokenVertex(tokenVertex)
+                    .map { it.tagName }
+
 }

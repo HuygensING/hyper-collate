@@ -23,6 +23,7 @@ package nl.knaw.huygens.hypercollate.collator
 import com.google.common.base.Preconditions
 import nl.knaw.huygens.hypercollate.model.TextNode
 import java.util.*
+import kotlin.math.min
 
 class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val potentialMatches: List<CollatedMatch>) {
 
@@ -102,7 +103,7 @@ class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val poten
 
     companion object {
         fun branchPathsOverlap(matchBranchPath: List<Int>, nodeBranchPath: List<Int>): Boolean {
-            val minSize = Math.min(matchBranchPath.size, nodeBranchPath.size)
+            val minSize = min(matchBranchPath.size, nodeBranchPath.size)
             for (i in 0 until minSize) {
                 if (matchBranchPath[i] != nodeBranchPath[i]) {
                     return false

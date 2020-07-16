@@ -48,7 +48,7 @@ public class ServerConfiguration extends Configuration implements HyperCollateCo
   private File collationsDir;
 
   @JsonProperty("swagger")
-  public SwaggerBundleConfiguration swaggerBundleConfiguration = new SwaggerBundleConfiguration();
+  public final SwaggerBundleConfiguration swaggerBundleConfiguration = new SwaggerBundleConfiguration();
 
   public ServerConfiguration() {
     super();

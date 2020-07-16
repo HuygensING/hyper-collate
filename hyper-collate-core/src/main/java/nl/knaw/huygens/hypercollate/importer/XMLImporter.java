@@ -242,7 +242,7 @@ public class XMLImporter {
     private final Deque<Boolean> ignoreRdgStack = new LinkedList<>();
     private final Deque<Boolean> afterAppStack = new LinkedList<>();
     private final Deque<List<TokenVertex>> unconnectedRdgVerticesStack = new LinkedList<>();
-    private AtomicInteger rdgCounter = new AtomicInteger(1);
+    private final AtomicInteger rdgCounter = new AtomicInteger(1);
 
     Context(VariantWitnessGraph graph, Function<String, String> normalizer, SimpleWitness witness) {
       this.graph = graph;

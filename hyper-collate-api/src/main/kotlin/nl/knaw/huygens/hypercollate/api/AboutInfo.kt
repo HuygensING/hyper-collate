@@ -23,21 +23,21 @@ package nl.knaw.huygens.hypercollate.api
 import java.net.URI
 
 class AboutInfo {
-    var appName: String? = null
+    private var appName: String? = null
         private set
-    var startedAt: String? = null
+    private var startedAt: String? = null
         private set
     var version: String? = null
         private set
-    var buildDate: String? = null
+    private var buildDate: String? = null
         private set
-    var commitId: String? = null
+    private var commitId: String? = null
         private set
-    var scmBranch: String? = null
+    private var scmBranch: String? = null
         private set
-    var projectDirURI: URI? = null
+    private var projectDirURI: URI? = null
         private set
-    var isDotRendering = false
+    private var isDotRendering = false
         private set
 
     fun setAppName(appName: String?): AboutInfo {

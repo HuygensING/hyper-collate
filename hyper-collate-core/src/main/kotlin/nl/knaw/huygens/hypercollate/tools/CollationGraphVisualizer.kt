@@ -27,8 +27,7 @@ import nl.knaw.huygens.hypercollate.model.CollationGraph
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken
 import nl.knaw.huygens.hypercollate.model.TextNode
 import java.util.*
-import java.util.function.Consumer
-import java.util.stream.Collectors
+import kotlin.math.max
 
 object CollationGraphVisualizer {
     private const val NBSP = "\u00A0"
@@ -38,7 +37,7 @@ object CollationGraphVisualizer {
         val sigils = graph.sigils
         val whitespaceCharacter = if (emphasizeWhitespace) "_" else " "
         val rowMap: MutableMap<String, MutableList<Cell>> = HashMap()
-        sigils.forEach(Consumer { sigil: String -> rowMap[sigil] = ArrayList() })
+        sigils.forEach { sigil: String -> rowMap[sigil] = ArrayList() }
         val ranking = CollationGraphRanking.of(graph) // TODO: make faster
         val maxLayers: MutableMap<String, Int> = HashMap()
         sigils.forEach { sigil: String -> maxLayers[sigil] = 1 }
@@ -50,9 +49,7 @@ object CollationGraphVisualizer {
             val nodeTokensPerWitness: MutableMap<String, MutableList<MarkedUpToken>> = HashMap()
             sigils.forEach { sigil: String ->
                 nodeTokensPerWitness[sigil] = ArrayList()
-                nodeSet.stream()
-                        .filter { obj: TextNode? -> TextNode::class.java.isInstance(obj) }
-                        .map { obj: TextNode? -> TextNode::class.java.cast(obj) }
+                nodeSet
                         .forEach { node: TextNode ->
                             val token = node.getTokenForWitness(sigil)
                             if (token != null) {
@@ -63,7 +60,7 @@ object CollationGraphVisualizer {
             }
             sigils.forEach { sigil: String ->
                 val tokens: List<MarkedUpToken>? = nodeTokensPerWitness[sigil]
-                maxLayers[sigil] = Math.max(maxLayers[sigil]!!, tokens!!.size)
+                maxLayers[sigil] = max(maxLayers[sigil]!!, tokens!!.size)
                 val cell = newCell(tokens, whitespaceCharacter)
                 rowMap[sigil]!!.add(cell)
             }
@@ -86,27 +83,25 @@ object CollationGraphVisualizer {
         if (tokens!!.isEmpty()) {
             setCellLayer(cell, " ")
         } else {
-            tokens.forEach(
-                    Consumer { token: MarkedUpToken ->
-                        var content = token.content.replace("\n".toRegex(), " ").replace(" +".toRegex(), whitespaceCharacter)
-                        val parentXPath = token.parentXPath
-                        if (parentXPath.endsWith("/del/add")) {
-                            content = "[za] $content"
-                        } else if (parentXPath.endsWith("/add")) {
-                            content = "[z] $content"
-                        } else if (parentXPath.endsWith("/del")) {
-                            content = "[a] $content"
-                        }
-                        if (parentXPath.contains("/rdg")) {
-                            val rdg = token.rdg
-                            content = "<$rdg> $content".replace("\\>\\s+\\[".toRegex(), ">[")
-                        }
-                        if (content.isEmpty()) {
-                            content = "<" + parentXPath.replace(".*/".toRegex(), "") + "/>"
-                        }
-                        //        String layerName = determineLayerName(parentXPath);
-                        setCellLayer(cell, content)
-                    })
+            tokens.forEach { token: MarkedUpToken ->
+                var content = token.content.replace("\n".toRegex(), " ").replace(" +".toRegex(), whitespaceCharacter)
+                val parentXPath = token.parentXPath
+                when {
+                    parentXPath.endsWith("/del/add") -> content = "[za] $content"
+                    parentXPath.endsWith("/add") -> content = "[z] $content"
+                    parentXPath.endsWith("/del") -> content = "[a] $content"
+                    //        String layerName = determineLayerName(parentXPath);
+                }
+                if (parentXPath.contains("/rdg")) {
+                    val rdg = token.rdg
+                    content = "<$rdg> $content".replace(">\\s+\\[".toRegex(), ">[")
+                }
+                if (content.isEmpty()) {
+                    content = "<" + parentXPath.replace(".*/".toRegex(), "") + "/>"
+                }
+                //        String layerName = determineLayerName(parentXPath);
+                setCellLayer(cell, content)
+            }
         }
         return cell
     }
@@ -123,7 +118,7 @@ object CollationGraphVisualizer {
     }
 
     private fun setCellLayer(cell: Cell, content: String) {
-        cell.layerContent.add(content)
+        cell.layerContent += content
         //    String previousContent = cell.getLayerContent().put(layerName, content);
         //    Preconditions.checkState(previousContent == null, "layerName " + layerName + " used
         // twice!");
@@ -135,15 +130,15 @@ object CollationGraphVisualizer {
         val cwc = CWC_LongestLine()
         table.renderer.cwc = cwc
         table.addRule()
-        sigils.forEach(
-                Consumer { sigil: String ->
-                    val row = rowMap[sigil]!!.stream()
-                            .map { cell: Cell -> toASCII(cell, cellHeights[sigil]!!) }
-                            .collect(Collectors.toList())
-                    row.add(0, "[$sigil]")
-                    table.addRow(row)
-                    table.addRule()
-                })
+        sigils.forEach { sigil: String ->
+            val row = (rowMap[sigil] ?: error("rowMap[$sigil] == null"))
+                    .map { cell: Cell -> toASCII(cell, cellHeights[sigil] ?: error("cellHeights[$sigil] == null")) }
+                    .toMutableList()
+
+            row.add(0, "[$sigil]")
+            table.addRow(row)
+            table.addRule()
+        }
         return table
     }
 
@@ -155,9 +150,7 @@ object CollationGraphVisualizer {
             contentBuilder.append(
                     "$NBSP<br>") // regular space or just <br> leads to ASCIITable error when rendering
         }
-        val layerContent: List<String?> = ArrayList(cell.layerContent)
-        Collections.sort<String>(layerContent)
-        Collections.reverse(layerContent)
+        val layerContent: List<String> = cell.layerContent.sorted().reversed()
         val joiner = StringJoiner("<br>")
         for (s in layerContent) {
             joiner.add(
@@ -203,7 +196,7 @@ object CollationGraphVisualizer {
             layerContent.add(content)
         }
 
-        internal constructor() {}
+        internal constructor()
 
     }
 }

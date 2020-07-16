@@ -35,7 +35,7 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
     private val profiler = Profiler()
     private val quantumCollatedMatchFingerprints: MutableSet<String> = mutableSetOf()
 
-    class Profiler() {
+    class Profiler {
         var isGoalCalled = 0
         val isGoalStopWatch: Stopwatch = Stopwatch.createUnstarted()
 

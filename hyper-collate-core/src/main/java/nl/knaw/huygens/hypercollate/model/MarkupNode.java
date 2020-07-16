@@ -21,7 +21,7 @@ package nl.knaw.huygens.hypercollate.model;
  */
 public class MarkupNode implements Node {
   public static final String LABEL = "Markup";
-  private String sigil;
+  private final String sigil;
   private final Markup markup;
 
   MarkupNode(String sigil, Markup markup) {

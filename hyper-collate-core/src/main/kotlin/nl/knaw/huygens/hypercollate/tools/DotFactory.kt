@@ -23,8 +23,6 @@ package nl.knaw.huygens.hypercollate.tools
 import nl.knaw.huygens.hypercollate.model.*
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.function.Consumer
-import java.util.stream.Collectors
 
 class DotFactory(emphasizeWhitespace: Boolean) {
     private val whitespaceCharacter: String = if (emphasizeWhitespace) "&#9251;" else "&nbsp;"
@@ -51,13 +49,12 @@ class DotFactory(emphasizeWhitespace: Boolean) {
             markupToClose.addAll(opened)
             markupToClose.removeAll(markupListForTokenVertex)
             markupToClose.sortWith(Comparator.comparingInt { obj: Markup -> obj.depth })
-            markupToClose.forEach(Consumer { m: Markup -> closeMarkup(m, dotBuilder) })
+            markupToClose.forEach { m: Markup -> closeMarkup(m, dotBuilder) }
             val markupToOpen: MutableList<Markup> = ArrayList()
             markupToOpen.addAll(markupListForTokenVertex)
             markupToOpen.removeAll(opened)
             markupToOpen.sortWith(Comparator.comparingInt { obj: Markup -> obj.depth })
-            markupToOpen.forEach(
-                    Consumer { m: Markup -> openMarkup(m, dotBuilder, clusterCounter.getAndIncrement(), colorContext) })
+            markupToOpen.forEach { m: Markup -> openMarkup(m, dotBuilder, clusterCounter.getAndIncrement(), colorContext) }
             openMarkup.removeAll(markupToClose)
             openMarkup.addAll(markupToOpen)
             val tokenVariable = vertexVariable(tokenVertex)
@@ -77,7 +74,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
                         edges.add("$tokenVariable->$vertexVariable")
                     }
         }
-        edges.stream().sorted().forEach { e: String? -> dotBuilder.append(e).append("\n") }
+        edges.sorted().forEach { dotBuilder.append(it).append("\n") }
         dotBuilder.append("}")
         return dotBuilder.toString()
     }
@@ -138,7 +135,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
                 verticesDone.add(tokenVertex)
             }
         }
-        edges.stream().sorted().forEach { e: String? -> dotBuilder.append(e).append("\n") }
+        edges.sorted().forEach { dotBuilder.append(it).append("\n") }
         dotBuilder.append("}")
         return dotBuilder.toString()
     }
@@ -185,14 +182,14 @@ class DotFactory(emphasizeWhitespace: Boolean) {
                     .forEach { e: TextEdge ->
                         val source = collation.getSource(e)
                         val target: Node = collation.getTarget(e)
-                        val edgeLabel = e.sigils.stream().sorted().collect(Collectors.joining(","))
+                        val edgeLabel = e.sigils.sorted().joinToString(",")
                         val line = String.format(
                                 "%s->%s[label=\"%s\"]\n",
                                 nodeIdentifiers[source], nodeIdentifiers[target], edgeLabel)
                         edgeLines.add(line)
                     }
         }
-        edgeLines.forEach(Consumer { str: String? -> dotBuilder.append(str) })
+        edgeLines.forEach { str: String? -> dotBuilder.append(str) }
     }
 
     private fun appendNodeLine(
@@ -209,8 +206,8 @@ class DotFactory(emphasizeWhitespace: Boolean) {
         val label = StringBuilder()
         val contentLabel: MutableMap<String, String> = HashMap()
         val markupLabel: MutableMap<String, String> = HashMap()
-        val sortedSigils = node.sigils.stream().sorted().collect(Collectors.toList())
-        val joinedSigils = sortedSigils.stream().collect(Collectors.joining(","))
+        val sortedSigils = node.sigils.sorted()
+        val joinedSigils = sortedSigils.joinToString(",")
         prepare(node, contentLabel, markupLabel, sortedSigils)
         appendContent(label, contentLabel, sortedSigils, joinedSigils)
         if (!hideMarkup) {
@@ -251,8 +248,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
                     .append(markupLabelSet.iterator().next())
                     .append("</i>")
         } else {
-            sortedSigils.forEach(
-                    Consumer { s: String? -> label.append(s).append(": <i>").append(markupLabel[s]).append("</i><br/>") })
+            sortedSigils.forEach { s: String? -> label.append(s).append(": <i>").append(markupLabel[s]).append("</i><br/>") }
         }
     }
 
@@ -265,7 +261,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
         if (contentLabelSet.size == 1) {
             label.append(joinedSigils).append(": ").append(contentLabelSet.iterator().next())
         } else {
-            val witnessLines = sortedSigils.stream().map { s: String -> s + ": " + contentLabel[s] }.collect(Collectors.joining("<br/>"))
+            val witnessLines = sortedSigils.joinToString("<br/>") { "$it: ${contentLabel[it]}" }
             label.append(witnessLines)
         }
     }

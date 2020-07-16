@@ -53,8 +53,8 @@ public class CollationInfo {
   private Instant modified;
   private String uriBase;
   private Long collationDuration;
-  private Map<String, String> witnesses = new HashMap<>();
-  private Map<String, VariantWitnessGraph> witnessGraphs = new HashMap<>();
+  private final Map<String, String> witnesses = new HashMap<>();
+  private final Map<String, VariantWitnessGraph> witnessGraphs = new HashMap<>();
   State collationState = State.needs_witness;
   private boolean join = true;
 

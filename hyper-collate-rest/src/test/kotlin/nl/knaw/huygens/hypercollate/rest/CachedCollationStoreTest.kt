@@ -32,7 +32,7 @@ import java.io.IOException
 import java.nio.file.Files
 
 class CachedCollationStoreTest {
-    var config = TestConfiguration()
+    private var config = TestConfiguration()
 
     class TestConfiguration : HyperCollateConfiguration {
         override fun getBaseURI(): String {

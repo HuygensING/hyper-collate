@@ -34,9 +34,9 @@ import static java.util.stream.Collectors.toList;
 public class CollationGraph extends Hypergraph<Node, Edge> {
   private static final Logger LOG = LoggerFactory.getLogger(CollationGraph.class);
   private final List<String> sigils;
-  private TextDelimiterNode textStartNode = new TextDelimiterNode();
-  private TextDelimiterNode textEndNode = new TextDelimiterNode();
-  Map<Markup, MarkupNode> markupNodeIndex = new HashMap<>();
+  private final TextDelimiterNode textStartNode = new TextDelimiterNode();
+  private final TextDelimiterNode textEndNode = new TextDelimiterNode();
+  final Map<Markup, MarkupNode> markupNodeIndex = new HashMap<>();
 
   public CollationGraph() {
     this(new ArrayList<>());

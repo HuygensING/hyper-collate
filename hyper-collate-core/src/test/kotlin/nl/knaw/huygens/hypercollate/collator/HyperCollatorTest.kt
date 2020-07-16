@@ -1188,8 +1188,7 @@ class HyperCollatorTest : HyperCollateTest() {
                     .map(Match::toString)
 
     private fun visualize(list: List<Tuple<Int>>): String =
-            list.map { format("<{0},{1}>", it.left, it.right) }
-                    .joinToString("")
+            list.joinToString("") { format("<{0},{1}>", it.left, it.right) }
 
     private fun testHyperCollation(witness1: VariantWitnessGraph, witness2: VariantWitnessGraph, expected: String): CollationGraph {
         //    Map<String, Long> collationDuration = new HashMap<>();

@@ -25,7 +25,6 @@ import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex
 import nl.knaw.huygens.hypercollate.model.TextNode
 import nl.knaw.huygens.hypercollate.model.TokenVertex
 import java.util.*
-import java.util.stream.Collectors
 
 class CollatedMatch(val collatedNode: TextNode, val witnessVertex: TokenVertex) {
     var nodeRank = 0
@@ -58,7 +57,7 @@ class CollatedMatch(val collatedNode: TextNode, val witnessVertex: TokenVertex) 
 
     override fun toString(): String {
         val sigils = if (collatedNode is TextNode) collatedNode.sigils else sigils
-        val sigilString = sigils.stream().sorted().collect(Collectors.joining(","))
+        val sigilString = sigils.sorted().joinToString(",")
         val stringBuilder = StringBuilder("<[").append(sigilString).append("]").append(nodeRank)
         val vString = StringBuilder()
         if (witnessVertex is SimpleTokenVertex) {
