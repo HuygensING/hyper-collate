@@ -1,15 +1,5 @@
 package nl.knaw.huygens.hypercollate.tools
 
-import de.vandermeer.asciitable.AsciiTable
-import de.vandermeer.asciitable.CWC_LongestLine
-import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment
-import nl.knaw.huygens.hypercollate.model.CollationGraph
-import nl.knaw.huygens.hypercollate.model.MarkedUpToken
-import nl.knaw.huygens.hypercollate.model.TextNode
-import java.util.*
-import java.util.function.Consumer
-import java.util.stream.Collectors
-
 /*-
  * #%L
  * hyper-collate-core
@@ -28,8 +18,21 @@ import java.util.stream.Collectors
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */   object CollationGraphVisualizer {
+ */
+
+import de.vandermeer.asciitable.AsciiTable
+import de.vandermeer.asciitable.CWC_LongestLine
+import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment
+import nl.knaw.huygens.hypercollate.model.CollationGraph
+import nl.knaw.huygens.hypercollate.model.MarkedUpToken
+import nl.knaw.huygens.hypercollate.model.TextNode
+import java.util.*
+import java.util.function.Consumer
+import java.util.stream.Collectors
+
+object CollationGraphVisualizer {
     private const val NBSP = "\u00A0"
+
     @JvmStatic
     fun toTableASCII(graph: CollationGraph, emphasizeWhitespace: Boolean): String {
         val sigils = graph.sigils
@@ -45,27 +48,25 @@ import java.util.stream.Collectors
                 continue
             }
             val nodeTokensPerWitness: MutableMap<String, MutableList<MarkedUpToken>> = HashMap()
-            sigils.forEach(
-                    Consumer { sigil: String ->
-                        nodeTokensPerWitness[sigil] = ArrayList()
-                        nodeSet.stream()
-                                .filter { obj: TextNode? -> TextNode::class.java.isInstance(obj) }
-                                .map { obj: TextNode? -> TextNode::class.java.cast(obj) }
-                                .forEach { node: TextNode ->
-                                    val token = node.getTokenForWitness(sigil)
-                                    if (token != null) {
-                                        val mToken = token as MarkedUpToken
-                                        nodeTokensPerWitness[sigil]!!.add(mToken)
-                                    }
-                                }
-                    })
-            sigils.forEach(
-                    Consumer { sigil: String ->
-                        val tokens: List<MarkedUpToken>? = nodeTokensPerWitness[sigil]
-                        maxLayers[sigil] = Math.max(maxLayers[sigil]!!, tokens!!.size)
-                        val cell = newCell(tokens, whitespaceCharacter)
-                        rowMap[sigil]!!.add(cell)
-                    })
+            sigils.forEach { sigil: String ->
+                nodeTokensPerWitness[sigil] = ArrayList()
+                nodeSet.stream()
+                        .filter { obj: TextNode? -> TextNode::class.java.isInstance(obj) }
+                        .map { obj: TextNode? -> TextNode::class.java.cast(obj) }
+                        .forEach { node: TextNode ->
+                            val token = node.getTokenForWitness(sigil)
+                            if (token != null) {
+                                val mToken = token as MarkedUpToken
+                                nodeTokensPerWitness[sigil]!!.add(mToken)
+                            }
+                        }
+            }
+            sigils.forEach { sigil: String ->
+                val tokens: List<MarkedUpToken>? = nodeTokensPerWitness[sigil]
+                maxLayers[sigil] = Math.max(maxLayers[sigil]!!, tokens!!.size)
+                val cell = newCell(tokens, whitespaceCharacter)
+                rowMap[sigil]!!.add(cell)
+            }
         }
         return asciiTable(graph.sigils, rowMap, maxLayers).render()
     }
@@ -175,7 +176,7 @@ import java.util.stream.Collectors
     ////    }
     //    return content;
     //  }
-    fun toTableHTML(graph: CollationGraph?): String {
+    fun toTableHTML(graph: CollationGraph): String {
         // TODO
         return StringBuilder()
                 .append("<table>")
@@ -189,14 +190,16 @@ import java.util.stream.Collectors
 
     @JvmStatic
     fun toDot(
-            graph: CollationGraph?, emphasizeWhitespace: Boolean, hideMarkup: Boolean): String {
-        return DotFactory(emphasizeWhitespace).fromCollationGraph(graph, hideMarkup)
-    }
+            graph: CollationGraph,
+            emphasizeWhitespace: Boolean,
+            hideMarkup: Boolean
+    ): String =
+            DotFactory(emphasizeWhitespace).fromCollationGraph(graph, hideMarkup)
 
     class Cell {
-        val layerContent: MutableList<String?> = ArrayList()
+        val layerContent: MutableList<String> = ArrayList()
 
-        constructor(content: String?) {
+        constructor(content: String) {
             layerContent.add(content)
         }
 

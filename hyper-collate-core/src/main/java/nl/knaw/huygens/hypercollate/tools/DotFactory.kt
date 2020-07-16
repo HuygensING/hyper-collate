@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.tools;
+package nl.knaw.huygens.hypercollate.tools
 
 /*-
  * #%L
@@ -20,290 +20,260 @@ package nl.knaw.huygens.hypercollate.tools;
  * #L%
  */
 
-import eu.interedition.collatex.Token;
-import nl.knaw.huygens.hypercollate.model.*;
+import nl.knaw.huygens.hypercollate.model.*
+import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.function.Consumer
+import java.util.stream.Collectors
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+class DotFactory(emphasizeWhitespace: Boolean) {
+    private val whitespaceCharacter: String = if (emphasizeWhitespace) "&#9251;" else "&nbsp;"
 
-import static java.util.Comparator.comparingInt;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-
-public class DotFactory {
-
-  private final String whitespaceCharacter;
-
-  public DotFactory(boolean emphasizeWhitespace) {
-    this.whitespaceCharacter = emphasizeWhitespace ? "&#9251;" : "&nbsp;";
-  }
-
-  /**
-   * Generates a .dot format string for visualizing a variant witness graph.
-   *
-   * @param graph The variant witness graph for which we are generating a dot file.
-   * @return A string containing the contents of a .dot representation of the variant witness graph.
-   */
-  public String fromVariantWitnessGraphColored(VariantWitnessGraph graph) {
-    StringBuilder dotBuilder =
-        new StringBuilder("digraph VariantWitnessGraph{\n")
-            .append("graph [rankdir=LR]\n")
-            .append("node [style=\"filled\";fillcolor=\"white\"]\n");
-
-    List<String> edges = new ArrayList<>();
-    Set<Markup> openMarkup = new HashSet<>();
-    AtomicInteger clusterCounter = new AtomicInteger();
-    ColorContext colorContext = new ColorContext();
-    for (TokenVertex tokenVertex : graph.vertices()) {
-      List<Markup> markupListForTokenVertex = graph.getMarkupListForTokenVertex(tokenVertex);
-      Set<Markup> opened = new HashSet<>();
-      opened.addAll(openMarkup);
-
-      List<Markup> markupToClose = new ArrayList<>();
-      markupToClose.addAll(opened);
-      markupToClose.removeAll(markupListForTokenVertex);
-      markupToClose.sort(comparingInt(Markup::getDepth));
-      markupToClose.forEach(m -> closeMarkup(m, dotBuilder));
-
-      List<Markup> markupToOpen = new ArrayList<>();
-      markupToOpen.addAll(markupListForTokenVertex);
-      markupToOpen.removeAll(opened);
-      markupToOpen.sort(comparingInt(Markup::getDepth));
-      markupToOpen.forEach(
-          m -> openMarkup(m, dotBuilder, clusterCounter.getAndIncrement(), colorContext));
-
-      openMarkup.removeAll(markupToClose);
-      openMarkup.addAll(markupToOpen);
-
-      String tokenVariable = vertexVariable(tokenVertex);
-      if (tokenVertex instanceof SimpleTokenVertex) {
-        SimpleTokenVertex stv = (SimpleTokenVertex) tokenVertex;
-        dotBuilder
-            .append(tokenVariable)
-            .append(" [label=<")
-            .append(asLabel(stv.getContent(), whitespaceCharacter))
-            .append(">]\n");
-      } else {
-        dotBuilder.append(tokenVariable).append(" [label=\"\";shape=doublecircle,rank=middle]\n");
-      }
-      tokenVertex
-          .getOutgoingTokenVertexStream()
-          .forEach(
-              ot -> {
-                String vertexVariable = vertexVariable(ot);
-                edges.add(tokenVariable + "->" + vertexVariable);
-              });
-    }
-    edges.stream().sorted().forEach(e -> dotBuilder.append(e).append("\n"));
-    dotBuilder.append("}");
-    return dotBuilder.toString();
-  }
-
-  private void openMarkup(
-      Markup m, StringBuilder dotBuilder, int clusterNum, ColorContext colorContext) {
-    String color = colorContext.colorFor(m.getTagName());
-    dotBuilder
-        .append("subgraph cluster_")
-        .append(clusterNum)
-        .append(" {\n")
-        .append("label=<<i><b>")
-        .append(m.getTagName())
-        .append("</b></i>>\n")
-        .append("graph[style=\"rounded,filled\";fillcolor=\"")
-        .append(color)
-        .append("\"]\n");
-  }
-
-  private void closeMarkup(Markup m, StringBuilder dotBuilder) {
-    dotBuilder.append("}\n");
-  }
-
-  public String fromVariantWitnessGraphSimple(VariantWitnessGraph graph) {
-    StringBuilder dotBuilder =
-        new StringBuilder("digraph VariantWitnessGraph{\ngraph [rankdir=LR]\nlabelloc=b\n");
-
-    List<String> edges = new ArrayList<>();
-    Deque<TokenVertex> nextTokens = new LinkedList<>();
-    nextTokens.add(graph.getStartTokenVertex());
-    Set<TokenVertex> verticesDone = new HashSet<>();
-    while (!nextTokens.isEmpty()) {
-      TokenVertex tokenVertex = nextTokens.pop();
-      if (!verticesDone.contains(tokenVertex)) {
-        String tokenVariable = vertexVariable(tokenVertex);
-        if (tokenVertex instanceof SimpleTokenVertex) {
-          SimpleTokenVertex stv = (SimpleTokenVertex) tokenVertex;
-          String markup = graph.getSigil() + ": " + stv.getParentXPath();
-          dotBuilder
-              .append(tokenVariable)
-              .append(" [label=<")
-              .append(asLabel(stv.getContent(), whitespaceCharacter))
-              .append("<br/><i>")
-              .append(markup)
-              .append("</i>")
-              .append(">]\n");
-        } else {
-          dotBuilder.append(tokenVariable).append(" [label=\"\";shape=doublecircle,rank=middle]\n");
+    /**
+     * Generates a .dot format string for visualizing a variant witness graph.
+     *
+     * @param graph The variant witness graph for which we are generating a dot file.
+     * @return A string containing the contents of a .dot representation of the variant witness graph.
+     */
+    fun fromVariantWitnessGraphColored(graph: VariantWitnessGraph): String {
+        val dotBuilder = StringBuilder("digraph VariantWitnessGraph{\n")
+                .append("graph [rankdir=LR]\n")
+                .append("node [style=\"filled\";fillcolor=\"white\"]\n")
+        val edges: MutableList<String> = ArrayList()
+        val openMarkup: MutableSet<Markup> = HashSet()
+        val clusterCounter = AtomicInteger()
+        val colorContext = ColorContext()
+        for (tokenVertex in graph.vertices()) {
+            val markupListForTokenVertex = graph.getMarkupListForTokenVertex(tokenVertex)
+            val opened: MutableSet<Markup> = HashSet()
+            opened.addAll(openMarkup)
+            val markupToClose: MutableList<Markup> = ArrayList()
+            markupToClose.addAll(opened)
+            markupToClose.removeAll(markupListForTokenVertex)
+            markupToClose.sortWith(Comparator.comparingInt { obj: Markup -> obj.depth })
+            markupToClose.forEach(Consumer { m: Markup -> closeMarkup(m, dotBuilder) })
+            val markupToOpen: MutableList<Markup> = ArrayList()
+            markupToOpen.addAll(markupListForTokenVertex)
+            markupToOpen.removeAll(opened)
+            markupToOpen.sortWith(Comparator.comparingInt { obj: Markup -> obj.depth })
+            markupToOpen.forEach(
+                    Consumer { m: Markup -> openMarkup(m, dotBuilder, clusterCounter.getAndIncrement(), colorContext) })
+            openMarkup.removeAll(markupToClose)
+            openMarkup.addAll(markupToOpen)
+            val tokenVariable = vertexVariable(tokenVertex)
+            if (tokenVertex is SimpleTokenVertex) {
+                dotBuilder
+                        .append(tokenVariable)
+                        .append(" [label=<")
+                        .append(asLabel(tokenVertex.content, whitespaceCharacter))
+                        .append(">]\n")
+            } else {
+                dotBuilder.append(tokenVariable).append(" [label=\"\";shape=doublecircle,rank=middle]\n")
+            }
+            tokenVertex
+                    .outgoingTokenVertexStream
+                    .forEach { ot: TokenVertex ->
+                        val vertexVariable = vertexVariable(ot)
+                        edges.add("$tokenVariable->$vertexVariable")
+                    }
         }
-        tokenVertex
-            .getOutgoingTokenVertexStream()
-            .forEach(
-                ot -> {
-                  String vertexVariable = vertexVariable(ot);
-                  edges.add(tokenVariable + "->" + vertexVariable);
-                  nextTokens.add(ot);
-                });
-        verticesDone.add(tokenVertex);
-      }
+        edges.stream().sorted().forEach { e: String? -> dotBuilder.append(e).append("\n") }
+        dotBuilder.append("}")
+        return dotBuilder.toString()
     }
-    edges.stream().sorted().forEach(e -> dotBuilder.append(e).append("\n"));
-    dotBuilder.append("}");
-    return dotBuilder.toString();
-  }
 
-  private String vertexVariable(TokenVertex tokenVertex) {
-    if (tokenVertex instanceof SimpleTokenVertex) {
-      MarkedUpToken token = (MarkedUpToken) tokenVertex.getToken();
-      return token.getWitness().getSigil() + "_" + String.format("%03d", token.getIndexNumber());
+    private fun openMarkup(
+            m: Markup,
+            dotBuilder: StringBuilder,
+            clusterNum: Int,
+            colorContext: ColorContext
+    ) {
+        val color = colorContext.colorFor(m.tagName)
+        dotBuilder
+                .append("subgraph cluster_")
+                .append(clusterNum)
+                .append(" {\n")
+                .append("label=<<i><b>")
+                .append(m.tagName)
+                .append("</b></i>>\n")
+                .append("graph[style=\"rounded,filled\";fillcolor=\"")
+                .append(color)
+                .append("\"]\n")
     }
-    if (tokenVertex instanceof StartTokenVertex) {
-      return "begin";
+
+    private fun closeMarkup(m: Markup, dotBuilder: StringBuilder) {
+        dotBuilder.append("}\n")
     }
-    if (tokenVertex instanceof EndTokenVertex) {
-      return "end";
+
+    fun fromVariantWitnessGraphSimple(graph: VariantWitnessGraph): String {
+        val dotBuilder = StringBuilder("digraph VariantWitnessGraph{\ngraph [rankdir=LR]\nlabelloc=b\n")
+        val edges: MutableList<String> = ArrayList()
+        val nextTokens: Deque<TokenVertex> = LinkedList()
+        nextTokens.add(graph.startTokenVertex)
+        val verticesDone: MutableSet<TokenVertex> = HashSet()
+        while (!nextTokens.isEmpty()) {
+            val tokenVertex = nextTokens.pop()
+            if (!verticesDone.contains(tokenVertex)) {
+                val tokenVariable = vertexVariable(tokenVertex)
+                if (tokenVertex is SimpleTokenVertex) {
+                    val markup = graph.sigil + ": " + tokenVertex.parentXPath
+                    dotBuilder
+                            .append(tokenVariable)
+                            .append(" [label=<")
+                            .append(asLabel(tokenVertex.content, whitespaceCharacter))
+                            .append("<br/><i>")
+                            .append(markup)
+                            .append("</i>")
+                            .append(">]\n")
+                } else {
+                    dotBuilder.append(tokenVariable).append(" [label=\"\";shape=doublecircle,rank=middle]\n")
+                }
+                tokenVertex
+                        .outgoingTokenVertexStream
+                        .forEach { ot: TokenVertex ->
+                            val vertexVariable = vertexVariable(ot)
+                            edges.add("$tokenVariable->$vertexVariable")
+                            nextTokens.add(ot)
+                        }
+                verticesDone.add(tokenVertex)
+            }
+        }
+        edges.stream().sorted().forEach { e: String? -> dotBuilder.append(e).append("\n") }
+        dotBuilder.append("}")
+        return dotBuilder.toString()
     }
-    return null;
-  }
 
-  private final Comparator<TextNode> BY_NODE = Comparator.comparing(TextNode::toString);
-
-  public String fromCollationGraph(CollationGraph collation, final boolean hideMarkup) {
-    StringBuilder dotBuilder = new StringBuilder("digraph CollationGraph{\nlabelloc=b\n");
-    Map<TextNode, String> nodeIdentifiers = new HashMap<>();
-
-    List<TextNode> nodes = collation.traverseTextNodes();
-    nodes.sort(BY_NODE);
-    for (int i = 0; i < nodes.size(); i++) {
-      TextNode node = nodes.get(i);
-      String nodeId = "t" + String.format("%03d", i);
-      nodeIdentifiers.put(node, nodeId);
-      appendNodeLine(dotBuilder, node, nodeId, hideMarkup);
+    private fun vertexVariable(tokenVertex: TokenVertex): String? {
+        if (tokenVertex is SimpleTokenVertex) {
+            val token = tokenVertex.getToken() as MarkedUpToken
+            return token.witness.sigil + "_" + String.format("%03d", token.indexNumber)
+        }
+        if (tokenVertex is StartTokenVertex) {
+            return "begin"
+        }
+        return if (tokenVertex is EndTokenVertex) {
+            "end"
+        } else null
     }
-    appendEdgeLines(dotBuilder, collation, nodeIdentifiers, nodes);
 
-    dotBuilder.append("}");
-    return dotBuilder.toString();
-  }
-
-  private void appendEdgeLines(
-      StringBuilder dotBuilder,
-      CollationGraph collation,
-      Map<TextNode, String> nodeIdentifiers,
-      List<TextNode> nodes) {
-    Set<String> edgeLines = new TreeSet<>();
-    for (TextNode node : nodes) {
-      collation
-          .getIncomingTextEdgeStream(node)
-          .forEach(
-              e -> {
-                Node source = collation.getSource(e);
-                Node target = collation.getTarget(e);
-                String edgeLabel = e.getSigils().stream().sorted().collect(joining(","));
-                String line =
-                    String.format(
-                        "%s->%s[label=\"%s\"]\n",
-                        nodeIdentifiers.get(source), nodeIdentifiers.get(target), edgeLabel);
-                edgeLines.add(line);
-              });
+    private val BY_NODE = Comparator.comparing { obj: TextNode -> obj.toString() }
+    fun fromCollationGraph(collation: CollationGraph, hideMarkup: Boolean): String {
+        val dotBuilder = StringBuilder("digraph CollationGraph{\nlabelloc=b\n")
+        val nodeIdentifiers: MutableMap<TextNode, String> = HashMap()
+        val nodes = collation.traverseTextNodes()
+        nodes.sortWith(BY_NODE)
+        for (i in nodes.indices) {
+            val node = nodes[i]
+            val nodeId = "t" + String.format("%03d", i)
+            nodeIdentifiers[node] = nodeId
+            appendNodeLine(dotBuilder, node, nodeId, hideMarkup)
+        }
+        appendEdgeLines(dotBuilder, collation, nodeIdentifiers, nodes)
+        dotBuilder.append("}")
+        return dotBuilder.toString()
     }
-    edgeLines.forEach(dotBuilder::append);
-  }
 
-  private void appendNodeLine(
-      StringBuilder dotBuilder, TextNode node, String nodeId, final boolean hideMarkup) {
-    String labelString = generateNodeLabel(node, hideMarkup);
-    if (labelString.isEmpty()) {
-      dotBuilder.append(nodeId).append(" [label=\"\";shape=doublecircle,rank=middle]\n");
-
-    } else {
-      dotBuilder.append(nodeId).append(" [label=<").append(labelString).append(">]\n");
+    private fun appendEdgeLines(
+            dotBuilder: StringBuilder,
+            collation: CollationGraph,
+            nodeIdentifiers: Map<TextNode, String>,
+            nodes: List<TextNode>) {
+        val edgeLines: MutableSet<String> = TreeSet()
+        for (node in nodes) {
+            collation
+                    .getIncomingTextEdgeStream(node)
+                    .forEach { e: TextEdge ->
+                        val source = collation.getSource(e)
+                        val target: Node = collation.getTarget(e)
+                        val edgeLabel = e.sigils.stream().sorted().collect(Collectors.joining(","))
+                        val line = String.format(
+                                "%s->%s[label=\"%s\"]\n",
+                                nodeIdentifiers[source], nodeIdentifiers[target], edgeLabel)
+                        edgeLines.add(line)
+                    }
+        }
+        edgeLines.forEach(Consumer { str: String? -> dotBuilder.append(str) })
     }
-  }
 
-  private String generateNodeLabel(TextNode node, final boolean hideMarkup) {
-    StringBuilder label = new StringBuilder();
-    Map<String, String> contentLabel = new HashMap<>();
-    Map<String, String> markupLabel = new HashMap<>();
-    List<String> sortedSigils = node.getSigils().stream().sorted().collect(toList());
-    String joinedSigils = sortedSigils.stream().collect(joining(","));
-
-    prepare(node, contentLabel, markupLabel, sortedSigils);
-
-    appendContent(label, contentLabel, sortedSigils, joinedSigils);
-    if (!hideMarkup) {
-      if (label.length() > 0) {
-        label.append("<br/>");
-      }
-      appendMarkup(label, markupLabel, sortedSigils, joinedSigils);
+    private fun appendNodeLine(
+            dotBuilder: StringBuilder, node: TextNode, nodeId: String, hideMarkup: Boolean) {
+        val labelString = generateNodeLabel(node, hideMarkup)
+        if (labelString.isEmpty()) {
+            dotBuilder.append(nodeId).append(" [label=\"\";shape=doublecircle,rank=middle]\n")
+        } else {
+            dotBuilder.append(nodeId).append(" [label=<").append(labelString).append(">]\n")
+        }
     }
-    return label.toString();
-  }
 
-  private void prepare(
-      TextNode node,
-      Map<String, String> contentLabel,
-      Map<String, String> markupLabel,
-      List<String> sortedSigils) {
-    sortedSigils.forEach(
-        s -> {
-          Token token = node.getTokenForWitness(s);
-          if (token != null) {
-            MarkedUpToken mToken = (MarkedUpToken) token;
-            String markup = mToken.getParentXPath();
-            contentLabel.put(s, asLabel(mToken.getContent(), whitespaceCharacter));
-            markupLabel.put(s, markup);
-          }
-        });
-  }
-
-  private void appendMarkup(
-      StringBuilder label,
-      Map<String, String> markupLabel,
-      List<String> sortedSigils,
-      String joinedSigils) {
-    Set<String> markupLabelSet = new HashSet<>(markupLabel.values());
-    if (markupLabelSet.size() == 1) {
-      label
-          .append(joinedSigils)
-          .append(": <i>")
-          .append(markupLabelSet.iterator().next())
-          .append("</i>");
-
-    } else {
-      sortedSigils.forEach(
-          s -> label.append(s).append(": <i>").append(markupLabel.get(s)).append("</i><br/>"));
+    private fun generateNodeLabel(node: TextNode, hideMarkup: Boolean): String {
+        val label = StringBuilder()
+        val contentLabel: MutableMap<String, String> = HashMap()
+        val markupLabel: MutableMap<String, String> = HashMap()
+        val sortedSigils = node.sigils.stream().sorted().collect(Collectors.toList())
+        val joinedSigils = sortedSigils.stream().collect(Collectors.joining(","))
+        prepare(node, contentLabel, markupLabel, sortedSigils)
+        appendContent(label, contentLabel, sortedSigils, joinedSigils)
+        if (!hideMarkup) {
+            if (label.isNotEmpty()) {
+                label.append("<br/>")
+            }
+            appendMarkup(label, markupLabel, sortedSigils, joinedSigils)
+        }
+        return label.toString()
     }
-  }
 
-  private void appendContent(
-      StringBuilder label,
-      Map<String, String> contentLabel,
-      List<String> sortedSigils,
-      String joinedSigils) {
-    Set<String> contentLabelSet = new HashSet<>(contentLabel.values());
-    if (contentLabelSet.size() == 1) {
-      label.append(joinedSigils).append(": ").append(contentLabelSet.iterator().next());
-
-    } else {
-      String witnessLines =
-          sortedSigils.stream().map(s -> s + ": " + contentLabel.get(s)).collect(joining("<br/>"));
-      label.append(witnessLines);
+    private fun prepare(
+            node: TextNode,
+            contentLabel: MutableMap<String, String>,
+            markupLabel: MutableMap<String, String>,
+            sortedSigils: List<String>) {
+        sortedSigils.forEach { s: String ->
+            val token = node.getTokenForWitness(s)
+            if (token != null) {
+                val mToken = token as MarkedUpToken
+                val markup = mToken.parentXPath
+                contentLabel[s] = asLabel(mToken.content, whitespaceCharacter)
+                markupLabel[s] = markup
+            }
+        }
     }
-  }
 
-  private String asLabel(String content, String whitespaceCharacter) {
-    return content
-        .replaceAll("&", "&amp;")
-        .replaceAll("\n", "&#x21A9;<br/>")
-        .replaceAll(" +", whitespaceCharacter);
-  }
+    private fun appendMarkup(
+            label: StringBuilder,
+            markupLabel: Map<String, String>,
+            sortedSigils: List<String>,
+            joinedSigils: String) {
+        val markupLabelSet: Set<String> = HashSet(markupLabel.values)
+        if (markupLabelSet.size == 1) {
+            label
+                    .append(joinedSigils)
+                    .append(": <i>")
+                    .append(markupLabelSet.iterator().next())
+                    .append("</i>")
+        } else {
+            sortedSigils.forEach(
+                    Consumer { s: String? -> label.append(s).append(": <i>").append(markupLabel[s]).append("</i><br/>") })
+        }
+    }
+
+    private fun appendContent(
+            label: StringBuilder,
+            contentLabel: Map<String, String>,
+            sortedSigils: List<String>,
+            joinedSigils: String) {
+        val contentLabelSet: Set<String> = HashSet(contentLabel.values)
+        if (contentLabelSet.size == 1) {
+            label.append(joinedSigils).append(": ").append(contentLabelSet.iterator().next())
+        } else {
+            val witnessLines = sortedSigils.stream().map { s: String -> s + ": " + contentLabel[s] }.collect(Collectors.joining("<br/>"))
+            label.append(witnessLines)
+        }
+    }
+
+    private fun asLabel(content: String, whitespaceCharacter: String): String =
+            content
+                    .replace("&".toRegex(), "&amp;")
+                    .replace("\n".toRegex(), "&#x21A9;<br/>")
+                    .replace(" +".toRegex(), whitespaceCharacter)
+
 }
