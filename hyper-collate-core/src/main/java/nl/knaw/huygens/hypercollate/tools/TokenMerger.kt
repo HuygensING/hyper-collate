@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.tools;
+package nl.knaw.huygens.hypercollate.tools
 
 /*-
  * #%L
@@ -19,126 +19,108 @@ package nl.knaw.huygens.hypercollate.tools;
  * limitations under the License.
  * #L%
  */
+import nl.knaw.huygens.hypercollate.model.*
+import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.function.Consumer
+import java.util.stream.Collectors
 
-import nl.knaw.huygens.hypercollate.model.*;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
-public class TokenMerger {
-
-  public static VariantWitnessGraph merge(VariantWitnessGraph originalGraph) {
-    VariantWitnessGraph mergedGraph = new VariantWitnessGraph(originalGraph.getSigil());
-    originalGraph.getMarkupStream().forEach(mergedGraph::addMarkup);
-
-    Map<Long, TokenVertex> originalToMergedMap = new HashMap<>();
-    TokenVertex originaltokenVertex = originalGraph.getStartTokenVertex();
-    List<TokenVertex> verticesToAdd =
-        originaltokenVertex.getOutgoingTokenVertexStream().collect(Collectors.toList());
-    List<Long> handledTokens = new ArrayList<>();
-    AtomicBoolean endTokenHandled = new AtomicBoolean(false);
-    TokenVertex mergedVertexToLinkTo = mergedGraph.getStartTokenVertex();
-    verticesToAdd.forEach(
-        originalVertex ->
+object TokenMerger {
+    @JvmStatic
+    fun merge(originalGraph: VariantWitnessGraph): VariantWitnessGraph {
+        val mergedGraph = VariantWitnessGraph(originalGraph.sigil)
+        originalGraph.markupStream.forEach { markup: Markup -> mergedGraph.addMarkup(markup) }
+        val originalToMergedMap: MutableMap<Long, TokenVertex> = HashMap()
+        val originalTokenVertex = originalGraph.startTokenVertex
+        val verticesToAdd = originalTokenVertex.outgoingTokenVertexStream.collect(Collectors.toList())
+        val handledTokens: MutableList<Long> = ArrayList()
+        val endTokenHandled = AtomicBoolean(false)
+        val mergedVertexToLinkTo = mergedGraph.startTokenVertex
+        verticesToAdd.forEach { originalVertex: TokenVertex ->
             handle(
-                originalGraph,
-                mergedGraph,
-                originalToMergedMap,
-                handledTokens,
-                endTokenHandled,
-                originalVertex,
-                mergedVertexToLinkTo));
-    return mergedGraph;
-  }
-
-  // TODO: introduce context to avoid passing so many parameters
-  private static void handle(
-      VariantWitnessGraph originalGraph,
-      VariantWitnessGraph mergedGraph,
-      Map<Long, TokenVertex> originalToMergedMap,
-      List<Long> handledTokens,
-      AtomicBoolean endTokenHandled,
-      TokenVertex originalVertex,
-      TokenVertex mergedVertexToLinkTo) {
-
-    if (originalVertex instanceof EndTokenVertex) {
-      if (endTokenHandled.get()) {
-        return;
-      }
-      TokenVertex endTokenVertex = mergedGraph.getEndTokenVertex();
-      originalVertex
-          .getIncomingTokenVertexStream()
-          .forEach(
-              tv -> {
-                Long indexNumber = ((MarkedUpToken) tv.getToken()).getIndexNumber();
-                TokenVertex mergedTokenVertex = originalToMergedMap.get(indexNumber);
-                mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedTokenVertex, endTokenVertex);
-              });
-      endTokenHandled.set(true);
-      return;
+                    originalGraph,
+                    mergedGraph,
+                    originalToMergedMap,
+                    handledTokens,
+                    endTokenHandled,
+                    originalVertex,
+                    mergedVertexToLinkTo)
+        }
+        return mergedGraph
     }
 
-    MarkedUpToken originalToken = (MarkedUpToken) originalVertex.getToken();
-    Long tokenNumber = originalToken.getIndexNumber();
-    if (handledTokens.contains(tokenNumber)) {
-      TokenVertex mergedTokenVertex = originalToMergedMap.get(tokenNumber);
-      mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedVertexToLinkTo, mergedTokenVertex);
-      return;
-    }
-
-    MarkedUpToken mergedToken =
-        new MarkedUpToken()
-            .setContent(originalToken.getContent())
-            .setNormalizedContent(originalToken.getNormalizedContent())
-            .setParentXPath(originalToken.getParentXPath())
-            .setWitness((SimpleWitness) originalToken.getWitness())
-            .setRdg(originalToken.getRdg())
-            .setIndexNumber(tokenNumber);
-
-    SimpleTokenVertex mergedVertex =
-        new SimpleTokenVertex(mergedToken).setBranchPath(originalVertex.getBranchPath());
-    originalGraph
-        .getMarkupListForTokenVertex(originalVertex)
-        .forEach(markup -> mergedGraph.addMarkupToTokenVertex(mergedVertex, markup));
-    originalToMergedMap.put(tokenNumber, mergedVertex);
-    mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedVertexToLinkTo, mergedVertex);
-    handledTokens.add(tokenNumber);
-    List<TokenVertex> originalOutgoingVertices =
-        originalVertex.getOutgoingTokenVertexStream().collect(Collectors.toList());
-    while (canMerge(originalGraph, originalVertex, originalOutgoingVertices)) {
-      MarkedUpToken nextOriginalToken = (MarkedUpToken) originalOutgoingVertices.get(0).getToken();
-      mergedToken
-          .setContent(mergedToken.getContent() + nextOriginalToken.getContent())
-          .setNormalizedContent(
-              mergedToken.getNormalizedContent() + nextOriginalToken.getNormalizedContent());
-      originalToMergedMap.put(nextOriginalToken.getIndexNumber(), mergedVertex);
-      originalVertex = originalOutgoingVertices.get(0);
-      originalOutgoingVertices =
-          originalVertex.getOutgoingTokenVertexStream().collect(Collectors.toList());
-    }
-    originalOutgoingVertices.forEach(
-        oVertex ->
+    // TODO: introduce context to avoid passing so many parameters
+    private fun handle(
+            originalGraph: VariantWitnessGraph,
+            mergedGraph: VariantWitnessGraph,
+            originalToMergedMap: MutableMap<Long, TokenVertex>,
+            handledTokens: MutableList<Long>,
+            endTokenHandled: AtomicBoolean,
+            originalVertexIn: TokenVertex,
+            mergedVertexToLinkTo: TokenVertex) {
+        var originalVertex = originalVertexIn
+        if (originalVertex is EndTokenVertex) {
+            if (endTokenHandled.get()) {
+                return
+            }
+            val endTokenVertex = mergedGraph.endTokenVertex
+            originalVertex
+                    .getIncomingTokenVertexStream()
+                    .forEach { tv: TokenVertex ->
+                        val indexNumber = (tv.token as MarkedUpToken).indexNumber
+                        val mergedTokenVertex = originalToMergedMap[indexNumber]
+                        mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedTokenVertex, endTokenVertex)
+                    }
+            endTokenHandled.set(true)
+            return
+        }
+        val originalToken = originalVertex.token as MarkedUpToken
+        val tokenNumber = originalToken.indexNumber
+        if (handledTokens.contains(tokenNumber)) {
+            val mergedTokenVertex = originalToMergedMap[tokenNumber]
+            mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedVertexToLinkTo, mergedTokenVertex)
+            return
+        }
+        val mergedToken = MarkedUpToken()
+                .setContent(originalToken.content)
+                .setNormalizedContent(originalToken.normalizedContent)
+                .setParentXPath(originalToken.parentXPath)
+                .setWitness(originalToken.witness as SimpleWitness)
+                .setRdg(originalToken.rdg)
+                .setIndexNumber(tokenNumber)
+        val mergedVertex = SimpleTokenVertex(mergedToken).setBranchPath(originalVertex.branchPath)
+        originalGraph
+                .getMarkupListForTokenVertex(originalVertex)
+                .forEach(Consumer { markup: Markup? -> mergedGraph.addMarkupToTokenVertex(mergedVertex, markup) })
+        originalToMergedMap[tokenNumber] = mergedVertex
+        mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedVertexToLinkTo, mergedVertex)
+        handledTokens.add(tokenNumber)
+        var originalOutgoingVertices = originalVertex.outgoingTokenVertexStream.collect(Collectors.toList())
+        while (canMerge(originalGraph, originalVertex, originalOutgoingVertices)) {
+            val nextOriginalToken = originalOutgoingVertices[0].token as MarkedUpToken
+            mergedToken
+                    .setContent(mergedToken.content + nextOriginalToken.content).normalizedContent = mergedToken.normalizedContent + nextOriginalToken.normalizedContent
+            originalToMergedMap[nextOriginalToken.indexNumber] = mergedVertex
+            originalVertex = originalOutgoingVertices[0]
+            originalOutgoingVertices = originalVertex.outgoingTokenVertexStream.collect(Collectors.toList())
+        }
+        originalOutgoingVertices.forEach { oVertex: TokenVertex ->
             handle(
-                originalGraph,
-                mergedGraph,
-                originalToMergedMap,
-                handledTokens,
-                endTokenHandled,
-                oVertex,
-                mergedVertex));
-  }
+                    originalGraph,
+                    mergedGraph,
+                    originalToMergedMap,
+                    handledTokens,
+                    endTokenHandled,
+                    oVertex,
+                    mergedVertex)
+        }
+    }
 
-  private static boolean canMerge(
-      VariantWitnessGraph originalGraph,
-      TokenVertex originalVertex,
-      List<TokenVertex> originalOutgoingVertices) {
-    return originalOutgoingVertices.size() == 1
-        && originalGraph
-        .getMarkupListForTokenVertex(originalVertex)
-        .equals(originalGraph.getMarkupListForTokenVertex(originalOutgoingVertices.get(0)));
-  }
+    private fun canMerge(
+            originalGraph: VariantWitnessGraph,
+            originalVertex: TokenVertex,
+            originalOutgoingVertices: List<TokenVertex>): Boolean =
+            (originalOutgoingVertices.size == 1
+                    && (originalGraph.getMarkupListForTokenVertex(originalVertex)
+                    == originalGraph.getMarkupListForTokenVertex(originalOutgoingVertices[0])))
 }
