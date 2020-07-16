@@ -38,27 +38,23 @@ import java.util.stream.Collectors
 class HyperCollatorTest : HyperCollateTest() {
     private val hyperCollator = HyperCollator()
 
-
-//    @Ignore("takes too long")
-    @Test(timeout = 420_000)
-//    @Test
+    //    @Ignore("takes too long")
+    @Test(timeout = 40_000)
     fun testCollationWithManyMatches() {
         val importer = XMLImporter()
-        val w1 = importer.importXML(
-                "W1",
-                "<seg>Ik had een buurvrouw, een paar deuren verder,"
-                        + " en <del>ze</del><add>het</add> was zo'n type dat naar het muse<del>im</del>um ging en "
-                        + "cappuc<add>c</add>i<del>o</del>no's dronk<del>l</del>, dus ik<del>i k</del>kon er weinig mee, en zij kon weinig"
-                        + " m<del>netr</del>et mij<del>,</del><add>;</add> we <del>lk</del> knikten alleen naar elkaar, en als ik"
-                        + " Rock<del>u</del>y bij me had, <del>knikte</del>maakte ze van het knikken iets dat nog wat sneller "
-                        + "a<del >g</del>fgehandeld moest<del>r</del> worden dan anders.</seg>")
-        val w2 = importer.importXML(
-                "W2",
-                "<seg><del>Ik had een buurvrouw, </del><add>Die "
-                        + "buurvrouw woonde </add>een paar deuren verder, en het was zo'n type <del>dat naar het museum ging en "
-                        + "cappuccino's dronk, dus ik kon er</del><add>waar ik</add> weinig mee<add> ko<del>m</del>n</add>, en zij kon "
-                        + "weinig met mij; we knikten alleen naar elkaar, en als ik Rocky bij me had, maakte ze van het knikken iets dat"
-                        + " nog wat sneller afgehandeld moest worden dan anders.</seg>")
+        val xml1 = ("<seg>Ik had een buurvrouw, een paar deuren verder,"
+                + " en <del>ze</del><add>het</add> was zo'n type dat naar het muse<del>im</del>um ging en "
+                + "cappuc<add>c</add>i<del>o</del>no's dronk<del>l</del>, dus ik<del>i k</del>kon er weinig mee, en zij kon weinig"
+                + " m<del>netr</del>et mij<del>,</del><add>;</add> we <del>lk</del> knikten alleen naar elkaar, en als ik"
+                + " Rock<del>u</del>y bij me had, <del>knikte</del>maakte ze van het knikken iets dat nog wat sneller "
+                + "a<del >g</del>fgehandeld moest<del>r</del> worden dan anders.</seg>")
+        val w1 = importer.importXML("W1", xml1)
+        val xml2 = ("<seg><del>Ik had een buurvrouw, </del><add>Die "
+                + "buurvrouw woonde </add>een paar deuren verder, en het was zo'n type <del>dat naar het museum ging en "
+                + "cappuccino's dronk, dus ik kon er</del><add>waar ik</add> weinig mee<add> ko<del>m</del>n</add>, en zij kon "
+                + "weinig met mij; we knikten alleen naar elkaar, en als ik Rocky bij me had, maakte ze van het knikken iets dat"
+                + " nog wat sneller afgehandeld moest worden dan anders.</seg>")
+        val w2 = importer.importXML("W2", xml2)
         val expected = """
             digraph CollationGraph{
             labelloc=b
@@ -209,6 +205,8 @@ class HyperCollatorTest : HyperCollateTest() {
             t058->t035[label="W2"]
             t059->t045[label="W2"]
             }""".trimIndent()
+        LOG.info("w1={}", xml1)
+        LOG.info("w2={}", xml2)
         val collationGraph = testHyperCollation(w1, w2, expected)
     }
 

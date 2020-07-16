@@ -35,8 +35,8 @@ class HyperCollator {
         val sigils: MutableList<String> = mutableListOf()
         val witnesses: MutableList<VariantWitnessGraph> = mutableListOf()
         val rankings: MutableList<VariantWitnessGraphRanking> = mutableListOf()
-        Arrays.stream(graphs)
-                .sorted(Comparator.comparing { obj: VariantWitnessGraph -> obj.sigil })
+        graphs
+                .sortedBy { it.sigil }
                 .forEach { graph: VariantWitnessGraph ->
                     sigils.add(graph.sigil)
                     witnesses.add(graph)

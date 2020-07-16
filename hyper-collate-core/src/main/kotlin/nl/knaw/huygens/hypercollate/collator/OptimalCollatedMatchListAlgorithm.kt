@@ -91,10 +91,9 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
     override fun neighborNodes(matchList: QuantumCollatedMatchList): Iterable<QuantumCollatedMatchList> {
         profiler.neighborNodesCalled += 1
         val nextPotentialMatches = runWithStopwatch(profiler.neighborNodesStopWatch) {
-            val nextPotentialMatches: MutableSet<QuantumCollatedMatchList> = mutableSetOf()
             val nextMatchSequence: MutableList<CollatedMatch> = mutableListOf()
-            val cms1 = matchesSortedByNode.asSequence().filter { matchList.potentialMatches.contains(it) }.iterator()
-            val cms2 = matchesSortedByWitness.asSequence().filter { matchList.potentialMatches.contains(it) }.iterator()
+            val cms1 = (matchesSortedByNode - matchList.chosenMatches).asSequence().filter { matchList.potentialMatches.contains(it) }.iterator()
+            val cms2 = (matchesSortedByWitness - matchList.chosenMatches).asSequence().filter { matchList.potentialMatches.contains(it) }.iterator()
             var goOn = cms1.hasNext()
             while (goOn) {
                 val next1 = cms1.next()
@@ -106,10 +105,11 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
                     goOn = false
                 }
             }
+            val nextPotentialMatches: MutableSet<QuantumCollatedMatchList> = mutableSetOf()
             if (nextMatchSequence.isEmpty()) {
-                val firstPotentialMatch1 = getFirstPotentialMatchSequence(matchesSortedByNode, matchList)
+                val firstPotentialMatch1 = getFirstPotentialMatch(matchesSortedByNode, matchList)
                 addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1)
-                val firstPotentialMatch2 = getFirstPotentialMatchSequence(matchesSortedByWitness, matchList)
+                val firstPotentialMatch2 = getFirstPotentialMatch(matchesSortedByWitness, matchList)
                 if (firstPotentialMatch1 != firstPotentialMatch2) {
                     addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch2)
                 }
@@ -140,9 +140,9 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
     fun neighborNodes0(matchList: QuantumCollatedMatchList): Iterable<QuantumCollatedMatchList> {
         profiler.neighborNodesCalled += 1
         val nextPotentialMatches: MutableSet<QuantumCollatedMatchList> = LinkedHashSet()
-        val firstPotentialMatch1 = getFirstPotentialMatchSequence(matchesSortedByNode, matchList)
+        val firstPotentialMatch1 = getFirstPotentialMatch(matchesSortedByNode, matchList)
         addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1)
-        val firstPotentialMatch2 = getFirstPotentialMatchSequence(matchesSortedByWitness, matchList)
+        val firstPotentialMatch2 = getFirstPotentialMatch(matchesSortedByWitness, matchList)
         if (firstPotentialMatch1 != firstPotentialMatch2) {
             addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch2)
         }
@@ -200,7 +200,7 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
         }
     }
 
-    private fun getFirstPotentialMatchSequence(matches: List<CollatedMatch>, matchList: QuantumCollatedMatchList): CollatedMatch =
+    private fun getFirstPotentialMatch(matches: List<CollatedMatch>, matchList: QuantumCollatedMatchList): CollatedMatch =
             matches.first { matchList.potentialMatches.contains(it) }
 
     private fun QuantumCollatedMatchList.maxPotentialSize(): Int {
