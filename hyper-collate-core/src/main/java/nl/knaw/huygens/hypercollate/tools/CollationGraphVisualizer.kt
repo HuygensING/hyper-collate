@@ -1,4 +1,14 @@
-package nl.knaw.huygens.hypercollate.tools;
+package nl.knaw.huygens.hypercollate.tools
+
+import de.vandermeer.asciitable.AsciiTable
+import de.vandermeer.asciitable.CWC_LongestLine
+import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment
+import nl.knaw.huygens.hypercollate.model.CollationGraph
+import nl.knaw.huygens.hypercollate.model.MarkedUpToken
+import nl.knaw.huygens.hypercollate.model.TextNode
+import java.util.*
+import java.util.function.Consumer
+import java.util.stream.Collectors
 
 /*-
  * #%L
@@ -18,207 +28,179 @@ package nl.knaw.huygens.hypercollate.tools;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * #L%
- */
-
-import de.vandermeer.asciitable.AsciiTable;
-import de.vandermeer.asciitable.CWC_LongestLine;
-import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment;
-import eu.interedition.collatex.Token;
-import nl.knaw.huygens.hypercollate.model.CollationGraph;
-import nl.knaw.huygens.hypercollate.model.MarkedUpToken;
-import nl.knaw.huygens.hypercollate.model.TextNode;
-
-import java.util.*;
-
-import static java.util.Collections.reverse;
-import static java.util.Collections.sort;
-import static java.util.stream.Collectors.toList;
-
-public class CollationGraphVisualizer {
-
-  private static final String NBSP = "\u00A0";
-
-  public static class Cell {
-    final List<String> layerContent = new ArrayList<>();
-
-    public Cell(String content) {
-      layerContent.add(content);
-    }
-
-    Cell() {
-    }
-
-    List<String> getLayerContent() {
-      return this.layerContent;
-    }
-  }
-
-  public static String toTableASCII(CollationGraph graph, boolean emphasizeWhitespace) {
-    List<String> sigils = graph.getSigils();
-    String whitespaceCharacter = emphasizeWhitespace ? "_" : " ";
-    Map<String, List<Cell>> rowMap = new HashMap<>();
-    sigils.forEach(sigil -> rowMap.put(sigil, new ArrayList<>()));
-
-    CollationGraphRanking ranking = CollationGraphRanking.of(graph);
-
-    Map<String, Integer> maxLayers = new HashMap<>();
-    sigils.forEach(sigil -> maxLayers.put(sigil, 1));
-    for (Set<TextNode> nodeSet : ranking) {
-      if (isBorderNode(nodeSet, graph)) {
-        // skip start and end nodes
-        continue;
-      }
-      Map<String, List<MarkedUpToken>> nodeTokensPerWitness = new HashMap<>();
-      sigils.forEach(
-          sigil -> {
-            nodeTokensPerWitness.put(sigil, new ArrayList<>());
-            nodeSet.stream()
-                .filter(TextNode.class::isInstance)
-                .map(TextNode.class::cast)
-                .forEach(
-                    node -> {
-                      Token token = node.getTokenForWitness(sigil);
-                      if (token != null) {
-                        MarkedUpToken mToken = (MarkedUpToken) token;
-                        nodeTokensPerWitness.get(sigil).add(mToken);
-                      }
-                    });
-          });
-      sigils.forEach(
-          sigil -> {
-            List<MarkedUpToken> tokens = nodeTokensPerWitness.get(sigil);
-            maxLayers.put(sigil, Math.max(maxLayers.get(sigil), tokens.size()));
-            Cell cell = newCell(tokens, whitespaceCharacter);
-            rowMap.get(sigil).add(cell);
-          });
-    }
-
-    return asciiTable(graph.getSigils(), rowMap, maxLayers).render();
-  }
-
-  private static boolean isBorderNode(Set<TextNode> nodeSet, CollationGraph graph) {
-    if (nodeSet.size() != 1) {
-      return false;
-    }
-    TextNode node = nodeSet.iterator().next();
-    Boolean hasNoIncomingEdges = graph.getIncomingEdges(node).isEmpty();
-    Boolean hasNoOutgoingEdges = graph.getOutgoingEdges(node).isEmpty();
-    return hasNoIncomingEdges || hasNoOutgoingEdges;
-  }
-
-  private static Cell newCell(List<MarkedUpToken> tokens, String whitespaceCharacter) {
-    Cell cell = new Cell();
-    if (tokens.isEmpty()) {
-      setCellLayer(cell, " ");
-    } else {
-      tokens.forEach(
-          token -> {
-            String content =
-                token.getContent().replaceAll("\n", " ").replaceAll(" +", whitespaceCharacter);
-            String parentXPath = token.getParentXPath();
-            if (parentXPath.endsWith("/del/add")) {
-              content = "[za] " + content;
-            } else if (parentXPath.endsWith("/add")) {
-              content = "[z] " + content;
-            } else if (parentXPath.endsWith("/del")) {
-              content = "[a] " + content;
+ */   object CollationGraphVisualizer {
+    private const val NBSP = "\u00A0"
+    @JvmStatic
+    fun toTableASCII(graph: CollationGraph, emphasizeWhitespace: Boolean): String {
+        val sigils = graph.sigils
+        val whitespaceCharacter = if (emphasizeWhitespace) "_" else " "
+        val rowMap: MutableMap<String, MutableList<Cell>> = HashMap()
+        sigils.forEach(Consumer { sigil: String -> rowMap[sigil] = ArrayList() })
+        val ranking = CollationGraphRanking.of(graph) // TODO: make faster
+        val maxLayers: MutableMap<String, Int> = HashMap()
+        sigils.forEach(Consumer { sigil: String -> maxLayers[sigil] = 1 })
+        for (nodeSet in ranking) {
+            if (isBorderNode(nodeSet, graph)) {
+                // skip start and end nodes
+                continue
             }
-            if (parentXPath.contains("/rdg")) {
-              String rdg = token.getRdg();
-              content = ("<" + rdg + "> " + content).replaceAll("\\>\\s+\\[", ">[");
-            }
-
-            if (content.isEmpty()) {
-              content = "<" + parentXPath.replaceAll(".*/", "") + "/>";
-            }
-            //        String layerName = determineLayerName(parentXPath);
-            setCellLayer(cell, content);
-          });
+            val nodeTokensPerWitness: MutableMap<String, MutableList<MarkedUpToken>> = HashMap()
+            sigils.forEach(
+                    Consumer { sigil: String ->
+                        nodeTokensPerWitness[sigil] = ArrayList()
+                        nodeSet.stream()
+                                .filter { obj: TextNode? -> TextNode::class.java.isInstance(obj) }
+                                .map { obj: TextNode? -> TextNode::class.java.cast(obj) }
+                                .forEach { node: TextNode ->
+                                    val token = node.getTokenForWitness(sigil)
+                                    if (token != null) {
+                                        val mToken = token as MarkedUpToken
+                                        nodeTokensPerWitness[sigil]!!.add(mToken)
+                                    }
+                                }
+                    })
+            sigils.forEach(
+                    Consumer { sigil: String ->
+                        val tokens: List<MarkedUpToken>? = nodeTokensPerWitness[sigil]
+                        maxLayers[sigil] = Math.max(maxLayers[sigil]!!, tokens!!.size)
+                        val cell = newCell(tokens, whitespaceCharacter)
+                        rowMap[sigil]!!.add(cell)
+                    })
+        }
+        return asciiTable(graph.sigils, rowMap, maxLayers).render()
     }
-    return cell;
-  }
 
-  private static String determineLayerName(String parentXPath) {
-    String layerName = "";
-    if (parentXPath.endsWith("/add")) {
-      layerName = "add";
+    private fun isBorderNode(nodeSet: Set<TextNode>, graph: CollationGraph): Boolean {
+        if (nodeSet.size != 1) {
+            return false
+        }
+        val node = nodeSet.iterator().next()
+        val hasNoIncomingEdges = graph.getIncomingEdges(node).isEmpty()
+        val hasNoOutgoingEdges = graph.getOutgoingEdges(node).isEmpty()
+        return hasNoIncomingEdges || hasNoOutgoingEdges
     }
-    if (parentXPath.endsWith("/del")) {
-      layerName = "del";
+
+    private fun newCell(tokens: List<MarkedUpToken>?, whitespaceCharacter: String): Cell {
+        val cell = Cell()
+        if (tokens!!.isEmpty()) {
+            setCellLayer(cell, " ")
+        } else {
+            tokens.forEach(
+                    Consumer { token: MarkedUpToken ->
+                        var content = token.content.replace("\n".toRegex(), " ").replace(" +".toRegex(), whitespaceCharacter)
+                        val parentXPath = token.parentXPath
+                        if (parentXPath.endsWith("/del/add")) {
+                            content = "[za] $content"
+                        } else if (parentXPath.endsWith("/add")) {
+                            content = "[z] $content"
+                        } else if (parentXPath.endsWith("/del")) {
+                            content = "[a] $content"
+                        }
+                        if (parentXPath.contains("/rdg")) {
+                            val rdg = token.rdg
+                            content = "<$rdg> $content".replace("\\>\\s+\\[".toRegex(), ">[")
+                        }
+                        if (content.isEmpty()) {
+                            content = "<" + parentXPath.replace(".*/".toRegex(), "") + "/>"
+                        }
+                        //        String layerName = determineLayerName(parentXPath);
+                        setCellLayer(cell, content)
+                    })
+        }
+        return cell
     }
-    return layerName;
-  }
 
-  private static void setCellLayer(Cell cell, String content) {
-    cell.getLayerContent().add(content);
-    //    String previousContent = cell.getLayerContent().put(layerName, content);
-    //    Preconditions.checkState(previousContent == null, "layerName " + layerName + " used
-    // twice!");
-  }
-
-  private static AsciiTable asciiTable(
-      List<String> sigils, Map<String, List<Cell>> rowMap, Map<String, Integer> cellHeights) {
-    AsciiTable table = new AsciiTable().setTextAlignment(TextAlignment.LEFT);
-    CWC_LongestLine cwc = new CWC_LongestLine();
-    table.getRenderer().setCWC(cwc);
-    table.addRule();
-    sigils.forEach(
-        sigil -> {
-          List<String> row =
-              rowMap.get(sigil).stream()
-                  .map(cell -> toASCII(cell, cellHeights.get(sigil)))
-                  .collect(toList());
-          row.add(0, "[" + sigil + "]");
-          table.addRow(row);
-          table.addRule();
-        });
-    return table;
-  }
-
-  private static String toASCII(Cell cell, int cellHeight) {
-    StringBuilder contentBuilder = new StringBuilder();
-    // ASCIITable has no TextAlignment.BOTTOM option, so add empty lines manually
-    int emptyLinesToAdd = cellHeight - cell.getLayerContent().size();
-    for (int i = 0; i < emptyLinesToAdd; i++) {
-      contentBuilder.append(
-          NBSP + "<br>"); // regular space or just <br> leads to ASCIITable error when rendering
+    private fun determineLayerName(parentXPath: String): String {
+        var layerName = ""
+        if (parentXPath.endsWith("/add")) {
+            layerName = "add"
+        }
+        if (parentXPath.endsWith("/del")) {
+            layerName = "del"
+        }
+        return layerName
     }
-    List<String> layerContent = new ArrayList<>(cell.getLayerContent());
-    sort(layerContent);
-    reverse(layerContent);
-    StringJoiner joiner = new StringJoiner("<br>");
-    for (String s : layerContent) {
-      joiner.add(
-          s.replaceAll("\\[z]", "[+]").replaceAll("\\[a]", "[-]").replaceAll("\\[za]", "[+-]"));
+
+    private fun setCellLayer(cell: Cell, content: String) {
+        cell.layerContent.add(content)
+        //    String previousContent = cell.getLayerContent().put(layerName, content);
+        //    Preconditions.checkState(previousContent == null, "layerName " + layerName + " used
+        // twice!");
     }
-    String content = joiner.toString();
-    return contentBuilder.append(content).toString();
-  }
 
-  //  private static String cellLine(Cell cell, String lName) {
-  //    String content = cell.getLayerContent().get(lName);
-  ////    if (lName.equals("add")) {
-  ////      content = "[+] " + content;
-  ////    } else if (lName.equals("del")) {
-  ////      content = "[-] " + content;
-  ////    }
-  //    return content;
-  //  }
+    private fun asciiTable(
+            sigils: List<String>, rowMap: Map<String, MutableList<Cell>>, cellHeights: Map<String, Int>): AsciiTable {
+        val table = AsciiTable().setTextAlignment(TextAlignment.LEFT)
+        val cwc = CWC_LongestLine()
+        table.renderer.cwc = cwc
+        table.addRule()
+        sigils.forEach(
+                Consumer { sigil: String ->
+                    val row = rowMap[sigil]!!.stream()
+                            .map { cell: Cell -> toASCII(cell, cellHeights[sigil]!!) }
+                            .collect(Collectors.toList())
+                    row.add(0, "[$sigil]")
+                    table.addRow(row)
+                    table.addRule()
+                })
+        return table
+    }
 
-  public static String toTableHTML(CollationGraph graph) {
-    // TODO
-    return new StringBuilder()
-        .append("<table>")
-        .append("<tr><th>")
-        .append("</th></tr>")
-        .append("<tr><td>")
-        .append("</td></tr>")
-        .append("</table>")
-        .toString();
-  }
+    private fun toASCII(cell: Cell, cellHeight: Int): String {
+        val contentBuilder = StringBuilder()
+        // ASCIITable has no TextAlignment.BOTTOM option, so add empty lines manually
+        val emptyLinesToAdd = cellHeight - cell.layerContent.size
+        for (i in 0 until emptyLinesToAdd) {
+            contentBuilder.append(
+                    "$NBSP<br>") // regular space or just <br> leads to ASCIITable error when rendering
+        }
+        val layerContent: List<String?> = ArrayList(cell.layerContent)
+        Collections.sort<String>(layerContent)
+        Collections.reverse(layerContent)
+        val joiner = StringJoiner("<br>")
+        for (s in layerContent) {
+            joiner.add(
+                    s!!.replace("\\[z]".toRegex(), "[+]").replace("\\[a]".toRegex(), "[-]").replace("\\[za]".toRegex(), "[+-]"))
+        }
+        val content = joiner.toString()
+        return contentBuilder.append(content).toString()
+    }
 
-  public static String toDot(
-      CollationGraph graph, boolean emphasizeWhitespace, final boolean hideMarkup) {
-    return new DotFactory(emphasizeWhitespace).fromCollationGraph(graph, hideMarkup);
-  }
+    //  private static String cellLine(Cell cell, String lName) {
+    //    String content = cell.getLayerContent().get(lName);
+    ////    if (lName.equals("add")) {
+    ////      content = "[+] " + content;
+    ////    } else if (lName.equals("del")) {
+    ////      content = "[-] " + content;
+    ////    }
+    //    return content;
+    //  }
+    fun toTableHTML(graph: CollationGraph?): String {
+        // TODO
+        return StringBuilder()
+                .append("<table>")
+                .append("<tr><th>")
+                .append("</th></tr>")
+                .append("<tr><td>")
+                .append("</td></tr>")
+                .append("</table>")
+                .toString()
+    }
+
+    @JvmStatic
+    fun toDot(
+            graph: CollationGraph?, emphasizeWhitespace: Boolean, hideMarkup: Boolean): String {
+        return DotFactory(emphasizeWhitespace).fromCollationGraph(graph, hideMarkup)
+    }
+
+    class Cell {
+        val layerContent: MutableList<String?> = ArrayList()
+
+        constructor(content: String?) {
+            layerContent.add(content)
+        }
+
+        internal constructor() {}
+
+    }
 }
