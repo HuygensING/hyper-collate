@@ -1,10 +1,4 @@
-package nl.knaw.huygens.hypercollate.model;
-
-import eu.interedition.collatex.Token;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
+package nl.knaw.huygens.hypercollate.model
 
 /*-
  * #%L
@@ -26,47 +20,30 @@ import java.util.stream.Stream;
  * #L%
  */
 
-public class EndTokenVertex implements TokenVertex {
+import eu.interedition.collatex.Token
+import java.util.*
+import java.util.stream.Stream
 
-  private final List<TokenVertex> incomingTokenVertices = new ArrayList<>();
-  private final String sigil;
+class EndTokenVertex internal constructor(override val sigil: String) : TokenVertex {
+    private val incomingTokenVertices: MutableList<TokenVertex> = ArrayList()
+    override val token: Token?
+        get() = null
 
-  EndTokenVertex(String sigil) {
-    this.sigil = sigil;
-  }
+    override val incomingTokenVertexStream: Stream<TokenVertex>
+        get() = incomingTokenVertices.stream()
 
-  @Override
-  public Token getToken() {
-    return null;
-  }
+    override val outgoingTokenVertexStream: Stream<TokenVertex>
+        get() = Stream.empty()
 
-  @Override
-  public Stream<TokenVertex> getIncomingTokenVertexStream() {
-    return incomingTokenVertices.stream();
-  }
+    override val branchPath: List<Int>
+        get() = ArrayList()
 
-  @Override
-  public Stream<TokenVertex> getOutgoingTokenVertexStream() {
-    return Stream.empty();
-  }
+    override fun addIncomingTokenVertex(incoming: TokenVertex) {
+        incomingTokenVertices.add(incoming)
+    }
 
-  @Override
-  public String getSigil() {
-    return sigil;
-  }
+    override fun addOutgoingTokenVertex(outgoing: TokenVertex) {
+        throw RuntimeException(this.javaClass.name + " has no outgoing TokenVertex")
+    }
 
-  @Override
-  public List<Integer> getBranchPath() {
-    return new ArrayList<>();
-  }
-
-  @Override
-  public void addIncomingTokenVertex(TokenVertex incoming) {
-    this.incomingTokenVertices.add(incoming);
-  }
-
-  @Override
-  public void addOutgoingTokenVertex(TokenVertex outgoing) {
-    throw new RuntimeException(this.getClass().getName() + " has no outgoing TokenVertex");
-  }
 }
