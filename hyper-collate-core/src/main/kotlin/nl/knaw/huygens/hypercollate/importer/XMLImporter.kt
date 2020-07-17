@@ -323,9 +323,9 @@ class XMLImporter {
                 afterDel = false
             }
             while (afterAppStack.peek()) {
-                unconnectedRdgVerticesStack.pop().stream()
-                        .filter { v: TokenVertex -> v != lastTokenVertex }
-                        .forEach { v: TokenVertex -> graph.addOutgoingTokenVertexToTokenVertex(v, tokenVertex) }
+                unconnectedRdgVerticesStack.pop()
+                        .filter { it != lastTokenVertex }
+                        .forEach { graph.addOutgoingTokenVertexToTokenVertex(it, tokenVertex) }
                 afterAppStack.pop()
             }
             openMarkup

@@ -104,7 +104,7 @@ class CollationGraph
                 visitedNodes.add(pop)
                 getOutgoingTextEdgeStream(pop)
                         .forEach { e: TextEdge ->
-                            val target = getTarget(e) ?: throw RuntimeException("edge target is null for edge $pop->")
+                            val target = getTarget(e)
                             nodesToVisit.add(target)
                         }
             } else {
