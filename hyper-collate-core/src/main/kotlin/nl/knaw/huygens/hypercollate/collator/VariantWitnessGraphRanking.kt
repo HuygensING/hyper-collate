@@ -62,7 +62,7 @@ class VariantWitnessGraphRanking : Iterable<Set<TokenVertex>>, Function<TokenVer
                         .forEach { incoming: TokenVertex -> rank.set(max(rank.get(), ranking._byVertex[incoming]!!)) }
                 rank.getAndIncrement()
                 ranking._byVertex[v] = rank.get()
-                ranking._byRank.computeIfAbsent(rank.get()) { r: Int? -> HashSet() }.add(v)
+                ranking._byRank.computeIfAbsent(rank.get()) { HashSet() }.add(v)
             }
             return ranking
         }

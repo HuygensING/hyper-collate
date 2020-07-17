@@ -142,7 +142,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
 
     private fun vertexVariable(tokenVertex: TokenVertex): String? {
         if (tokenVertex is SimpleTokenVertex) {
-            val token = tokenVertex.token as MarkedUpToken
+            val token = tokenVertex.token
             return token.witness.sigil + "_" + String.format("%03d", token.indexNumber)
         }
         if (tokenVertex is StartTokenVertex) {

@@ -154,7 +154,7 @@ object CollationGraphVisualizer {
         val joiner = StringJoiner("<br>")
         for (s in layerContent) {
             joiner.add(
-                    s!!.replace("\\[z]".toRegex(), "[+]").replace("\\[a]".toRegex(), "[-]").replace("\\[za]".toRegex(), "[+-]"))
+                    s.replace("\\[z]".toRegex(), "[+]").replace("\\[a]".toRegex(), "[-]").replace("\\[za]".toRegex(), "[+-]"))
         }
         val content = joiner.toString()
         return contentBuilder.append(content).toString()
