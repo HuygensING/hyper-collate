@@ -22,15 +22,9 @@ package nl.knaw.huygens.hypercollate.model
 
 import com.google.common.base.Preconditions
 import eu.interedition.collatex.Token
-import nl.knaw.huygens.hypercollate.model.MarkupHyperEdge
-import nl.knaw.huygens.hypercollate.model.MarkupNode
-import nl.knaw.huygens.hypercollate.model.TextEdge
 import nl.knaw.huygens.hypergraph.core.Hypergraph
 import org.slf4j.LoggerFactory
 import java.util.*
-import java.util.function.Function
-import java.util.function.Predicate
-import java.util.stream.Collectors
 import java.util.stream.Stream
 
 class CollationGraph
@@ -56,10 +50,9 @@ class CollationGraph
     }
 
     fun linkMarkupToText(markupNode: MarkupNode, textNode: TextNode?) {
-        val markupHyperEdges = getOutgoingEdges(markupNode).stream()
-                .filter(Predicate<Edge> { obj: Edge? -> MarkupHyperEdge::class.java.isInstance(obj) })
-                .map(Function<Edge, MarkupHyperEdge> { obj: Edge? -> MarkupHyperEdge::class.java.cast(obj) })
-                .collect(Collectors.toList())
+        val markupHyperEdges = getOutgoingEdges(markupNode)
+                .filterIsInstance<MarkupHyperEdge>()
+
         if (markupHyperEdges.isEmpty()) {
             val newEdge = MarkupHyperEdge()
             addDirectedHyperEdge(newEdge, MarkupHyperEdge.LABEL, markupNode, textNode)
@@ -92,11 +85,10 @@ class CollationGraph
         super.addDirectedHyperEdge(edge, TextEdge.LABEL, source, target)
     }
 
-    fun getOutgoingTextEdgeStream(source: Node?): Stream<TextEdge> {
-        return getOutgoingEdges(source).stream()
-                .filter(Predicate<Edge> { obj: Edge? -> TextEdge::class.java.isInstance(obj) })
-                .map(Function<Edge, TextEdge> { obj: Edge? -> TextEdge::class.java.cast(obj) })
-    }
+    fun getOutgoingTextEdgeStream(source: Node?): Stream<TextEdge> =
+            getOutgoingEdges(source)
+                    .filterIsInstance<TextEdge>()
+                    .stream()
 
     fun traverseTextNodes(): List<TextNode> {
         val visitedNodes: MutableSet<Node> = HashSet()
@@ -122,11 +114,8 @@ class CollationGraph
         return result
     }
 
-    fun getIncomingTextEdgeStream(node: TextNode?): Stream<TextEdge> {
-        return getIncomingEdges(node).stream()
-                .filter(Predicate<Edge> { obj: Edge? -> TextEdge::class.java.isInstance(obj) })
-                .map(Function<Edge, TextEdge> { obj: Edge? -> TextEdge::class.java.cast(obj) })
-    }
+    fun getIncomingTextEdgeStream(node: TextNode?): Stream<TextEdge> =
+            getIncomingEdges(node).filterIsInstance<TextEdge>().stream()
 
     val markupStream: Stream<Markup>
         get() = markupNodeIndex.keys.stream()
@@ -134,33 +123,29 @@ class CollationGraph
     val markupNodeStream: Stream<MarkupNode>
         get() = markupNodeIndex.values.stream()
 
-    fun getTextNodeStreamForMarkup(markup: Markup?): Stream<TextNode> {
+    fun getTextNodeStreamForMarkup(markup: Markup): Stream<TextNode> {
         val originalMarkupNode = getMarkupNode(markup)
-        val markupHyperEdges = getOutgoingEdges(originalMarkupNode).stream()
-                .filter(Predicate<Edge> { obj: Edge? -> MarkupHyperEdge::class.java.isInstance(obj) })
-                .map(Function<Edge, MarkupHyperEdge> { obj: Edge? -> MarkupHyperEdge::class.java.cast(obj) })
-                .collect(Collectors.toList())
+        val markupHyperEdges = getOutgoingEdges(originalMarkupNode)
+                .filterIsInstance<MarkupHyperEdge>()
         Preconditions.checkArgument(markupHyperEdges.size == 1)
-        return getTargets(markupHyperEdges[0]).stream()
-                .filter(Predicate<Node> { obj: Node? -> TextNode::class.java.isInstance(obj) })
-                .map(Function<Node, TextNode> { obj: Node? -> TextNode::class.java.cast(obj) })
+        return getTargets(markupHyperEdges[0])
+                .filterIsInstance<TextNode>()
+                .stream()
     }
 
-    fun getMarkupNode(markup: Markup?): MarkupNode {
-        return getMarkupNode(markupNodeIndex[markup])!!
+    fun getMarkupNode(markup: Markup): MarkupNode {
+        return getMarkupNode(markupNodeIndex[markup]!!)
     }
 
-    fun getMarkupNodeStreamForTextNode(textNode: TextNode?): Stream<MarkupNode> {
-        return getIncomingEdges(textNode).stream()
-                .filter(Predicate<Edge> { obj: Edge? -> MarkupHyperEdge::class.java.isInstance(obj) })
-                .map(Function<Edge, MarkupHyperEdge> { obj: Edge? -> MarkupHyperEdge::class.java.cast(obj) })
-                .map { e: MarkupHyperEdge? -> getSource(e) }
-                .map(Function<Node, MarkupNode> { obj: Node? -> MarkupNode::class.java.cast(obj) })
-    }
+    fun getMarkupNodeStreamForTextNode(textNode: TextNode): Stream<MarkupNode> =
+            getIncomingEdges(textNode)
+                    .filterIsInstance<MarkupHyperEdge>()
+                    .map { getSource(it) }
+                    .filterIsInstance<MarkupNode>()
+                    .stream()
 
-    private fun getMarkupNode(markupNode: Node?): MarkupNode? {
-        return markupNode as MarkupNode?
-    }
+    private fun getMarkupNode(markupNode: Node): MarkupNode =
+            markupNode as MarkupNode
 
     companion object {
         private val LOG = LoggerFactory.getLogger(CollationGraph::class.java)
