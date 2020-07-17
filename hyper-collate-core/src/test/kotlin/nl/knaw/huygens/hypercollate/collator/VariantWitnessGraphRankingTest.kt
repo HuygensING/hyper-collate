@@ -40,7 +40,7 @@ class VariantWitnessGraphRankingTest : HyperCollateTest() {
         val witnessGraph = TokenMerger.merge(wg0)
         val ranking = VariantWitnessGraphRanking.of(witnessGraph)
         val byRank = ranking.byRank
-        byRank.forEach { (key: Int, value: Set<TokenVertex?>) -> println("$key:$value") }
+        byRank.forEach { (key: Int, value: Set<TokenVertex>) -> println("$key:$value") }
         assertThat(byRank[0]).hasSize(1)
         assert(byRank[0]!!.iterator().next() is StartTokenVertex)
         assertThat(byRank[1]).hasSize(1)

@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.model;
+package nl.knaw.huygens.hypercollate.model
 
 /*-
  * #%L
@@ -20,56 +20,48 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
-import eu.interedition.collatex.Token;
+import eu.interedition.collatex.Token
+import java.util.*
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+open class TextNode internal constructor(vararg tokens: Token) : Node {
+    private val tokenMap: MutableMap<String, Token> = HashMap()
+    private val branchPaths: MutableMap<String, List<Int>> = HashMap()
 
-import static java.util.stream.Collectors.joining;
-
-public class TextNode implements Node {
-  final Map<String, Token> tokenMap = new HashMap<>();
-  private final Map<String, List<Integer>> branchPaths = new HashMap<>();
-  public static final String LABEL = "Text";
-
-  TextNode(Token... tokens) {
-    for (Token token : tokens) {
-      addToken(token);
+    fun addToken(token: Token) {
+        if (token.witness != null) {
+            tokenMap[token.witness.sigil] = token
+        }
     }
-  }
 
-  public void addToken(Token token) {
-    if (token != null && token.getWitness() != null) {
-      tokenMap.put(token.getWitness().getSigil(), token);
+    fun getTokenForWitness(sigil: String?): Token? =
+            tokenMap[sigil]
+
+    val sigils: Set<String>
+        get() = tokenMap.keys
+
+    override fun toString(): String {
+        val tokensString = sigils
+                .sorted()
+                .map { key: String ->
+                    tokenMap[key] ?: error("tokenMap[$key] == null")
+                }.joinToString(", ") { obj: Token -> obj.toString() }
+        return "($tokensString)"
     }
-  }
 
-  public Token getTokenForWitness(String sigil) {
-    return tokenMap.get(sigil);
-  }
+    fun getBranchPath(s: String): List<Int> =
+            branchPaths[s] ?: error("branchPaths[$s] == null")
 
-  public Set<String> getSigils() {
-    return tokenMap.keySet();
-  }
+    fun addBranchPath(sigil: String, branchPath: List<Int>) {
+        branchPaths[sigil] = branchPath
+    }
 
-  @Override
-  public String toString() {
-    String tokensString =
-        getSigils().stream()
-            .sorted()
-            .map(tokenMap::get)
-            .map(Token::toString)
-            .collect(joining(", "));
-    return "(" + tokensString + ")";
-  }
+    companion object {
+        const val LABEL = "Text"
+    }
 
-  public List<Integer> getBranchPath(String s) {
-    return branchPaths.get(s);
-  }
-
-  public void addBranchPath(String sigil, List<Integer> branchPath) {
-    branchPaths.put(sigil, branchPath);
-  }
+    init {
+        for (token in tokens) {
+            addToken(token)
+        }
+    }
 }
