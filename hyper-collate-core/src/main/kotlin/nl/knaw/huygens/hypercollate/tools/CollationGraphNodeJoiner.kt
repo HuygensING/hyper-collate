@@ -132,10 +132,10 @@ object CollationGraphNodeJoiner {
                                 .getIncomingTextEdgeStream(node)
                                 .forEach { e: TextEdge ->
                                     val oSource = originalGraph.getSource(e)
-                                    val mSource: Node? = originalToMerged[oSource]
+                                    val mSource: Node = originalToMerged[oSource]!!
                                     Preconditions.checkNotNull(mSource)
                                     val oTarget: Node = originalGraph.getTarget(e)
-                                    val mTarget: Node? = originalToMerged[oTarget]
+                                    val mTarget: Node = originalToMerged[oTarget]!!
                                     Preconditions.checkNotNull(mTarget)
                                     mergedGraph.addDirectedEdge(mSource, mTarget, e.sigils)
                                 }

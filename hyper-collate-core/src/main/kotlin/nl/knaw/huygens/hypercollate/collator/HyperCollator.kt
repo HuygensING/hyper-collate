@@ -182,7 +182,7 @@ class HyperCollator {
             matchingNode: TextNode) {
         witnessGraph
                 .getMarkupListForTokenVertex(tokenVertexForWitnessGraph)
-                .forEach { markup: Markup -> collationGraph.linkMarkupToText(markupNodeIndex[markup], matchingNode) }
+                .forEach { markup: Markup -> collationGraph.linkMarkupToText(markupNodeIndex[markup]!!, matchingNode) }
     }
 
     private fun getOptimalMatchList(matchList: List<CollatedMatch>): MutableList<CollatedMatch> =
@@ -230,7 +230,7 @@ class HyperCollator {
             witnessGraph: VariantWitnessGraph,
             markupNodeIndex: Map<Markup, MarkupNode>) {
         if (!collatedTokenVertexMap.containsKey(tokenVertex)) {
-            val collationNode = collationGraph.addTextNodeWithTokens(tokenVertex.token)
+            val collationNode = collationGraph.addTextNodeWithTokens(tokenVertex.token!!)
             collationNode.addBranchPath(tokenVertex.sigil, tokenVertex.branchPath)
             collatedTokenVertexMap[tokenVertex] = collationNode
             addMarkupHyperEdges(
@@ -363,7 +363,7 @@ class HyperCollator {
                                     val target = collatedTokenVertexMap[tv] ?: error("target is null!")
                                     val existingTargetNodes = collationGraph
                                             .getOutgoingTextEdgeStream(source)
-                                            .map { edge: TextEdge? -> collationGraph.getTarget(edge) }
+                                            .map { edge: TextEdge -> collationGraph.getTarget(edge) }
                                             .map { it as TextNode }
                                             .collect(toList())
                                     val sigil = tv.sigil
@@ -374,7 +374,7 @@ class HyperCollator {
                                     } else {
                                         val edge = collationGraph
                                                 .getOutgoingTextEdgeStream(source)
-                                                .filter { e: TextEdge? -> target == collationGraph.getTarget(e) }
+                                                .filter { e: TextEdge -> target == collationGraph.getTarget(e) }
                                                 .findFirst()
                                                 .orElseThrow { RuntimeException("There should be an edge!") }
                                         edge.addSigil(sigil)
