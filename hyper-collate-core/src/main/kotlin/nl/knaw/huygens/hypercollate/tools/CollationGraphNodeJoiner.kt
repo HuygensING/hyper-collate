@@ -121,7 +121,8 @@ object CollationGraphNodeJoiner {
     private fun copyIncomingEdges(
             originalGraph: CollationGraph,
             originalToMerged: Map<TextNode, TextNode>,
-            mergedGraph: CollationGraph) {
+            mergedGraph: CollationGraph
+    ) {
         val linkedNodes: MutableSet<Node?> = HashSet()
         originalGraph
                 .traverseTextNodes()
@@ -154,8 +155,9 @@ object CollationGraphNodeJoiner {
                         val mergedMarkupNode = mergedGraph.getMarkupNode(m)
                         originalGraph
                                 .getTextNodeStreamForMarkup(m)
-                                .map { key: TextNode -> originalToMerged[key]!! }
+                                .map { key: TextNode -> originalToMerged[key] }
+                                .filter { it != null }
                                 .distinct()
-                                .forEach { mergedTextNode -> mergedGraph.linkMarkupToText(mergedMarkupNode, mergedTextNode) }
+                                .forEach { mergedTextNode -> mergedGraph.linkMarkupToText(mergedMarkupNode, mergedTextNode!!) }
                     }
 }
