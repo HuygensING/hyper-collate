@@ -49,7 +49,7 @@ class CollationGraph
         return newNode
     }
 
-    fun linkMarkupToText(markupNode: MarkupNode, textNode: TextNode?) {
+    fun linkMarkupToText(markupNode: MarkupNode, textNode: TextNode) {
         val markupHyperEdges = getOutgoingEdges(markupNode)
                 .filterIsInstance<MarkupHyperEdge>()
 
@@ -73,7 +73,7 @@ class CollationGraph
         get() = sigils.isEmpty()
 
     fun getTarget(edge: TextEdge): TextNode {
-        val nodes = getTargets(edge)
+        val nodes = getTargets(edge) ?: error("getTargets(edge) == null")
         if (nodes.size != 1) {
             throw RuntimeException("trouble!")
         }
@@ -85,7 +85,7 @@ class CollationGraph
         super.addDirectedHyperEdge(edge, TextEdge.LABEL, source, target)
     }
 
-    fun getOutgoingTextEdgeStream(source: Node?): Stream<TextEdge> =
+    fun getOutgoingTextEdgeStream(source: Node): Stream<TextEdge> =
             getOutgoingEdges(source)
                     .filterIsInstance<TextEdge>()
                     .stream()
@@ -114,7 +114,7 @@ class CollationGraph
         return result
     }
 
-    fun getIncomingTextEdgeStream(node: TextNode?): Stream<TextEdge> =
+    fun getIncomingTextEdgeStream(node: TextNode): Stream<TextEdge> =
             getIncomingEdges(node).filterIsInstance<TextEdge>().stream()
 
     val markupStream: Stream<Markup>
@@ -128,7 +128,7 @@ class CollationGraph
         val markupHyperEdges = getOutgoingEdges(originalMarkupNode)
                 .filterIsInstance<MarkupHyperEdge>()
         Preconditions.checkArgument(markupHyperEdges.size == 1)
-        return getTargets(markupHyperEdges[0])
+        return getTargets(markupHyperEdges[0])!!
                 .filterIsInstance<TextNode>()
                 .stream()
     }

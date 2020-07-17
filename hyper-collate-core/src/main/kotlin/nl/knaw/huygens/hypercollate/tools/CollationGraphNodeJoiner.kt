@@ -154,7 +154,7 @@ object CollationGraphNodeJoiner {
                         val mergedMarkupNode = mergedGraph.getMarkupNode(m)
                         originalGraph
                                 .getTextNodeStreamForMarkup(m)
-                                .map { key: TextNode -> originalToMerged[key] }
+                                .map { key: TextNode -> originalToMerged[key]!! }
                                 .distinct()
                                 .forEach { mergedTextNode -> mergedGraph.linkMarkupToText(mergedMarkupNode, mergedTextNode) }
                     }

@@ -58,8 +58,8 @@ class CollationGraphRanking : Iterable<Set<TextNode>>, Function<TextNode, Int> {
                 val canRank = AtomicBoolean(true)
                 val rank = AtomicInteger(-1)
                 graph.getIncomingEdges(node)
-                        .filter { obj: Edge? -> TextEdge::class.java.isInstance(obj) }
-                        .map { e: Edge -> graph.getSource(e) }
+                        .filter { obj: Edge -> TextEdge::class.java.isInstance(obj) }
+                        .map { e: Edge -> graph.getSource(e)!! }
                         .forEach { incomingTextNode: Node ->
                             val currentRank = rank.get()
                             val incomingRank = ranking._byNode[incomingTextNode]
