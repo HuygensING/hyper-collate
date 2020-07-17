@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.model;
+package nl.knaw.huygens.hypercollate.model
 
 /*-
  * #%L
@@ -20,81 +20,52 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
-import eu.interedition.collatex.Token;
+import java.util.*
+import java.util.stream.Stream
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
+class SimpleTokenVertex(override val token: MarkedUpToken) : TokenVertex, Comparable<SimpleTokenVertex> {
+    private val incomingVertices: MutableList<TokenVertex> = ArrayList()
+    private val outgoingVertices: MutableList<TokenVertex> = ArrayList()
 
-public class SimpleTokenVertex implements TokenVertex, Comparable<SimpleTokenVertex> {
+    override var branchPath: List<Int> = listOf()
+        private set
 
-  private final MarkedUpToken token;
-  private final List<TokenVertex> incomingVertices = new ArrayList<>();
-  private final List<TokenVertex> outgoingVertices = new ArrayList<>();
-  private List<Integer> branchPath;
+    override fun addIncomingTokenVertex(incoming: TokenVertex) {
+        incomingVertices.add(incoming)
+    }
 
-  public SimpleTokenVertex(MarkedUpToken token) {
-    this.token = token;
-  }
+    override val incomingTokenVertexStream: Stream<TokenVertex>
+        get() = incomingVertices.stream()
 
-  @Override
-  public Token getToken() {
-    return token;
-  }
+    override fun addOutgoingTokenVertex(outgoing: TokenVertex) {
+        outgoingVertices.add(outgoing)
+    }
 
-  @Override
-  public void addIncomingTokenVertex(TokenVertex incoming) {
-    incomingVertices.add(incoming);
-  }
+    override val outgoingTokenVertexStream: Stream<TokenVertex>
+        get() = outgoingVertices.stream()
 
-  @Override
-  public Stream<TokenVertex> getIncomingTokenVertexStream() {
-    return incomingVertices.stream();
-  }
+    override val sigil: String
+        get() = token.witness.sigil
 
-  @Override
-  public void addOutgoingTokenVertex(TokenVertex outgoing) {
-    outgoingVertices.add(outgoing);
-  }
+    fun setBranchPath(branchPath: List<Int>): SimpleTokenVertex {
+        this.branchPath = branchPath
+        return this
+    }
 
-  @Override
-  public Stream<TokenVertex> getOutgoingTokenVertexStream() {
-    return outgoingVertices.stream();
-  }
+    val content: String
+        get() = token.content
 
-  @Override
-  public String getSigil() {
-    return token.getWitness().getSigil();
-  }
+    val normalizedContent: String
+        get() = token.normalizedContent
 
-  public SimpleTokenVertex setBranchPath(List<Integer> branchPath) {
-    this.branchPath = branchPath;
-    return this;
-  }
+    val parentXPath: String
+        get() = token.parentXPath
 
-  @Override
-  public List<Integer> getBranchPath() {
-    return branchPath;
-  }
+    val indexNumber: Long
+        get() = token.indexNumber
 
-  public String getContent() {
-    return token.getContent();
-  }
+    override fun compareTo(other: SimpleTokenVertex): Int {
+        return token.indexNumber.compareTo(other.token.indexNumber)
+    }
 
-  public String getNormalizedContent() {
-    return token.getNormalizedContent();
-  }
-
-  public String getParentXPath() {
-    return token.getParentXPath();
-  }
-
-  @Override
-  public int compareTo(SimpleTokenVertex other) {
-    return token.getIndexNumber().compareTo(other.token.getIndexNumber());
-  }
-
-  public Long getIndexNumber() {
-    return token.getIndexNumber();
-  }
 }
