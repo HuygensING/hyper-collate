@@ -1,10 +1,4 @@
-package nl.knaw.huygens.hypercollate.model;
-
-import eu.interedition.collatex.Token;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
+package nl.knaw.huygens.hypercollate.model
 
 /*-
  * #%L
@@ -26,46 +20,32 @@ import java.util.stream.Stream;
  * #L%
  */
 
-public class StartTokenVertex implements TokenVertex {
-  private final List<TokenVertex> outgoingTokenVertices = new ArrayList<>();
-  private final String sigil;
+import eu.interedition.collatex.Token
+import java.util.*
+import java.util.stream.Stream
 
-  StartTokenVertex(String sigil) {
-    this.sigil = sigil;
-  }
+class StartTokenVertex internal constructor(override val sigil: String) : TokenVertex {
 
-  @Override
-  public Token getToken() {
-    return null;
-  }
+    private val outgoingTokenVertices: MutableList<TokenVertex> = ArrayList()
 
-  @Override
-  public Stream<TokenVertex> getIncomingTokenVertexStream() {
-    return Stream.empty();
-  }
+    override val token: Token?
+        get() = null
 
-  @Override
-  public Stream<TokenVertex> getOutgoingTokenVertexStream() {
-    return outgoingTokenVertices.stream();
-  }
+    override val incomingTokenVertexStream: Stream<TokenVertex>
+        get() = Stream.empty()
 
-  @Override
-  public String getSigil() {
-    return sigil;
-  }
+    override val outgoingTokenVertexStream: Stream<TokenVertex>
+        get() = outgoingTokenVertices.stream()
 
-  @Override
-  public List<Integer> getBranchPath() {
-    return new ArrayList<>();
-  }
+    override val branchPath: List<Int>
+        get() = ArrayList()
 
-  @Override
-  public void addIncomingTokenVertex(TokenVertex incoming) {
-    throw new RuntimeException(this.getClass().getName() + " has no incoming TokenVertex");
-  }
+    override fun addIncomingTokenVertex(incoming: TokenVertex) {
+        throw RuntimeException(this.javaClass.name + " has no incoming TokenVertex")
+    }
 
-  @Override
-  public void addOutgoingTokenVertex(TokenVertex outgoing) {
-    this.outgoingTokenVertices.add(outgoing);
-  }
+    override fun addOutgoingTokenVertex(outgoing: TokenVertex) {
+        outgoingTokenVertices.add(outgoing)
+    }
+
 }

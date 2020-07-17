@@ -24,7 +24,7 @@ import eu.interedition.collatex.Token
 import java.util.stream.Stream
 
 interface TokenVertex {
-    val token: Token
+    val token: Token?
     fun addIncomingTokenVertex(incoming: TokenVertex)
     val incomingTokenVertexStream: Stream<TokenVertex>
     fun addOutgoingTokenVertex(outgoing: TokenVertex)
