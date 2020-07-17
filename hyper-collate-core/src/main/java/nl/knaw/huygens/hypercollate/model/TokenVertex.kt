@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.model;
+package nl.knaw.huygens.hypercollate.model
 
 /*-
  * #%L
@@ -19,24 +19,16 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
-import eu.interedition.collatex.Token;
 
-import java.util.List;
-import java.util.stream.Stream;
+import eu.interedition.collatex.Token
+import java.util.stream.Stream
 
-public interface TokenVertex {
-
-  Token getToken();
-
-  void addIncomingTokenVertex(TokenVertex incoming);
-
-  Stream<TokenVertex> getIncomingTokenVertexStream();
-
-  void addOutgoingTokenVertex(TokenVertex outgoing);
-
-  Stream<TokenVertex> getOutgoingTokenVertexStream();
-
-  String getSigil();
-
-  List<Integer> getBranchPath();
+interface TokenVertex {
+    val token: Token
+    fun addIncomingTokenVertex(incoming: TokenVertex)
+    val incomingTokenVertexStream: Stream<TokenVertex>
+    fun addOutgoingTokenVertex(outgoing: TokenVertex)
+    val outgoingTokenVertexStream: Stream<TokenVertex>
+    val sigil: String
+    val branchPath: List<Int>
 }

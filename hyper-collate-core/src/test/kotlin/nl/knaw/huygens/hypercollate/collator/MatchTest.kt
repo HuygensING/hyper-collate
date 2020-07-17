@@ -54,12 +54,24 @@ class MatchTest : HyperCollateTest() {
 
     private fun mockVertexWithSigil(sigil: String): TokenVertex =
             object : TokenVertex {
-                override fun getToken(): Token = dummyToken
+                override val token: Token
+                    get() = dummyToken
+
                 override fun addIncomingTokenVertex(incoming: TokenVertex) {}
-                override fun getIncomingTokenVertexStream(): Stream<TokenVertex> = Stream.empty()
+
+                override val incomingTokenVertexStream: Stream<TokenVertex>
+                    get() = Stream.empty()
+
                 override fun addOutgoingTokenVertex(outgoing: TokenVertex) {}
-                override fun getOutgoingTokenVertexStream(): Stream<TokenVertex> = Stream.empty()
-                override fun getSigil(): String = sigil
-                override fun getBranchPath(): List<Int> = ArrayList()
+
+                override val outgoingTokenVertexStream: Stream<TokenVertex>
+                    get() = Stream.empty()
+
+                override val sigil: String
+                    get() = sigil
+
+                override val branchPath: List<Int>
+                    get() = ArrayList()
+
             }
 }

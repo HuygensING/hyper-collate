@@ -65,7 +65,7 @@ object TokenMerger {
             }
             val endTokenVertex = mergedGraph.endTokenVertex
             originalVertex
-                    .getIncomingTokenVertexStream()
+                    .incomingTokenVertexStream
                     .forEach { tv: TokenVertex ->
                         val indexNumber = (tv.token as MarkedUpToken).indexNumber
                         val mergedTokenVertex = originalToMergedMap[indexNumber]
