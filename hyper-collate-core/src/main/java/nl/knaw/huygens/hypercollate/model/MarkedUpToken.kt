@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.model;
+package nl.knaw.huygens.hypercollate.model
 
 /*-
  * #%L
@@ -20,91 +20,68 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
-import eu.interedition.collatex.Token;
-import eu.interedition.collatex.Witness;
+import eu.interedition.collatex.Token
+import eu.interedition.collatex.Witness
 
-public class MarkedUpToken implements Token {
-  private String content;
-  private String normalizedContent;
-  private SimpleWitness witness;
-  private Long index = 0L;
-  private String parentXPath = "";
-  private String rdg;
+class MarkedUpToken : Token {
 
-  public MarkedUpToken setContent(String content) {
-    this.content = content;
-    return this;
-  }
+    var content: String = ""
+        private set
+    var normalizedContent: String = ""
 
-  public String getContent() {
-    return this.content;
-  }
+    private var witness: SimpleWitness? = null
+    var indexNumber = 0L
+        private set
+    var parentXPath = ""
+        private set
+    var rdg: String = ""
+        private set
 
-  public MarkedUpToken setNormalizedContent(String normalizedContent) {
-    this.normalizedContent = normalizedContent;
-    return this;
-  }
+    fun setContent(content: String): MarkedUpToken {
+        this.content = content
+        return this
+    }
 
-  public String getNormalizedContent() {
-    return this.normalizedContent;
-  }
+    fun setWitness(witness: SimpleWitness): MarkedUpToken {
+        this.witness = witness
+        return this
+    }
 
-  public MarkedUpToken setWitness(SimpleWitness witness) {
-    this.witness = witness;
-    return this;
-  }
+    fun setRdg(rdg: String): MarkedUpToken {
+        this.rdg = rdg
+        return this
+    }
 
-  public MarkedUpToken setRdg(String rdg) {
-    this.rdg = rdg;
-    return this;
-  }
+    override fun getWitness(): Witness =
+            witness!!
 
-  public String getRdg() {
-    return rdg;
-  }
+    fun setIndexNumber(index: Long): MarkedUpToken {
+        indexNumber = index
+        return this
+    }
 
-  @Override
-  public Witness getWitness() {
-    return witness;
-  }
+    fun setParentXPath(parentXPath: String): MarkedUpToken {
+        this.parentXPath = parentXPath
+        return this
+    }
 
-  public MarkedUpToken setIndexNumber(Long index) {
-    this.index = index;
-    return this;
-  }
+    override fun toString(): String =
+            (witness!!.sigil
+                    + indexNumber
+                    + ":"
+                    + parentXPath
+                    + "='"
+                    + content.replace("\n", "\\n")
+                    + "'")
 
-  public Long getIndexNumber() {
-    return this.index;
-  }
-
-  public MarkedUpToken setParentXPath(String parentXPath) {
-    this.parentXPath = parentXPath;
-    return this;
-  }
-
-  public String getParentXPath() {
-    return this.parentXPath;
-  }
-
-  @Override
-  public String toString() {
-    return witness.getSigil()
-        + index
-        + ":"
-        + getParentXPath()
-        + "='"
-        + content.replace("\n", "\\n")
-        + "'";
-  }
-
-  @Override
-  public MarkedUpToken clone() {
-    return new MarkedUpToken()
-        .setWitness(witness)
-        .setContent(content)
-        .setRdg(rdg)
-        .setNormalizedContent(normalizedContent)
-        .setIndexNumber(index)
-        .setParentXPath(parentXPath);
-  }
+    fun clone(): MarkedUpToken {
+        val copy = MarkedUpToken()
+                .setWitness(witness!!)
+                .setContent(content)
+                .setRdg(rdg)
+                .setIndexNumber(indexNumber)
+                .setParentXPath(parentXPath)
+        copy.normalizedContent = this.normalizedContent
+        return copy
+    }
 }

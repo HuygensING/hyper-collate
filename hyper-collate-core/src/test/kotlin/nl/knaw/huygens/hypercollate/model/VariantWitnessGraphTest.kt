@@ -123,10 +123,10 @@ class VariantWitnessGraphTest : HyperCollateTest() {
     ): SimpleTokenVertex {
         val token = MarkedUpToken()
                 .setContent(string)
-                .setNormalizedContent(string.toLowerCase())
                 .setParentXPath(parentXPath)
                 .setWitness(witness)
                 .setIndexNumber(index)
+                .apply { normalizedContent = string.toLowerCase() }
         return SimpleTokenVertex(token)
     }
 

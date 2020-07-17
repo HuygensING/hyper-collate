@@ -83,11 +83,11 @@ object TokenMerger {
         }
         val mergedToken = MarkedUpToken()
                 .setContent(originalToken.content)
-                .setNormalizedContent(originalToken.normalizedContent)
                 .setParentXPath(originalToken.parentXPath)
                 .setWitness(originalToken.witness as SimpleWitness)
                 .setRdg(originalToken.rdg)
                 .setIndexNumber(tokenNumber)
+                .apply { normalizedContent = originalToken.normalizedContent }
         val mergedVertex = SimpleTokenVertex(mergedToken).setBranchPath(originalVertex.branchPath)
         originalGraph
                 .getMarkupListForTokenVertex(originalVertex)
