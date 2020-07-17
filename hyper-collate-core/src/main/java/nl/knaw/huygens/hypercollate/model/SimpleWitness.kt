@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.model;
+package nl.knaw.huygens.hypercollate.model
 
 /*-
  * #%L
@@ -20,18 +20,8 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
-import eu.interedition.collatex.Witness;
+import eu.interedition.collatex.Witness
 
-public class SimpleWitness implements Witness {
-
-  private final String sigil;
-
-  public SimpleWitness(String sigil) {
-    this.sigil = sigil;
-  }
-
-  @Override
-  public String getSigil() {
-    return sigil;
-  }
+class SimpleWitness(private val sigil: String) : Witness {
+    override fun getSigil(): String = sigil
 }
