@@ -29,7 +29,6 @@ import nl.knaw.huygens.hypercollate.model.*
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer
 import org.assertj.core.util.Sets
-import org.junit.Ignore
 import org.junit.Test
 import org.slf4j.LoggerFactory
 import java.text.MessageFormat.format
@@ -39,8 +38,8 @@ import java.util.stream.Collectors
 class HyperCollatorTest : HyperCollateTest() {
     private val hyperCollator = HyperCollator()
 
-    @Ignore("takes too long")
-//    @Test(timeout = 40_000)
+    //    @Ignore("takes too long")
+    @Test(timeout = 40_000)
     fun testCollationWithManyMatches() {
         val importer = XMLImporter()
         val xml1 = ("<seg>Ik had een buurvrouw, een paar deuren verder,"
@@ -56,7 +55,7 @@ class HyperCollatorTest : HyperCollateTest() {
                 + "weinig met mij; we knikten alleen naar elkaar, en als ik Rocky bij me had, maakte ze van het knikken iets dat"
                 + " nog wat sneller afgehandeld moest worden dan anders.</seg>")
         val w2 = importer.importXML("W2", xml2)
-        val expected = """
+        val expectedDot = """
             digraph CollationGraph{
             labelloc=b
             t000 [label="";shape=doublecircle,rank=middle]
@@ -206,12 +205,14 @@ class HyperCollatorTest : HyperCollateTest() {
             t058->t035[label="W2"]
             t059->t045[label="W2"]
             }""".trimIndent()
+        val expectedTable = """
+            """.trimIndent()
         LOG.info("w1={}", xml1)
         LOG.info("w2={}", xml2)
-        val collationGraph = testHyperCollation(w1, w2, expected)
+        val collationGraph = testHyperCollation(w1, w2, expectedDot, expectedTable)
     }
 
-    @Test(timeout = 10000)
+    @Test//(timeout = 10000)
     fun testAppRdgWithAddDel() {
         val importer = XMLImporter()
         val wF = importer.importXML(
@@ -224,7 +225,7 @@ class HyperCollatorTest : HyperCollateTest() {
         val wQ = importer.importXML(
                 "W2",
                 "<s>One must have lived longer with this system, to appreciate its advantages.</s>")
-        val expected = """
+        val expectedDot = """
             digraph CollationGraph{
             labelloc=b
             t000 [label="";shape=doublecircle,rank=middle]
@@ -247,7 +248,16 @@ class HyperCollatorTest : HyperCollateTest() {
             t007->t003[label="W1"]
             }
             """.trimIndent()
-        val collationGraph = testHyperCollation(wF, wQ, expected)
+        val expectedTable = """
+            ┌────┬────────────────────────────────┬──────────────┬─┬─────────────────────────────────────┐
+            │[W1]│                                │<3>[+]       a│ │                                     │
+            │    │                                │<2>[+-] such a│ │                                     │
+            │    │One must have lived longer with │<1>[-] this   │ │system, to appreciate its advantages.│
+            ├────┼────────────────────────────────┼──────────────┼─┼─────────────────────────────────────┤
+            │[W2]│One must have lived longer with │this          │ │system, to appreciate its advantages.│
+            └────┴────────────────────────────────┴──────────────┴─┴─────────────────────────────────────┘
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
     }
 
     @Test(timeout = 10000)
@@ -263,7 +273,7 @@ class HyperCollatorTest : HyperCollateTest() {
         val wQ = importer.importXML(
                 "W2",
                 "<s>One must have lived longer with this system, to appreciate its advantages.</s>")
-        val expected = """
+        val expectedDot = """
             digraph CollationGraph{
             labelloc=b
             t000 [label="";shape=doublecircle,rank=middle]
@@ -286,7 +296,16 @@ class HyperCollatorTest : HyperCollateTest() {
             t007->t003[label="W1"]
             }
             """.trimIndent()
-        val collationGraph = testHyperCollation(wF, wQ, expected)
+        val expectedTable = """
+            ┌────┬────────────────────────────────┬──────────┬─┬─────────────────────────────────────┐
+            │[W1]│                                │<3>      a│ │                                     │
+            │    │                                │<2> such a│ │                                     │
+            │    │One must have lived longer with │<1> this  │ │system, to appreciate its advantages.│
+            ├────┼────────────────────────────────┼──────────┼─┼─────────────────────────────────────┤
+            │[W2]│One must have lived longer with │this      │ │system, to appreciate its advantages.│
+            └────┴────────────────────────────────┴──────────┴─┴─────────────────────────────────────┘
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
     }
 
     @Test(timeout = 10000)
@@ -294,23 +313,29 @@ class HyperCollatorTest : HyperCollateTest() {
         val importer = XMLImporter()
         val wF = importer.importXML(
                 "F",
-                """<text>
-    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,
-        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>
-</text>""")
+                """
+                |<text>
+                |    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,
+                |        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>
+                |</text>
+                """.trimMargin())
         val wQ = importer.importXML(
                 "Q",
-                """<text>
-    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !
-        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>
-</text>""")
+                """
+                |<text>
+                |    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !
+                |        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>
+                |</text>
+                """.trimMargin())
         val wZ = importer.importXML(
                 "Z",
-                """<text>
-    <s>Hoe zoet moet nochtans zijn dit trachten naar een vrouw !
-        Die dagen van ongewisheid vóór de liefelijke toestemming.</s>
-</text>""")
-        val expected = """
+                """
+                |<text>
+                |    <s>Hoe zoet moet nochtans zijn dit trachten naar een vrouw !
+                |        Die dagen van ongewisheid vóór de liefelijke toestemming.</s>
+                |</text>
+                """.trimMargin())
+        val expectedDot = """
             digraph CollationGraph{
             labelloc=b
             t000 [label="";shape=doublecircle,rank=middle]
@@ -361,14 +386,27 @@ class HyperCollatorTest : HyperCollateTest() {
             t018->t001[label="Q,Z"]
             }
             """.trimIndent()
-        val collationGraph = testHyperCollation3(wF, wQ, wZ, expected)
+        val expectedTable = """
+            ┌───┬────────────────────────────────┬─────┬─────────────────┬─┬────┬─────┬──────┬────────────────┬─────────────────────┬────────┬─────┬──────────────────────┬─┐
+            │[F]│                                │     │[+] trachten_naar│ │    │     │      │                │                     │        │     │                      │ │
+            │   │Hoe_zoet_moet_nochtans_zijn_dit_│<lb/>│[-] werven_om    │_│een_│     │vrouw │,_de_           │ongewisheid_         │vóór_de_│<lb/>│liefelijke_toestemming│!│
+            ├───┼────────────────────────────────┼─────┼─────────────────┼─┼────┼─────┼──────┼────────────────┼─────────────────────┼────────┼─────┼──────────────────────┼─┤
+            │[Q]│                                │     │[+] trachten_naar│ │    │     │      │                │                     │        │     │                      │ │
+            │   │Hoe_zoet_moet_nochtans_zijn_dit_│     │[-] werven_om    │_│een_│<lb/>│vrouw_│!_Die_dagen_van_│nerveuze_verwachting_│vóór_de_│     │liefelijke_toestemming│.│
+            ├───┼────────────────────────────────┼─────┼─────────────────┼─┼────┼─────┼──────┼────────────────┼─────────────────────┼────────┼─────┼──────────────────────┼─┤
+            │[Z]│Hoe_zoet_moet_nochtans_zijn_dit_│     │trachten_naar_   │ │een_│     │vrouw_│!Die_dagen_van_ │ongewisheid_         │vóór_de_│     │liefelijke_toestemming│.│
+            └───┴────────────────────────────────┴─────┴─────────────────┴─┴────┴─────┴──────┴────────────────┴─────────────────────┴────────┴─────┴──────────────────────┴─┘
+            """.trimIndent()
+        val collationGraph = testHyperCollation3(wF, wQ, wZ, expectedDot, expectedTable)
 
         // test matching tokens
         val n1 = CollationGraphAssert.textNodeSketch()
                 .withWitnessSegmentSketch("F", "Hoe zoet moet nochtans zijn dit ")
                 .withWitnessSegmentSketch("Q", "Hoe zoet moet nochtans zijn dit ")
                 .withWitnessSegmentSketch("Z", "Hoe zoet moet nochtans zijn dit ")
-        val n2 = CollationGraphAssert.textNodeSketch().withWitnessSegmentSketch("F", " ").withWitnessSegmentSketch("Q", " ")
+        val n2 = CollationGraphAssert.textNodeSketch()
+                .withWitnessSegmentSketch("F", " ")
+                .withWitnessSegmentSketch("Q", " ")
         val n3 = CollationGraphAssert.textNodeSketch()
                 .withWitnessSegmentSketch("F", "een ")
                 .withWitnessSegmentSketch("Q", "een ")
@@ -407,15 +445,19 @@ class HyperCollatorTest : HyperCollateTest() {
     @Test(timeout = 10000)
     fun testHierarchy() {
         val importer = XMLImporter()
-        val fXML = """<text>
-    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,
-        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>
-</text>"""
+        val fXML = """
+            |<text>
+            |    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,
+            |        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>
+            |</text>
+            """.trimMargin()
         val wF = importer.importXML("F", fXML)
-        val qXML = """<text>
-    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !
-        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>
-</text>"""
+        val qXML = """
+            |<text>
+            |    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !
+            |        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>
+            |</text>
+            """.trimMargin()
         val wQ = importer.importXML("Q", qXML)
         LOG.info(fXML)
         LOG.info(qXML)
@@ -467,7 +509,7 @@ class HyperCollatorTest : HyperCollateTest() {
             }
             """.trimIndent()
         verifyDotExport(wQ, expectedDotQ)
-        val expected = """
+        val expectedDot = """
             digraph CollationGraph{
             labelloc=b
             t000 [label="";shape=doublecircle,rank=middle]
@@ -510,7 +552,17 @@ class HyperCollatorTest : HyperCollateTest() {
             t015->t001[label="Q"]
             }
             """.trimIndent()
-        val collationGraph = testHyperCollation(wF, wQ, expected)
+        val expectedTable = """
+            ┌───┬────────────────────────────────┬─────┬─────────────────┬─────┬─────┬──────┬─────────────────────────────────────┬────────┬─────┬──────────────────────┬─┐
+            │[F]│                                │     │[+] trachten naar│     │     │      │                                     │        │     │                      │ │
+            │   │Hoe zoet moet nochtans zijn dit │<lb/>│[-] werven om    │een  │     │vrouw │, de ongewisheid                     │vóór de │<lb/>│liefelijke toestemming│!│
+            ├───┼────────────────────────────────┼─────┼─────────────────┼─────┼─────┼──────┼─────────────────────────────────────┼────────┼─────┼──────────────────────┼─┤
+            │[Q]│                                │     │[+] trachten naar│     │     │      │                                     │        │     │                      │ │
+            │   │Hoe zoet moet nochtans zijn dit │     │[-] werven om    │een  │<lb/>│vrouw │! Die dagen van nerveuze verwachting │vóór de │     │liefelijke toestemming│.│
+            └───┴────────────────────────────────┴─────┴─────────────────┴─────┴─────┴──────┴─────────────────────────────────────┴────────┴─────┴──────────────────────┴─┘
+            """.trimIndent()
+
+        val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
 
         // test matching tokens
         assertThat(collationGraph)
@@ -543,19 +595,23 @@ class HyperCollatorTest : HyperCollateTest() {
         val importer = XMLImporter()
         val wF = importer.importXML(
                 "F",
-                """<?xml version="1.0" encoding="UTF-8"?>
-<text>
-    <s>De vent was woedend en maakte <del type="instantCorrection">Shiriar</del> den bedremmelden
-        Sultan uit voor "lompen boer".</s>
-</text>""")
+                """
+                |<?xml version="1.0" encoding="UTF-8"?>
+                |<text>
+                |    <s>De vent was woedend en maakte <del type="instantCorrection">Shiriar</del> den bedremmelden
+                |        Sultan uit voor "lompen boer".</s>
+                |</text>
+                """.trimMargin())
         val wQ = importer.importXML(
                 "Q",
-                """<?xml version="1.0" encoding="UTF-8"?>
-<text>
-    <s>De vent was woedend en maakte <del>Shiriar</del>
-        <add>den bedremmelden <del>man</del>
-            <add>Sultan</add></add> uit voor "lompen boer".</s>
-</text>""")
+                """
+                |<?xml version="1.0" encoding="UTF-8"?>
+                |<text>
+                |    <s>De vent was woedend en maakte <del>Shiriar</del>
+                |        <add>den bedremmelden <del>man</del>
+                |            <add>Sultan</add></add> uit voor "lompen boer".</s>
+                |</text>
+                """.trimMargin())
         val expectedDotF = """
             digraph VariantWitnessGraph{
             graph [rankdir=LR]
@@ -597,7 +653,7 @@ class HyperCollatorTest : HyperCollateTest() {
             }
             """.trimIndent()
         verifyDotExport(wQ, expectedDotQ)
-        val expected = """
+        val expectedDot = """
             digraph CollationGraph{
             labelloc=b
             t000 [label="";shape=doublecircle,rank=middle]
@@ -626,7 +682,15 @@ class HyperCollatorTest : HyperCollateTest() {
             t009->t008[label="Q"]
             }
             """.trimIndent()
-        val collationGraph = testHyperCollation(wF, wQ, expected)
+        val expectedTable = """
+            ┌───┬──────────────────────────────┬───────────┬─┬─────────────────────┬──────────┬─┬───────────────────────┐
+            │[F]│De vent was woedend en maakte │[-] Shiriar│ │den bedremmelden     │Sultan    │ │uit voor "lompen boer".│
+            ├───┼──────────────────────────────┼───────────┼─┼─────────────────────┼──────────┼─┼───────────────────────┤
+            │[Q]│                              │           │ │                     │[+] Sultan│ │                       │
+            │   │De vent was woedend en maakte │[-] Shiriar│ │[+] den bedremmelden │[-] man   │ │uit voor "lompen boer".│
+            └───┴──────────────────────────────┴───────────┴─┴─────────────────────┴──────────┴─┴───────────────────────┘
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
         assertThat(collationGraph)
                 .containsTextNodesMatching(
                         CollationGraphAssert.textNodeSketch()
@@ -652,7 +716,7 @@ class HyperCollatorTest : HyperCollateTest() {
         val wF = importer.importXML("A", "<text>The dog's big eyes.</text>")
         val wQ = importer.importXML(
                 "B", "<text>The dog's <del>big black ears</del><add>brown eyes</add>.</text>")
-        val expected = """
+        val expectedDot = """
             digraph CollationGraph{
             labelloc=b
             t000 [label="";shape=doublecircle,rank=middle]
@@ -674,7 +738,15 @@ class HyperCollatorTest : HyperCollateTest() {
             t007->t004[label="B"]
             }
             """.trimIndent()
-        val collationGraph = testHyperCollation(wF, wQ, expected)
+        val expectedTable = """
+            ┌───┬──────────┬──────────┬──────────────┬─┐
+            │[A]│The dog's │big       │eyes          │.│
+            ├───┼──────────┼──────────┼──────────────┼─┤
+            │[B]│          │[+]  brown│[+]       eyes│ │
+            │   │The dog's │[-] big   │[-] black ears│.│
+            └───┴──────────┴──────────┴──────────────┴─┘
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
         assertThat(collationGraph)
                 .containsOnlyTextNodesMatching(
                         CollationGraphAssert.textNodeSketch()
@@ -688,7 +760,9 @@ class HyperCollatorTest : HyperCollateTest() {
                         CollationGraphAssert.textNodeSketch()
                                 .withWitnessSegmentSketch("A", "eyes")
                                 .withWitnessSegmentSketch("B", "eyes"),
-                        CollationGraphAssert.textNodeSketch().withWitnessSegmentSketch("A", ".").withWitnessSegmentSketch("B", "."))
+                        CollationGraphAssert.textNodeSketch()
+                                .withWitnessSegmentSketch("A", ".")
+                                .withWitnessSegmentSketch("B", "."))
     }
 
     @Test(timeout = 10000)
@@ -696,7 +770,7 @@ class HyperCollatorTest : HyperCollateTest() {
         val importer = XMLImporter()
         val wF = importer.importXML("A", "<text>T b b b b b b b Y</text>")
         val wQ = importer.importXML("B", "<text>X b b b b b b b T</text>")
-        val expected = """
+        val expectedDot = """
             digraph CollationGraph{
             labelloc=b
             t000 [label="";shape=doublecircle,rank=middle]
@@ -716,7 +790,14 @@ class HyperCollatorTest : HyperCollateTest() {
             t006->t001[label="B"]
             }
             """.trimIndent()
-        val collationGraph = testHyperCollation(wF, wQ, expected)
+        val expectedTable = """
+            ┌───┬──┬──────────────┬─┐
+            │[A]│T │b b b b b b b │Y│
+            ├───┼──┼──────────────┼─┤
+            │[B]│X │b b b b b b b │T│
+            └───┴──┴──────────────┴─┘
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
         assertThat(collationGraph)
                 .containsTextNodesMatching(
                         CollationGraphAssert.textNodeSketch()
@@ -734,7 +815,7 @@ class HyperCollatorTest : HyperCollateTest() {
         val importer = XMLImporter()
         val wF = importer.importXML("A", "<text>A b C d E C f G H</text>")
         val wQ = importer.importXML("B", "<text>A H i j E C G k</text>")
-        val expected = """
+        val expectedDot = """
             digraph CollationGraph{
             labelloc=b
             t000 [label="";shape=doublecircle,rank=middle]
@@ -761,7 +842,14 @@ class HyperCollatorTest : HyperCollateTest() {
             t009->t001[label="B"]
             }
             """.trimIndent()
-        val collationGraph = testHyperCollation(wF, wQ, expected)
+        val expectedTable = """
+            ┌───┬──┬──────┬────┬──┬──┬─┐
+            │[A]│A │b C d │E C │f │G │H│
+            ├───┼──┼──────┼────┼──┼──┼─┤
+            │[B]│A │H i j │E C │  │G │k│
+            └───┴──┴──────┴────┴──┴──┴─┘
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
         assertThat(collationGraph)
                 .containsTextNodesMatching(
                         CollationGraphAssert.textNodeSketch()
@@ -807,7 +895,7 @@ class HyperCollatorTest : HyperCollateTest() {
             """.trimIndent()
         LOG.info("T: {}", xml2)
         val wQ = importer.importXML("T", xml2)
-        val expected = """
+        val expectedDot = """
             digraph CollationGraph{
             labelloc=b
             t000 [label="";shape=doublecircle,rank=middle]
@@ -836,7 +924,14 @@ class HyperCollatorTest : HyperCollateTest() {
             t009->t001[label="T"]
             }
             """.trimIndent()
-        val collationGraph = testHyperCollation(wF, wQ, expected)
+        val expectedTable = """
+            ┌───┬──────────────────────────────────────────────────────────────────┬─────────────────────────────────────────────┬────────────────┬────────────────┬─────────┬───────────────────────────────────────────┬────┐
+            │[H]│                                                                  │Leaning her bony breast on the hard thorn    │she crooned out │her forgiveness │         │.Was it then that she had her consolations │    │
+            ├───┼──────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────┼────────────────┼────────────────┼─────────┼───────────────────────────────────────────┼────┤
+            │[T]│granting, as she stood the chair straight by the dressing table,  │[+] leaning her bony breast on the hard thorn│,               │her forgiveness │of it all│.Was it then that she had her consolations │... │
+            └───┴──────────────────────────────────────────────────────────────────┴─────────────────────────────────────────────┴────────────────┴────────────────┴─────────┴───────────────────────────────────────────┴────┘
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
         assertThat(collationGraph)
                 .containsTextNodesMatching(
                         CollationGraphAssert.textNodeSketch()
@@ -858,12 +953,14 @@ class HyperCollatorTest : HyperCollateTest() {
     @Test(timeout = 10000)
     fun testMaryShellyGodwinFrankensteinFragment1() {
         val importer = XMLImporter()
-        val xmlN = """<text>
-<s>so destitute of every hope of consolation to live
-<del rend="strikethrough">-</del>
-<add place="overwritten" hand="#pbs">?</add> oh no - ...
-</s>
-</text>"""
+        val xmlN = """
+            <text>
+            <s>so destitute of every hope of consolation to live
+            <del rend="strikethrough">-</del>
+            <add place="overwritten" hand="#pbs">?</add> oh no - ...
+            </s>
+            </text>
+            """.trimIndent()
         val wF = importer.importXML("N", xmlN)
         LOG.info("N: {}", xmlN)
         val xmlF = """
@@ -874,7 +971,7 @@ class HyperCollatorTest : HyperCollateTest() {
             """.trimIndent()
         LOG.info("F: {}", xmlF)
         val wQ = importer.importXML("F", xmlF)
-        val expected = """
+        val expectedDot = """
             digraph CollationGraph{
             labelloc=b
             t000 [label="";shape=doublecircle,rank=middle]
@@ -944,7 +1041,15 @@ class HyperCollatorTest : HyperCollateTest() {
             t012->t004[label="N"]
             }
             """.trimIndent()
-        val collationGraph = testHyperCollation(wF, wQ, expected)
+        val expectedTable = """
+            ┌───┬───┬─────────────────────────┬──────────────────────────────────────────────┬─────┬─┬───┬──┬───┬──┬────┐
+            │[F]│so │infinitely miserable, so │destitute of every hope of consolation to live│?    │ │Oh │, │no │! │... │
+            ├───┼───┼─────────────────────────┼──────────────────────────────────────────────┼─────┼─┼───┼──┼───┼──┼────┤
+            │[N]│   │                         │                                              │[+] ?│ │   │  │   │  │    │
+            │   │so │                         │destitute of every hope of consolation to live│[-] -│ │oh │  │no │- │... │
+            └───┴───┴─────────────────────────┴──────────────────────────────────────────────┴─────┴─┴───┴──┴───┴──┴────┘
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
         assertThat(collationGraph)
                 .containsTextNodesMatching(
                         CollationGraphAssert.textNodeSketch()
@@ -988,7 +1093,7 @@ class HyperCollatorTest : HyperCollateTest() {
             """.trimIndent()
         LOG.info("F: {}", xmlF)
         val wQ = importer.importXML("F", xmlF)
-        val expected = """
+        val expectedDot = """
             digraph CollationGraph{
             labelloc=b
             t000 [label="";shape=doublecircle,rank=middle]
@@ -1028,7 +1133,14 @@ class HyperCollatorTest : HyperCollateTest() {
             t014->t009[label="N"]
             }
             """.trimIndent()
-        val collationGraph = testHyperCollation(wF, wQ, expected)
+        val expectedTable = """
+            ┌───┬────────────────────────┬──────────┬─────────┬──────┬─┬──────────────────────────────────┬──┬─────────────────────┬─────────┬──────────────────┬─────────────────┬────────────────────┐
+            │[F]│Frankenstein discovered │[+] that I│         │[-] or│ │made notes concerning his history │; │he asked to see them │and then │himself corrected │and augmented    │them in many places │
+            ├───┼────────────────────────┼──────────┼─────────┼──────┼─┼──────────────────────────────────┼──┼─────────────────────┼─────────┼──────────────────┼─────────────────┼────────────────────┤
+            │[N]│Frankenstein discovered │that I    │detailed │or    │ │made notes concerning his history │  │he asked to see them │&        │himself corrected │[+] and augmented│them in many places │
+            └───┴────────────────────────┴──────────┴─────────┴──────┴─┴──────────────────────────────────┴──┴─────────────────────┴─────────┴──────────────────┴─────────────────┴────────────────────┘
+            """.trimIndent()
+        val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
         assertThat(collationGraph)
                 .containsTextNodesMatching(
                         CollationGraphAssert.textNodeSketch()
@@ -1063,16 +1175,22 @@ class HyperCollatorTest : HyperCollateTest() {
         val importer = XMLImporter()
         val wF = importer.importXML(
                 "F",
-                """<text>
-    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,
-        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>
-</text>""")
+                """
+                |<text>
+                |    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,
+                |        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>
+                |</text>
+                """.trimMargin())
         val collationGraph = CollationGraph()
         val map: MutableMap<TokenVertex, TextNode> = mutableMapOf()
         val markupNodeIndex: MutableMap<Markup, MarkupNode> = mutableMapOf()
         hyperCollator.initialize(collationGraph, map, markupNodeIndex, wF)
         val collation = CollationGraphNodeJoiner.join(collationGraph)
-        val dot = CollationGraphVisualizer.toDot(collation, true, false)
+        val dot = CollationGraphVisualizer.toDot(
+                collation,
+                emphasizeWhitespace = true,
+                hideMarkup = false
+        )
         val expected = """
             digraph CollationGraph{
             labelloc=b
@@ -1097,7 +1215,11 @@ class HyperCollatorTest : HyperCollateTest() {
             }
             """.trimIndent()
         assertThat(dot).isEqualTo(expected)
-        val dotWithoutMarkupAndWhitespaceEmphasis = CollationGraphVisualizer.toDot(collation, false, true)
+        val dotWithoutMarkupAndWhitespaceEmphasis = CollationGraphVisualizer.toDot(
+                collation,
+                emphasizeWhitespace = false,
+                hideMarkup = true
+        )
         val expected2 = """
             digraph CollationGraph{
             labelloc=b
@@ -1190,21 +1312,30 @@ class HyperCollatorTest : HyperCollateTest() {
     private fun visualize(list: List<Tuple<Int>>): String =
             list.joinToString("") { format("<{0},{1}>", it.left, it.right) }
 
-    private fun testHyperCollation(witness1: VariantWitnessGraph, witness2: VariantWitnessGraph, expected: String): CollationGraph {
-        //    Map<String, Long> collationDuration = new HashMap<>();
+    private fun testHyperCollation(
+            witness1: VariantWitnessGraph,
+            witness2: VariantWitnessGraph,
+            expectedDot: String,
+            expectedTable: String
+    ): CollationGraph {
         val stopwatch = Stopwatch.createStarted()
         val collation0 = hyperCollator.collate(witness1, witness2)
         stopwatch.stop()
         val duration = stopwatch.elapsed(TimeUnit.MILLISECONDS)
         LOG.info("Collating took {} ms.", duration)
         val collation = CollationGraphNodeJoiner.join(collation0)
-        val dot = CollationGraphVisualizer.toDot(collation, true, false)
+        val dot = CollationGraphVisualizer.toDot(
+                collation,
+                emphasizeWhitespace = true,
+                hideMarkup = false
+        )
         LOG.debug("dot=\n{}", dot)
         writeGraph(dot, "graph")
-        assertThat(dot).isEqualTo(expected)
+        assertThat(dot).isEqualTo(expectedDot)
 
         val table = CollationGraphVisualizer.toTableASCII(collation, false)
         LOG.debug("table=\n{}", table)
+        assertThat(table).isEqualTo(expectedTable.replace("\n", System.lineSeparator()))
         return collation
     }
 
@@ -1212,7 +1343,9 @@ class HyperCollatorTest : HyperCollateTest() {
             witness1: VariantWitnessGraph,
             witness2: VariantWitnessGraph,
             witness3: VariantWitnessGraph,
-            expected: String): CollationGraph {
+            expectedDot: String,
+            expectedTable: String
+    ): CollationGraph {
         //    Map<String, Long> collationDuration = new HashMap<>();
         val stopwatch = Stopwatch.createStarted()
         var collation = hyperCollator.collate(witness1, witness2, witness3)
@@ -1231,15 +1364,16 @@ class HyperCollatorTest : HyperCollateTest() {
         val dot = CollationGraphVisualizer.toDot(collation, true, false)
         LOG.info("dot=\n{}", dot)
         writeGraph(dot, "graph")
-        assertThat(dot).isEqualTo(expected)
+        assertThat(dot).isEqualTo(expectedDot)
 
         val table = CollationGraphVisualizer.toTableASCII(collation, true)
-        LOG.info("dot=\n{}", table)
-        assertThat(collation).isNotNull
+        LOG.info("table=\n{}", table)
+        assertThat(table).isEqualTo(expectedTable.replace("\n", System.lineSeparator()))
         return collation
     }
 
     companion object {
         private val LOG = LoggerFactory.getLogger(HyperCollateTest::class.java)
     }
+
 }
