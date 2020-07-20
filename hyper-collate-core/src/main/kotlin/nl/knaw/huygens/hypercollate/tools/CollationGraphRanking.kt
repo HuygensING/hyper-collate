@@ -33,24 +33,15 @@ import java.util.function.Function
 import kotlin.math.max
 
 class CollationGraphRanking : Iterable<Set<TextNode>>, Function<TextNode, Int> {
-    private val _byNode: MutableMap<TextNode, Int> = mutableMapOf()
-    private val _byRank: SortedMap<Int, MutableSet<TextNode>> = TreeMap()
-
-//    val byNode: Map<TextNode, Int>
-//        get() = _byNode.toMap()
-//
-//    val byRank: Map<Int, Set<TextNode>>
-//        get() = _byRank.toMap()
+    private val byNode: MutableMap<TextNode, Int> = mutableMapOf()
+    private val byRank: SortedMap<Int, MutableSet<TextNode>> = TreeMap()
 
     val size: Int
-        get() = _byRank.keys.size
+        get() = byRank.keys.size
 
-//    val comparator: Comparator<TextNode>
-//        get() = Comparator.comparingInt { key: TextNode -> _byNode[key]!! }
+    override fun iterator(): MutableIterator<Set<TextNode>> = byRank.values.iterator()
 
-    override fun iterator(): MutableIterator<Set<TextNode>> = _byRank.values.iterator()
-
-    override fun apply(node: TextNode): Int = _byNode[node]!!
+    override fun apply(node: TextNode): Int = byNode[node]!!
 
     companion object {
         fun of0(graph: CollationGraph): CollationGraphRanking {
@@ -59,11 +50,11 @@ class CollationGraphRanking : Iterable<Set<TextNode>>, Function<TextNode, Int> {
                 var rank: Int = -1
                 for (incomingTextEdge in graph.getIncomingTextEdgeStream(textNode)) {
                     val incomingTextNode = graph.getSource(incomingTextEdge)
-                    rank = max(rank, ranking._byNode[incomingTextNode] ?: -1)
+                    rank = max(rank, ranking.byNode[incomingTextNode] ?: -1)
                 }
                 rank += 1
-                ranking._byNode[textNode] = rank
-                ranking._byRank.computeIfAbsent(rank) { HashSet() }.add(textNode)
+                ranking.byNode[textNode] = rank
+                ranking.byRank.computeIfAbsent(rank) { HashSet() }.add(textNode)
             }
             return ranking
         }
@@ -83,7 +74,7 @@ class CollationGraphRanking : Iterable<Set<TextNode>>, Function<TextNode, Int> {
                         .map { graph.getSource(it) }
                         .forEach { incomingTextNode: Node ->
                             val currentRank = rank.get()
-                            val incomingRank = ranking._byNode[incomingTextNode]
+                            val incomingRank = ranking.byNode[incomingTextNode]
                             if (incomingRank == null) {
                                 // node has an incoming node that hasn't been ranked yet, so node can't be ranked
                                 // yet either.
@@ -102,8 +93,8 @@ class CollationGraphRanking : Iterable<Set<TextNode>>, Function<TextNode, Int> {
                         .forEach { e: TextNode -> nodesToRank.add(e); profile.outgoingTextNodesProcessed += 1 }
                 if (canRank.get()) {
                     rank.getAndIncrement()
-                    ranking._byNode[node] = rank.get()
-                    ranking._byRank.computeIfAbsent(rank.get()) { HashSet() }.add(node)
+                    ranking.byNode[node] = rank.get()
+                    ranking.byRank.computeIfAbsent(rank.get()) { HashSet() }.add(node)
                 } else {
                     nodesToRank.add(node)
                 }
