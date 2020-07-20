@@ -26,11 +26,14 @@ import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment
 import nl.knaw.huygens.hypercollate.model.CollationGraph
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken
 import nl.knaw.huygens.hypercollate.model.TextNode
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.util.*
 import kotlin.math.max
 
 object CollationGraphVisualizer {
     private const val NBSP = "\u00A0"
+    val LOG: Logger = LoggerFactory.getLogger(this.javaClass)
 
     @JvmStatic
     fun toTableASCII(graph: CollationGraph, emphasizeWhitespace: Boolean): String {
@@ -39,6 +42,7 @@ object CollationGraphVisualizer {
         val rowMap: MutableMap<String, MutableList<Cell>> = HashMap()
         sigils.forEach { sigil: String -> rowMap[sigil] = ArrayList() }
         val ranking = CollationGraphRanking.of(graph) // TODO: make faster
+        LOG.info("ranking size={}", ranking.size)
         val maxLayers: MutableMap<String, Int> = HashMap()
         sigils.forEach { sigil: String -> maxLayers[sigil] = 1 }
         for (nodeSet in ranking) {
@@ -154,7 +158,9 @@ object CollationGraphVisualizer {
         val joiner = StringJoiner("<br>")
         for (s in layerContent) {
             joiner.add(
-                    s!!.replace("\\[z]".toRegex(), "[+]").replace("\\[a]".toRegex(), "[-]").replace("\\[za]".toRegex(), "[+-]"))
+                    s.replace("\\[z]".toRegex(), "[+]")
+                            .replace("\\[a]".toRegex(), "[-]")
+                            .replace("\\[za]".toRegex(), "[+-]"))
         }
         val content = joiner.toString()
         return contentBuilder.append(content).toString()
