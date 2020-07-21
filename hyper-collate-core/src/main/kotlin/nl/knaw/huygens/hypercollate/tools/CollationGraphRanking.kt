@@ -20,15 +20,10 @@ package nl.knaw.huygens.hypercollate.tools
  * #L%
  */
 
-import com.google.common.base.Stopwatch
 import nl.knaw.huygens.hypercollate.model.CollationGraph
-import nl.knaw.huygens.hypercollate.model.Node
 import nl.knaw.huygens.hypercollate.model.TextEdge
 import nl.knaw.huygens.hypercollate.model.TextNode
 import java.util.*
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.function.Function
 import kotlin.math.max
 
@@ -44,9 +39,9 @@ class CollationGraphRanking : Iterable<Set<TextNode>>, Function<TextNode, Int> {
     override fun apply(node: TextNode): Int = byNode[node]!!
 
     companion object {
-        fun of0(graph: CollationGraph): CollationGraphRanking {
+        fun of(graph: CollationGraph): CollationGraphRanking {
             val ranking = CollationGraphRanking()
-            for (textNode in graph.traverseTextNodes()) {
+            for (textNode in topologicallySortedTextNodes(graph)) {
                 var rank: Int = -1
                 for (incomingTextEdge in graph.getIncomingTextEdgeStream(textNode)) {
                     val incomingTextNode = graph.getSource(incomingTextEdge)
@@ -59,72 +54,28 @@ class CollationGraphRanking : Iterable<Set<TextNode>>, Function<TextNode, Int> {
             return ranking
         }
 
-        fun of(graph: CollationGraph): CollationGraphRanking {
-            val profile = RankingProfile(graph.traverseTextNodes().size, graph.markupStream.count())
-            val ranking = CollationGraphRanking()
-            // Set<TextNode> nodesRanked = new HashSet<>();
-            val nodesToRank: MutableList<TextNode> = ArrayList()
-            nodesToRank.add(graph.textStartNode)
-            while (nodesToRank.isNotEmpty()) {
-                val node = nodesToRank.removeAt(0)
-                val canRank = AtomicBoolean(true)
-                val rank = AtomicInteger(-1)
-                graph.getIncomingEdges(node)
-                        .filterIsInstance<TextEdge>()
-                        .map { graph.getSource(it) }
-                        .forEach { incomingTextNode: Node ->
-                            val currentRank = rank.get()
-                            val incomingRank = ranking.byNode[incomingTextNode]
-                            if (incomingRank == null) {
-                                // node has an incoming node that hasn't been ranked yet, so node can't be ranked
-                                // yet either.
-                                profile.incomingRankIsNull += 1
-                                canRank.set(false)
-                            } else {
-                                val max = max(currentRank, incomingRank)
-                                rank.set(max)
-                            }
-                            profile.incomingTextNodesProcessed += 1
+        private fun topologicallySortedTextNodes(graph: CollationGraph): List<TextNode> {
+            // https://en.wikipedia.org/wiki/Topological_sorting
+            // Kahn's algorithm
+            val sorted: MutableList<TextNode> = mutableListOf()
+            val todo: MutableSet<TextNode> = mutableSetOf(graph.textStartNode)
+            val handledEdges: MutableSet<TextEdge> = mutableSetOf()
+            while (todo.isNotEmpty()) {
+                val textNode = todo.iterator().next()
+                todo.remove(textNode)
+                sorted += textNode
+                for (e in graph.getOutgoingTextEdgeStream(textNode)) {
+                    if (!handledEdges.contains(e)) {
+                        handledEdges += e
+                        val node = graph.getTarget(e)
+                        if (graph.getIncomingTextEdgeStream(node).allMatch(handledEdges::contains)) {
+                            todo += node
                         }
-                graph
-                        .getOutgoingTextEdgeStream(node)
-                        .map(graph::getTarget)
-                        .map(TextNode::class.java::cast)
-                        .forEach { e: TextNode -> nodesToRank.add(e); profile.outgoingTextNodesProcessed += 1 }
-                if (canRank.get()) {
-                    rank.getAndIncrement()
-                    ranking.byNode[node] = rank.get()
-                    ranking.byRank.computeIfAbsent(rank.get()) { HashSet() }.add(node)
-                } else {
-                    nodesToRank.add(node)
+                    }
                 }
-                profile.whileLoops += 1
             }
-            profile.log()
-            return ranking
+            return sorted
         }
     }
 
-    class RankingProfile(private val textNodes: Int, private val markupNodes: Long) {
-        internal var outgoingTextNodesProcessed: Int = 0
-        internal var incomingTextNodesProcessed: Int = 0
-        internal var whileLoops = 0
-        internal var incomingRankIsNull = 0
-        private val stopwatch: Stopwatch = Stopwatch.createStarted()
-
-        override fun toString(): String = """
-            ranking took ${stopwatch.elapsed(TimeUnit.MILLISECONDS)} ms
-            textNodes: $textNodes
-            markupNodes: $markupNodes
-            whileLoops: $whileLoops
-            incomingRankIsNull: $incomingRankIsNull
-            incomingTextNodesProcessed: $incomingTextNodesProcessed
-            outgoingTextNodesProcessed: $outgoingTextNodesProcessed
-            """.trimIndent()
-
-        fun log() {
-            stopwatch.stop()
-            println(this)
-        }
-    }
 }
