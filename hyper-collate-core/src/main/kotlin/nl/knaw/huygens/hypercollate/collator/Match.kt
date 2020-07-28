@@ -45,6 +45,7 @@ class Match(vararg matchingTokenVertices: TokenVertex) {
 
     fun getLowestRankForWitnessesOtherThan(s: String): Int =
             rankingMap.entries
+                    .asSequence()
                     .filter { it.key != s }
                     .map { it.value }
                     .min() ?: error("no minimum found")

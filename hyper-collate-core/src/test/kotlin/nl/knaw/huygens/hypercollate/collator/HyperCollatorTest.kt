@@ -38,7 +38,24 @@ import java.util.stream.Collectors
 class HyperCollatorTest : HyperCollateTest() {
     private val hyperCollator = HyperCollator()
 
-    //    @Ignore("takes too long")
+//    @Test
+//    fun test_time() {
+//        val multiset = HashMultiset.create<Long>()
+//        for (i in 0..1000) {
+////            val id = (System.nanoTime() / 100) % 10000
+//            val id = System.nanoTime()
+//            multiset += id
+//        }
+//        for (i in multiset.sorted().distinct()) {
+//            println("$i : ${"*".repeat(multiset.count(i))}")
+//        }
+//    }
+
+//    @Test
+//    fun profile_many_matches() {
+//        for (i in 1..100) testCollationWithManyMatches()
+//    }
+
     @Test(timeout = 40_000)
     fun testCollationWithManyMatches() {
         val importer = XMLImporter()

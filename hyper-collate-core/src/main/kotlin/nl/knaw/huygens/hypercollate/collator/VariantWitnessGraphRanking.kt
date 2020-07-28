@@ -31,8 +31,8 @@ class VariantWitnessGraphRanking : Iterable<Set<TokenVertex>>, Function<TokenVer
     private val _byVertex: MutableMap<TokenVertex, Int> = HashMap()
     private val _byRank: SortedMap<Int, MutableSet<TokenVertex>> = TreeMap()
 
-    val byVertex: Map<TokenVertex, Int>
-        get() = _byVertex.toMap()
+//    val byVertex: Map<TokenVertex, Int>
+//        get() = _byVertex.toMap()
 
     val byRank: Map<Int, Set<TokenVertex>>
         get() = _byRank.toMap()
@@ -62,7 +62,7 @@ class VariantWitnessGraphRanking : Iterable<Set<TokenVertex>>, Function<TokenVer
                         .forEach { incoming: TokenVertex -> rank.set(max(rank.get(), ranking._byVertex[incoming]!!)) }
                 rank.getAndIncrement()
                 ranking._byVertex[v] = rank.get()
-                ranking._byRank.computeIfAbsent(rank.get()) { r: Int? -> HashSet() }.add(v)
+                ranking._byRank.computeIfAbsent(rank.get()) { HashSet() }.add(v)
             }
             return ranking
         }

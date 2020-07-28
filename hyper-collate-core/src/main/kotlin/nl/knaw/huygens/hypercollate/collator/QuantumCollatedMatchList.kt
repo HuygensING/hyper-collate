@@ -73,20 +73,21 @@ class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val poten
         val minVertexRank = match.vertexRank
         return potentialMatches
                 .filter { m: CollatedMatch ->
-                    m.collatedNode == node || m.witnessVertex == tokenVertexForWitness || hasSigilOverlap(m, node) && m.nodeRank < minNodeRank || m.vertexRank < minVertexRank
+                    m.collatedNode == node ||
+                            m.witnessVertex == tokenVertexForWitness ||
+                            m.vertexRank < minVertexRank ||
+                            (m.nodeRank < minNodeRank && hasSigilOverlap(m, node))
                 }
     }
 
-    private fun hasSigilOverlap(m: CollatedMatch, node: TextNode): Boolean {
-        val nodeSigils = node.sigils
-        // m and node have witnesses in common
-        // for those witnesses they have in common, the branchpath of one is the startsubpath otf the
-        // other.
-        return m.sigils
-                .asSequence()
-                .filter { nodeSigils.contains(it) }
-                .any { branchPathsOverlap(m.getBranchPath(it)!!, node.getBranchPath(it)) }
-    }
+    // m and node have witnesses in common
+    // for those witnesses they have in common, the branchpath of one is the startsubpath otf the
+    // other.
+    private fun hasSigilOverlap(m: CollatedMatch, node: TextNode): Boolean =
+            m.sigils
+                    .asSequence()
+                    .filter { node.sigils.contains(it) }
+                    .any { branchPathsOverlap(m.getBranchPath(it)!!, node.getBranchPath(it)) }
 
     override fun toString(): String =
             "($chosenMatches | $potentialMatches)"
