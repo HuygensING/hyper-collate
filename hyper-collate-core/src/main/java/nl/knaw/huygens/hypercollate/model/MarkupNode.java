@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.model;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package nl.knaw.huygens.hypercollate.model;
  */
 public class MarkupNode implements Node {
   public static final String LABEL = "Markup";
-  private String sigil;
+  private final String sigil;
   private final Markup markup;
 
   MarkupNode(String sigil, Markup markup) {

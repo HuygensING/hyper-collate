@@ -7,10 +7,8 @@
     <parent>
         <groupId>nl.knaw.huygens</groupId>
         <artifactId>hyper-collate</artifactId>
-        <version>1.1</version>
+        <version>1.2-SNAPSHOT</version>
     </parent>
-
-    <groupId>nl.knaw.huygens</groupId>
     <artifactId>hyper-collate-rest</artifactId>
 
     <dependencies>
@@ -63,5 +61,4 @@
         </dependency>
     </dependencies>
 
-    
 </project>

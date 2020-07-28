@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.rest.resources;
  * #%L
  * hyper-collate-rest
  * =======
- * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,13 +44,17 @@ public class AboutResource {
 
   public AboutResource(HyperCollateConfiguration configuration, String appName) {
     PropertiesConfiguration properties = new PropertiesConfiguration(PROPERTIES_FILE, true);
-    about.setAppName(appName)//
-        .setStartedAt(Instant.now().toString())//
-        .setBuildDate(properties.getProperty("buildDate").orElse("no buildDate set in about.properties"))//
-        .setCommitId(properties.getProperty("commitId").orElse("no commitId set in about.properties"))//
-        .setScmBranch(properties.getProperty("scmBranch").orElse("no scmBranch set in about.properties"))//
-        .setVersion(properties.getProperty("version").orElse("no version set in about.properties"))//
-        .setProjectDirURI(configuration.getProjectDir().toURI())//
+    about
+        .setAppName(appName)
+        .setStartedAt(Instant.now().toString())
+        .setBuildDate(
+            properties.getProperty("buildDate").orElse("no buildDate set in about.properties"))
+        .setCommitId(
+            properties.getProperty("commitId").orElse("no commitId set in about.properties"))
+        .setScmBranch(
+            properties.getProperty("scmBranch").orElse("no scmBranch set in about.properties"))
+        .setVersion(properties.getProperty("version").orElse("no version set in about.properties"))
+        .setProjectDirURI(configuration.getProjectDir().toURI())
         .setDotRendering(configuration.hasPathToDotExecutable());
   }
 

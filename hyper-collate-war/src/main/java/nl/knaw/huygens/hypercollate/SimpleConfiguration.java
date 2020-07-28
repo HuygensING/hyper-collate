@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate;
  * #%L
  * hyper-collate-war
  * =======
- * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,5 +86,4 @@ public class SimpleConfiguration implements HyperCollateConfiguration {
       setProjectDir(Paths.get(System.getProperty("user.home"), ".hypercollate").toString());
     }
   }
-
 }

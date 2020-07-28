@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.rest.resources;
  * #%L
  * hyper-collate-rest
  * =======
- * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.io.InputStream;
 
 @Api("/")
@@ -40,20 +39,17 @@ public class HomePageResource {
    * Shows the homepage for the backend
    *
    * @return HTML representation of the homepage
-   * @throws IOException
    */
-
   @GET
   @Timed
   @Produces(MediaType.TEXT_HTML)
   @ApiOperation(value = "Show the server homepage")
-  public Response getHomePage() throws IOException {
-    InputStream resourceAsStream = Thread.currentThread()//
-        .getContextClassLoader().getResourceAsStream("index.html");
-    return Response//
-        .ok(resourceAsStream)//
-        .header("Pragma", "public")//
-        .header("Cache-Control", "public")//
+  public Response getHomePage() {
+    InputStream resourceAsStream =
+        Thread.currentThread().getContextClassLoader().getResourceAsStream("index.html");
+    return Response.ok(resourceAsStream)
+        .header("Pragma", "public")
+        .header("Cache-Control", "public")
         .build();
   }
 

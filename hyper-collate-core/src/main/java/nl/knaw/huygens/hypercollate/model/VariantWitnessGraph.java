@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.model;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 
 public class VariantWitnessGraph {
 
-  private String sigil = "";
+  private final String sigil;
   private final List<Markup> markupList = new ArrayList<>();
 
   private final TokenVertex startTokenVertex;
@@ -91,5 +91,4 @@ public class VariantWitnessGraph {
   public Iterable<TokenVertex> vertices() {
     return VariantWitnessGraphTraversal.of(this);
   }
-
 }

@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.dropwizard;
  * #%L
  * hyper-collate-server
  * =======
- * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class ServerConfiguration extends Configuration implements HyperCollateCo
   private File collationsDir;
 
   @JsonProperty("swagger")
-  public SwaggerBundleConfiguration swaggerBundleConfiguration = new SwaggerBundleConfiguration();
+  public final SwaggerBundleConfiguration swaggerBundleConfiguration = new SwaggerBundleConfiguration();
 
   public ServerConfiguration() {
     super();
@@ -65,7 +65,8 @@ public class ServerConfiguration extends Configuration implements HyperCollateCo
     baseURI = HTTP_LOCALHOST + port;
 
     DefaultServerFactory serverFactory = (DefaultServerFactory) getServerFactory();
-    HttpConnectorFactory httpConnectorFactory = (HttpConnectorFactory) serverFactory.getApplicationConnectors().get(0);
+    HttpConnectorFactory httpConnectorFactory =
+        (HttpConnectorFactory) serverFactory.getApplicationConnectors().get(0);
     httpConnectorFactory.setPort(port);
 
     DefaultLoggingFactory loggingFactory = (DefaultLoggingFactory) getLoggingFactory();
@@ -129,5 +130,4 @@ public class ServerConfiguration extends Configuration implements HyperCollateCo
       throw new RuntimeException(e);
     }
   }
-
 }

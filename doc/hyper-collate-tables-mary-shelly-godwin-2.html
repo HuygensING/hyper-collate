@@ -1,6 +1,6 @@
 <html>
-    <head>
-        <style type="text/css">
+<head>
+    <style type="text/css">
         .tg  {border-collapse:collapse;border-spacing:0;white-space:nowrap;text-align: center;}
         .tg .tg-top {font-weight:bold;vertical-align:top}
         .tg .tg-bottom {vertical-align:bottom;text-align: left;}
@@ -15,52 +15,54 @@
         span.del::before{content:'[-] ';text-align: center;}
         span.add::before{content:'[+] ';text-align: center;}
         span.match {color:green;background-color: #bff442;}
-        </style>
-    </head>
-    <body>
 
-        <h2>Legenda</h2>
-        <table class="tg">
-            <tr>
-                <td class="tg-markup tg-right">non-matching markup</td>
-            </tr>
-            <tr>
-                <td class="tg-markup-match tg-right">matching markup</td>
-            </tr>
-            <tr>
-                <td class="tg-bottom tg-right"><span class="add">added text</span><br><span class="del">deleted text</span></td>
-            </tr>
-        </table>
 
-        <h2>Witnesses</h2>
-        <table class="tg">
-          <tr>
-              <th class="tg-top">N</th>
-            <td class="tg-bottom"><pre>
+    </style>
+</head>
+<body>
+
+<h2>Legenda</h2>
+<table class="tg">
+    <tr>
+        <td class="tg-markup tg-right">non-matching markup</td>
+    </tr>
+    <tr>
+        <td class="tg-markup-match tg-right">matching markup</td>
+    </tr>
+    <tr>
+        <td class="tg-bottom tg-right"><span class="add">added text</span><br><span class="del">deleted text</span></td>
+    </tr>
+</table>
+
+<h2>Witnesses</h2>
+<table class="tg">
+    <tr>
+        <th class="tg-top">N</th>
+        <td class="tg-bottom"><pre>
 &lt;text&gt;
   &lt;s&gt;Frankenstein discovered that I detailed or made notes concerning his history he asked to see them &amp; himself corrected
   &lt;add place="superlinear"&gt;and augmented&lt;/add&gt;
   them in many places&lt;/s&gt;
 &lt;/text&gt;
 </pre>
-            </td>
-          </tr>
-          <tr>
-              <th class="tg-top">F</th>
-            <td class="tg-bottom"><pre>
+        </td>
+    </tr>
+    <tr>
+        <th class="tg-top">F</th>
+        <td class="tg-bottom"><pre>
 &lt;text&gt;
   &lt;s&gt;Frankenstein discovered
   &lt;del rend="strikethrough"&gt;or&lt;/del&gt;
   &lt;add place="superlinear"&gt;that I&lt;/add&gt; made notes concerning his history; he asked to see them and then himself corrected and augmented them in many places
   &lt;/s&gt;
 &lt;/text&gt;</pre>
-            </td>
-          </tr>
-        </table>
-        <hr/>
+        </td>
+    </tr>
+</table>
+<hr/>
 
-        <h1>Visualization 1: ASCII table</h1>
-        <pre>
+<h1>Visualization 1: ASCII table</h1>
+<pre>
 ┌───┬────────────────────────┬──────────┬────────────┬──────────────────────────────────┬──┬─────────────────────┬─────────┬──────────────────┬─────────────────┬────────────────────┐
 │[N]│                        │          │            │                                  │  │                     │         │                  │[+] and augmented│                    │
 │   │Frankenstein discovered │that I    │detailed or │made notes concerning his history │  │he asked to see them │&amp;        │himself corrected │                 │them in many places │
@@ -69,197 +71,216 @@
 │   │Frankenstein discovered │[-] or    │            │made notes concerning his history │; │he asked to see them │and then │himself corrected │and augmented    │them in many places │
 └───┴────────────────────────┴──────────┴────────────┴──────────────────────────────────┴──┴─────────────────────┴─────────┴──────────────────┴─────────────────┴────────────────────┘
         </pre>
-        <hr/>
+<hr/>
 
-        <h1>Visualization 3: HTML table, with markup tags</h1>
-        <table class="tg">
-          <tr>
-              <th class="tg-top">N</th>
-            <td class="tg-bottom tg-markup-match">&lt;text&gt;</td>
-            <td class="tg-bottom tg-markup-match">&lt;s&gt;</td>
-            <td class="tg-bottom">Frankenstein discovered</td>
-            <td class="tg-bottom">that I </td>
-            <td class="tg-bottom">detailed or</td>
-            <td class="tg-bottom">made notes concerning his history</td>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">he asked to see them</td>
-            <td class="tg-bottom">&amp;</td>
-            <td class="tg-bottom">himself corrected</td>
-            <td class="tg-bottom"><span class="add">and augmented</span><br/>&nbsp;</td>
-            <td class="tg-bottom">them in many places</td>
-            <td class="tg-bottom tg-markup-match">&lt;/s&gt;</td>
-            <td class="tg-bottom tg-markup-match">&lt;/text&gt;</td>
-          </tr>
-          <tr>
-              <th class="tg-top">F</th>
-            <td class="tg-bottom tg-markup-match">&lt;text&gt;</td>
-            <td class="tg-bottom tg-markup-match">&lt;s&gt;</td>
-            <td class="tg-bottom">Frankenstein discovered</td>
-            <td class="tg-bottom"><span class="add">that I</span><br/><span class="del">or</span></td>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">made notes concerning his history</td>
-            <td class="tg-bottom">;</td>
-            <td class="tg-bottom">he asked to see them</td>
-            <td class="tg-bottom">and then</td>
-            <td class="tg-bottom">himself corrected</td>
-            <td class="tg-bottom">and augmented</td>
-            <td class="tg-bottom">them in many places</td>
-            <td class="tg-bottom tg-markup-match">&lt;/s&gt;</td>
-            <td class="tg-bottom tg-markup-match">&lt;/text&gt;</td>
-          </tr>
-        </table>
-        <hr/>
+<h1>Visualization 3: HTML table, with markup tags</h1>
+<table class="tg">
+    <tr>
+        <th class="tg-top">N</th>
+        <td class="tg-bottom tg-markup-match">&lt;text&gt;</td>
+        <td class="tg-bottom tg-markup-match">&lt;s&gt;</td>
+        <td class="tg-bottom">Frankenstein discovered</td>
+        <td class="tg-bottom">that I</td>
+        <td class="tg-bottom">detailed or</td>
+        <td class="tg-bottom">made notes concerning his history</td>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">he asked to see them</td>
+        <td class="tg-bottom">&amp;</td>
+        <td class="tg-bottom">himself corrected</td>
+        <td class="tg-bottom"><span class="add">and augmented</span><br/>&nbsp;</td>
+        <td class="tg-bottom">them in many places</td>
+        <td class="tg-bottom tg-markup-match">&lt;/s&gt;</td>
+        <td class="tg-bottom tg-markup-match">&lt;/text&gt;</td>
+    </tr>
+    <tr>
+        <th class="tg-top">F</th>
+        <td class="tg-bottom tg-markup-match">&lt;text&gt;</td>
+        <td class="tg-bottom tg-markup-match">&lt;s&gt;</td>
+        <td class="tg-bottom">Frankenstein discovered</td>
+        <td class="tg-bottom"><span class="add">that I</span><br/><span class="del">or</span></td>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">made notes concerning his history</td>
+        <td class="tg-bottom">;</td>
+        <td class="tg-bottom">he asked to see them</td>
+        <td class="tg-bottom">and then</td>
+        <td class="tg-bottom">himself corrected</td>
+        <td class="tg-bottom">and augmented</td>
+        <td class="tg-bottom">them in many places</td>
+        <td class="tg-bottom tg-markup-match">&lt;/s&gt;</td>
+        <td class="tg-bottom tg-markup-match">&lt;/text&gt;</td>
+    </tr>
+</table>
+<hr/>
 
-        <h1>Visualization 4a: HTML table, with markup layers (mirrored)</h1>
-        <table class="tg">
-          <tr>
-              <th class="tg-top" rowspan="3">N</th>
-            <td class="tg-center tg-markup-match" colspan="10">text</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="10">s</td>
-          </tr>
-          <tr>
-            <td class="tg-bottom">Frankenstein discovered</td>
-            <td class="tg-bottom">that I </td>
-            <td class="tg-bottom">detailed or</td>
-            <td class="tg-bottom">made notes concerning his history</td>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">he asked to see them</td>
-            <td class="tg-bottom">&amp;</td>
-            <td class="tg-bottom">himself corrected</td>
-            <td class="tg-bottom"><span class="add">and augmented</span><br/>&nbsp;</td>
-            <td class="tg-bottom">them in many places</td>
-          </tr>
-          <tr>
-              <th class="tg-top" rowspan="4">F</th>
-            <td class="tg-bottom">Frankenstein discovered</td>
-            <td class="tg-bottom"><span class="add">that I</span><br/><span class="del">or</span></td>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">made notes concerning his history</td>
-            <td class="tg-bottom">;</td>
-            <td class="tg-bottom">he asked to see them</td>
-            <td class="tg-bottom">and then</td>
-            <td class="tg-bottom">himself corrected</td>
-            <td class="tg-bottom">and augmented</td>
-            <td class="tg-bottom">them in many places</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="10">s</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="10">text</td>
-          </tr>
-        </table>
-        <hr/>
+<h1>Visualization 4a: HTML table, with markup layers (mirrored)</h1>
+<table class="tg">
+    <tr>
+        <th class="tg-top" rowspan="3">N</th>
+        <td class="tg-center tg-markup-match" colspan="10">text</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="10">s</td>
+    </tr>
+    <tr>
+        <td class="tg-bottom">Frankenstein discovered</td>
+        <td class="tg-bottom">that I</td>
+        <td class="tg-bottom">detailed or</td>
+        <td class="tg-bottom">made notes concerning his history</td>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">he asked to see them</td>
+        <td class="tg-bottom">&amp;</td>
+        <td class="tg-bottom">himself corrected</td>
+        <td class="tg-bottom"><span class="add">and augmented</span><br/>&nbsp;</td>
+        <td class="tg-bottom">them in many places</td>
+    </tr>
+    <tr>
+        <th class="tg-top" rowspan="4">F</th>
+        <td class="tg-bottom">Frankenstein discovered</td>
+        <td class="tg-bottom"><span class="add">that I</span><br/><span class="del">or</span></td>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">made notes concerning his history</td>
+        <td class="tg-bottom">;</td>
+        <td class="tg-bottom">he asked to see them</td>
+        <td class="tg-bottom">and then</td>
+        <td class="tg-bottom">himself corrected</td>
+        <td class="tg-bottom">and augmented</td>
+        <td class="tg-bottom">them in many places</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="10">s</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="10">text</td>
+    </tr>
+</table>
+<hr/>
 
-        <h1>Visualization 4c: HTML table, with markup layers (with add/del)</h1>
-        <table class="tg">
-          <tr>
-              <th class="tg-top" rowspan="4">N</th>
-            <td class="tg-center tg-markup-match" colspan="11">text</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="11">s</td>
-          </tr>
-          <tr>
-            <td colspan="9"></td>
-            <td class="tg-center tg-markup">add (place="superlinear")</td>
-            <td colspan="1"></td>
-          </tr>
-          <tr>
-            <td class="tg-bottom">Frankenstein discovered</td>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">that I </td>
-            <td class="tg-bottom">detailed or</td>
-            <td class="tg-bottom">made notes concerning his history</td>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">he asked to see them</td>
-            <td class="tg-bottom">&amp;</td>
-            <td class="tg-bottom">himself corrected</td>
-            <td class="tg-bottom"><span class="add">and augmented</span></td>
-            <td class="tg-bottom">them in many places</td>
-          </tr>
-          <tr>
-              <th class="tg-top" rowspan="4">F</th>
-            <td class="tg-bottom">Frankenstein discovered</td>
-            <td class="tg-bottom"><span class="del">or</span></td>
-            <td class="tg-bottom"><span class="add">that I</span></td>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">made notes concerning his history</td>
-            <td class="tg-bottom">;</td>
-            <td class="tg-bottom">he asked to see them</td>
-            <td class="tg-bottom">and then</td>
-            <td class="tg-bottom">himself corrected</td>
-            <td class="tg-bottom">and augmented</td>
-            <td class="tg-bottom">them in many places</td>
-          </tr>
-          <tr>
-            <td colspan="1"></td>
-            <td class="tg-center tg-markup">del (rend="strikethrough")</td>
-            <td class="tg-center tg-markup">add (place="superlinear")</td>
-            <td colspan="8"></td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="11">s</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="11">text</td>
-          </tr>
-        </table>
-        <hr/>
+<h1>Visualization 4c: HTML table, with markup layers (with add/del)</h1>
+<table class="tg">
+    <tr>
+        <th class="tg-top" rowspan="4">N</th>
+        <td class="tg-center tg-markup-match" colspan="11">text</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="11">s</td>
+    </tr>
+    <tr>
+        <td colspan="9"></td>
+        <td class="tg-center tg-markup">add (place="superlinear")</td>
+        <td colspan="1"></td>
+    </tr>
+    <tr>
+        <td class="tg-bottom">Frankenstein discovered</td>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">that I</td>
+        <td class="tg-bottom">detailed or</td>
+        <td class="tg-bottom">made notes concerning his history</td>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">he asked to see them</td>
+        <td class="tg-bottom">&amp;</td>
+        <td class="tg-bottom">himself corrected</td>
+        <td class="tg-bottom"><span class="add">and augmented</span></td>
+        <td class="tg-bottom">them in many places</td>
+    </tr>
+    <tr>
+        <th class="tg-top" rowspan="4">F</th>
+        <td class="tg-bottom">Frankenstein discovered</td>
+        <td class="tg-bottom"><span class="del">or</span></td>
+        <td class="tg-bottom"><span class="add">that I</span></td>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">made notes concerning his history</td>
+        <td class="tg-bottom">;</td>
+        <td class="tg-bottom">he asked to see them</td>
+        <td class="tg-bottom">and then</td>
+        <td class="tg-bottom">himself corrected</td>
+        <td class="tg-bottom">and augmented</td>
+        <td class="tg-bottom">them in many places</td>
+    </tr>
+    <tr>
+        <td colspan="1"></td>
+        <td class="tg-center tg-markup">del (rend="strikethrough")</td>
+        <td class="tg-center tg-markup">add (place="superlinear")</td>
+        <td colspan="8"></td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="11">s</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="11">text</td>
+    </tr>
+</table>
+<hr/>
 
-        <h1>Visualization 4d: HTML table, with markup layers (with add/del, not seperated)</h1>
-        <table class="tg">
-          <tr>
-              <th class="tg-top" rowspan="3">N</th>
-            <td class="tg-center tg-markup-match" colspan="10">text</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="10">s</td>
-          </tr>
-          <tr>
-            <td class="tg-bottom">Frankenstein discovered</td>
-            <td class="tg-bottom">that I </td>
-            <td class="tg-bottom">detailed or</td>
-            <td class="tg-bottom">made notes concerning his history</td>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">he asked to see them</td>
-            <td class="tg-bottom">&amp;</td>
-            <td class="tg-bottom">himself corrected</td>
-            <td class="sub"><table class="tg">
-              <tr><td class="tg-center tg-markup" colspan="1">add (place="superlinear")</td></tr>
-              <tr><td class="tg-bottom"><span class="add">and augmented</span></td></tr>
-              <tr><td>&nbsp;</td></tr>
-            </table></td>
-            <td class="tg-bottom">them in many places</td>
-          </tr>
-          <tr>
-            <th class="tg-top" rowspan="4">F</td>
-            <td class="tg-bottom">Frankenstein discovered</td>
-            <td class="sub"><table class="tg">
-              <tr><td class="tg-center tg-markup" colspan="1">add (place="superlinear")</td></tr>
-              <tr><td class="tg-bottom"><span class="add">that I</span></td></tr>
-              <tr><td class="tg-center tg-markup" colspan="1">del (rend="strikethrough")</td></tr>
-              <tr><td class="tg-bottom"><span class="del">or</span></td></tr>
-            </table></td>
-            <td class="tg-bottom"></td>
-            <td class="tg-bottom">made notes concerning his history</td>
-            <td class="tg-bottom">;</td>
-            <td class="tg-bottom">he asked to see them</td>
-            <td class="tg-bottom">and then</td>
-            <td class="tg-bottom">himself corrected</td>
-            <td class="tg-bottom">and augmented</td>
-            <td class="tg-bottom">them in many places</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="10">s</td>
-          </tr>
-          <tr>
-            <td class="tg-center tg-markup-match" colspan="10">text</td>
-          </tr>
-        </table>
-        <hr/>
+<h1>Visualization 4d: HTML table, with markup layers (with add/del, not seperated)</h1>
+<table class="tg">
+    <tr>
+        <th class="tg-top" rowspan="3">N</th>
+        <td class="tg-center tg-markup-match" colspan="10">text</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="10">s</td>
+    </tr>
+    <tr>
+        <td class="tg-bottom">Frankenstein discovered</td>
+        <td class="tg-bottom">that I</td>
+        <td class="tg-bottom">detailed or</td>
+        <td class="tg-bottom">made notes concerning his history</td>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">he asked to see them</td>
+        <td class="tg-bottom">&amp;</td>
+        <td class="tg-bottom">himself corrected</td>
+        <td class="sub">
+            <table class="tg">
+                <tr>
+                    <td class="tg-center tg-markup" colspan="1">add (place="superlinear")</td>
+                </tr>
+                <tr>
+                    <td class="tg-bottom"><span class="add">and augmented</span></td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                </tr>
+            </table>
+        </td>
+        <td class="tg-bottom">them in many places</td>
+    </tr>
+    <tr>
+        <th class="tg-top" rowspan="4">F
+        </td>
+        <td class="tg-bottom">Frankenstein discovered</td>
+        <td class="sub">
+            <table class="tg">
+                <tr>
+                    <td class="tg-center tg-markup" colspan="1">add (place="superlinear")</td>
+                </tr>
+                <tr>
+                    <td class="tg-bottom"><span class="add">that I</span></td>
+                </tr>
+                <tr>
+                    <td class="tg-center tg-markup" colspan="1">del (rend="strikethrough")</td>
+                </tr>
+                <tr>
+                    <td class="tg-bottom"><span class="del">or</span></td>
+                </tr>
+            </table>
+        </td>
+        <td class="tg-bottom"></td>
+        <td class="tg-bottom">made notes concerning his history</td>
+        <td class="tg-bottom">;</td>
+        <td class="tg-bottom">he asked to see them</td>
+        <td class="tg-bottom">and then</td>
+        <td class="tg-bottom">himself corrected</td>
+        <td class="tg-bottom">and augmented</td>
+        <td class="tg-bottom">them in many places</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="10">s</td>
+    </tr>
+    <tr>
+        <td class="tg-center tg-markup-match" colspan="10">text</td>
+    </tr>
+</table>
+<hr/>
 
-    </body>
+</body>
 </html>

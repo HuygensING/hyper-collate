@@ -1,73 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<parent>
-		<artifactId>hyper-collate</artifactId>
-		<groupId>nl.knaw.huygens</groupId>
-		<version>1.1</version>
-	</parent>
-	<modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>hyper-collate</artifactId>
+        <groupId>nl.knaw.huygens</groupId>
+        <version>1.2-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
 
-	<artifactId>hyper-collate-core</artifactId>
+    <artifactId>hyper-collate-core</artifactId>
 
-	<dependencies>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>hyper-collate-api</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>eu.interedition</groupId>
-			<artifactId>collatex-core</artifactId>
-			<version>${collatex.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>${commons-io.version}</version>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>hyper-collate-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.interedition</groupId>
+            <artifactId>collatex-core</artifactId>
+            <version>${collatex.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
 
-		<dependency>
-			<groupId>guru.nidi</groupId>
-			<artifactId>graphviz-java</artifactId>
-			<version>${graphviz-java.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>${logback-classic.version}</version>
-		</dependency>
-		<!--<dependency>-->
-			<!--<groupId>org.apache.xmlgraphics</groupId>-->
-			<!--<artifactId>batik-i18n</artifactId>-->
-			<!--<version>${batik.version}</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>org.apache.xmlgraphics</groupId>-->
-			<!--<artifactId>batik-constants</artifactId>-->
-			<!--<version>${batik.version}</version>-->
-		<!--</dependency>-->
+        <dependency>
+            <groupId>guru.nidi</groupId>
+            <artifactId>graphviz-java</artifactId>
+            <version>${graphviz-java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback-classic.version}</version>
+        </dependency>
+        <!--<dependency>-->
+        <!--<groupId>org.apache.xmlgraphics</groupId>-->
+        <!--<artifactId>batik-i18n</artifactId>-->
+        <!--<version>${batik.version}</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+        <!--<groupId>org.apache.xmlgraphics</groupId>-->
+        <!--<artifactId>batik-constants</artifactId>-->
+        <!--<version>${batik.version}</version>-->
+        <!--</dependency>-->
 
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>${guava.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
 
-		<dependency>
-			<groupId>de.vandermeer</groupId>
-			<artifactId>asciitable</artifactId>
-			<version>0.3.2</version>
-		</dependency>
+        <dependency>
+            <groupId>de.vandermeer</groupId>
+            <artifactId>asciitable</artifactId>
+            <version>0.3.2</version>
+        </dependency>
 
-		<!-- Test dependencies -->
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>hyper-collate-test</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>hyper-collate-test</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
@@ -79,7 +79,7 @@
                 <executions>
                     <execution>
                         <goals>
-							<!--<goal>generate-assertions</goal>-->
+                            <!--<goal>generate-assertions</goal>-->
                         </goals>
                     </execution>
                 </executions>
@@ -151,23 +151,23 @@
                     <!-- <skip>true</skip> -->
                 </configuration>
             </plugin>
-			<!--<plugin>-->
-			<!--<groupId>org.codehaus.mojo</groupId>-->
-			<!--<artifactId>build-helper-maven-plugin</artifactId>-->
-			<!--<executions>-->
-			<!--<execution>-->
-			<!--<phase>generate-sources</phase>-->
-			<!--<goals>-->
-			<!--<goal>add-test-source</goal>-->
-			<!--</goals>-->
-			<!--<configuration>-->
-			<!--<sources>-->
-			<!--<source>src/test/generated-assertions</source>-->
-			<!--</sources>-->
-			<!--</configuration>-->
-			<!--</execution>-->
-			<!--</executions>-->
-			<!--</plugin>-->
+            <!--<plugin>-->
+            <!--<groupId>org.codehaus.mojo</groupId>-->
+            <!--<artifactId>build-helper-maven-plugin</artifactId>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<phase>generate-sources</phase>-->
+            <!--<goals>-->
+            <!--<goal>add-test-source</goal>-->
+            <!--</goals>-->
+            <!--<configuration>-->
+            <!--<sources>-->
+            <!--<source>src/test/generated-assertions</source>-->
+            <!--</sources>-->
+            <!--</configuration>-->
+            <!--</execution>-->
+            <!--</executions>-->
+            <!--</plugin>-->
         </plugins>
     </build>
 </project>

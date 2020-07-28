@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.dropwizard.health;
  * #%L
  * hyper-collate-server
  * =======
- * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ public class DotHealthCheck extends HealthCheck {
 
   @Override
   protected Result check() throws Exception {
-    if (dotPath==null){
+    if (dotPath == null) {
       return Result.healthy();
     }
     File dotFile = new File(dotPath);
@@ -48,7 +48,7 @@ public class DotHealthCheck extends HealthCheck {
     }
     final Process dotProc = new ProcessBuilder(dotPath, "-V").start();
     boolean terminated = dotProc.waitFor(2, TimeUnit.SECONDS);
-    if (!terminated){
+    if (!terminated) {
       return Result.unhealthy("%s -V timed out.", dotPath);
     }
 

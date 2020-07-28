@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.dropwizard;
  * #%L
  * hyper-collate-server
  * =======
- * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,16 +55,17 @@ class ServerApplication extends Application<ServerConfiguration> {
   @Override
   public void initialize(final Bootstrap<ServerConfiguration> bootstrap) {
     // Enable variable substitution with environment variables
-    bootstrap.setConfigurationSourceProvider(//
-        new SubstitutingSourceProvider(//
-            bootstrap.getConfigurationSourceProvider(), //
-            new EnvironmentVariableSubstitutor()));
-    bootstrap.addBundle(new SwaggerBundle<ServerConfiguration>() {
-      @Override
-      protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(ServerConfiguration configuration) {
-        return configuration.swaggerBundleConfiguration;
-      }
-    });
+    bootstrap.setConfigurationSourceProvider(
+        new SubstitutingSourceProvider(
+            bootstrap.getConfigurationSourceProvider(), new EnvironmentVariableSubstitutor()));
+    bootstrap.addBundle(
+        new SwaggerBundle<ServerConfiguration>() {
+          @Override
+          protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(
+              ServerConfiguration configuration) {
+            return configuration.swaggerBundleConfiguration;
+          }
+        });
   }
 
   @Override
@@ -82,17 +83,21 @@ class ServerApplication extends Application<ServerConfiguration> {
     SortedMap<String, HealthCheck.Result> results = environment.healthChecks().runHealthChecks();
     AtomicBoolean healthy = new AtomicBoolean(true);
     LOG.info("Health checks:");
-    results.forEach((name, result) -> {
-      LOG.info("{}: {}, message='{}'",//
-          name,//
-          result.isHealthy() ? "healthy" : "unhealthy",//
-          StringUtils.defaultIfBlank(result.getMessage(), ""));
-      healthy.set(healthy.get() && result.isHealthy());
-    });
+    results.forEach(
+        (name, result) -> {
+          LOG.info(
+              "{}: {}, message='{}'",
+              name,
+              result.isHealthy() ? "healthy" : "unhealthy",
+              StringUtils.defaultIfBlank(result.getMessage(), ""));
+          healthy.set(healthy.get() && result.isHealthy());
+        });
     if (!healthy.get()) {
       throw new RuntimeException("Failing health check(s)");
     }
-    LOG.info(String.format("\n\n************************************************************\n** Starting %s at %s **\n************************************************************\n", getName(), configuration.getBaseURI()));
+    LOG.info(
+        String.format(
+            "\n\n************************************************************\n** Starting %s at %s **\n************************************************************\n",
+            getName(), configuration.getBaseURI()));
   }
-
 }

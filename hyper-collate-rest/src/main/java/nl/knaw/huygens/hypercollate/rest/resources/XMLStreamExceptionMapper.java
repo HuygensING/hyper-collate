@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.rest.resources;
  * #%L
  * hyper-collate-rest
  * =======
- * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,9 @@ public class XMLStreamExceptionMapper implements ExceptionMapper<XMLStreamExcept
 
   @Override
   public Response toResponse(XMLStreamException exception) {
-    return Response.status(Status.BAD_REQUEST)//
-        .entity(exception.getMessage())//
-        .type(MediaType.TEXT_PLAIN)//
+    return Response.status(Status.BAD_REQUEST)
+        .entity(exception.getMessage())
+        .type(MediaType.TEXT_PLAIN)
         .build();
   }
-
 }

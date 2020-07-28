@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.model;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,9 +34,9 @@ import static java.util.stream.Collectors.toList;
 public class CollationGraph extends Hypergraph<Node, Edge> {
   private static final Logger LOG = LoggerFactory.getLogger(CollationGraph.class);
   private final List<String> sigils;
-  private TextDelimiterNode textStartNode = new TextDelimiterNode();
-  private TextDelimiterNode textEndNode = new TextDelimiterNode();
-  Map<Markup, MarkupNode> markupNodeIndex = new HashMap<>();
+  private final TextDelimiterNode textStartNode = new TextDelimiterNode();
+  private final TextDelimiterNode textEndNode = new TextDelimiterNode();
+  final Map<Markup, MarkupNode> markupNodeIndex = new HashMap<>();
 
   public CollationGraph() {
     this(new ArrayList<>());
@@ -45,8 +45,8 @@ public class CollationGraph extends Hypergraph<Node, Edge> {
   public CollationGraph(List<String> sigils) {
     super(GraphType.ORDERED);
     this.sigils = sigils;
-//    textStartNode.setSigils(sigils);
-//    textEndNode.setSigils(sigils);
+    //    textStartNode.setSigils(sigils);
+    //    textEndNode.setSigils(sigils);
   }
 
   public TextNode addTextNodeWithTokens(Token... tokens) {
@@ -63,16 +63,21 @@ public class CollationGraph extends Hypergraph<Node, Edge> {
   }
 
   public void linkMarkupToText(MarkupNode markupNode, TextNode textNode) {
-    List<MarkupHyperEdge> markupHyperEdges = getOutgoingEdges(markupNode).stream()
-        .filter(MarkupHyperEdge.class::isInstance)
-        .map(MarkupHyperEdge.class::cast)
-        .collect(toList());
+    List<MarkupHyperEdge> markupHyperEdges =
+        getOutgoingEdges(markupNode).stream()
+            .filter(MarkupHyperEdge.class::isInstance)
+            .map(MarkupHyperEdge.class::cast)
+            .collect(toList());
     if (markupHyperEdges.isEmpty()) {
       MarkupHyperEdge newEdge = new MarkupHyperEdge();
       addDirectedHyperEdge(newEdge, MarkupHyperEdge.LABEL, markupNode, textNode);
     } else {
       if (markupHyperEdges.size() != 1) {
-        throw new RuntimeException("MarkupNode " + markupNode + " should have exactly 1 MarkupHyperEdge, but has " + markupHyperEdges.size());
+        throw new RuntimeException(
+            "MarkupNode "
+                + markupNode
+                + " should have exactly 1 MarkupHyperEdge, but has "
+                + markupHyperEdges.size());
       }
       MarkupHyperEdge edge = markupHyperEdges.get(0);
       addTargetsToHyperEdge(edge, textNode);
@@ -109,8 +114,7 @@ public class CollationGraph extends Hypergraph<Node, Edge> {
   }
 
   public Stream<TextEdge> getOutgoingTextEdgeStream(Node source) {
-    return this.getOutgoingEdges(source)
-        .stream()//
+    return this.getOutgoingEdges(source).stream()
         .filter(TextEdge.class::isInstance)
         .map(TextEdge.class::cast);
   }
@@ -127,13 +131,15 @@ public class CollationGraph extends Hypergraph<Node, Edge> {
           result.add((TextNode) pop);
         }
         visitedNodes.add(pop);
-        getOutgoingTextEdgeStream(pop).forEach(e -> {
-          Node target = this.getTarget(e);
-          if (target == null) {
-            throw new RuntimeException("edge target is null for edge " + pop + "->");
-          }
-          nodesToVisit.add(target);
-        });
+        getOutgoingTextEdgeStream(pop)
+            .forEach(
+                e -> {
+                  Node target = this.getTarget(e);
+                  if (target == null) {
+                    throw new RuntimeException("edge target is null for edge " + pop + "->");
+                  }
+                  nodesToVisit.add(target);
+                });
       } else {
         LOG.debug("revisiting node {}", pop);
       }
@@ -157,14 +163,13 @@ public class CollationGraph extends Hypergraph<Node, Edge> {
 
   public Stream<TextNode> getTextNodeStreamForMarkup(Markup markup) {
     MarkupNode originalMarkupNode = getMarkupNode(markup);
-    List<MarkupHyperEdge> markupHyperEdges = getOutgoingEdges(originalMarkupNode)//
-        .stream()//
-        .filter(MarkupHyperEdge.class::isInstance)//
-        .map(MarkupHyperEdge.class::cast)//
-        .collect(toList());
+    List<MarkupHyperEdge> markupHyperEdges =
+        getOutgoingEdges(originalMarkupNode).stream()
+            .filter(MarkupHyperEdge.class::isInstance)
+            .map(MarkupHyperEdge.class::cast)
+            .collect(toList());
     Preconditions.checkArgument(markupHyperEdges.size() == 1);
-    return getTargets(markupHyperEdges.get(0))
-        .stream()
+    return getTargets(markupHyperEdges.get(0)).stream()
         .filter(TextNode.class::isInstance)
         .map(TextNode.class::cast);
   }
@@ -174,15 +179,14 @@ public class CollationGraph extends Hypergraph<Node, Edge> {
   }
 
   public Stream<MarkupNode> getMarkupNodeStreamForTextNode(TextNode textNode) {
-    return getIncomingEdges(textNode).stream()//
-        .filter(MarkupHyperEdge.class::isInstance)//
-        .map(MarkupHyperEdge.class::cast)//
-        .map(this::getSource)//
+    return getIncomingEdges(textNode).stream()
+        .filter(MarkupHyperEdge.class::isInstance)
+        .map(MarkupHyperEdge.class::cast)
+        .map(this::getSource)
         .map(MarkupNode.class::cast);
   }
 
   private MarkupNode getMarkupNode(Node markupNode) {
     return (MarkupNode) markupNode;
   }
-
 }

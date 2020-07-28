@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.dropwizard.health;
  * #%L
  * hyper-collate-server
  * =======
- * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import com.codahale.metrics.health.HealthCheck;
 public class ServerHealthCheck extends HealthCheck {
 
   @Override
-  protected Result check() throws Exception {
+  protected Result check() {
     return Result.healthy();
   }
 }

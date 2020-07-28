@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,8 @@ public class HyperCollateAssertions extends Assertions {
   }
 
   /**
-   * Creates a new instance of <code>{@link nl.knaw.huygens.hypercollate.model.CollationGraphAssert}</code>.
+   * Creates a new instance of <code>{@link nl.knaw.huygens.hypercollate.model.CollationGraphAssert}
+   * </code>.
    *
    * @param actual the actual value.
    * @return the created assertion object.

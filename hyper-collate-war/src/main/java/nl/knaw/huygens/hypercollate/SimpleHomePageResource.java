@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate;
  * #%L
  * hyper-collate-war
  * =======
- * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.util.List;
 
 @Path("")
@@ -42,10 +41,7 @@ public class SimpleHomePageResource {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @ApiOperation(value = "List the root endpoint URLs")
-  public Response getHomePage() throws IOException {
-    return Response//
-        .ok(rootEndpointURLs)//
-        .build();
+  public Response getHomePage() {
+    return Response.ok(rootEndpointURLs).build();
   }
-
 }

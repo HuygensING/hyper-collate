@@ -114,3 +114,5 @@ venv/
 wheels/
 assertions-generation-report.txt
 hyper-collate-core/src/test/generated-assertions/
+**/dependency-reduced-pom.xml
+test-*.txt

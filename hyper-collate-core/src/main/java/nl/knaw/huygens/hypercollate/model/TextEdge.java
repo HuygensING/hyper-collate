@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.model;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.util.Set;
 
 public class TextEdge implements Edge {
   public static final String LABEL = "NextTextNode";
-  private Set<String> sigils;
+  private final Set<String> sigils;
 
   TextEdge(Set<String> sigils) {
     this.sigils = sigils;

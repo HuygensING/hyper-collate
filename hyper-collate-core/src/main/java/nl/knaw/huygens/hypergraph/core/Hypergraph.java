@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypergraph.core;
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2019 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,14 +74,12 @@ public class Hypergraph<N, H> {
     sourceNode.put(edge, source);
     // set targets
     if (GraphType.ORDERED == this.graphType) {
-      List<N> targetList = new ArrayList<>();
-      targetList.addAll(asList(targets));
+      List<N> targetList = new ArrayList<>(asList(targets));
 
       targetNodes.put(edge, targetList);
     } else {
       // convert Array target to set
-      Set<N> targetSet = new HashSet<>();
-      targetSet.addAll(asList(targets));
+      Set<N> targetSet = new HashSet<>(asList(targets));
       targetNodes.put(edge, targetSet);
     }
     // set incoming
@@ -123,6 +121,7 @@ public class Hypergraph<N, H> {
   }
 
   public enum GraphType {
-    ORDERED, UNORDERED
+    ORDERED,
+    UNORDERED
   }
 }
