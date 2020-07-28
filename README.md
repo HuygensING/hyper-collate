@@ -3,7 +3,7 @@
 ## General
 HyperCollate is a prototype collation engine that is able to handle *intradocumentary* variation (i.e. variation _within_ one document), in addition to finding the differences _between_ witnesses. This advanced form of collation is possible because HyperCollate looks not only at the text of a document, but also at its markup.
 
-We are also developing a collation algorithm that can deal with structural variation (think of deleted paragraphs, split sentences, etc.). The code (work-in-progress) can be found in the "Prioritised XML Collation" [codebase](https://github.com/bleekere/prioritised_xml_collation_java) (java). Also take a look at the [Jupyter Notebook](https://github.com/HuygensING/hyper-collate-python-proxy/blob/master/hyper-collate-example.ipynb). The two codebases (interval variation and structural variation) will be merged in the near future.
+We are also developing a collation algorithm that can deal with structural variation (think of deleted paragraphs, split sentences, etc.). The code (work-in-progress) can be found in the "Prioritised XML Collation" [codebase](https://github.com/bleekere/prioritised_xml_collation_java) (java). Also, take a look at the [Jupyter Notebook](https://github.com/HuygensING/hyper-collate-python-proxy/blob/master/hyper-collate-example.ipynb). The two code bases (interval variation and structural variation) will be merged in the near future.
 
 ## Server
 
@@ -56,7 +56,7 @@ Follow steps 3 - 5 from Option 1b.
 Interaction with the server is through REST calls.
 This can be done in the computer language of your choice, with the `curl` tool, or (for the jar option) with the built-in API explorer at 
 the `/swagger` endpoint of the server.
-The war just exposes a swagger file without a UI, in the `/swagger.json` or `/swagger.yaml` endpoints
+The war just exposes a swagger file without a UI, in the `/swagger.json` or `/swagger.yaml` endpoints.
 
 - **Create a new Collation with a given name:**    
   `PUT /collations/{name}`  

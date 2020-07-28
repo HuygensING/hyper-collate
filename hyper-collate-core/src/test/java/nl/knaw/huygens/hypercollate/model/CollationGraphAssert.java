@@ -161,7 +161,7 @@ public class CollationGraphAssert
   }
 
   public static class TextNodeSketch {
-    Map<String, String> witnessTokenSegments = new OrderedHashMap<>();
+    final Map<String, String> witnessTokenSegments = new OrderedHashMap<>();
 
     public TextNodeSketch withWitnessSegmentSketch(String sigil, String mergedTokens) {
       witnessTokenSegments.put(sigil, mergedTokens);

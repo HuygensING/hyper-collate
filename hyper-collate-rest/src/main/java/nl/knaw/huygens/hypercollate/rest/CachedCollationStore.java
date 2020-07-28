@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -207,8 +208,7 @@ public class CachedCollationStore implements CollationStore {
       final String xmlPath) {
     InputStream xmlStream = classLoader.getResourceAsStream(xmlPath);
     try {
-      String xml = null;
-      xml = IOUtils.toString(xmlStream, "UTF-8");
+      String xml = IOUtils.toString(xmlStream, StandardCharsets.UTF_8);
       VariantWitnessGraph variantWitnessGraph = xmlImporter.importXML(sigil, xml);
       collationInfo.addWitness(sigil, xml).addWitnessGraph(sigil, variantWitnessGraph);
       persist(collationId);
@@ -218,7 +218,7 @@ public class CachedCollationStore implements CollationStore {
     }
   }
 
-  XMLImporter xmlImporter = new XMLImporter();
+  final XMLImporter xmlImporter = new XMLImporter();
 
   private ObjectMapper objectMapper() {
     return new ObjectMapper()

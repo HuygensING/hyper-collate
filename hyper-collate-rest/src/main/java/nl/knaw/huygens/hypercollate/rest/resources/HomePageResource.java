@@ -29,7 +29,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.io.InputStream;
 
 @Api("/")
@@ -40,13 +39,12 @@ public class HomePageResource {
    * Shows the homepage for the backend
    *
    * @return HTML representation of the homepage
-   * @throws IOException
    */
   @GET
   @Timed
   @Produces(MediaType.TEXT_HTML)
   @ApiOperation(value = "Show the server homepage")
-  public Response getHomePage() throws IOException {
+  public Response getHomePage() {
     InputStream resourceAsStream =
         Thread.currentThread().getContextClassLoader().getResourceAsStream("index.html");
     return Response.ok(resourceAsStream)

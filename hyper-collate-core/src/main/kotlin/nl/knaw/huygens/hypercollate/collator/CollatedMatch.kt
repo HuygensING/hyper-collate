@@ -20,11 +20,11 @@ package nl.knaw.huygens.hypercollate.collator
  * #L%
  */
 
+import nl.knaw.huygens.hypercollate.model.MarkedUpToken
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex
 import nl.knaw.huygens.hypercollate.model.TextNode
 import nl.knaw.huygens.hypercollate.model.TokenVertex
 import java.util.*
-import java.util.stream.Collectors
 
 class CollatedMatch(val collatedNode: TextNode, val witnessVertex: TokenVertex) {
     var nodeRank = 0
@@ -33,6 +33,16 @@ class CollatedMatch(val collatedNode: TextNode, val witnessVertex: TokenVertex) 
 
     var sigils: Set<String>
     private val branchPaths: MutableMap<String, List<Int>> = HashMap()
+
+    val content: String by lazy {
+        if (collatedNode.sigils.isEmpty()) {
+            ""
+        } else {
+            val sigil = collatedNode.sigils.iterator().next()
+            val token = collatedNode.getTokenForWitness(sigil) as MarkedUpToken
+            token.normalizedContent
+        }
+    }
 
     fun hasWitness(sigil: String): Boolean =
             sigils.contains(sigil)
@@ -46,8 +56,8 @@ class CollatedMatch(val collatedNode: TextNode, val witnessVertex: TokenVertex) 
             branchPaths[s]
 
     override fun toString(): String {
-        val sigils = if (collatedNode is TextNode) collatedNode.sigils else sigils
-        val sigilString = sigils.stream().sorted().collect(Collectors.joining(","))
+        val sigils = collatedNode.sigils
+        val sigilString = sigils.sorted().joinToString(",")
         val stringBuilder = StringBuilder("<[").append(sigilString).append("]").append(nodeRank)
         val vString = StringBuilder()
         if (witnessVertex is SimpleTokenVertex) {
@@ -62,11 +72,10 @@ class CollatedMatch(val collatedNode: TextNode, val witnessVertex: TokenVertex) 
     override fun hashCode(): Int =
             collatedNode.hashCode() * witnessVertex.hashCode()
 
-    override fun equals(other: Any?): Boolean {
-        return if (other is CollatedMatch) {
-            collatedNode == other.collatedNode && witnessVertex == other.witnessVertex
-        } else false
-    }
+    override fun equals(other: Any?): Boolean =
+            if (other is CollatedMatch) {
+                collatedNode == other.collatedNode && witnessVertex == other.witnessVertex
+            } else false
 
     init {
         val tmp: MutableList<String> = mutableListOf(witnessVertex.sigil)

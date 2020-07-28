@@ -24,7 +24,7 @@ import java.util.Set;
 
 public class TextEdge implements Edge {
   public static final String LABEL = "NextTextNode";
-  private Set<String> sigils;
+  private final Set<String> sigils;
 
   TextEdge(Set<String> sigils) {
     this.sigils = sigils;
