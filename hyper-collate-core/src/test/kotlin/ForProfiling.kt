@@ -30,25 +30,65 @@ import java.util.concurrent.TimeUnit
 
 fun main() {
     (LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger).level = Level.WARN
-    for (i in 1..100) testCollationWithManyMatches()
+    for (i in 1..100) testCollations()
 }
 
-fun testCollationWithManyMatches() {
+data class Witness(val sigil: String, val xml: String)
+
+val testPairs: List<Pair<Witness, Witness>> = listOf(
+        Pair(Witness("W1",
+                "<seg>Ik had een buurvrouw, een paar deuren verder,"
+                        + " en <del>ze</del><add>het</add> was zo'n type dat naar het muse<del>im</del>um ging en "
+                        + "cappuc<add>c</add>i<del>o</del>no's dronk<del>l</del>, dus ik<del>i k</del>kon er weinig mee, en zij kon weinig"
+                        + " m<del>netr</del>et mij<del>,</del><add>;</add> we <del>lk</del> knikten alleen naar elkaar, en als ik"
+                        + " Rock<del>u</del>y bij me had, <del>knikte</del>maakte ze van het knikken iets dat nog wat sneller "
+                        + "a<del >g</del>fgehandeld moest<del>r</del> worden dan anders.</seg>"),
+                Witness("W2",
+                        "<seg><del>Ik had een buurvrouw, </del><add>Die "
+                                + "buurvrouw woonde </add>een paar deuren verder, en het was zo'n type <del>dat naar het museum ging en "
+                                + "cappuccino's dronk, dus ik kon er</del><add>waar ik</add> weinig mee<add> ko<del>m</del>n</add>, en zij kon "
+                                + "weinig met mij; we knikten alleen naar elkaar, en als ik Rocky bij me had, maakte ze van het knikken iets dat"
+                                + " nog wat sneller afgehandeld moest worden dan anders.</seg>")),
+
+        Pair(Witness("W1",
+                "<s>One must have lived longer with <app>"
+                        + "<rdg varSeq=\"1\"><del>this</del></rdg>"
+                        + "<rdg varSeq=\"2\"><del><add>such a</add></del></rdg>"
+                        + "<rdg varSeq=\"3\"><add>a</add></rdg>"
+                        + "</app> system, to appreciate its advantages.</s>"),
+                Witness("W2",
+                        "<s>One must have lived longer with this system, to appreciate its advantages.</s>")),
+
+        Pair(Witness("N", """
+            <text>
+            <s>Frankenstein discovered that I detailed or made notes concerning his history he asked to see them &amp; himself corrected
+            <add place="superlinear">and augmented</add>
+            them in many places</s>
+            </text>
+            """.trimIndent()),
+                Witness("F", """
+            <text>
+            <s>Frankenstein discovered
+            <del rend="strikethrough">or</del>
+            <add place="superlinear">that I</add> made notes concerning his history; he asked to see them and then himself corrected and augmented them in many places
+            </s>
+            </text>
+            """.trimIndent()))
+//        Pair(Witness("", ""), Witness("", "")),
+)
+
+fun testCollations() {
     val importer = XMLImporter()
-    val xml1 = ("<seg>Ik had een buurvrouw, een paar deuren verder,"
-            + " en <del>ze</del><add>het</add> was zo'n type dat naar het muse<del>im</del>um ging en "
-            + "cappuc<add>c</add>i<del>o</del>no's dronk<del>l</del>, dus ik<del>i k</del>kon er weinig mee, en zij kon weinig"
-            + " m<del>netr</del>et mij<del>,</del><add>;</add> we <del>lk</del> knikten alleen naar elkaar, en als ik"
-            + " Rock<del>u</del>y bij me had, <del>knikte</del>maakte ze van het knikken iets dat nog wat sneller "
-            + "a<del >g</del>fgehandeld moest<del>r</del> worden dan anders.</seg>")
-    val w1 = importer.importXML("W1", xml1)
-    val xml2 = ("<seg><del>Ik had een buurvrouw, </del><add>Die "
-            + "buurvrouw woonde </add>een paar deuren verder, en het was zo'n type <del>dat naar het museum ging en "
-            + "cappuccino's dronk, dus ik kon er</del><add>waar ik</add> weinig mee<add> ko<del>m</del>n</add>, en zij kon "
-            + "weinig met mij; we knikten alleen naar elkaar, en als ik Rocky bij me had, maakte ze van het knikken iets dat"
-            + " nog wat sneller afgehandeld moest worden dan anders.</seg>")
-    val w2 = importer.importXML("W2", xml2)
-    hyperCollate(w1, w2)
+    for (testPair in testPairs) {
+        println("""
+            |collating:
+            |- ${testPair.first.sigil}: ${testPair.first.xml}
+            |- ${testPair.second.sigil}: ${testPair.second.xml}
+            """.trimMargin())
+        val w1 = importer.importXML(testPair.first.sigil, testPair.first.xml)
+        val w2 = importer.importXML(testPair.second.sigil, testPair.second.xml)
+        hyperCollate(w1, w2)
+    }
 }
 
 private val hyperCollator = HyperCollator()

@@ -20,12 +20,11 @@ package nl.knaw.huygens.hypercollate.collator
  * #L%
  */
 
-import com.google.common.base.Preconditions
 import nl.knaw.huygens.hypercollate.model.TextNode
 import java.util.*
 import kotlin.math.min
 
-class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val potentialMatches: List<CollatedMatch>) {
+data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val potentialMatches: List<CollatedMatch>) {
 
     val isDetermined: Boolean
         get() = potentialMatches.isEmpty()
@@ -40,69 +39,59 @@ class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val poten
     }
 
     fun chooseMatch(match: CollatedMatch): QuantumCollatedMatchList {
-        Preconditions.checkState(potentialMatches.contains(match))
-        val newChosen = cloneChosenMatches()
-        newChosen.add(match)
+        val newChosen = chosenMatches + match
         val newPotential = calculateNewPotential(potentialMatches, match)
         return QuantumCollatedMatchList(newChosen, newPotential)
     }
 
-    fun discardMatch(match: CollatedMatch?): QuantumCollatedMatchList {
-        Preconditions.checkState(potentialMatches.contains(match))
-        val newChosen: List<CollatedMatch> = cloneChosenMatches()
-        val newPotential: MutableList<CollatedMatch> = ArrayList(potentialMatches)
-        newPotential.remove(match)
+    fun discardMatch(match: CollatedMatch): QuantumCollatedMatchList {
+        val newChosen = chosenMatches
+        val newPotential = potentialMatches - match
         return QuantumCollatedMatchList(newChosen, newPotential)
     }
 
-    private fun cloneChosenMatches(): MutableList<CollatedMatch> =
-            ArrayList(chosenMatches)
-
     private fun calculateNewPotential(
-            potentialMatches: List<CollatedMatch>, match: CollatedMatch): List<CollatedMatch> {
+            potentialMatches: List<CollatedMatch>,
+            match: CollatedMatch
+    ): List<CollatedMatch> {
         val newPotential: MutableList<CollatedMatch> = ArrayList(potentialMatches)
         val invalidatedMatches = calculateInvalidatedMatches(potentialMatches, match)
         newPotential.removeAll(invalidatedMatches)
         return newPotential
     }
 
-    private fun calculateInvalidatedMatches(potentialMatches: List<CollatedMatch>, match: CollatedMatch): List<CollatedMatch> {
-        val node = match.collatedNode
-        val tokenVertexForWitness = match.witnessVertex
-        val minNodeRank = match.nodeRank
-        val minVertexRank = match.vertexRank
-        return potentialMatches
-                .filter { m: CollatedMatch ->
-                    m.collatedNode == node ||
-                            m.witnessVertex == tokenVertexForWitness ||
-                            m.vertexRank < minVertexRank ||
-                            (m.nodeRank < minNodeRank && hasSigilOverlap(m, node))
-                }
-    }
+    private val stringSerialization: String by lazy { "($chosenMatches | $potentialMatches)" }
+    override fun toString(): String = stringSerialization
 
-    // m and node have witnesses in common
-    // for those witnesses they have in common, the branchpath of one is the startsubpath otf the
-    // other.
-    private fun hasSigilOverlap(m: CollatedMatch, node: TextNode): Boolean =
-            m.sigils
-                    .asSequence()
-                    .filter { node.sigils.contains(it) }
-                    .any { branchPathsOverlap(m.getBranchPath(it)!!, node.getBranchPath(it)) }
+    override fun hashCode(): Int = super.hashCode()
 
-    override fun toString(): String =
-            "($chosenMatches | $potentialMatches)"
-
-    override fun hashCode(): Int =
-            chosenMatches.hashCode() + potentialMatches.hashCode()
-
-    override fun equals(other: Any?): Boolean {
-        if (other !is QuantumCollatedMatchList) {
-            return false
-        }
-        return chosenMatches == other.chosenMatches && potentialMatches == other.potentialMatches
-    }
+    override fun equals(other: Any?): Boolean =
+            other === this
 
     companion object {
+        private fun calculateInvalidatedMatches(potentialMatches: List<CollatedMatch>, match: CollatedMatch): List<CollatedMatch> {
+            val node = match.collatedNode
+            val tokenVertexForWitness = match.witnessVertex
+            val minNodeRank = match.nodeRank
+            val minVertexRank = match.vertexRank
+            return potentialMatches
+                    .filter { m: CollatedMatch ->
+                        m.collatedNode == node ||
+                                m.witnessVertex == tokenVertexForWitness ||
+                                m.vertexRank < minVertexRank ||
+                                (m.nodeRank < minNodeRank && hasSigilOverlap(m, node))
+                    }
+        }
+
+        // m and node have witnesses in common
+        // for those witnesses they have in common, the branchpath of one is the startsubpath otf the
+        // other.
+        private fun hasSigilOverlap(m: CollatedMatch, node: TextNode): Boolean =
+                m.sigils
+                        .asSequence()
+                        .filter { node.sigils.contains(it) }
+                        .any { branchPathsOverlap(m.getBranchPath(it)!!, node.getBranchPath(it)) }
+
         fun branchPathsOverlap(matchBranchPath: List<Int>, nodeBranchPath: List<Int>): Boolean {
             val minSize = min(matchBranchPath.size, nodeBranchPath.size)
             for (i in 0 until minSize) {

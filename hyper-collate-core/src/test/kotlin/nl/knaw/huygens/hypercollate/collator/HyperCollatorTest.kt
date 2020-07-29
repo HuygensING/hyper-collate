@@ -38,25 +38,7 @@ import java.util.stream.Collectors
 class HyperCollatorTest : HyperCollateTest() {
     private val hyperCollator = HyperCollator()
 
-//    @Test
-//    fun test_time() {
-//        val multiset = HashMultiset.create<Long>()
-//        for (i in 0..1000) {
-////            val id = (System.nanoTime() / 100) % 10000
-//            val id = System.nanoTime()
-//            multiset += id
-//        }
-//        for (i in multiset.sorted().distinct()) {
-//            println("$i : ${"*".repeat(multiset.count(i))}")
-//        }
-//    }
-
-//    @Test
-//    fun profile_many_matches() {
-//        for (i in 1..100) testCollationWithManyMatches()
-//    }
-
-    @Test(timeout = 40_000)
+    @Test(timeout = 5_000)
     fun testCollationWithManyMatches() {
         val importer = XMLImporter()
         val xml1 = ("<seg>Ik had een buurvrouw, een paar deuren verder,"
@@ -233,10 +215,10 @@ class HyperCollatorTest : HyperCollateTest() {
             """.trimIndent()
         LOG.info("w1={}", xml1)
         LOG.info("w2={}", xml2)
-        val collationGraph = testHyperCollation(w1, w2, expectedDot, expectedTable)
+        testHyperCollation(w1, w2, expectedDot, expectedTable)
     }
 
-    @Test//(timeout = 10000)
+    @Test(timeout = 10_000)
     fun testAppRdgWithAddDel() {
         val importer = XMLImporter()
         val wF = importer.importXML(
@@ -281,7 +263,7 @@ class HyperCollatorTest : HyperCollateTest() {
             │[W2]│One must have lived longer with │this          │ │system, to appreciate its advantages.│
             └────┴────────────────────────────────┴──────────────┴─┴─────────────────────────────────────┘
             """.trimIndent()
-        val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
+        testHyperCollation(wF, wQ, expectedDot, expectedTable)
     }
 
     @Test(timeout = 10000)
@@ -329,7 +311,7 @@ class HyperCollatorTest : HyperCollateTest() {
             │[W2]│One must have lived longer with │this      │ │system, to appreciate its advantages.│
             └────┴────────────────────────────────┴──────────┴─┴─────────────────────────────────────┘
             """.trimIndent()
-        val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
+        testHyperCollation(wF, wQ, expectedDot, expectedTable)
     }
 
     @Test(timeout = 10000)
@@ -446,24 +428,24 @@ class HyperCollatorTest : HyperCollateTest() {
                 .withWitnessSegmentSketch("F", "liefelijke toestemming")
                 .withWitnessSegmentSketch("Z", "liefelijke toestemming")
                 .withWitnessSegmentSketch("Q", "liefelijke toestemming")
-        val trachten_naar = CollationGraphAssert.textNodeSketch()
+        val trachtenNaar = CollationGraphAssert.textNodeSketch()
                 .withWitnessSegmentSketch("F", "trachten naar")
                 .withWitnessSegmentSketch("Q", "trachten naar")
                 .withWitnessSegmentSketch("Z", "trachten naar ")
-        val werven_om = CollationGraphAssert.textNodeSketch()
+        val wervenOm = CollationGraphAssert.textNodeSketch()
                 .withWitnessSegmentSketch("F", "werven om")
                 .withWitnessSegmentSketch("Q", "werven om")
         assertThat(collationGraph)
-                .containsTextNodesMatching(n1, n2, n3, n4, n5, n6, trachten_naar, werven_om)
+                .containsTextNodesMatching(n1, n2, n3, n4, n5, n6, trachtenNaar, wervenOm)
         assertThat(collationGraph)
                 .containsMarkupNodesMatching(
                         CollationGraphAssert.markupNodeSketch("F", "text"),
                         CollationGraphAssert.markupNodeSketch("Q", "text"),
                         CollationGraphAssert.markupNodeSketch("Z", "text"))
-        val f_del = CollationGraphAssert.markupNodeSketch("F", "del")
-        val q_add = CollationGraphAssert.markupNodeSketch("Q", "add")
-        assertThat(collationGraph).hasTextNodeMatching(werven_om).withMarkupNodesMatching(f_del)
-        assertThat(collationGraph).hasMarkupNodeMatching(q_add).withTextNodesMatching(trachten_naar)
+        val fDel = CollationGraphAssert.markupNodeSketch("F", "del")
+        val qAdd = CollationGraphAssert.markupNodeSketch("Q", "add")
+        assertThat(collationGraph).hasTextNodeMatching(wervenOm).withMarkupNodesMatching(fDel)
+        assertThat(collationGraph).hasMarkupNodeMatching(qAdd).withTextNodesMatching(trachtenNaar)
     }
 
     @Test(timeout = 10000)
@@ -1031,40 +1013,40 @@ class HyperCollatorTest : HyperCollateTest() {
             t013->t004[label="N"]
             }
             """.trimIndent()
-        val expected1 = """
-            digraph CollationGraph{
-            labelloc=b
-            t000 [label="";shape=doublecircle,rank=middle]
-            t001 [label="";shape=doublecircle,rank=middle]
-            t002 [label=<F: so&#9251;infinitely&#9251;miserable,&#9251;<br/>F: <i>/text/p/s</i>>]
-            t003 [label=<F,N: ?<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s/add</i><br/>>]
-            t004 [label=<F,N: &#9251;<br/>F: <i>/text/p</i><br/>N: <i>/text/s</i><br/>>]
-            t005 [label=<F: Oh<br/>N: oh&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]
-            t006 [label=<F: ,&#9251;<br/>F: <i>/text/p/s</i>>]
-            t007 [label=<F: no<br/>N: no&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]
-            t008 [label=<F: !&#9251;<br/>F: <i>/text/p/s</i>>]
-            t009 [label=<F: ...&#9251;<br/>N: ...&#x21A9;<br/><br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]
-            t010 [label=<F,N: so&#9251;destitute&#9251;of&#9251;every&#9251;hope&#9251;of&#9251;consolation&#9251;to&#9251;live<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]
-            t011 [label=<N: -&#9251;<br/>N: <i>/text/s</i>>]
-            t012 [label=<N: -<br/>N: <i>/text/s/del</i>>]
-            t000->t002[label="F"]
-            t000->t010[label="N"]
-            t002->t010[label="F"]
-            t003->t004[label="F,N"]
-            t004->t005[label="F,N"]
-            t005->t006[label="F"]
-            t005->t007[label="N"]
-            t006->t007[label="F"]
-            t007->t008[label="F"]
-            t007->t011[label="N"]
-            t008->t009[label="F"]
-            t009->t001[label="F,N"]
-            t010->t003[label="F,N"]
-            t010->t012[label="N"]
-            t011->t009[label="N"]
-            t012->t004[label="N"]
-            }
-            """.trimIndent()
+//        val expected1 = """
+//            digraph CollationGraph{
+//            labelloc=b
+//            t000 [label="";shape=doublecircle,rank=middle]
+//            t001 [label="";shape=doublecircle,rank=middle]
+//            t002 [label=<F: so&#9251;infinitely&#9251;miserable,&#9251;<br/>F: <i>/text/p/s</i>>]
+//            t003 [label=<F,N: ?<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s/add</i><br/>>]
+//            t004 [label=<F,N: &#9251;<br/>F: <i>/text/p</i><br/>N: <i>/text/s</i><br/>>]
+//            t005 [label=<F: Oh<br/>N: oh&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]
+//            t006 [label=<F: ,&#9251;<br/>F: <i>/text/p/s</i>>]
+//            t007 [label=<F: no<br/>N: no&#9251;<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]
+//            t008 [label=<F: !&#9251;<br/>F: <i>/text/p/s</i>>]
+//            t009 [label=<F: ...&#9251;<br/>N: ...&#x21A9;<br/><br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]
+//            t010 [label=<F,N: so&#9251;destitute&#9251;of&#9251;every&#9251;hope&#9251;of&#9251;consolation&#9251;to&#9251;live<br/>F: <i>/text/p/s</i><br/>N: <i>/text/s</i><br/>>]
+//            t011 [label=<N: -&#9251;<br/>N: <i>/text/s</i>>]
+//            t012 [label=<N: -<br/>N: <i>/text/s/del</i>>]
+//            t000->t002[label="F"]
+//            t000->t010[label="N"]
+//            t002->t010[label="F"]
+//            t003->t004[label="F,N"]
+//            t004->t005[label="F,N"]
+//            t005->t006[label="F"]
+//            t005->t007[label="N"]
+//            t006->t007[label="F"]
+//            t007->t008[label="F"]
+//            t007->t011[label="N"]
+//            t008->t009[label="F"]
+//            t009->t001[label="F,N"]
+//            t010->t003[label="F,N"]
+//            t010->t012[label="N"]
+//            t011->t009[label="N"]
+//            t012->t004[label="N"]
+//            }
+//            """.trimIndent()
         val expectedTable = """
             ┌───┬───┬─────────────────────────┬──────────────────────────────────────────────┬─────┬─┬───┬──┬───┬──┬────┐
             │[F]│so │infinitely miserable, so │destitute of every hope of consolation to live│?    │ │Oh │, │no │! │... │

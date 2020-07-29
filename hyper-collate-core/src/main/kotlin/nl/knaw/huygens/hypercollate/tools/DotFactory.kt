@@ -153,12 +153,12 @@ class DotFactory(emphasizeWhitespace: Boolean) {
         } else null
     }
 
-    private val BY_NODE = Comparator.comparing { obj: TextNode -> obj.toString() }
+    private val byNode = Comparator.comparing { obj: TextNode -> obj.toString() }
     fun fromCollationGraph(collation: CollationGraph, hideMarkup: Boolean): String {
         val dotBuilder = StringBuilder("digraph CollationGraph{\nlabelloc=b\n")
         val nodeIdentifiers: MutableMap<TextNode, String> = HashMap()
         val nodes = collation.traverseTextNodes()
-        nodes.sortWith(BY_NODE)
+        nodes.sortWith(byNode)
         for (i in nodes.indices) {
             val node = nodes[i]
             val nodeId = "t" + String.format("%03d", i)

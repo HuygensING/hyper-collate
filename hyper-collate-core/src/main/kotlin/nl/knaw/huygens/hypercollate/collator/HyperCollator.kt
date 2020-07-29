@@ -122,7 +122,7 @@ class HyperCollator {
                 ?: error("no TokenVertex found for sigil $sigil")
         val node = collatedTokenVertexMap[vertex] ?: error("no node found for vertex")
         return CollatedMatch(node, tokenVertexForWitness)
-                .setVertexRank(match.getRankForWitness(sigil)!!)
+                .withVertexRank(match.getRankForWitness(sigil)!!)
     }
 
     private fun collate(
@@ -148,7 +148,7 @@ class HyperCollator {
         val first = witnessIterator.next()
         val rootNode: TextNode = collationGraph.textStartNode
         collatedTokenVertexMap[first] = rootNode
-        logCollated(collatedTokenVertexMap)
+//        logCollated(collatedTokenVertexMap)
         while (optimalMatchList.isNotEmpty()) {
             val match: CollatedMatch = optimalMatchList.removeAt(0)
             LOG.debug("match={}", match)
@@ -172,9 +172,9 @@ class HyperCollator {
                     collationGraph, witnessGraph, markupNodeIndex, tokenVertexForWitnessGraph, matchingNode)
         }
         collatedTokenVertexMap[witnessGraph.endTokenVertex] = collationGraph.textEndNode
-        logCollated(collatedTokenVertexMap)
+//        logCollated(collatedTokenVertexMap)
         addEdges(collationGraph, collatedTokenVertexMap)
-        logCollated(collatedTokenVertexMap)
+//        logCollated(collatedTokenVertexMap)
     }
 
     private fun addMarkupHyperEdges(
