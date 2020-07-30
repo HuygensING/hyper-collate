@@ -1367,7 +1367,7 @@ class HyperCollatorTest : HyperCollateTest() {
         // collation.getMarkupStream().map(Markup::toString).sorted().collect(toList()));
         assertThat(markupAfterJoin).containsExactlyElementsOf(markupBeforeJoin)
 
-        val dot = CollationGraphVisualizer.toDot(collation, true, false)
+        val dot = CollationGraphVisualizer.toDot(collation, emphasizeWhitespace = true, hideMarkup = false)
         LOG.info("dot=\n{}", dot)
         writeGraph(dot, "graph")
         assertThat(dot).isEqualTo(expectedDot)

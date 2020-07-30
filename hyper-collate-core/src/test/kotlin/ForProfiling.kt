@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit
 
 fun main() {
     (LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger).level = Level.WARN
-    for (i in 1..100) testCollations()
+    while (true) testCollations()
 }
 
 data class Witness(val sigil: String, val xml: String)
