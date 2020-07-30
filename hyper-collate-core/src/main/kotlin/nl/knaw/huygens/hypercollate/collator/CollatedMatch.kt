@@ -76,9 +76,7 @@ data class CollatedMatch(val collatedNode: TextNode, val witnessVertex: TokenVer
             hashCode
 
     override fun equals(other: Any?): Boolean =
-            other is CollatedMatch
-                    && collatedNode == other.collatedNode
-                    && witnessVertex == other.witnessVertex
+            other === this
 
     init {
         val tmp: MutableList<String> = mutableListOf(witnessVertex.sigil)
