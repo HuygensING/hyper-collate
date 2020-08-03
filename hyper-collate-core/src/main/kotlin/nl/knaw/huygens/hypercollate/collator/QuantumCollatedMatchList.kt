@@ -21,7 +21,6 @@ package nl.knaw.huygens.hypercollate.collator
  */
 
 import nl.knaw.huygens.hypercollate.model.TextNode
-import java.util.*
 import kotlin.math.min
 
 data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val potentialMatches: List<CollatedMatch>) {
@@ -54,10 +53,8 @@ data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val 
             potentialMatches: List<CollatedMatch>,
             match: CollatedMatch
     ): List<CollatedMatch> {
-        val newPotential: MutableList<CollatedMatch> = ArrayList(potentialMatches)
         val invalidatedMatches = calculateInvalidatedMatches(potentialMatches, match)
-        newPotential.removeAll(invalidatedMatches)
-        return newPotential
+        return potentialMatches - invalidatedMatches
     }
 
     private val stringSerialization: String by lazy { "($chosenMatches | $potentialMatches)" }
@@ -89,7 +86,7 @@ data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val 
         private fun hasSigilOverlap(m: CollatedMatch, node: TextNode): Boolean =
                 m.sigils
                         .asSequence()
-                        .filter { node.sigils.contains(it) }
+                        .filter { it in node.sigils }
                         .any { branchPathsOverlap(m.getBranchPath(it)!!, node.getBranchPath(it)) }
 
         fun branchPathsOverlap(matchBranchPath: List<Int>, nodeBranchPath: List<Int>): Boolean {
