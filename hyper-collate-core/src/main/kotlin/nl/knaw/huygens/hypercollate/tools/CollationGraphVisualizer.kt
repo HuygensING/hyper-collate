@@ -199,7 +199,7 @@ object CollationGraphVisualizer {
         val layerContent: MutableList<String> = ArrayList()
 
         constructor(content: String) {
-            layerContent.add(content)
+            layerContent += content
         }
 
         internal constructor()

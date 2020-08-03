@@ -68,7 +68,7 @@ class Match(vararg matchingTokenVertices: TokenVertex) {
             } else {
                 vString.append(sigil).append(":").append(vertex.javaClass.simpleName)
             }
-            vertexStrings.add(vString.toString())
+            vertexStrings += vString.toString()
         }
         return stringBuilder.append(Joiner.on(",").join(vertexStrings)).append(">").toString()
     }

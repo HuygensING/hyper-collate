@@ -45,7 +45,7 @@ data class CollatedMatch(val collatedNode: TextNode, val witnessVertex: TokenVer
         }
     }
 
-    fun hasWitness(sigil: String): Boolean = sigils.contains(sigil)
+    fun hasWitness(sigil: String): Boolean = sigil in sigils
 
     fun withVertexRank(vertexRank: Int): CollatedMatch {
         this.vertexRank = vertexRank

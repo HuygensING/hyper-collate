@@ -37,9 +37,9 @@ class HyperCollator {
         graphs
                 .sortedBy { it.sigil }
                 .forEach { graph: VariantWitnessGraph ->
-                    sigils.add(graph.sigil)
-                    witnesses.add(graph)
-                    rankings.add(VariantWitnessGraphRanking.of(graph))
+                    sigils += graph.sigil
+                    witnesses += graph
+                    rankings += VariantWitnessGraphRanking.of(graph)
                 }
         val matches = getPotentialMatches(witnesses, rankings)
         val collationGraph = CollationGraph()
@@ -74,7 +74,7 @@ class HyperCollator {
             witnessGraph: VariantWitnessGraph
     ) {
         val sigil = witnessGraph.sigil
-        collationGraph.sigils.add(sigil)
+        collationGraph.sigils += sigil
         addMarkupNodes(collationGraph, markupNodeIndex, witnessGraph)
         collatedTokenVertexMap[witnessGraph.startTokenVertex] = collationGraph.textStartNode
         witnessGraph.vertices()
@@ -136,7 +136,7 @@ class HyperCollator {
         val filteredSortedMatchesForWitness = sortedMatchesForWitness
                 .filter { m: Match -> collationGraph.sigils.any { m.hasWitness(it) } }
         val witnessSigil = witnessGraph.sigil
-        collationGraph.sigils.add(witnessSigil)
+        collationGraph.sigils += witnessSigil
         addMarkupNodes(collationGraph, markupNodeIndex, witnessGraph)
         val matchList = getCollatedMatches(collatedTokenVertexMap, filteredSortedMatchesForWitness, witnessSigil)
                 .map { m: CollatedMatch -> adjustRankForCollatedNode(m, baseRanking) }
@@ -204,7 +204,7 @@ class HyperCollator {
 
     private fun logCollated(collatedTokenVertexMap: Map<TokenVertex, TextNode>) {
         val lines: MutableList<String> = ArrayList()
-        collatedTokenVertexMap.forEach { (k: TokenVertex, v: TextNode) -> lines.add("${k.sigil}:${k.token} -> $v") }
+        collatedTokenVertexMap.forEach { (k: TokenVertex, v: TextNode) -> lines += "${k.sigil}:${k.token} -> $v" }
         LOG.debug("collated={}", lines.sorted().joinToString("\n"))
     }
 
@@ -280,7 +280,7 @@ class HyperCollator {
             val ranking2 = rankings[t.right!!]
             match(witness1, witness2, ranking1, ranking2, allPotentialMatches, vertexToMatch)
             val endMatch = getEndMatch(witness1, ranking1, witness2, ranking2)
-            allPotentialMatches.add(endMatch)
+            allPotentialMatches += endMatch
         }
         return allPotentialMatches
     }
@@ -306,7 +306,7 @@ class HyperCollator {
         val list: MutableList<Tuple<Int>> = ArrayList()
         for (left in 0 until max) {
             for (right in left + 1 until max) {
-                list.add(Tuple(left, right))
+                list += Tuple(left, right)
             }
         }
         return list
@@ -334,7 +334,7 @@ class HyperCollator {
                                     val match = Match(tv1, tv2)
                                             .setRank(sigil1, ranking1.apply(tv1))
                                             .setRank(sigil2, ranking2.apply(tv2))
-                                    allPotentialMatches.add(match)
+                                    allPotentialMatches += match
                                     vertexToMatch[tv1] = match
                                     vertexToMatch[tv2] = match
                                 }
@@ -376,7 +376,7 @@ class HyperCollator {
                                             .map { it as TextNode }
                                             .collect(toSet())
                                     val sigil = tv.sigil
-                                    if (!existingTargetNodes.contains(target)) {
+                                    if (target !in existingTargetNodes) {
                                         val sigils: MutableSet<String> = mutableSetOf(sigil)
                                         collationGraph.addDirectedEdge(source, target, sigils)
                                         // System.out.println("> " + source + " -> " + target);

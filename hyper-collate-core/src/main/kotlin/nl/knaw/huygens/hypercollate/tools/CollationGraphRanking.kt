@@ -65,7 +65,7 @@ class CollationGraphRanking : Iterable<Set<TextNode>>, Function<TextNode, Int> {
                 todo.remove(textNode)
                 sorted += textNode
                 for (e in graph.getOutgoingTextEdgeStream(textNode)) {
-                    if (!handledEdges.contains(e)) {
+                    if (e !in handledEdges) {
                         handledEdges += e
                         val node = graph.getTarget(e)
                         if (graph.getIncomingTextEdgeStream(node).allMatch(handledEdges::contains)) {

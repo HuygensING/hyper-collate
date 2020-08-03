@@ -42,7 +42,7 @@ class VariantWitnessGraphTraversal private constructor(private val graph: Varian
                                 val endIncoming = outgoing.incomingTokenVertexStream.count()
                                 check(endIncoming != endEncountered) { String.format("Encountered cycle traversing %s to %s", next, outgoing) }
                                 if (endIncoming - endEncountered == 1L) {
-                                    queue.add(outgoing)
+                                    queue += outgoing
                                 }
                                 encountered[outgoing] = endEncountered + 1
                             }

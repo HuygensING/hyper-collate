@@ -71,7 +71,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
                     .outgoingTokenVertexStream
                     .forEach { ot: TokenVertex ->
                         val vertexVariable = vertexVariable(ot)
-                        edges.add("$tokenVariable->$vertexVariable")
+                        edges += "$tokenVariable->$vertexVariable"
                     }
         }
         edges.sorted().forEach { dotBuilder.append(it).append("\n") }
@@ -106,11 +106,11 @@ class DotFactory(emphasizeWhitespace: Boolean) {
         val dotBuilder = StringBuilder("digraph VariantWitnessGraph{\ngraph [rankdir=LR]\nlabelloc=b\n")
         val edges: MutableList<String> = ArrayList()
         val nextTokens: Deque<TokenVertex> = LinkedList()
-        nextTokens.add(graph.startTokenVertex)
+        nextTokens += graph.startTokenVertex
         val verticesDone: MutableSet<TokenVertex> = HashSet()
         while (!nextTokens.isEmpty()) {
             val tokenVertex = nextTokens.pop()
-            if (!verticesDone.contains(tokenVertex)) {
+            if (tokenVertex !in verticesDone) {
                 val tokenVariable = vertexVariable(tokenVertex)
                 if (tokenVertex is SimpleTokenVertex) {
                     val markup = graph.sigil + ": " + tokenVertex.parentXPath
@@ -129,10 +129,10 @@ class DotFactory(emphasizeWhitespace: Boolean) {
                         .outgoingTokenVertexStream
                         .forEach { ot: TokenVertex ->
                             val vertexVariable = vertexVariable(ot)
-                            edges.add("$tokenVariable->$vertexVariable")
-                            nextTokens.add(ot)
+                            edges += "$tokenVariable->$vertexVariable"
+                            nextTokens += ot
                         }
-                verticesDone.add(tokenVertex)
+                verticesDone += tokenVertex
             }
         }
         edges.sorted().forEach { dotBuilder.append(it).append("\n") }
@@ -186,7 +186,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
                         val line = String.format(
                                 "%s->%s[label=\"%s\"]\n",
                                 nodeIdentifiers[source], nodeIdentifiers[target], edgeLabel)
-                        edgeLines.add(line)
+                        edgeLines += line
                     }
         }
         edgeLines.forEach { str: String? -> dotBuilder.append(str) }

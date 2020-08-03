@@ -45,17 +45,17 @@ open class DirectedAcyclicGraph<N> protected constructor() : Hypergraph<N, Tradi
     fun traverse(): List<N?> {
         val visitedNodes: MutableSet<N?> = HashSet()
         val nodesToVisit = Stack<N?>()
-        nodesToVisit.add(root)
+        nodesToVisit += root
         val result: MutableList<N?> = ArrayList()
         while (!nodesToVisit.isEmpty()) {
             val pop = nodesToVisit.pop()!!
-            if (!visitedNodes.contains(pop)) {
-                result.add(pop)
+            if (pop !in visitedNodes) {
+                result += pop
                 val outgoingEdges = getOutgoingEdges(pop)
-                visitedNodes.add(pop)
+                visitedNodes += pop
                 for (e in outgoingEdges!!) {
                     val target = getTarget(e) ?: throw RuntimeException("edge target is null for edge $pop->")
-                    nodesToVisit.add(target)
+                    nodesToVisit += target
                 }
             } else {
                 LOG.debug("revisiting node {}", pop)

@@ -30,7 +30,7 @@ class CollationInput {
     }
 
     fun addWitness(witnessInput: WitnessInput) {
-        witnesses.add(witnessInput)
+        witnesses += witnessInput
     }
 
 }
