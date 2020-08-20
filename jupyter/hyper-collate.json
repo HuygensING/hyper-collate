@@ -1,0 +1,24 @@
+{
+  "description": "Collation machine",
+  "properties": {
+    "v": "1.3.1-SNAPSHOT"
+  },
+  "link": "https://github.com/HuygensING/hyper-collate",
+  "dependencies": [
+    "nl.knaw.huygens:hyper-collate-core:$v",
+    "nl.knaw.huygens:hyper-collate-jupyter:$v"
+  ],
+  "repositories": ["http://maven.huygens.knaw.nl/repository/"],
+  "imports": [
+    "nl.knaw.huygens.hypercollate.importer.*",
+    "nl.knaw.huygens.hypercollate.model.*",
+    "nl.knaw.huygens.hypercollate.core.*",
+    "nl.knaw.huygens.hypercollate.tools.*",
+    "nl.knaw.huygens.hypercollate.jupyter.*",
+    "nl.knaw.huygens.hypercollate.collator.*"
+  ],
+  "init": ["LibraryConfig.init()"],
+  "initCell": ["LibraryConfig.initCell()"],
+  "shutdown": ["LibraryConfig.shutdown()"],
+  "renderers": {"nl.knaw.huygens.hypercollate.model.CollationGraph":  "HTML(LibraryConfig.renderCollationGraph($it))"}
+}
