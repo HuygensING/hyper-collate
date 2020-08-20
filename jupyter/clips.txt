@@ -1,0 +1,17 @@
+@file:Repository("http://maven.huygens.knaw.nl/repository/")
+@file:DependsOn("nl.knaw.huygens:hyper-collate-core:1.3.1-SNAPSHOT")
+@file:DependsOn("nl.knaw.huygens:hyper-collate-jupyter:1.3.1-SNAPSHOT")
+
+import nl.knaw.huygens.hypercollate.collator.*
+import nl.knaw.huygens.hypercollate.importer.*
+import nl.knaw.huygens.hypercollate.jupyter.*
+
+LibraryConfig.init()
+
+val hyperCollator = HyperCollator()
+val importer = XMLImporter()
+val wF = importer.importXML("A", "<text>The dog's big eyes.</text>")
+val wQ = importer.importXML(
+        "B", "<text>The dog's <del>big black ears</del><add>brown eyes</add>.</text>")
+val collationGraph = hyperCollator.collate(wF, wQ)
+LibraryConfig.renderCollationGraph(collationGraph)

@@ -21,13 +21,14 @@ package nl.knaw.huygens.hypercollate.jupyter
 
 import nl.knaw.huygens.hypercollate.collator.HyperCollator
 import nl.knaw.huygens.hypercollate.importer.XMLImporter
+import nl.knaw.huygens.hypercollate.jupyter.LibraryConfig.Companion.init
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class LibraryConfigTest() {
     @Test
     fun test_init() {
-        LibraryConfig.init()
+        init()
     }
 
     @Test

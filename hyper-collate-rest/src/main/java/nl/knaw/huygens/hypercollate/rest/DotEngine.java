@@ -19,6 +19,7 @@ package nl.knaw.huygens.hypercollate.rest;
  * limitations under the License.
  * #L%
  */
+
 import javax.ws.rs.WebApplicationException;
 import java.io.*;
 import java.nio.charset.StandardCharsets;

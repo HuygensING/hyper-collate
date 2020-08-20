@@ -166,15 +166,6 @@ object CollationGraphVisualizer {
         return contentBuilder.append(content).toString()
     }
 
-    //  private static String cellLine(Cell cell, String lName) {
-    //    String content = cell.getLayerContent().get(lName);
-    ////    if (lName.equals("add")) {
-    ////      content = "[+] " + content;
-    ////    } else if (lName.equals("del")) {
-    ////      content = "[-] " + content;
-    ////    }
-    //    return content;
-    //  }
     fun toTableHTML(graph: CollationGraph): String {
         // TODO
         return StringBuilder()
