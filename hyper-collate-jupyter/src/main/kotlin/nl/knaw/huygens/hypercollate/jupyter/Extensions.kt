@@ -17,6 +17,7 @@
  * limitations under the License.
  * #L%
  */
+
 package nl.knaw.huygens.hypercollate.jupyter
 
 import nl.knaw.huygens.hypercollate.model.CollationGraph

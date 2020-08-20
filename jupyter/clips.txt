@@ -1,17 +1,26 @@
-@file:Repository("http://maven.huygens.knaw.nl/repository/")
-@file:DependsOn("nl.knaw.huygens:hyper-collate-core:1.3.1-SNAPSHOT")
-@file:DependsOn("nl.knaw.huygens:hyper-collate-jupyter:1.3.1-SNAPSHOT")
+# -SNAPSHOT versions aren't automatically reloaded, need to update the project version to see the difference
 
-import nl.knaw.huygens.hypercollate.collator.*
-import nl.knaw.huygens.hypercollate.importer.*
+@file:Repository("http://maven.huygens.knaw.nl/repository/")
+@file:DependsOn("nl.knaw.huygens:hyper-collate-core:1.3.3")
+@file:DependsOn("nl.knaw.huygens:hyper-collate-jupyter:1.3.3")
+
 import nl.knaw.huygens.hypercollate.jupyter.*
 
-LibraryConfig.init()
+HC.init()
 
-val hyperCollator = HyperCollator()
-val importer = XMLImporter()
-val wF = importer.importXML("A", "<text>The dog's big eyes.</text>")
-val wQ = importer.importXML(
-        "B", "<text>The dog's <del>big black ears</del><add>brown eyes</add>.</text>")
-val collationGraph = hyperCollator.collate(wF, wQ)
-LibraryConfig.renderCollationGraph(collationGraph)
+val wF = HC.importVariantWitnessGraphFromXML("A",
+        "<text>The dog's big eyes.</text>")
+val wQ = HC.importVariantWitnessGraphFromXML("B",
+        "<text>The dog's <del>big black ears</del><add>brown eyes</add>.</text>")
+
+val collationGraph = HC.collate(wF, wQ)
+
+collationGraph.asASCIITable(true)
+
+collationGraph.asDot()
+
+wF.asColoredDot()
+
+wQ.asColoredDot()
+
+HTML(collationGraph.asHTML())

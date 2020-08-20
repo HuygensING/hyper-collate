@@ -1,3 +1,5 @@
+package nl.knaw.huygens.hypercollate.jupyter
+
 /*-
  * #%L
  * hyper-collate-jupyter
@@ -17,39 +19,45 @@
  * limitations under the License.
  * #L%
  */
-package nl.knaw.huygens.hypercollate.jupyter
 
-import nl.knaw.huygens.hypercollate.collator.HyperCollator
-import nl.knaw.huygens.hypercollate.importer.XMLImporter
-import nl.knaw.huygens.hypercollate.jupyter.LibraryConfig.Companion.init
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
-class LibraryConfigTest() {
+class HCTest() {
     @Test
     fun test_init() {
-        init()
+        HC.init()
     }
 
     @Test
     fun test_initCell() {
-        LibraryConfig.initCell()
+        HC.initCell()
     }
 
     @Test
     fun test_shutdown() {
-        LibraryConfig.shutdown()
+        HC.shutdown()
     }
 
     @Test
     fun test_renderCollationGraph() {
-        val hyperCollator = HyperCollator()
-        val importer = XMLImporter()
-        val wF = importer.importXML("A", "<text>The dog's big eyes.</text>")
-        val wQ = importer.importXML(
-                "B", "<text>The dog's <del>big black ears</del><add>brown eyes</add>.</text>")
-        val collationGraph = hyperCollator.collate(wF, wQ)
-        val render = LibraryConfig.renderCollationGraph(collationGraph)
+        val wF: VariantWitnessGraph = HC.importVariantWitnessGraphFromXML("A",
+                "<text>The dog's big eyes.</text>")
+        println("\n--[wf.asDot(true)]----------------------------------------------------------")
+        println(wF.asDot(true))
+        val wQ = HC.importVariantWitnessGraphFromXML("B",
+                "<text>The dog's <del>big black ears</del><add>brown eyes</add>.</text>")
+        println("\n--[wQ.asColoredDot()]-------------------------------------------------------")
+        println(wQ.asColoredDot())
+        val collationGraph = HC.collate(wF, wQ)
+        println("\n--[collationGraph.asDot()]--------------------------------------------------")
+        println(collationGraph.asDot())
+        println("\n--[collationGraph.asHTML()]-------------------------------------------------")
+        println(collationGraph.asHTML())
+        val render = collationGraph.asASCIITable()
+        println("\n--[collationGraph.asASCIITable()]-------------------------------------------")
+        println(render)
         val expected = """
             ┌───┬────┬──────┬──────────┬──────────┬────────┬─┐
             │[A]│The │dog's │big       │eyes      │        │.│
