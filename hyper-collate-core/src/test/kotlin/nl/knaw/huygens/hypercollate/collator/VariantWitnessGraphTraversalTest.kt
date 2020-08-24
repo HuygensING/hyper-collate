@@ -25,7 +25,7 @@ import nl.knaw.huygens.hypercollate.importer.XMLImporter
 import nl.knaw.huygens.hypercollate.model.*
 import nl.knaw.huygens.hypercollate.tools.TokenMerger
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class VariantWitnessGraphTraversalTest : HyperCollateTest() {
     @Test

@@ -29,16 +29,17 @@ import nl.knaw.huygens.hypercollate.model.*
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer
 import org.assertj.core.util.Sets
-import org.junit.Test
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
 import org.slf4j.LoggerFactory
 import java.text.MessageFormat.format
 import java.util.concurrent.TimeUnit
 import java.util.stream.Collectors
 
 class HyperCollatorTest : HyperCollateTest() {
-    private val hyperCollator = HyperCollator()
 
-    @Test(timeout = 5_000)
+    @Test()
+    @Timeout(5)
     fun testCollationWithManyMatches() {
         val importer = XMLImporter()
         val xml1 = ("<seg>Ik had een buurvrouw, een paar deuren verder,"
@@ -218,7 +219,8 @@ class HyperCollatorTest : HyperCollateTest() {
         testHyperCollation(w1, w2, expectedDot, expectedTable)
     }
 
-    @Test(timeout = 10_000)
+    @Test()
+    @Timeout(10)
     fun testAppRdgWithAddDel() {
         val importer = XMLImporter()
         val wF = importer.importXML(
@@ -266,7 +268,8 @@ class HyperCollatorTest : HyperCollateTest() {
         testHyperCollation(wF, wQ, expectedDot, expectedTable)
     }
 
-    @Test(timeout = 10000)
+    @Test()
+    @Timeout(10000)
     fun testAppRdg() {
         val importer = XMLImporter()
         val wF = importer.importXML(
@@ -314,7 +317,8 @@ class HyperCollatorTest : HyperCollateTest() {
         testHyperCollation(wF, wQ, expectedDot, expectedTable)
     }
 
-    @Test(timeout = 10000)
+    @Test()
+    @Timeout(10000)
     fun testHierarchyWith3Witnesses() {
         val importer = XMLImporter()
         val wF = importer.importXML(
@@ -448,7 +452,8 @@ class HyperCollatorTest : HyperCollateTest() {
         assertThat(collationGraph).hasMarkupNodeMatching(qAdd).withTextNodesMatching(trachtenNaar)
     }
 
-    @Test(timeout = 10000)
+    @Test()
+    @Timeout(10000)
     fun testHierarchy() {
         val importer = XMLImporter()
         val fXML = """
@@ -596,7 +601,8 @@ class HyperCollatorTest : HyperCollateTest() {
                                 .withWitnessSegmentSketch("Q", "liefelijke toestemming"))
     }
 
-    @Test(timeout = 10000)
+    @Test()
+    @Timeout(10000)
     fun testOrder() {
         val importer = XMLImporter()
         val wF = importer.importXML(
@@ -771,7 +777,8 @@ class HyperCollatorTest : HyperCollateTest() {
                                 .withWitnessSegmentSketch("B", "."))
     }
 
-    @Test(timeout = 10000)
+    @Test()
+    @Timeout(10000)
     fun testTranspositionAndDuplication() {
         val importer = XMLImporter()
         val wF = importer.importXML("A", "<text>T b b b b b b b Y</text>")
@@ -816,7 +823,8 @@ class HyperCollatorTest : HyperCollateTest() {
                                 .withWitnessSegmentSketch("B", "X "))
     }
 
-    @Test(timeout = 10000)
+    @Test()
+    @Timeout(10000)
     fun testDoubleTransposition() {
         val importer = XMLImporter()
         val wF = importer.importXML("A", "<text>A b C d E C f G H</text>")
@@ -874,7 +882,8 @@ class HyperCollatorTest : HyperCollateTest() {
                                 .withWitnessSegmentSketch("B", "H "))
     }
 
-    @Test(timeout = 10000)
+    @Test()
+    @Timeout(10000)
     fun testVirginiaWoolfTimePassesFragment() {
         val importer = XMLImporter()
         val xml1 = """
@@ -956,7 +965,8 @@ class HyperCollatorTest : HyperCollateTest() {
                                 .withWitnessSegmentSketch("T", ", "))
     }
 
-    @Test(timeout = 10000)
+    @Test()
+    @Timeout(10000)
     fun testMaryShellyGodwinFrankensteinFragment1() {
         val importer = XMLImporter()
         val xmlN = """
@@ -1077,7 +1087,8 @@ class HyperCollatorTest : HyperCollateTest() {
                                 .withWitnessSegmentSketch("N", "...\n"))
     }
 
-    @Test(timeout = 10000)
+    @Test()
+    @Timeout(10000)
     fun testMaryShellyGodwinFrankensteinFragment2() {
         val importer = XMLImporter()
         val xmlN = """
@@ -1176,7 +1187,8 @@ class HyperCollatorTest : HyperCollateTest() {
                                 .withWitnessSegmentSketch("N", "them in many places"))
     }
 
-    @Test(timeout = 10000)
+    @Test()
+    @Timeout(10000)
     fun testCollationGraphInitialization() {
         val importer = XMLImporter()
         val wF = importer.importXML(
@@ -1255,7 +1267,8 @@ class HyperCollatorTest : HyperCollateTest() {
         // writeGraph(dot, "graph");
     }
 
-    @Test(timeout = 10000)
+    @Test()
+    @Timeout(10000)
     fun testPermute() {
         val permute1 = hyperCollator.permute(3)
         LOG.info("permute={}", visualize(permute1))
@@ -1271,7 +1284,8 @@ class HyperCollatorTest : HyperCollateTest() {
         assertThat(permute3).hasSize(45)
     }
 
-    @Test(timeout = 10000)
+    @Test()
+    @Timeout(10000)
     fun testPotentialMatches() {
         val importer = XMLImporter()
         val sigil1 = "A"
@@ -1307,16 +1321,6 @@ class HyperCollatorTest : HyperCollateTest() {
         val listC = stringList(sortAndFilterMatchesByWitness, sigil3)
         assertThat(listC).containsOnly(match4, match2, match3, match5, match7, match8)
     }
-
-    private fun stringList(
-            sortAndFilterMatchesByWitness: Map<String, List<Match>>,
-            key: String
-    ): List<String> =
-            (sortAndFilterMatchesByWitness[key] ?: error("key $key not found in sortAndFilterMatchesByWitness"))
-                    .map(Match::toString)
-
-    private fun visualize(list: List<Tuple<Int>>): String =
-            list.joinToString("") { format("<{0},{1}>", it.left, it.right) }
 
     private fun testHyperCollation(
             witness1: VariantWitnessGraph,
@@ -1380,6 +1384,18 @@ class HyperCollatorTest : HyperCollateTest() {
 
     companion object {
         private val LOG = LoggerFactory.getLogger(HyperCollateTest::class.java)
+        val hyperCollator = HyperCollator()
+
+        private fun stringList(
+                sortAndFilterMatchesByWitness: Map<String, List<Match>>,
+                key: String
+        ): List<String> =
+                (sortAndFilterMatchesByWitness[key] ?: error("key $key not found in sortAndFilterMatchesByWitness"))
+                        .map(Match::toString)
+
+        private fun visualize(list: List<Tuple<Int>>): String =
+                list.joinToString("") { format("<{0},{1}>", it.left, it.right) }
+
     }
 
 }

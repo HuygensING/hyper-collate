@@ -23,7 +23,7 @@ package nl.knaw.huygens.hypercollate.model
 import nl.knaw.huygens.hypercollate.HyperCollateTest
 import nl.knaw.huygens.hypercollate.tools.DotFactory
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.util.stream.Collectors
 

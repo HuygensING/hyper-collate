@@ -25,8 +25,8 @@ import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
 import nl.knaw.huygens.hypercollate.tools.DotFactory
 import nl.knaw.huygens.hypercollate.tools.TokenMerger
 import org.assertj.core.api.Assertions
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.util.stream.Collectors
 
@@ -133,7 +133,7 @@ class XMLImporterTest : HyperCollateTest() {
         verifyDotExport(wg0, expectedDot)
     }
 
-    @Ignore
+    @Disabled
     @Test
     fun testDoubleDel() {
         val importer = XMLImporter()
@@ -161,7 +161,7 @@ class XMLImporterTest : HyperCollateTest() {
         verifyDotExport(wg0, expectedDot)
     }
 
-    @Ignore
+    @Disabled
     @Test
     fun testTripleDel() {
         val importer = XMLImporter()

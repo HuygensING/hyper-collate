@@ -25,7 +25,7 @@ import eu.interedition.collatex.Witness
 import nl.knaw.huygens.hypercollate.HyperCollateTest
 import nl.knaw.huygens.hypercollate.model.TokenVertex
 import org.assertj.core.api.Assertions
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.util.*
 import java.util.stream.Stream
 

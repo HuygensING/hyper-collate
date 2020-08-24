@@ -23,9 +23,9 @@ package nl.knaw.huygens.hypercollate.rest
 
 import org.apache.commons.io.FileUtils
 import org.assertj.core.api.Assertions
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
@@ -64,12 +64,12 @@ class CachedCollationStoreTest {
         }
     }
 
-    @Before
+    @BeforeEach
     fun before() {
         Assertions.assertThat(config.collationsDir).isDirectory()
     }
 
-    @After
+    @AfterEach
     @Throws(IOException::class)
     fun after() {
         FileUtils.deleteDirectory(config.projectDir)

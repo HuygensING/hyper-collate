@@ -21,7 +21,7 @@ package nl.knaw.huygens.hypercollate.rest.resources
  */
 
 import org.assertj.core.api.AssertionsForClassTypes.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class HomePageResourceTest {
     @Test

@@ -28,7 +28,7 @@ import nl.knaw.huygens.hypercollate.model.StartTokenVertex
 import nl.knaw.huygens.hypercollate.model.TokenVertex
 import nl.knaw.huygens.hypercollate.tools.TokenMerger
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import java.util.stream.Collectors
 
 class VariantWitnessGraphRankingTest : HyperCollateTest() {

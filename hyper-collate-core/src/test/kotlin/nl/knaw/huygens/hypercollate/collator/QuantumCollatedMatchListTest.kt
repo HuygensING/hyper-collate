@@ -21,7 +21,7 @@ package nl.knaw.huygens.hypercollate.collator
  */
 
 import org.assertj.core.api.AssertionsForClassTypes.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class QuantumCollatedMatchListTest {
     @Test
