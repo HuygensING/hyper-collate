@@ -24,7 +24,7 @@ import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class HCTest() {
+class HCTest {
     @Test
     fun test_init() {
         HC.init()

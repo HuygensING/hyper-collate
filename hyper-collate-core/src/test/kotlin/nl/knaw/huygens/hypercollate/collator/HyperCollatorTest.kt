@@ -38,7 +38,7 @@ import java.util.stream.Collectors
 
 class HyperCollatorTest : HyperCollateTest() {
 
-    @Test()
+    @Test
     @Timeout(5)
     fun testCollationWithManyMatches() {
         val importer = XMLImporter()
@@ -219,7 +219,7 @@ class HyperCollatorTest : HyperCollateTest() {
         testHyperCollation(w1, w2, expectedDot, expectedTable)
     }
 
-    @Test()
+    @Test
     @Timeout(10)
     fun testAppRdgWithAddDel() {
         val importer = XMLImporter()
@@ -268,7 +268,7 @@ class HyperCollatorTest : HyperCollateTest() {
         testHyperCollation(wF, wQ, expectedDot, expectedTable)
     }
 
-    @Test()
+    @Test
     @Timeout(10000)
     fun testAppRdg() {
         val importer = XMLImporter()
@@ -317,7 +317,7 @@ class HyperCollatorTest : HyperCollateTest() {
         testHyperCollation(wF, wQ, expectedDot, expectedTable)
     }
 
-    @Test()
+    @Test
     @Timeout(10000)
     fun testHierarchyWith3Witnesses() {
         val importer = XMLImporter()
@@ -452,7 +452,7 @@ class HyperCollatorTest : HyperCollateTest() {
         assertThat(collationGraph).hasMarkupNodeMatching(qAdd).withTextNodesMatching(trachtenNaar)
     }
 
-    @Test()
+    @Test
     @Timeout(10000)
     fun testHierarchy() {
         val importer = XMLImporter()
@@ -601,7 +601,7 @@ class HyperCollatorTest : HyperCollateTest() {
                                 .withWitnessSegmentSketch("Q", "liefelijke toestemming"))
     }
 
-    @Test()
+    @Test
     @Timeout(10000)
     fun testOrder() {
         val importer = XMLImporter()
@@ -777,7 +777,7 @@ class HyperCollatorTest : HyperCollateTest() {
                                 .withWitnessSegmentSketch("B", "."))
     }
 
-    @Test()
+    @Test
     @Timeout(10000)
     fun testTranspositionAndDuplication() {
         val importer = XMLImporter()
@@ -823,7 +823,7 @@ class HyperCollatorTest : HyperCollateTest() {
                                 .withWitnessSegmentSketch("B", "X "))
     }
 
-    @Test()
+    @Test
     @Timeout(10000)
     fun testDoubleTransposition() {
         val importer = XMLImporter()
@@ -882,7 +882,7 @@ class HyperCollatorTest : HyperCollateTest() {
                                 .withWitnessSegmentSketch("B", "H "))
     }
 
-    @Test()
+    @Test
     @Timeout(10000)
     fun testVirginiaWoolfTimePassesFragment() {
         val importer = XMLImporter()
@@ -965,7 +965,7 @@ class HyperCollatorTest : HyperCollateTest() {
                                 .withWitnessSegmentSketch("T", ", "))
     }
 
-    @Test()
+    @Test
     @Timeout(10000)
     fun testMaryShellyGodwinFrankensteinFragment1() {
         val importer = XMLImporter()
@@ -1087,7 +1087,7 @@ class HyperCollatorTest : HyperCollateTest() {
                                 .withWitnessSegmentSketch("N", "...\n"))
     }
 
-    @Test()
+    @Test
     @Timeout(10000)
     fun testMaryShellyGodwinFrankensteinFragment2() {
         val importer = XMLImporter()
@@ -1187,7 +1187,7 @@ class HyperCollatorTest : HyperCollateTest() {
                                 .withWitnessSegmentSketch("N", "them in many places"))
     }
 
-    @Test()
+    @Test
     @Timeout(10000)
     fun testCollationGraphInitialization() {
         val importer = XMLImporter()
@@ -1267,7 +1267,7 @@ class HyperCollatorTest : HyperCollateTest() {
         // writeGraph(dot, "graph");
     }
 
-    @Test()
+    @Test
     @Timeout(10000)
     fun testPermute() {
         val permute1 = hyperCollator.permute(3)
@@ -1284,7 +1284,7 @@ class HyperCollatorTest : HyperCollateTest() {
         assertThat(permute3).hasSize(45)
     }
 
-    @Test()
+    @Test
     @Timeout(10000)
     fun testPotentialMatches() {
         val importer = XMLImporter()

@@ -24,21 +24,14 @@ import java.net.URI
 
 class AboutInfo {
     private var appName: String? = null
-        private set
     private var startedAt: String? = null
-        private set
     var version: String? = null
         private set
     private var buildDate: String? = null
-        private set
     private var commitId: String? = null
-        private set
     private var scmBranch: String? = null
-        private set
     private var projectDirURI: URI? = null
-        private set
     private var isDotRendering = false
-        private set
 
     fun setAppName(appName: String?): AboutInfo {
         this.appName = appName

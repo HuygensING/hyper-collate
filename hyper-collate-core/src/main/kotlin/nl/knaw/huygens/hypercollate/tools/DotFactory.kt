@@ -49,7 +49,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
             markupToClose.addAll(opened)
             markupToClose.removeAll(markupListForTokenVertex)
             markupToClose.sortWith(Comparator.comparingInt { obj: Markup -> obj.depth })
-            markupToClose.forEach { m: Markup -> closeMarkup(m, dotBuilder) }
+            markupToClose.forEach { m: Markup -> closeMarkup(dotBuilder) }
             val markupToOpen: MutableList<Markup> = ArrayList()
             markupToOpen.addAll(markupListForTokenVertex)
             markupToOpen.removeAll(opened)
@@ -98,7 +98,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
                 .append("\"]\n")
     }
 
-    private fun closeMarkup(m: Markup, dotBuilder: StringBuilder) {
+    private fun closeMarkup(dotBuilder: StringBuilder) {
         dotBuilder.append("}\n")
     }
 
