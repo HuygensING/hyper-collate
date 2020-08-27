@@ -48,7 +48,7 @@ class Match(vararg matchingTokenVertices: TokenVertex) {
                     .asSequence()
                     .filter { it.key != s }
                     .map { it.value }
-                    .min() ?: error("no minimum found")
+                    .minOrNull() ?: error("no minimum found")
 
     override fun toString(): String {
         val stringBuilder = StringBuilder("<")

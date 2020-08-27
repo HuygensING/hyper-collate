@@ -1,6 +1,5 @@
 package nl.knaw.huygens.hypercollate.rest
 
-
 /*-
  * #%L
  * hyper-collate-rest
@@ -22,7 +21,7 @@ package nl.knaw.huygens.hypercollate.rest
  */
 
 import org.apache.commons.io.FileUtils
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -35,25 +34,15 @@ class CachedCollationStoreTest {
     private var config = TestConfiguration()
 
     class TestConfiguration : HyperCollateConfiguration {
-        override fun getBaseURI(): String {
-            return "https://test.hypercollate.com"
-        }
+        override fun getBaseURI(): String = "https://test.hypercollate.com"
 
-        override fun getProjectDir(): File {
-            return File(System.getProperty("java.io.tmpdir") + "/.hypercollate")
-        }
+        override fun getProjectDir(): File = File(System.getProperty("java.io.tmpdir") + "/.hypercollate")
 
-        override fun getCollationsDir(): File {
-            return File(projectDir, "collations")
-        }
+        override fun getCollationsDir(): File = File(projectDir, "collations")
 
-        override fun hasPathToDotExecutable(): Boolean {
-            return false
-        }
+        override fun hasPathToDotExecutable(): Boolean = false
 
-        override fun getPathToDotExecutable(): String {
-            return ""
-        }
+        override fun getPathToDotExecutable(): String = ""
 
         init {
             try {
@@ -66,7 +55,7 @@ class CachedCollationStoreTest {
 
     @BeforeEach
     fun before() {
-        Assertions.assertThat(config.collationsDir).isDirectory()
+        assertThat(config.collationsDir).isDirectory
     }
 
     @AfterEach
@@ -80,8 +69,8 @@ class CachedCollationStoreTest {
         val store = CachedCollationStore(config)
         val collationIds = store.collationIds
         LOG.info("collationIds={}", collationIds)
-        Assertions.assertThat(collationIds).isNotEmpty
-        Assertions.assertThat(collationIds).allSatisfy { id: String -> id.startsWith("sample-") }
+        assertThat(collationIds).isNotEmpty
+        assertThat(collationIds).allSatisfy { id: String -> id.startsWith("sample-") }
     }
 
     companion object {

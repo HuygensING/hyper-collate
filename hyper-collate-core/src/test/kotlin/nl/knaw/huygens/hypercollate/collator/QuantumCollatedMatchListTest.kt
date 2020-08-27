@@ -30,12 +30,12 @@ class QuantumCollatedMatchListTest {
         val nodeBranchPath = listOf(0, 1)
         val matchBranchPath1 = listOf(0, 4, 6)
         val branchPathsOverlap1 = QuantumCollatedMatchList.branchPathsOverlap(matchBranchPath, nodeBranchPath)
-        assertThat(branchPathsOverlap1).isTrue()
+        assertThat(branchPathsOverlap1).isTrue
 
         val branchPathsOverlap2 = QuantumCollatedMatchList.branchPathsOverlap(nodeBranchPath, matchBranchPath)
-        assertThat(branchPathsOverlap2).isTrue()
+        assertThat(branchPathsOverlap2).isTrue
 
         val branchPathsOverlap3 = QuantumCollatedMatchList.branchPathsOverlap(matchBranchPath1, nodeBranchPath)
-        assertThat(branchPathsOverlap3).isFalse()
+        assertThat(branchPathsOverlap3).isFalse
     }
 }

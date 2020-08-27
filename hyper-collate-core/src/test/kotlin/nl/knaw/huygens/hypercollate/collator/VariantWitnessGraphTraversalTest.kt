@@ -76,7 +76,7 @@ class VariantWitnessGraphTraversalTest : HyperCollateTest() {
 
         tokenVertex = iterator.next()
         assert(tokenVertex is EndTokenVertex)
-        assertThat(iterator.hasNext()).isFalse()
+        assertThat(iterator.hasNext()).isFalse
     }
 
     private fun markupTags(witnessGraph: VariantWitnessGraph, tokenVertex: TokenVertex): List<String> =

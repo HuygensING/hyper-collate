@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.rest;
+package nl.knaw.huygens.hypercollate.rest
 
 /*-
  * #%L
@@ -20,42 +20,39 @@ package nl.knaw.huygens.hypercollate.rest;
  * #L%
  */
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.nio.charset.Charset
+import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
+import java.util.logging.Logger
 
-public class Util {
+object Util {
+    private val LOG = Logger.getLogger(Util::class.java.name)
 
-  private static final java.util.logging.Logger LOG =
-      java.util.logging.Logger.getLogger(Util.class.getName());
-
-  public static String detectDotPath() {
-    for (String detectionCommand : new String[]{"where dot.exe", "which dot"}) {
-      try {
-        final Process process = Runtime.getRuntime().exec(detectionCommand);
-        try (BufferedReader processReader =
-                 new BufferedReader(
-                     new InputStreamReader(process.getInputStream(), Charset.defaultCharset()))) {
-          final CompletableFuture<Optional<String>> path =
-              CompletableFuture.supplyAsync(
-                  () ->
-                      processReader
-                          .lines()
-                          .map(String::trim)
-                          .filter(l -> l.toLowerCase().contains("dot"))
-                          .findFirst());
-          process.waitFor();
-          final String dotPath = path.get().get();
-          LOG.info(() -> "Detected GraphViz' dot at '" + dotPath + "'");
-          return dotPath;
+    @JvmStatic
+    fun detectDotPath(): String? {
+        for (detectionCommand in arrayOf("where dot.exe", "which dot")) {
+            try {
+                val process = Runtime.getRuntime().exec(detectionCommand)
+                val inputStreamReader = InputStreamReader(process.inputStream, Charset.defaultCharset())
+                BufferedReader(inputStreamReader).use { processReader ->
+                    val path = CompletableFuture.supplyAsync {
+                        processReader
+                                .lines()
+                                .map { line: String -> line.trim { it <= ' ' } }
+                                .filter { line: String -> line.toLowerCase().contains("dot") }
+                                .findFirst()
+                    }
+                    process.waitFor()
+                    val dotPath = path.get().get()
+                    LOG.info { "Detected GraphViz' dot at '$dotPath'" }
+                    return dotPath
+                }
+            } catch (t: Throwable) {
+                LOG.log(Level.FINE, detectionCommand, t)
+            }
         }
-      } catch (Throwable t) {
-        LOG.log(Level.FINE, detectionCommand, t);
-      }
+        return null
     }
-    return null;
-  }
 }

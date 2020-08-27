@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.rest;
+package nl.knaw.huygens.hypercollate.rest
 
 /*-
  * #%L
@@ -20,95 +20,92 @@ package nl.knaw.huygens.hypercollate.rest;
  * #L%
  */
 
-import javax.ws.rs.WebApplicationException;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.*;
+import java.io.*
+import java.nio.charset.StandardCharsets
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionException
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
-public class DotEngine {
-  private final String dotPath;
-  private final ExecutorService processThreads = Executors.newCachedThreadPool();
+class DotEngine(private val dotPath: String) {
+    private val processThreads = Executors.newCachedThreadPool()
 
-  public DotEngine(String dotPath) {
-    this.dotPath = dotPath;
-  }
-
-  public void renderAs(String format, String dot, OutputStream outputStream) throws IOException {
-    final Process dotProc = new ProcessBuilder(dotPath, "-T" + format).start();
-    final StringWriter errors = new StringWriter();
-    try {
-      CompletableFuture.allOf(
-          processErrorStream(dotProc, errors),
-          processOutputStream(dotProc, dot),
-          processInputStream(dotProc, outputStream),
-          waitForCompletion(dotProc, errors))
-          .exceptionally(
-              t -> {
-                throw new WebApplicationException(t);
-              })
-          .get();
-    } catch (InterruptedException | ExecutionException e) {
-      throw new WebApplicationException(e);
+    //    @Throws(IOException::class)
+    fun renderAs(format: String, dot: String, outputStream: OutputStream) {
+        val dotProc = ProcessBuilder(dotPath, "-T$format").start()
+        val errors = StringWriter()
+//        try {
+        CompletableFuture.allOf(
+                processErrorStream(dotProc, errors),
+                processOutputStream(dotProc, dot),
+                processInputStream(dotProc, outputStream),
+                waitForCompletion(dotProc, errors))
+//                    .exceptionally { t: Throwable? -> throw WebApplicationException(t) }
+                .get()
+//        } catch (e: InterruptedException) {
+//            throw WebApplicationException(e)
+//        } catch (e: ExecutionException) {
+//            throw WebApplicationException(e)
+//        }
     }
-  }
 
-  private CompletableFuture<Void> waitForCompletion(Process dotProc, StringWriter errors) {
-    return CompletableFuture.runAsync(
-        () -> {
-          try {
-            if (!dotProc.waitFor(2, TimeUnit.MINUTES)) {
-              throw new CompletionException(new IllegalStateException(errors.toString()));
-            }
-          } catch (InterruptedException e) {
-            throw new CompletionException(e);
-          }
-        },
-        processThreads);
-  }
+    private fun waitForCompletion(dotProc: Process, errors: StringWriter): CompletableFuture<Void> =
+            CompletableFuture.runAsync(
+                    {
+                        try {
+                            if (!dotProc.waitFor(2, TimeUnit.MINUTES)) {
+                                throw CompletionException(IllegalStateException(errors.toString()))
+                            }
+                        } catch (e: InterruptedException) {
+                            throw CompletionException(e)
+                        }
+                    },
+                    processThreads)
 
-  private CompletableFuture<Void> processInputStream(Process dotProc, OutputStream outputStream) {
-    return CompletableFuture.runAsync(
-        () -> {
-          final byte[] buf = new byte[8192];
-          try (final InputStream in = dotProc.getInputStream();
-               final OutputStream out = outputStream) {
-            int len;
-            while ((len = in.read(buf)) >= 0) {
-              out.write(buf, 0, len);
-            }
-          } catch (IOException e) {
-            throw new CompletionException(e);
-          }
-        },
-        processThreads);
-  }
+    private fun processInputStream(dotProc: Process, outputStream: OutputStream): CompletableFuture<Void> =
+            CompletableFuture.runAsync(
+                    {
+                        val buf = ByteArray(8192)
+                        try {
+                            dotProc.inputStream.use { `in` ->
+                                outputStream.use { out ->
+                                    var len: Int
+                                    while (`in`.read(buf).also { len = it } >= 0) {
+                                        out.write(buf, 0, len)
+                                    }
+                                }
+                            }
+                        } catch (e: IOException) {
+                            throw CompletionException(e)
+                        }
+                    },
+                    processThreads)
 
-  private CompletableFuture<Void> processOutputStream(Process dotProc, String dot) {
-    return CompletableFuture.runAsync(
-        () -> {
-          try (final Writer dotProcStream =
-                   new OutputStreamWriter(dotProc.getOutputStream(), StandardCharsets.UTF_8)) {
-            dotProcStream.write(dot);
-          } catch (IOException e) {
-            throw new CompletionException(e);
-          }
-        },
-        processThreads);
-  }
+    private fun processOutputStream(dotProc: Process, dot: String): CompletableFuture<Void> =
+            CompletableFuture.runAsync(
+                    {
+                        try {
+                            OutputStreamWriter(dotProc.outputStream, StandardCharsets.UTF_8).use { dotProcStream -> dotProcStream.write(dot) }
+                        } catch (e: IOException) {
+                            throw CompletionException(e)
+                        }
+                    },
+                    processThreads)
 
-  private CompletableFuture<Void> processErrorStream(Process dotProc, StringWriter errors) {
-    return CompletableFuture.runAsync(
-        () -> {
-          final char[] buf = new char[8192];
-          try (final Reader errorStream = new InputStreamReader(dotProc.getErrorStream())) {
-            int len;
-            while ((len = errorStream.read(buf)) >= 0) {
-              errors.write(buf, 0, len);
-            }
-          } catch (IOException e) {
-            throw new CompletionException(e);
-          }
-        },
-        processThreads);
-  }
+    private fun processErrorStream(dotProc: Process, errors: StringWriter): CompletableFuture<Void> =
+            CompletableFuture.runAsync(
+                    {
+                        val buf = CharArray(8192)
+                        try {
+                            InputStreamReader(dotProc.errorStream).use { errorStream ->
+                                var len: Int
+                                while (errorStream.read(buf).also { len = it } >= 0) {
+                                    errors.write(buf, 0, len)
+                                }
+                            }
+                        } catch (e: IOException) {
+                            throw CompletionException(e)
+                        }
+                    },
+                    processThreads)
 }
