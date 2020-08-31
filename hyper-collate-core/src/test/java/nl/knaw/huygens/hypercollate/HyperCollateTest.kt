@@ -1,22 +1,4 @@
-package nl.knaw.huygens.hypercollate;
-
-import guru.nidi.graphviz.engine.Format;
-import guru.nidi.graphviz.engine.Graphviz;
-import guru.nidi.graphviz.model.MutableGraph;
-import guru.nidi.graphviz.parse.Parser;
-import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph;
-import nl.knaw.huygens.hypercollate.tools.DotFactory;
-import nl.knaw.huygens.hypercollate.tools.TokenMerger;
-import org.apache.commons.io.FileUtils;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
-import static org.assertj.core.api.Assertions.assertThat;
+package nl.knaw.huygens.hypercollate
 
 /*-
  * #%L
@@ -38,43 +20,58 @@ import static org.assertj.core.api.Assertions.assertThat;
  * #L%
  */
 
-public class HyperCollateTest {
+import guru.nidi.graphviz.engine.Format
+import guru.nidi.graphviz.engine.Graphviz
+import guru.nidi.graphviz.parse.Parser
+import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
+import nl.knaw.huygens.hypercollate.tools.DotFactory
+import nl.knaw.huygens.hypercollate.tools.TokenMerger.merge
+import org.apache.commons.io.FileUtils
+import org.assertj.core.api.Assertions.assertThat
+import java.awt.FlowLayout
+import java.io.File
+import java.io.IOException
+import java.nio.charset.StandardCharsets
+import javax.swing.ImageIcon
+import javax.swing.JFrame
+import javax.swing.JLabel
 
-  protected void verifyDotExport(VariantWitnessGraph variantWitnessGraph, String expectedDot) {
-    verifyDotExport(variantWitnessGraph, expectedDot, "graph");
-  }
+open class HyperCollateTest {
 
-  protected void verifyDotExport(
-      VariantWitnessGraph variantWitnessGraph, String expectedDot, String name) {
-    VariantWitnessGraph wg = TokenMerger.merge(variantWitnessGraph);
-    // VariantWitnessGraph wg = variantWitnessGraph;
-
-    String dot = new DotFactory(true).fromVariantWitnessGraphSimple(wg);
-    // System.out.println(dot);
-    writeGraph(dot, name);
-    assertThat(dot).isEqualTo(expectedDot);
-    // showGraph(dot);
-  }
-
-  protected void writeGraph(String dot, String name) {
-    try {
-      FileUtils.write(new File("out/" + name + ".dot"), dot, StandardCharsets.UTF_8);
-    } catch (IOException e) {
-      e.printStackTrace();
+    protected fun verifyDotExport(
+            variantWitnessGraph: VariantWitnessGraph,
+            expectedDot: String,
+            name: String = "graph"
+    ) {
+        val wg = merge(variantWitnessGraph)
+        // VariantWitnessGraph wg = variantWitnessGraph;
+        val dot = DotFactory(true).fromVariantWitnessGraphSimple(wg)
+        // System.out.println(dot);
+        writeGraph(dot, name)
+        assertThat(dot).isEqualTo(expectedDot)
+        // showGraph(dot);
     }
-  }
 
-  public void showGraph(String dot) {
-    try {
-      MutableGraph g = Parser.read(dot.replaceAll("=<", "=\"").replaceAll(">]", "\"]"));
-      BufferedImage bufferedImage = Graphviz.fromGraph(g).width(4000).render(Format.PNG).toImage();
-      JFrame frame = new JFrame();
-      frame.getContentPane().setLayout(new FlowLayout());
-      frame.getContentPane().add(new JLabel(new ImageIcon(bufferedImage)));
-      frame.pack();
-      frame.setVisible(true);
-    } catch (Exception e) {
-      e.printStackTrace();
+    protected fun writeGraph(dot: String?, name: String) {
+        try {
+            FileUtils.write(File("out/$name.dot"), dot, StandardCharsets.UTF_8)
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
     }
-  }
+
+    fun showGraph(dot: String) {
+        try {
+            val g = Parser.read(dot.replace("=<".toRegex(), "=\"").replace(">]".toRegex(), "\"]"))
+            val bufferedImage = Graphviz.fromGraph(g).width(4000).render(Format.PNG).toImage()
+            val frame = JFrame().apply {
+                contentPane.layout = FlowLayout()
+                contentPane.add(JLabel(ImageIcon(bufferedImage)))
+                pack()
+                isVisible = true
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 }
