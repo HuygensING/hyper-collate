@@ -195,7 +195,9 @@ object CollationGraphVisualizer {
         }
 
         val rows: String = graph.sigils.joinToString("\n") { witnessRow(it, cells[it]!!) }
-        return "<table border=1>\n$rows\n</table>"
+        return """<table border="1">
+            $rows
+            </table>""".trimIndent()
     }
 
     private fun witnessRow(sigil: String, cells: List<String>): String =

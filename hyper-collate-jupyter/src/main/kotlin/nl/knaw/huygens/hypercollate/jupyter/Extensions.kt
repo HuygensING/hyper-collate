@@ -22,20 +22,117 @@ package nl.knaw.huygens.hypercollate.jupyter
 
 import nl.knaw.huygens.hypercollate.model.CollationGraph
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
+import nl.knaw.huygens.hypercollate.rest.DotEngine
+import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer
 import nl.knaw.huygens.hypercollate.tools.DotFactory
+import nl.knaw.huygens.hypercollate.tools.TokenMerger
+import java.io.ByteArrayOutputStream
+
+fun VariantWitnessGraph.asSVGPair(
+        dotEngine: DotEngine,
+        colored: Boolean = true,
+        join: Boolean = false,
+        emphasizeWhitespace: Boolean = false
+): Pair<String, String> =
+        asRenderPair(dotEngine, colored, join, emphasizeWhitespace, OutputFormat.SVG())
+
+fun VariantWitnessGraph.asPNGPair(
+        dotEngine: DotEngine,
+        colored: Boolean = true,
+        join: Boolean = false,
+        emphasizeWhitespace: Boolean = false
+): Pair<String, String> =
+        asRenderPair(dotEngine, colored, join, emphasizeWhitespace, OutputFormat.PNG())
+
+fun VariantWitnessGraph.asDot(
+        join: Boolean = false,
+        emphasizeWhitespace: Boolean = false
+): String {
+    val graph = if (join) {
+        TokenMerger.merge(this);
+    } else this
+    return DotFactory(emphasizeWhitespace).fromVariantWitnessGraphSimple(graph)
+}
+
+fun VariantWitnessGraph.asColoredDot(
+        join: Boolean = false,
+        emphasizeWhitespace: Boolean = false
+): String {
+    val graph = if (join) {
+        TokenMerger.merge(this);
+    } else this
+    return DotFactory(emphasizeWhitespace).fromVariantWitnessGraphColored(graph)
+}
 
 fun CollationGraph.asASCIITable(emphasizeWhitespace: Boolean = false): String =
         CollationGraphVisualizer.toTableASCII(this, emphasizeWhitespace)
 
-fun CollationGraph.asDot(emphasizeWhitespace: Boolean = false, hideMarkup: Boolean = false): String =
-        CollationGraphVisualizer.toDot(this, emphasizeWhitespace, hideMarkup)
-
-fun CollationGraph.asHTML(): String =
+fun CollationGraph.asHTMLString(): String =
         CollationGraphVisualizer.toTableHTML(this)
 
-fun VariantWitnessGraph.asDot(emphasizeWhitespace: Boolean = false): String =
-        DotFactory(emphasizeWhitespace).fromVariantWitnessGraphSimple(this)
+fun CollationGraph.asSVGPair(
+        dotEngine: DotEngine,
+        join: Boolean = false,
+        emphasizeWhitespace: Boolean = false
+): Pair<String, String> =
+        asRenderPair(dotEngine, join, emphasizeWhitespace, OutputFormat.SVG())
 
-fun VariantWitnessGraph.asColoredDot(emphasizeWhitespace: Boolean = false): String =
-        DotFactory(emphasizeWhitespace).fromVariantWitnessGraphColored(this)
+fun CollationGraph.asPNGPair(
+        dotEngine: DotEngine,
+        join: Boolean = false,
+        emphasizeWhitespace: Boolean = false
+): Pair<String, String> =
+        asRenderPair(dotEngine, join, emphasizeWhitespace, OutputFormat.PNG())
+
+fun CollationGraph.asRenderPair(
+        dotEngine: DotEngine,
+        join: Boolean,
+        emphasizeWhitespace: Boolean,
+        format: OutputFormat
+): Pair<String, String> {
+    val dot: String = asDot(join, emphasizeWhitespace,false)
+    return renderDot(dotEngine, dot, format)
+}
+
+fun CollationGraph.asDot(
+        join: Boolean = false,
+        emphasizeWhitespace: Boolean = false,
+        hideMarkup: Boolean = false
+): String {
+    val graph = if (join) {
+        CollationGraphNodeJoiner.join(this)
+    } else this
+    return CollationGraphVisualizer.toDot(graph, emphasizeWhitespace, hideMarkup)
+}
+
+fun renderDot(
+        dotEngine: DotEngine,
+        dot: String,
+        format: OutputFormat
+): Pair<String, String> {
+    val outputStream = ByteArrayOutputStream()
+    dotEngine.renderAs(format.extension, dot, outputStream)
+    val rendered = outputStream.toString("UTF-8")
+    return Pair(format.mimeType, rendered)
+}
+
+sealed class OutputFormat(val extension: String, val mimeType: String) {
+    class SVG() : OutputFormat("svg", "image/svg+xml")
+    class PNG() : OutputFormat("png", "image/png")
+}
+
+fun VariantWitnessGraph.asRenderPair(
+        dotEngine: DotEngine,
+        colored: Boolean,
+        join: Boolean,
+        emphasizeWhitespace: Boolean,
+        format: OutputFormat
+): Pair<String, String> {
+    val dot: String = if (colored) {
+        asDot(join, emphasizeWhitespace)
+    } else {
+        asColoredDot(join, emphasizeWhitespace)
+    }
+    return renderDot(dotEngine, dot, format)
+}

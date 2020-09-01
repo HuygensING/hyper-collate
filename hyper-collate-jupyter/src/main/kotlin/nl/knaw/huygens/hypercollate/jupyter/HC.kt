@@ -33,7 +33,7 @@ object HC {
 
     fun init() {
         (LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger).level = Level.WARN
-        println("Welcome to hyper-collate")
+        println("Welcome to hyper-collate 1.3.3")
     }
 
     fun initCell() {

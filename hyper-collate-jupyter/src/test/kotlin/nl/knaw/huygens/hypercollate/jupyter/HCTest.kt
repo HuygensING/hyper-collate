@@ -54,7 +54,7 @@ class HCTest {
         println("\n--[collationGraph.asDot()]--------------------------------------------------")
         println(collationGraph.asDot())
         println("\n--[collationGraph.asHTML()]-------------------------------------------------")
-        println(collationGraph.asHTML())
+        println(collationGraph.asHTMLString())
         val render = collationGraph.asASCIITable()
         println("\n--[collationGraph.asASCIITable()]-------------------------------------------")
         println(render)
