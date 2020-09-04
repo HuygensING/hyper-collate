@@ -39,7 +39,7 @@ import java.util.stream.Collectors
 class HyperCollatorTest : HyperCollateTest() {
 
     @Test
-    @Timeout(5)
+    @Timeout(15)
     fun testCollationWithManyMatches() {
         val importer = XMLImporter()
         val xml1 = ("<seg>Ik had een buurvrouw, een paar deuren verder,"

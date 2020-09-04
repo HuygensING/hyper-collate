@@ -23,6 +23,12 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>nl.knaw.huygens</groupId>
+            <artifactId>graphviz-wrapper</artifactId>
+            <version>${graphviz-wrapper.version}</version>
+            <scope>compile</scope>
+        </dependency>
 
         <dependency>
             <groupId>io.swagger</groupId>
