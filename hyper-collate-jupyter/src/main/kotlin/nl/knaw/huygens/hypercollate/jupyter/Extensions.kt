@@ -122,9 +122,9 @@ fun VariantWitnessGraph.asRenderPair(
         format: OutputFormat
 ): Pair<String, String> {
     val dot: String = if (colored) {
-        asDot(join, emphasizeWhitespace)
-    } else {
         asColoredDot(join, emphasizeWhitespace)
+    } else {
+        asDot(join, emphasizeWhitespace)
     }
     return renderDot(dot, format)
 }

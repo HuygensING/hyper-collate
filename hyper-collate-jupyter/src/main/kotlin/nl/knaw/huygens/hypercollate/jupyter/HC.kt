@@ -22,6 +22,7 @@ package nl.knaw.huygens.hypercollate.jupyter
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
+import nl.knaw.huygens.graphviz.DotEngine
 import nl.knaw.huygens.hypercollate.collator.HyperCollator
 import nl.knaw.huygens.hypercollate.config.PropertiesConfiguration
 import nl.knaw.huygens.hypercollate.importer.XMLImporter
@@ -37,6 +38,12 @@ object HC {
         val properties = PropertiesConfiguration("version.properties", true)
         val version = properties.getProperty("version", "unknown")
         println("Welcome to HyperCollate $version")
+        val dotEngine = DotEngine()
+        if (dotEngine.hasDot){
+            println("Using GraphViz: ${dotEngine.dotVersion}")
+        }else{
+            println("No dot executable found. Is GraphViz installed?. GraphViz is needed to render the graphs.")
+        }
     }
 
     fun initCell() {
@@ -47,10 +54,10 @@ object HC {
         println("Goodbye from hyper-collate")
     }
 
-    fun importVariantWitnessGraphFromXML(sigil: String, xml: String): VariantWitnessGraph =
+    fun importXMLWitness(sigil: String, xml: String): VariantWitnessGraph =
             XMLImporter().importXML(sigil, xml)
 
-    fun importVariantWitnessGraphFromXML(sigil: String, xmlFile: File): VariantWitnessGraph =
+    fun importXMLWitness(sigil: String, xmlFile: File): VariantWitnessGraph =
             XMLImporter().importXML(sigil, xmlFile)
 
     fun collate(vararg witnesses: VariantWitnessGraph): CollationGraph =
