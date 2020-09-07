@@ -33,8 +33,8 @@ object HC {
 
     fun init() {
         (LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger).level = Level.WARN
-        val version = this.javaClass.getResource("version.txt").openStream().bufferedReader().use { it.readText() }
-        println("Welcome to HyperCollate $version")
+//        val version = this.javaClass.getResource("version.txt").openStream().bufferedReader().use { it.readText() }
+//        println("Welcome to HyperCollate $version")
     }
 
     fun initCell() {

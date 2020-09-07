@@ -101,15 +101,17 @@
                 <filtering>true</filtering>
                 <includes>
                     <include>*.properties</include>
+                    <include>*.txt</include>
                 </includes>
             </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>false</filtering>
-                <excludes>
-                    <exclude>*.properties</exclude>
-                </excludes>
-            </resource>
+<!--            <resource>-->
+<!--                <directory>src/main/resources</directory>-->
+<!--                <filtering>false</filtering>-->
+<!--                <excludes>-->
+<!--                    <exclude>*.properties</exclude>-->
+<!--                    <exclude>*.txt</exclude>-->
+<!--                </excludes>-->
+<!--            </resource>-->
             <resource>
                 <directory>src/main/java</directory>
                 <includes>
