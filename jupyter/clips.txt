@@ -2,7 +2,6 @@
 
 @file:Repository("http://maven.huygens.knaw.nl/repository/")
 @file:DependsOn("nl.knaw.huygens:hyper-collate-core:1.3.3-SNAPSHOT")
-@file:DependsOn("nl.knaw.huygens:hyper-collate-rest:1.3.3-SNAPSHOT")
 @file:DependsOn("nl.knaw.huygens:hyper-collate-jupyter:1.3.3-SNAPSHOT")
 
 import nl.knaw.huygens.hypercollate.jupyter.*
@@ -10,20 +9,20 @@ import nl.knaw.huygens.hypercollate.rest.DotEngine
 import nl.knaw.huygens.hypercollate.model.*
 
 HC.init()
-val dotEngine = DotEngine("/usr/bin/dot")
-fun VariantWitnessGraph.asSvg(): MimeTypedResult = MIME(this.asSVGPair(dotEngine,colored=true,join=true))
-fun VariantWitnessGraph.asPng(): MimeTypedResult = MIME(this.asSVGPair(dotEngine,colored=true,join=true))
-fun CollationGraph.asHtml(): MimeTypedResult = HTML(this.asHTMLString())
-fun CollationGraph.asSvg(): MimeTypedResult = MIME(this.asSVGPair(dotEngine,colored=true,join=true))
-fun CollationGraph.asPng(): MimeTypedResult = MIME(this.asPNGPair(dotEngine,colored=true,join=true))
+fun VariantWitnessGraph.show(colored: Boolean = true, join: Boolean = true, emphasizeWhitespace: Boolean = false) = MIME(this.asSVGPair(colored, join, emphasizeWhitespace))
+fun CollationGraph.asHtml() = HTML(this.asHTMLString())
+fun CollationGraph.show(join: Boolean = true, emphasizeWhitespace: Boolean = false) = MIME(this.asSVGPair(join, emphasizeWhitespace))
 
-val wF = HC.importVariantWitnessGraphFromXML("A",
+val wA = HC.importVariantWitnessGraphFromXML("A",
         "<text>The dog's big eyes.</text>")
-val wQ = HC.importVariantWitnessGraphFromXML("B",
+val wB = HC.importVariantWitnessGraphFromXML("B",
         "<text>The dog's <del>big black ears</del><add>brown eyes</add>.</text>")
+val wC = HC.importVariantWitnessGraphFromXML("C",File("witness-c.xml")
 
-wF.asSvg()
-wQ.asPng()
+
+wA.show()
+wB.show()
+wC.show(join=false)
 
 val collationGraph = HC.collate(wF, wQ)
 
@@ -31,9 +30,8 @@ collationGraph.asASCIITable(true)
 
 collationGraph.asHtml()
 
-collationGraph.asSvg()
+collationGraph.show()
 
-collationGraph.asPng()
 
 
 

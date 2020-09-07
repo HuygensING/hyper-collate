@@ -50,6 +50,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 @Api(ResourcePaths.COLLATIONS)
@@ -116,7 +117,7 @@ public class CollationsResource {
     return collationStore.getCollationIds().stream()
         .map(
             id ->
-                String.format("%s/%s/%s", configuration.getBaseURI(), ResourcePaths.COLLATIONS, id))
+                format("%s/%s/%s", configuration.getBaseURI(), ResourcePaths.COLLATIONS, id))
         .sorted()
         .collect(toList());
   }
@@ -130,7 +131,7 @@ public class CollationsResource {
       @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name) {
     if (collationStore.idInUse(name)) {
       throw new BadRequestException(
-          String.format("%s '%s' is already in use.", APIPARAM_NAME, name));
+          format("%s '%s' is already in use.", APIPARAM_NAME, name));
     }
     try {
       collationStore.addCollation(name);
@@ -204,7 +205,7 @@ public class CollationsResource {
             .orElseThrow(
                 () ->
                     new NotFoundException(
-                        String.format("No witness '%s' found for collation '%s'.", sigil, name)));
+                        format("No witness '%s' found for collation '%s'.", sigil, name)));
     return Response.ok(xml).build();
   }
 
@@ -314,7 +315,7 @@ public class CollationsResource {
 
   private URI collationURI(String collationId) {
     return URI.create(
-        String.format(
+        format(
             "%s/%s/%s", configuration.getBaseURI(), ResourcePaths.COLLATIONS, collationId));
   }
 
@@ -329,7 +330,7 @@ public class CollationsResource {
     CollationInfo.State collationState = collationInfo.getCollationState();
     if (collationState.equals(CollationInfo.State.needs_witness)) {
       throw new BadRequestException(
-          String.format("Collation '%s' has no witnesses yet. Please add them first.", name));
+          format("Collation '%s' has no witnesses yet. Please add them first.", name));
     }
     if (collationState.equals(CollationInfo.State.ready_to_collate)) {
       collate(collationInfo);
@@ -340,7 +341,7 @@ public class CollationsResource {
   }
 
   private NotFoundException collationNotFoundException(String name) {
-    return new NotFoundException(String.format("No collation '%s' found.", name));
+    return new NotFoundException(format("No collation '%s' found.", name));
   }
 
   private void collate(CollationInfo collationInfo) {

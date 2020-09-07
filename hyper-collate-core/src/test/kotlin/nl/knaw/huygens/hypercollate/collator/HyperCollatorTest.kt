@@ -1322,6 +1322,17 @@ class HyperCollatorTest : HyperCollateTest() {
         assertThat(listC).containsOnly(match4, match2, match3, match5, match7, match8)
     }
 
+    @Test
+    fun min_or_null() {
+        val l = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9)
+        val m = l.asSequence().minOrNull()
+        assertThat(m).isEqualTo(1)
+
+        val e = listOf<Int>()
+        val n = e.asSequence().minOrNull()
+        assertThat(n).isNull()
+    }
+
     private fun testHyperCollation(
             witness1: VariantWitnessGraph,
             witness2: VariantWitnessGraph,

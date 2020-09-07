@@ -49,7 +49,7 @@ fun VariantWitnessGraph.asDot(
         emphasizeWhitespace: Boolean = false
 ): String {
     val graph = if (join) {
-        TokenMerger.merge(this);
+        TokenMerger.merge(this)
     } else this
     return DotFactory(emphasizeWhitespace).fromVariantWitnessGraphSimple(graph)
 }
@@ -59,7 +59,7 @@ fun VariantWitnessGraph.asColoredDot(
         emphasizeWhitespace: Boolean = false
 ): String {
     val graph = if (join) {
-        TokenMerger.merge(this);
+        TokenMerger.merge(this)
     } else this
     return DotFactory(emphasizeWhitespace).fromVariantWitnessGraphColored(graph)
 }
@@ -71,7 +71,6 @@ fun CollationGraph.asHTMLString(): String =
         CollationGraphVisualizer.toTableHTML(this)
 
 fun CollationGraph.asSVGPair(
-        dotEngine: DotEngine,
         join: Boolean = false,
         emphasizeWhitespace: Boolean = false
 ): Pair<String, String> =
@@ -112,8 +111,8 @@ fun renderDot(
 }
 
 sealed class OutputFormat(val extension: String, val mimeType: String) {
-    class SVG() : OutputFormat("svg", "image/svg+xml")
-    class PNG() : OutputFormat("png", "image/png")
+    class SVG : OutputFormat("svg", "image/svg+xml")
+    class PNG : OutputFormat("png", "image/png")
 }
 
 fun VariantWitnessGraph.asRenderPair(
@@ -129,3 +128,7 @@ fun VariantWitnessGraph.asRenderPair(
     }
     return renderDot(dot, format)
 }
+
+//fun VariantWitnessGraph.show(colored: Boolean = true, join: Boolean = true, emphasizeWhitespace: Boolean = false) = MIME(this.asSVGPair(colored, join, emphasizeWhitespace))
+//fun CollationGraph.asHtml() = HTML(this.asHTMLString())
+//fun CollationGraph.show(join: Boolean = true, emphasizeWhitespace: Boolean = false) = MIME(this.asSVGPair(join, emphasizeWhitespace))
