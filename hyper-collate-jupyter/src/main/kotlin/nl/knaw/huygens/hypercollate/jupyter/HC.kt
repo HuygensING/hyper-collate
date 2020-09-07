@@ -23,6 +23,7 @@ package nl.knaw.huygens.hypercollate.jupyter
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import nl.knaw.huygens.hypercollate.collator.HyperCollator
+import nl.knaw.huygens.hypercollate.config.PropertiesConfiguration
 import nl.knaw.huygens.hypercollate.importer.XMLImporter
 import nl.knaw.huygens.hypercollate.model.CollationGraph
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
@@ -33,8 +34,9 @@ object HC {
 
     fun init() {
         (LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger).level = Level.WARN
-//        val version = this.javaClass.getResource("version.txt").openStream().bufferedReader().use { it.readText() }
-//        println("Welcome to HyperCollate $version")
+        val properties = PropertiesConfiguration("version.properties", true)
+        val version = properties.getProperty("version", "unknown")
+        println("Welcome to HyperCollate $version")
     }
 
     fun initCell() {
