@@ -173,6 +173,7 @@ object CollationGraphVisualizer {
         val ranking = CollationGraphRanking.of(graph)
         val cells: Map<String, MutableList<String>> = sigils.map { it to mutableListOf<String>() }.toMap()
         for (nodeSet in ranking) {
+            val matchingTokens = mutableListOf<MarkedUpToken>()
             if (isBorderNode(nodeSet, graph)) {
                 // skip start and end nodes
                 continue
@@ -181,10 +182,14 @@ object CollationGraphVisualizer {
             sigils.forEach { sigil: String ->
                 nodeTokensPerWitness[sigil] = ArrayList()
                 nodeSet.forEach { node: TextNode ->
+                    val isMatch = node.sigils.size > 1
                     val token = node.getTokenForWitness(sigil)
                     if (token != null) {
                         val mToken = token as MarkedUpToken
                         nodeTokensPerWitness[sigil]!!.add(mToken)
+                        if (isMatch) {
+                            matchingTokens += mToken
+                        }
                     }
                 }
             }
@@ -195,6 +200,9 @@ object CollationGraphVisualizer {
                             var asHtml = it.content.replace(" ", "&nbsp;")
                             if (it.parentXPath.contains("app/rdg")) {
                                 asHtml += "<br/>"
+                            }
+                            if (it in matchingTokens) {
+                                asHtml = "<span style=\"background:orange\">$asHtml</span>"
                             }
                             when {
                                 it.parentXPath.endsWith("/del/add") -> "<sup><sup>$asHtml</sup></sup>"
@@ -214,7 +222,7 @@ object CollationGraphVisualizer {
     }
 
     private fun witnessRow(sigil: String, cells: List<String>): String =
-            "<tr><th>$sigil</th>${cells.joinToString("") { "<td>$it</td>" }}</tr>"
+            "<tr><th style=\"background:lightgreen\">$sigil</th>${cells.joinToString("") { "<td>$it</td>" }}</tr>"
 
     @JvmStatic
     fun toDot(
