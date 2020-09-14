@@ -30,15 +30,12 @@ class PropertiesConfiguration(propertiesFile: String, isResource: Boolean) {
     private var propertyResourceBundle: PropertyResourceBundle? = null
 
     @Synchronized
-    fun getProperty(key: String): Optional<String> {
-        return Optional.ofNullable(getValue(key))
-    }
+    fun getProperty(key: String): Optional<String> =
+            Optional.ofNullable(getValue(key))
 
     @Synchronized
-    fun getProperty(key: String, defaultValue: String?): String {
-        val value = getValue(key)
-        return value ?: defaultValue!!
-    }
+    fun getProperty(key: String, defaultValue: String): String =
+            getValue(key) ?: defaultValue!!
 
     private fun getValue(key: String): String? {
         var value: String? = null

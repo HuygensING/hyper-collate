@@ -1,3 +1,5 @@
+package nl.knaw.huygens.hypercollate.jupyter
+
 /*-
  * #%L
  * hyper-collate-jupyter
@@ -18,7 +20,6 @@
  * #L%
  */
 
-package nl.knaw.huygens.hypercollate.jupyter
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger

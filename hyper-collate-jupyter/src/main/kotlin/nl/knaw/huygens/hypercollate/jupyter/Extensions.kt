@@ -64,10 +64,16 @@ fun VariantWitnessGraph.asColoredDot(
     return DotFactory(emphasizeWhitespace).fromVariantWitnessGraphColored(graph)
 }
 
+fun CollationGraph.asTable(format: TableFormat = TableFormat.ASCII, emphasizeWhitespace: Boolean = false): String =
+        when (format) {
+            is TableFormat.ASCII -> this.asASCIITable(emphasizeWhitespace)
+            is TableFormat.HTML -> this.asHTMLString(emphasizeWhitespace)
+        }
+
 fun CollationGraph.asASCIITable(emphasizeWhitespace: Boolean = false): String =
         CollationGraphVisualizer.toTableASCII(this, emphasizeWhitespace)
 
-fun CollationGraph.asHTMLString(): String =
+fun CollationGraph.asHTMLString(emphasizeWhitespace: Boolean = false): String =
         CollationGraphVisualizer.toTableHTML(this)
 
 fun CollationGraph.asSVGPair(
@@ -113,6 +119,11 @@ fun renderDot(
 sealed class OutputFormat(val extension: String, val mimeType: String) {
     class SVG : OutputFormat("svg", "image/svg+xml")
     class PNG : OutputFormat("png", "image/png")
+}
+
+sealed class TableFormat {
+    object ASCII : TableFormat()
+    object HTML : TableFormat()
 }
 
 fun VariantWitnessGraph.asRenderPair(
