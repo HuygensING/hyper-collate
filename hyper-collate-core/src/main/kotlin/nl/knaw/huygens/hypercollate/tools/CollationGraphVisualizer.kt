@@ -192,13 +192,15 @@ object CollationGraphVisualizer {
                 cells[sigil]!! += nodeTokensPerWitness[sigil]!!
                         .sortedBy { it.indexNumber }
                         .joinToString("&nbsp;") {
-                            val asHtml = it.content.replace(" ", "&nbsp;")
+                            var asHtml = it.content.replace(" ", "&nbsp;")
+                            if (it.parentXPath.contains("app/rdg")) {
+                                asHtml += "<br/>"
+                            }
                             when {
                                 it.parentXPath.endsWith("/del/add") -> "<sup><sup>$asHtml</sup></sup>"
                                 it.parentXPath.endsWith("/add/del") -> "<sup><del>$asHtml</del></sup>"
                                 it.parentXPath.endsWith("/add") -> "<sup>$asHtml</sup>"
                                 it.parentXPath.endsWith("/del") -> "<del>$asHtml</del>"
-                                it.parentXPath.endsWith("/rdg") -> "<tr>$asHtml</tr>"
                                 else -> asHtml
                             }
                         }
