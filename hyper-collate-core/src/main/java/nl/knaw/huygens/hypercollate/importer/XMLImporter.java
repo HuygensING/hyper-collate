@@ -78,8 +78,8 @@ public class XMLImporter {
 
   public VariantWitnessGraph importXML(String rawSigil, InputStream input) {
     String sigil = normalizedSigil(rawSigil);
-    VariantWitnessGraph graph = new VariantWitnessGraph(rawSigil);
-    SimpleWitness witness = new SimpleWitness(rawSigil);
+    VariantWitnessGraph graph = new VariantWitnessGraph(sigil);
+    SimpleWitness witness = new SimpleWitness(sigil);
     XMLInputFactory factory = XMLInputFactory.newInstance();
     try {
       XMLEventReader reader = factory.createXMLEventReader(input);
