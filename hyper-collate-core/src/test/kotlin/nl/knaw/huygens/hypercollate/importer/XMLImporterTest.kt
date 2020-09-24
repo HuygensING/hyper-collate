@@ -21,10 +21,12 @@ package nl.knaw.huygens.hypercollate.importer
  */
 
 import nl.knaw.huygens.hypercollate.HyperCollateTest
+import nl.knaw.huygens.hypercollate.importer.XMLImporter.normalizedSigil
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
 import nl.knaw.huygens.hypercollate.tools.DotFactory
 import nl.knaw.huygens.hypercollate.tools.TokenMerger
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
@@ -697,6 +699,17 @@ class XMLImporterTest : HyperCollateTest() {
             }
             """.trimIndent()
         assertThat(dot).isEqualTo(expectedDot)
+    }
+
+    @Test
+    fun normalize_sigil() {
+        val softly = SoftAssertions()
+        with(softly) {
+            assertThat(normalizedSigil("A")).isEqualTo("A")
+            assertThat(normalizedSigil("remove space")).isEqualTo("removespace")
+            assertThat(normalizedSigil("1 2 3 4")).isEqualTo("1234")
+            assertAll()
+        }
     }
 
     private fun visualize(vwg: VariantWitnessGraph) {

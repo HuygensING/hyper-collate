@@ -76,9 +76,10 @@ public class XMLImporter {
     }
   }
 
-  public VariantWitnessGraph importXML(String sigil, InputStream input) {
-    VariantWitnessGraph graph = new VariantWitnessGraph(sigil);
-    SimpleWitness witness = new SimpleWitness(sigil);
+  public VariantWitnessGraph importXML(String rawSigil, InputStream input) {
+    String sigil = normalizedSigil(rawSigil);
+    VariantWitnessGraph graph = new VariantWitnessGraph(rawSigil);
+    SimpleWitness witness = new SimpleWitness(rawSigil);
     XMLInputFactory factory = XMLInputFactory.newInstance();
     try {
       XMLEventReader reader = factory.createXMLEventReader(input);
@@ -141,6 +142,10 @@ public class XMLImporter {
     } catch (XMLStreamException e) {
       throw new RuntimeException(e);
     }
+  }
+
+   static String normalizedSigil(String rawSigil) {
+    return rawSigil.replaceAll("[^0-9a-zA-Z]","");
   }
 
   private void handleStartDocument(XMLEvent event, Context context) {}
