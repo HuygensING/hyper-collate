@@ -75,21 +75,21 @@ class VariantWitnessGraphTest : HyperCollateTest() {
             graph [rankdir=LR]
             labelloc=b
             begin [label="";shape=doublecircle,rank=middle]
-            A_000 [label=<Collating&nbsp;<br/><i>A: /s</i>>]
-            A_001 [label=<is&nbsp;<br/><i>A: /s</i>>]
-            A_002 [label=<NP&nbsp;<br/><i>A: /s/del</i>>]
-            A_004 [label=<easy<br/><i>A: /s/add</i>>]
-            A_003 [label=<hard<br/><i>A: /s/del</i>>]
-            A_005 [label=<.<br/><i>A: /s</i>>]
+            vA_000 [label=<Collating&nbsp;<br/><i>A: /s</i>>]
+            vA_001 [label=<is&nbsp;<br/><i>A: /s</i>>]
+            vA_002 [label=<NP&nbsp;<br/><i>A: /s/del</i>>]
+            vA_004 [label=<easy<br/><i>A: /s/add</i>>]
+            vA_003 [label=<hard<br/><i>A: /s/del</i>>]
+            vA_005 [label=<.<br/><i>A: /s</i>>]
             end [label="";shape=doublecircle,rank=middle]
-            A_000->A_001
-            A_001->A_002
-            A_001->A_004
-            A_002->A_003
-            A_003->A_005
-            A_004->A_005
-            A_005->end
-            begin->A_000
+            begin->vA_000
+            vA_000->vA_001
+            vA_001->vA_002
+            vA_001->vA_004
+            vA_002->vA_003
+            vA_003->vA_005
+            vA_004->vA_005
+            vA_005->end
             }
             """.trimIndent()
         assertThat(dot).isEqualTo(expected)
@@ -99,17 +99,17 @@ class VariantWitnessGraphTest : HyperCollateTest() {
             graph [rankdir=LR]
             labelloc=b
             begin [label="";shape=doublecircle,rank=middle]
-            A_000 [label=<Collating&#9251;is&#9251;<br/><i>A: /s</i>>]
-            A_002 [label=<NP&#9251;hard<br/><i>A: /s/del</i>>]
-            A_004 [label=<easy<br/><i>A: /s/add</i>>]
-            A_005 [label=<.<br/><i>A: /s</i>>]
+            vA_000 [label=<Collating&#9251;is&#9251;<br/><i>A: /s</i>>]
+            vA_002 [label=<NP&#9251;hard<br/><i>A: /s/del</i>>]
+            vA_004 [label=<easy<br/><i>A: /s/add</i>>]
+            vA_005 [label=<.<br/><i>A: /s</i>>]
             end [label="";shape=doublecircle,rank=middle]
-            A_000->A_002
-            A_000->A_004
-            A_002->A_005
-            A_004->A_005
-            A_005->end
-            begin->A_000
+            begin->vA_000
+            vA_000->vA_002
+            vA_000->vA_004
+            vA_002->vA_005
+            vA_004->vA_005
+            vA_005->end
             }
             """.trimIndent()
         verifyDotExport(vwg1, expected2)

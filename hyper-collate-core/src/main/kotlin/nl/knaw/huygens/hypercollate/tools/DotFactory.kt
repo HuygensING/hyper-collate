@@ -21,6 +21,7 @@ package nl.knaw.huygens.hypercollate.tools
  */
 
 import nl.knaw.huygens.hypercollate.model.*
+import java.lang.String.format
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -49,7 +50,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
             markupToClose.addAll(opened)
             markupToClose.removeAll(markupListForTokenVertex)
             markupToClose.sortWith(Comparator.comparingInt { obj: Markup -> obj.depth })
-            markupToClose.forEach { m: Markup -> closeMarkup(dotBuilder) }
+            markupToClose.forEach { closeMarkup(dotBuilder) }
             val markupToOpen: MutableList<Markup> = ArrayList()
             markupToOpen.addAll(markupListForTokenVertex)
             markupToOpen.removeAll(opened)
@@ -143,7 +144,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
     private fun vertexVariable(tokenVertex: TokenVertex): String? {
         if (tokenVertex is SimpleTokenVertex) {
             val token = tokenVertex.getToken() as MarkedUpToken
-            return token.witness.sigil + "_" + String.format("%03d", token.indexNumber)
+            return "v${token.witness.sigil}_${format("%03d", token.indexNumber)}"
         }
         if (tokenVertex is StartTokenVertex) {
             return "begin"

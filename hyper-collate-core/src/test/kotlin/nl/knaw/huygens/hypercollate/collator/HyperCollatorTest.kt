@@ -228,112 +228,112 @@ class HyperCollatorTest {
         fun testHierarchy() {
             val importer = XMLImporter()
             val fXML = """
-            |<text>
-            |    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,
-            |        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>
-            |</text>
-            """.trimMargin()
+                |<text>
+                |    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,
+                |        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>
+                |</text>
+                """.trimMargin()
             val wF = importer.importXML("F", fXML)
             val qXML = """
-            |<text>
-            |    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !
-            |        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>
-            |</text>
-            """.trimMargin()
+                |<text>
+                |    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !
+                |        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>
+                |</text>
+                """.trimMargin()
             val wQ = importer.importXML("Q", qXML)
             LOG.info(fXML)
             LOG.info(qXML)
             val expectedDotF = """
-            digraph VariantWitnessGraph{
-            graph [rankdir=LR]
-            labelloc=b
-            begin [label="";shape=doublecircle,rank=middle]
-            F_000 [label=<Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/><i>F: /text/s</i>>]
-            F_006 [label=<<br/><i>F: /text/s/lb</i>>]
-            F_007 [label=<werven&#9251;om<br/><i>F: /text/s/del</i>>]
-            F_009 [label=<trachten&#9251;naar<br/><i>F: /text/s/add</i>>]
-            F_011 [label=<&#9251;een&#9251;vrouw,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;vóór&#9251;de&#9251;<br/><i>F: /text/s</i>>]
-            F_019 [label=<<br/><i>F: /text/s/lb</i>>]
-            F_020 [label=<liefelijke&#9251;toestemming!<br/><i>F: /text/s</i>>]
-            end [label="";shape=doublecircle,rank=middle]
-            F_000->F_006
-            F_006->F_007
-            F_006->F_009
-            F_007->F_011
-            F_009->F_011
-            F_011->F_019
-            F_019->F_020
-            F_020->end
-            begin->F_000
-            }
-            """.trimIndent()
+                digraph VariantWitnessGraph{
+                graph [rankdir=LR]
+                labelloc=b
+                begin [label="";shape=doublecircle,rank=middle]
+                vF_000 [label=<Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/><i>F: /text/s</i>>]
+                vF_006 [label=<<br/><i>F: /text/s/lb</i>>]
+                vF_007 [label=<werven&#9251;om<br/><i>F: /text/s/del</i>>]
+                vF_009 [label=<trachten&#9251;naar<br/><i>F: /text/s/add</i>>]
+                vF_011 [label=<&#9251;een&#9251;vrouw,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;vóór&#9251;de&#9251;<br/><i>F: /text/s</i>>]
+                vF_019 [label=<<br/><i>F: /text/s/lb</i>>]
+                vF_020 [label=<liefelijke&#9251;toestemming!<br/><i>F: /text/s</i>>]
+                end [label="";shape=doublecircle,rank=middle]
+                begin->vF_000
+                vF_000->vF_006
+                vF_006->vF_007
+                vF_006->vF_009
+                vF_007->vF_011
+                vF_009->vF_011
+                vF_011->vF_019
+                vF_019->vF_020
+                vF_020->end
+                }
+                """.trimIndent()
             verifyDotExport(wF, expectedDotF)
             val expectedDotQ = """
-            digraph VariantWitnessGraph{
-            graph [rankdir=LR]
-            labelloc=b
-            begin [label="";shape=doublecircle,rank=middle]
-            Q_000 [label=<Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/><i>Q: /text/s</i>>]
-            Q_006 [label=<werven&#9251;om<br/><i>Q: /text/s/del</i>>]
-            Q_008 [label=<trachten&#9251;naar<br/><i>Q: /text/s/add</i>>]
-            Q_010 [label=<&#9251;een&#9251;<br/><i>Q: /text/s</i>>]
-            Q_012 [label=<<br/><i>Q: /text/s/lb</i>>]
-            Q_013 [label=<vrouw&#9251;!&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;nerveuze&#9251;verwachting&#9251;vóór&#9251;de&#9251;liefelijke&#9251;toestemming.<br/><i>Q: /text/s</i>>]
-            end [label="";shape=doublecircle,rank=middle]
-            Q_000->Q_006
-            Q_000->Q_008
-            Q_006->Q_010
-            Q_008->Q_010
-            Q_010->Q_012
-            Q_012->Q_013
-            Q_013->end
-            begin->Q_000
-            }
-            """.trimIndent()
+                digraph VariantWitnessGraph{
+                graph [rankdir=LR]
+                labelloc=b
+                begin [label="";shape=doublecircle,rank=middle]
+                vQ_000 [label=<Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/><i>Q: /text/s</i>>]
+                vQ_006 [label=<werven&#9251;om<br/><i>Q: /text/s/del</i>>]
+                vQ_008 [label=<trachten&#9251;naar<br/><i>Q: /text/s/add</i>>]
+                vQ_010 [label=<&#9251;een&#9251;<br/><i>Q: /text/s</i>>]
+                vQ_012 [label=<<br/><i>Q: /text/s/lb</i>>]
+                vQ_013 [label=<vrouw&#9251;!&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;nerveuze&#9251;verwachting&#9251;vóór&#9251;de&#9251;liefelijke&#9251;toestemming.<br/><i>Q: /text/s</i>>]
+                end [label="";shape=doublecircle,rank=middle]
+                begin->vQ_000
+                vQ_000->vQ_006
+                vQ_000->vQ_008
+                vQ_006->vQ_010
+                vQ_008->vQ_010
+                vQ_010->vQ_012
+                vQ_012->vQ_013
+                vQ_013->end
+                }
+                """.trimIndent()
             verifyDotExport(wQ, expectedDotQ)
             val expectedDot = """
-            digraph CollationGraph{
-            labelloc=b
-            t000 [label="";shape=doublecircle,rank=middle]
-            t001 [label="";shape=doublecircle,rank=middle]
-            t002 [label=<F,Q: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F,Q: <i>/text/s</i>>]
-            t003 [label=<F,Q: &#9251;een&#9251;<br/>F,Q: <i>/text/s</i>>]
-            t004 [label=<F: vrouw<br/>Q: vrouw&#9251;<br/>F,Q: <i>/text/s</i>>]
-            t005 [label=<F: ,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;<br/>F: <i>/text/s</i>>]
-            t006 [label=<F,Q: vóór&#9251;de&#9251;<br/>F,Q: <i>/text/s</i>>]
-            t007 [label=<F: <br/>F: <i>/text/s/lb</i>>]
-            t008 [label=<F,Q: liefelijke&#9251;toestemming<br/>F,Q: <i>/text/s</i>>]
-            t009 [label=<F: !<br/>F: <i>/text/s</i>>]
-            t010 [label=<F: <br/>F: <i>/text/s/lb</i>>]
-            t011 [label=<F,Q: werven&#9251;om<br/>F,Q: <i>/text/s/del</i>>]
-            t012 [label=<F,Q: trachten&#9251;naar<br/>F,Q: <i>/text/s/add</i>>]
-            t013 [label=<Q: <br/>Q: <i>/text/s/lb</i>>]
-            t014 [label=<Q: !&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;nerveuze&#9251;verwachting&#9251;<br/>Q: <i>/text/s</i>>]
-            t015 [label=<Q: .<br/>Q: <i>/text/s</i>>]
-            t000->t002[label="F,Q"]
-            t002->t010[label="F"]
-            t002->t011[label="Q"]
-            t002->t012[label="Q"]
-            t003->t004[label="F"]
-            t003->t013[label="Q"]
-            t004->t005[label="F"]
-            t004->t014[label="Q"]
-            t005->t006[label="F"]
-            t006->t007[label="F"]
-            t006->t008[label="Q"]
-            t007->t008[label="F"]
-            t008->t009[label="F"]
-            t008->t015[label="Q"]
-            t009->t001[label="F"]
-            t010->t011[label="F"]
-            t010->t012[label="F"]
-            t011->t003[label="F,Q"]
-            t012->t003[label="F,Q"]
-            t013->t004[label="Q"]
-            t014->t006[label="Q"]
-            t015->t001[label="Q"]
-            }
-            """.trimIndent()
+                digraph CollationGraph{
+                labelloc=b
+                t000 [label="";shape=doublecircle,rank=middle]
+                t001 [label="";shape=doublecircle,rank=middle]
+                t002 [label=<F,Q: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F,Q: <i>/text/s</i>>]
+                t003 [label=<F,Q: &#9251;een&#9251;<br/>F,Q: <i>/text/s</i>>]
+                t004 [label=<F: vrouw<br/>Q: vrouw&#9251;<br/>F,Q: <i>/text/s</i>>]
+                t005 [label=<F: ,&#x21A9;<br/>&#9251;de&#9251;ongewisheid&#9251;<br/>F: <i>/text/s</i>>]
+                t006 [label=<F,Q: vóór&#9251;de&#9251;<br/>F,Q: <i>/text/s</i>>]
+                t007 [label=<F: <br/>F: <i>/text/s/lb</i>>]
+                t008 [label=<F,Q: liefelijke&#9251;toestemming<br/>F,Q: <i>/text/s</i>>]
+                t009 [label=<F: !<br/>F: <i>/text/s</i>>]
+                t010 [label=<F: <br/>F: <i>/text/s/lb</i>>]
+                t011 [label=<F,Q: werven&#9251;om<br/>F,Q: <i>/text/s/del</i>>]
+                t012 [label=<F,Q: trachten&#9251;naar<br/>F,Q: <i>/text/s/add</i>>]
+                t013 [label=<Q: <br/>Q: <i>/text/s/lb</i>>]
+                t014 [label=<Q: !&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;nerveuze&#9251;verwachting&#9251;<br/>Q: <i>/text/s</i>>]
+                t015 [label=<Q: .<br/>Q: <i>/text/s</i>>]
+                t000->t002[label="F,Q"]
+                t002->t010[label="F"]
+                t002->t011[label="Q"]
+                t002->t012[label="Q"]
+                t003->t004[label="F"]
+                t003->t013[label="Q"]
+                t004->t005[label="F"]
+                t004->t014[label="Q"]
+                t005->t006[label="F"]
+                t006->t007[label="F"]
+                t006->t008[label="Q"]
+                t007->t008[label="F"]
+                t008->t009[label="F"]
+                t008->t015[label="Q"]
+                t009->t001[label="F"]
+                t010->t011[label="F"]
+                t010->t012[label="F"]
+                t011->t003[label="F,Q"]
+                t012->t003[label="F,Q"]
+                t013->t004[label="Q"]
+                t014->t006[label="Q"]
+                t015->t001[label="Q"]
+                }
+                """.trimIndent()
             val expectedTable = """
             ┌───┬────────────────────────────────┬─────┬─────────────────┬─────┬─────┬──────┬─────────────────────────────────────┬────────┬─────┬──────────────────────┬─┐
             │[F]│                                │     │[+] trachten naar│     │     │      │                                     │        │     │                      │ │
@@ -379,100 +379,100 @@ class HyperCollatorTest {
             val wF = importer.importXML(
                     "F",
                     """
-                |<?xml version="1.0" encoding="UTF-8"?>
-                |<text>
-                |    <s>De vent was woedend en maakte <del type="instantCorrection">Shiriar</del> den bedremmelden
-                |        Sultan uit voor "lompen boer".</s>
-                |</text>
-                """.trimMargin())
+                    |<?xml version="1.0" encoding="UTF-8"?>
+                    |<text>
+                    |    <s>De vent was woedend en maakte <del type="instantCorrection">Shiriar</del> den bedremmelden
+                    |        Sultan uit voor "lompen boer".</s>
+                    |</text>
+                    """.trimMargin())
             val wQ = importer.importXML(
                     "Q",
                     """
-                |<?xml version="1.0" encoding="UTF-8"?>
-                |<text>
-                |    <s>De vent was woedend en maakte <del>Shiriar</del>
-                |        <add>den bedremmelden <del>man</del>
-                |            <add>Sultan</add></add> uit voor "lompen boer".</s>
-                |</text>
-                """.trimMargin())
+                    |<?xml version="1.0" encoding="UTF-8"?>
+                    |<text>
+                    |    <s>De vent was woedend en maakte <del>Shiriar</del>
+                    |        <add>den bedremmelden <del>man</del>
+                    |            <add>Sultan</add></add> uit voor "lompen boer".</s>
+                    |</text>
+                    """.trimMargin())
             val expectedDotF = """
-            digraph VariantWitnessGraph{
-            graph [rankdir=LR]
-            labelloc=b
-            begin [label="";shape=doublecircle,rank=middle]
-            F_000 [label=<De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/><i>F: /text/s</i>>]
-            F_006 [label=<Shiriar<br/><i>F: /text/s/del</i>>]
-            F_007 [label=<&#9251;den&#9251;bedremmelden&#x21A9;<br/>&#9251;Sultan&#9251;uit&#9251;voor&#9251;"lompen&#9251;boer".<br/><i>F: /text/s</i>>]
-            end [label="";shape=doublecircle,rank=middle]
-            F_000->F_006
-            F_000->F_007
-            F_006->F_007
-            F_007->end
-            begin->F_000
-            }
-            """.trimIndent()
+                digraph VariantWitnessGraph{
+                graph [rankdir=LR]
+                labelloc=b
+                begin [label="";shape=doublecircle,rank=middle]
+                vF_000 [label=<De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/><i>F: /text/s</i>>]
+                vF_006 [label=<Shiriar<br/><i>F: /text/s/del</i>>]
+                vF_007 [label=<&#9251;den&#9251;bedremmelden&#x21A9;<br/>&#9251;Sultan&#9251;uit&#9251;voor&#9251;"lompen&#9251;boer".<br/><i>F: /text/s</i>>]
+                end [label="";shape=doublecircle,rank=middle]
+                begin->vF_000
+                vF_000->vF_006
+                vF_000->vF_007
+                vF_006->vF_007
+                vF_007->end
+                }
+                """.trimIndent()
             verifyDotExport(wF, expectedDotF)
             val expectedDotQ = """
-            digraph VariantWitnessGraph{
-            graph [rankdir=LR]
-            labelloc=b
-            begin [label="";shape=doublecircle,rank=middle]
-            Q_000 [label=<De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/><i>Q: /text/s</i>>]
-            Q_006 [label=<Shiriar<br/><i>Q: /text/s/del</i>>]
-            Q_007 [label=<den&#9251;bedremmelden&#9251;<br/><i>Q: /text/s/add</i>>]
-            Q_011 [label=<&#9251;uit&#9251;voor&#9251;"lompen&#9251;boer".<br/><i>Q: /text/s</i>>]
-            Q_009 [label=<man<br/><i>Q: /text/s/add/del</i>>]
-            Q_010 [label=<Sultan<br/><i>Q: /text/s/add/add</i>>]
-            end [label="";shape=doublecircle,rank=middle]
-            Q_000->Q_006
-            Q_000->Q_007
-            Q_006->Q_011
-            Q_007->Q_009
-            Q_007->Q_010
-            Q_009->Q_011
-            Q_010->Q_011
-            Q_011->end
-            begin->Q_000
-            }
-            """.trimIndent()
+                digraph VariantWitnessGraph{
+                graph [rankdir=LR]
+                labelloc=b
+                begin [label="";shape=doublecircle,rank=middle]
+                vQ_000 [label=<De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/><i>Q: /text/s</i>>]
+                vQ_006 [label=<Shiriar<br/><i>Q: /text/s/del</i>>]
+                vQ_007 [label=<den&#9251;bedremmelden&#9251;<br/><i>Q: /text/s/add</i>>]
+                vQ_011 [label=<&#9251;uit&#9251;voor&#9251;"lompen&#9251;boer".<br/><i>Q: /text/s</i>>]
+                vQ_009 [label=<man<br/><i>Q: /text/s/add/del</i>>]
+                vQ_010 [label=<Sultan<br/><i>Q: /text/s/add/add</i>>]
+                end [label="";shape=doublecircle,rank=middle]
+                begin->vQ_000
+                vQ_000->vQ_006
+                vQ_000->vQ_007
+                vQ_006->vQ_011
+                vQ_007->vQ_009
+                vQ_007->vQ_010
+                vQ_009->vQ_011
+                vQ_010->vQ_011
+                vQ_011->end
+                }
+                """.trimIndent()
             verifyDotExport(wQ, expectedDotQ)
             val expectedDot = """
-            digraph CollationGraph{
-            labelloc=b
-            t000 [label="";shape=doublecircle,rank=middle]
-            t001 [label="";shape=doublecircle,rank=middle]
-            t002 [label=<F,Q: De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/>F,Q: <i>/text/s</i>>]
-            t003 [label=<F: Sultan&#9251;<br/>Q: Sultan<br/>F: <i>/text/s</i><br/>Q: <i>/text/s/add/add</i><br/>>]
-            t004 [label=<F,Q: uit&#9251;voor&#9251;"lompen&#9251;boer".<br/>F,Q: <i>/text/s</i>>]
-            t005 [label=<F,Q: Shiriar<br/>F,Q: <i>/text/s/del</i>>]
-            t006 [label=<F: &#9251;<br/>F: <i>/text/s</i>>]
-            t007 [label=<F: den&#9251;bedremmelden&#x21A9;<br/>&#9251;<br/>Q: den&#9251;bedremmelden&#9251;<br/>F: <i>/text/s</i><br/>Q: <i>/text/s/add</i><br/>>]
-            t008 [label=<Q: &#9251;<br/>Q: <i>/text/s</i>>]
-            t009 [label=<Q: man<br/>Q: <i>/text/s/add/del</i>>]
-            t000->t002[label="F,Q"]
-            t002->t005[label="F,Q"]
-            t002->t006[label="F"]
-            t002->t007[label="Q"]
-            t003->t004[label="F"]
-            t003->t008[label="Q"]
-            t004->t001[label="F,Q"]
-            t005->t006[label="F"]
-            t005->t008[label="Q"]
-            t006->t007[label="F"]
-            t007->t003[label="F,Q"]
-            t007->t009[label="Q"]
-            t008->t004[label="Q"]
-            t009->t008[label="Q"]
-            }
-            """.trimIndent()
+                digraph CollationGraph{
+                labelloc=b
+                t000 [label="";shape=doublecircle,rank=middle]
+                t001 [label="";shape=doublecircle,rank=middle]
+                t002 [label=<F,Q: De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/>F,Q: <i>/text/s</i>>]
+                t003 [label=<F: Sultan&#9251;<br/>Q: Sultan<br/>F: <i>/text/s</i><br/>Q: <i>/text/s/add/add</i><br/>>]
+                t004 [label=<F,Q: uit&#9251;voor&#9251;"lompen&#9251;boer".<br/>F,Q: <i>/text/s</i>>]
+                t005 [label=<F,Q: Shiriar<br/>F,Q: <i>/text/s/del</i>>]
+                t006 [label=<F: &#9251;<br/>F: <i>/text/s</i>>]
+                t007 [label=<F: den&#9251;bedremmelden&#x21A9;<br/>&#9251;<br/>Q: den&#9251;bedremmelden&#9251;<br/>F: <i>/text/s</i><br/>Q: <i>/text/s/add</i><br/>>]
+                t008 [label=<Q: &#9251;<br/>Q: <i>/text/s</i>>]
+                t009 [label=<Q: man<br/>Q: <i>/text/s/add/del</i>>]
+                t000->t002[label="F,Q"]
+                t002->t005[label="F,Q"]
+                t002->t006[label="F"]
+                t002->t007[label="Q"]
+                t003->t004[label="F"]
+                t003->t008[label="Q"]
+                t004->t001[label="F,Q"]
+                t005->t006[label="F"]
+                t005->t008[label="Q"]
+                t006->t007[label="F"]
+                t007->t003[label="F,Q"]
+                t007->t009[label="Q"]
+                t008->t004[label="Q"]
+                t009->t008[label="Q"]
+                }
+                """.trimIndent()
             val expectedTable = """
-            ┌───┬──────────────────────────────┬───────────┬─┬─────────────────────┬──────────┬─┬───────────────────────┐
-            │[F]│De vent was woedend en maakte │[-] Shiriar│ │den bedremmelden     │Sultan    │ │uit voor "lompen boer".│
-            ├───┼──────────────────────────────┼───────────┼─┼─────────────────────┼──────────┼─┼───────────────────────┤
-            │[Q]│                              │           │ │                     │[+] Sultan│ │                       │
-            │   │De vent was woedend en maakte │[-] Shiriar│ │[+] den bedremmelden │[-] man   │ │uit voor "lompen boer".│
-            └───┴──────────────────────────────┴───────────┴─┴─────────────────────┴──────────┴─┴───────────────────────┘
-            """.trimIndent()
+                ┌───┬──────────────────────────────┬───────────┬─┬─────────────────────┬──────────┬─┬───────────────────────┐
+                │[F]│De vent was woedend en maakte │[-] Shiriar│ │den bedremmelden     │Sultan    │ │uit voor "lompen boer".│
+                ├───┼──────────────────────────────┼───────────┼─┼─────────────────────┼──────────┼─┼───────────────────────┤
+                │[Q]│                              │           │ │                     │[+] Sultan│ │                       │
+                │   │De vent was woedend en maakte │[-] Shiriar│ │[+] den bedremmelden │[-] man   │ │uit voor "lompen boer".│
+                └───┴──────────────────────────────┴───────────┴─┴─────────────────────┴──────────┴─┴───────────────────────┘
+                """.trimIndent()
             val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
             assertThat(collationGraph)
                     .containsTextNodesMatching(
