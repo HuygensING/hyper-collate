@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.importer;
+package nl.knaw.huygens.hypercollate.importer
 
 /*-
  * #%L
@@ -20,438 +20,363 @@ package nl.knaw.huygens.hypercollate.importer;
  * #L%
  */
 
-import eu.interedition.collatex.simple.SimplePatternTokenizer;
-import nl.knaw.huygens.hypercollate.model.*;
-import org.apache.commons.io.FileUtils;
+import eu.interedition.collatex.simple.SimplePatternTokenizer
+import nl.knaw.huygens.hypercollate.model.*
+import org.apache.commons.io.FileUtils
+import java.io.*
+import java.nio.charset.StandardCharsets
+import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.function.Function
+import java.util.stream.Collectors
+import java.util.stream.Stream
+import java.util.stream.StreamSupport
+import javax.xml.stream.XMLInputFactory
+import javax.xml.stream.XMLStreamConstants
+import javax.xml.stream.XMLStreamException
+import javax.xml.stream.events.*
 
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.*;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+class XMLImporter {
+    private val tokenizer: Function<String, Stream<String>>
+    private val normalizer: Function<String, String>
 
-import static com.google.common.collect.Iterators.toArray;
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.joining;
-
-public class XMLImporter {
-
-  private final Function<String, Stream<String>> tokenizer;
-  private final Function<String, String> normalizer;
-
-  public XMLImporter(
-      Function<String, Stream<String>> tokenizer, Function<String, String> normalizer) {
-    this.tokenizer = tokenizer;
-    this.normalizer = normalizer;
-  }
-
-  public XMLImporter() {
-    this.tokenizer = SimplePatternTokenizer.BY_WS_OR_PUNCT;
-    this.normalizer = (String raw) -> raw.trim().toLowerCase();
-  }
-
-  public VariantWitnessGraph importXML(String sigil, String xmlString) {
-    InputStream inputStream;
-    try {
-      inputStream = new ByteArrayInputStream(xmlString.getBytes(StandardCharsets.UTF_8.name()));
-      return importXML(sigil, inputStream);
-    } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException(e);
+    constructor(
+            tokenizer: Function<String, Stream<String>>,
+            normalizer: Function<String, String>
+    ) {
+        this.tokenizer = tokenizer
+        this.normalizer = normalizer
     }
-  }
 
-  public VariantWitnessGraph importXML(String sigil, File xmlFile) {
-    try {
-      InputStream input = FileUtils.openInputStream(xmlFile);
-      return importXML(sigil, input);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    constructor() {
+        tokenizer = SimplePatternTokenizer.BY_WS_OR_PUNCT
+        normalizer = Function { raw: String -> raw.trim { it <= ' ' }.toLowerCase() }
     }
-  }
 
-  public VariantWitnessGraph importXML(String rawSigil, InputStream input) {
-    String sigil = normalizedSigil(rawSigil);
-    VariantWitnessGraph graph = new VariantWitnessGraph(sigil);
-    SimpleWitness witness = new SimpleWitness(sigil);
-    XMLInputFactory factory = XMLInputFactory.newInstance();
-    try {
-      XMLEventReader reader = factory.createXMLEventReader(input);
-      Context context = new Context(graph, normalizer, witness);
-      while (reader.hasNext()) {
-        XMLEvent event = reader.nextEvent();
-        switch (event.getEventType()) {
-          case XMLStreamConstants.START_DOCUMENT:
-            handleStartDocument(event, context);
-            break;
-          case XMLStreamConstants.START_ELEMENT:
-            handleStartElement(event.asStartElement(), context);
-            break;
-          case XMLStreamConstants.CHARACTERS:
-            handleCharacters(event.asCharacters(), context);
-            break;
-          case XMLStreamConstants.END_ELEMENT:
-            handleEndElement(event.asEndElement(), context);
-            break;
-          case XMLStreamConstants.END_DOCUMENT:
-            handleEndDocument(event, context);
-            break;
-          case XMLStreamConstants.PROCESSING_INSTRUCTION:
-            handleProcessingInstruction(event, context);
-            break;
-          case XMLStreamConstants.COMMENT:
-            handleComment(event, context);
-            break;
-          case XMLStreamConstants.SPACE:
-            handleSpace(event, context);
-            break;
-          case XMLStreamConstants.ENTITY_REFERENCE:
-            handleEntityReference(event, context);
-            break;
-          case XMLStreamConstants.ATTRIBUTE:
-            handleAttribute(event, context);
-            break;
-          case XMLStreamConstants.DTD:
-            handleDTD(event, context);
-            break;
-          case XMLStreamConstants.CDATA:
-            handleCData(event, context);
-            break;
-          case XMLStreamConstants.NAMESPACE:
-            handleNameSpace(event, context);
-            break;
-          case XMLStreamConstants.NOTATION_DECLARATION:
-            handleNotationDeclaration(event, context);
-            break;
-          case XMLStreamConstants.ENTITY_DECLARATION:
-            handleEntityDeclaration(event, context);
-            break;
-
-          default:
-            break;
+    fun importXML(sigil: String, xmlString: String): VariantWitnessGraph {
+        val inputStream: InputStream
+        return try {
+            inputStream = ByteArrayInputStream(xmlString.toByteArray(charset(StandardCharsets.UTF_8.name())))
+            importXML(sigil, inputStream)
+        } catch (e: UnsupportedEncodingException) {
+            throw RuntimeException(e)
         }
-      }
-
-      return graph;
-    } catch (XMLStreamException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-   static String normalizedSigil(String rawSigil) {
-    return rawSigil.replaceAll("[^0-9a-zA-Z]","");
-  }
-
-  private void handleStartDocument(XMLEvent event, Context context) {}
-
-  private void handleEndDocument(XMLEvent event, Context context) {
-    context.closeDocument();
-  }
-
-  private void handleStartElement(StartElement startElement, Context context) {
-    String tagName = startElement.getName().toString();
-    Markup markup = new Markup(tagName).setDepth(context.openMarkup.size());
-    startElement
-        .getAttributes()
-        .forEachRemaining(
-            (Object object) -> {
-              Attribute attribute = (Attribute) object;
-              String attributeName = attribute.getName().toString();
-              String attributeValue = ((Attribute) object).getValue();
-              markup.addAttribute(attributeName, attributeValue);
-            });
-    context.openMarkup(markup);
-  }
-
-  private void handleEndElement(EndElement endElement, Context context) {
-    String tagName = endElement.getName().toString();
-    Markup markup = new Markup(tagName);
-    context.closeMarkup(markup);
-  }
-
-  private void handleCharacters(Characters characters, Context context) {
-    String data = characters.getData();
-    if (data.startsWith(" ")) { // because the tokenizer will lose these leading whitespaces;
-      context.addNewToken(" ");
-    }
-    tokenizer.apply(data).forEach(context::addNewToken);
-  }
-
-  private void handleNotationDeclaration(XMLEvent event, Context context) {
-    throw new RuntimeException("unexpected event: NotationDeclaration");
-  }
-
-  private void handleEntityDeclaration(XMLEvent event, Context context) {
-    throw new RuntimeException("unexpected event: EntityDeclaration");
-  }
-
-  private void handleNameSpace(XMLEvent event, Context context) {
-    throw new RuntimeException("unexpected event: NameSpace");
-  }
-
-  private void handleCData(XMLEvent event, Context context) {
-    throw new RuntimeException("unexpected event: CData");
-  }
-
-  private void handleDTD(XMLEvent event, Context context) {
-    throw new RuntimeException("unexpected event: DTD");
-  }
-
-  private void handleAttribute(XMLEvent event, Context context) {
-    throw new RuntimeException("unexpected event: Attribute");
-  }
-
-  private void handleEntityReference(XMLEvent event, Context context) {
-    throw new RuntimeException("unexpected event: EntityReference");
-  }
-
-  private void handleSpace(XMLEvent event, Context context) {
-    throw new RuntimeException("unexpected event: Space");
-  }
-
-  private void handleComment(XMLEvent event, Context context) {}
-
-  private void handleProcessingInstruction(XMLEvent event, Context context) {
-    throw new RuntimeException("unexpected event: ProcessingInstruction");
-  }
-
-  private static class Context {
-
-    private final VariantWitnessGraph graph;
-    private final Deque<Markup> openMarkup = new LinkedList<>();
-    private TokenVertex lastTokenVertex;
-    private long tokenCounter = 0L;
-    private final Deque<TokenVertex> variationStartVertices =
-        new LinkedList<>(); // the tokenvertices whose outgoing vertices are the variant vertices
-    // (add/del)
-    private final Deque<TokenVertex> variationEndVertices =
-        new LinkedList<>(); // the tokenvertices that are the last in a <del>
-    private final Deque<TokenVertex> unconnectedVertices =
-        new LinkedList<>(); // the last tokenvertex in an <add> which hasn't been linked to the
-    // tokenvertex after the </del> yet
-    private final Function<String, String> normalizer;
-    private final SimpleWitness witness;
-    private String rdg = "";
-    private String parentXPath;
-    private Boolean afterDel = false;
-    private final AtomicInteger branchCounter = new AtomicInteger(0);
-    private final Deque<Integer> branchIds = new LinkedList<>();
-
-    private final Deque<Boolean> inAppStack = new LinkedList<>();
-    private final Deque<Boolean> ignoreRdgStack = new LinkedList<>();
-    private final Deque<Boolean> afterAppStack = new LinkedList<>();
-    private final Deque<List<TokenVertex>> unconnectedRdgVerticesStack = new LinkedList<>();
-    private final AtomicInteger rdgCounter = new AtomicInteger(1);
-
-    Context(VariantWitnessGraph graph, Function<String, String> normalizer, SimpleWitness witness) {
-      this.graph = graph;
-      this.normalizer = normalizer;
-      this.lastTokenVertex = graph.getStartTokenVertex();
-      this.witness = witness;
-      afterAppStack.push(false);
-      ignoreRdgStack.push(false);
-      inAppStack.push(false);
-      unconnectedRdgVerticesStack.push(new ArrayList<>());
-      branchIds.push(nextBranchId());
     }
 
-    private Integer nextBranchId() {
-      return branchCounter.getAndIncrement();
-    }
+    fun importXML(sigil: String, xmlFile: File): VariantWitnessGraph =
+            try {
+                val input: InputStream = FileUtils.openInputStream(xmlFile)
+                importXML(sigil, input)
+            } catch (e: IOException) {
+                throw RuntimeException(e)
+            }
 
-    void openMarkup(Markup markup) {
-      if (markup.getTagName().equals("app")) {
-        rdgCounter.set(1);
-      }
-      if (ignoreRdgStack.peek()) {
-        return;
-      }
-
-      graph.addMarkup(markup);
-      openMarkup.push(markup);
-      parentXPath = buildParentXPath();
-      if (!inAppStack.peek() && isVariationStartingMarkup(markup)) { // del
-        variationStartVertices.push(lastTokenVertex);
-        branchIds.push(nextBranchId());
-
-      } else if (!inAppStack.peek() && isVariationEndingMarkup(markup)) { // add
-        if (afterDel) {
-          lastTokenVertex = variationStartVertices.pop();
-
-        } else { // add without immediately preceding del
-          unconnectedVertices.push(
-              lastTokenVertex); // add link from vertex preceding the <add> to vertex following
-          // </add>
+    fun importXML(rawSigil: String, input: InputStream): VariantWitnessGraph {
+        val sigil = normalizedSigil(rawSigil)
+        val graph = VariantWitnessGraph(sigil)
+        val witness = SimpleWitness(sigil)
+        val factory = XMLInputFactory.newInstance()
+        return try {
+            val reader = factory.createXMLEventReader(input)
+            val context = Context(graph, normalizer, witness)
+            while (reader.hasNext()) {
+                val event = reader.nextEvent()
+                when (event.eventType) {
+                    XMLStreamConstants.START_DOCUMENT -> handleStartDocument(event, context)
+                    XMLStreamConstants.START_ELEMENT -> handleStartElement(event.asStartElement(), context)
+                    XMLStreamConstants.CHARACTERS -> handleCharacters(event.asCharacters(), context)
+                    XMLStreamConstants.END_ELEMENT -> handleEndElement(event.asEndElement(), context)
+                    XMLStreamConstants.END_DOCUMENT -> handleEndDocument(event, context)
+                    XMLStreamConstants.PROCESSING_INSTRUCTION -> handleProcessingInstruction(event, context)
+                    XMLStreamConstants.COMMENT -> handleComment(event, context)
+                    XMLStreamConstants.SPACE -> handleSpace(event, context)
+                    XMLStreamConstants.ENTITY_REFERENCE -> handleEntityReference(event, context)
+                    XMLStreamConstants.ATTRIBUTE -> handleAttribute(event, context)
+                    XMLStreamConstants.DTD -> handleDTD(event, context)
+                    XMLStreamConstants.CDATA -> handleCData(event, context)
+                    XMLStreamConstants.NAMESPACE -> handleNameSpace(event, context)
+                    XMLStreamConstants.NOTATION_DECLARATION -> handleNotationDeclaration(event, context)
+                    XMLStreamConstants.ENTITY_DECLARATION -> handleEntityDeclaration(event, context)
+                    else -> {
+                    }
+                }
+            }
+            graph
+        } catch (e: XMLStreamException) {
+            throw RuntimeException(e)
         }
-        afterDel = false;
-        branchIds.push(nextBranchId());
+    }
 
-      } else if (isApp(markup)) { // app
-        variationStartVertices.push(lastTokenVertex);
-        inAppStack.push(true);
-        unconnectedRdgVerticesStack.push(new ArrayList<>());
+    private fun handleStartDocument(event: XMLEvent, context: Context) {}
 
-      } else if (isRdg(markup)) { // rdg
-        rdg = markup.getAttributeMap().get("varSeq");
-        if (rdg == null) {
-          rdg = String.valueOf(rdgCounter.getAndIncrement());
+    private fun handleEndDocument(event: XMLEvent, context: Context) = context.closeDocument()
+
+    private fun handleStartElement(startElement: StartElement, context: Context) {
+        val tagName = startElement.name.toString()
+        val markup = Markup(tagName).setDepth(context.openMarkup.size)
+        startElement
+                .attributes
+                .forEachRemaining { `object`: Any ->
+                    val attribute = `object` as Attribute
+                    val attributeName = attribute.name.toString()
+                    val attributeValue = `object`.value
+                    markup.addAttribute(attributeName, attributeValue)
+                }
+        context.openMarkup(markup)
+    }
+
+    private fun handleEndElement(endElement: EndElement, context: Context) {
+        val tagName = endElement.name.toString()
+        val markup = Markup(tagName)
+        context.closeMarkup(markup)
+    }
+
+    private fun handleCharacters(characters: Characters, context: Context) {
+        val data = characters.data
+        if (data.startsWith(" ")) { // because the tokenizer will lose these leading whitespaces;
+            context.addNewToken(" ")
         }
-        if (isLitRdg(markup)) {
-          ignoreRdgStack.push(true);
+        tokenizer.apply(data).forEach { content: String -> context.addNewToken(content) }
+    }
 
-        } else {
-          lastTokenVertex = variationStartVertices.peek();
-          branchIds.push(nextBranchId());
+    private fun handleNotationDeclaration(event: XMLEvent, context: Context): Unit =
+            throw RuntimeException("unexpected event: NotationDeclaration")
+
+    private fun handleEntityDeclaration(event: XMLEvent, context: Context): Unit =
+            throw RuntimeException("unexpected event: EntityDeclaration")
+
+    private fun handleNameSpace(event: XMLEvent, context: Context): Unit =
+            throw RuntimeException("unexpected event: NameSpace")
+
+    private fun handleCData(event: XMLEvent, context: Context): Unit = throw RuntimeException("unexpected event: CData")
+
+    private fun handleDTD(event: XMLEvent, context: Context): Unit = throw RuntimeException("unexpected event: DTD")
+
+    private fun handleAttribute(event: XMLEvent, context: Context): Unit =
+            throw RuntimeException("unexpected event: Attribute")
+
+    private fun handleEntityReference(event: XMLEvent, context: Context): Unit =
+            throw RuntimeException("unexpected event: EntityReference")
+
+    private fun handleSpace(event: XMLEvent, context: Context): Unit = throw RuntimeException("unexpected event: Space")
+
+    private fun handleComment(event: XMLEvent, context: Context) {}
+
+    private fun handleProcessingInstruction(event: XMLEvent, context: Context): Unit =
+            throw RuntimeException("unexpected event: ProcessingInstruction")
+
+    private class Context internal constructor(
+            private val graph: VariantWitnessGraph, // tokenvertex after the </del> yet
+            private val normalizer: Function<String, String>,
+            witness: SimpleWitness
+    ) {
+        val openMarkup: Deque<Markup> = LinkedList()
+        private var lastTokenVertex: TokenVertex
+        private var tokenCounter = 0L
+        private val variationStartVertices: Deque<TokenVertex> = LinkedList() // the tokenvertices whose outgoing vertices are the variant vertices
+
+        // (add/del)
+        private val variationEndVertices: Deque<TokenVertex> = LinkedList() // the tokenvertices that are the last in a <del>
+        private val unconnectedVertices: Deque<TokenVertex> = LinkedList() // the last tokenvertex in an <add> which hasn't been linked to the
+        private val witness: SimpleWitness
+        private var rdg: String? = ""
+        private var parentXPath: String? = null
+        private var afterDel = false
+        private val branchCounter = AtomicInteger(0)
+        private val branchIds: Deque<Int> = LinkedList()
+        private val inAppStack: Deque<Boolean> = LinkedList()
+        private val ignoreRdgStack: Deque<Boolean> = LinkedList()
+        private val afterAppStack: Deque<Boolean> = LinkedList()
+        private val unconnectedRdgVerticesStack: Deque<MutableList<TokenVertex>> = LinkedList()
+        private val rdgCounter = AtomicInteger(1)
+
+        private fun nextBranchId(): Int = branchCounter.getAndIncrement()
+
+        fun openMarkup(markup: Markup) {
+            if (markup.tagName == "app") {
+                rdgCounter.set(1)
+            }
+            if (ignoreRdgStack.peek()) {
+                return
+            }
+            graph.addMarkup(markup)
+            openMarkup.push(markup)
+            parentXPath = buildParentXPath()
+            when {
+                !inAppStack.peek() && isVariationStartingMarkup(markup) -> { // del
+                    variationStartVertices.push(lastTokenVertex)
+                    branchIds.push(nextBranchId())
+                }
+                !inAppStack.peek() && isVariationEndingMarkup(markup) -> { // add
+                    if (afterDel) {
+                        lastTokenVertex = variationStartVertices.pop()
+                    } else { // add without immediately preceding del
+                        unconnectedVertices.push(
+                                lastTokenVertex) // add link from vertex preceding the <add> to vertex following
+                        // </add>
+                    }
+                    afterDel = false
+                    branchIds.push(nextBranchId())
+                }
+                isApp(markup) -> { // app
+                    variationStartVertices.push(lastTokenVertex)
+                    inAppStack.push(true)
+                    unconnectedRdgVerticesStack.push(ArrayList())
+                }
+                isRdg(markup) -> { // rdg
+                    rdg = markup.attributeMap["varSeq"] ?: rdgCounter.getAndIncrement().toString()
+                    if (isLitRdg(markup)) {
+                        ignoreRdgStack.push(true)
+                    } else {
+                        lastTokenVertex = variationStartVertices.peek()
+                        branchIds.push(nextBranchId())
+                    }
+                }
+            }
         }
-      }
-    }
 
-    private boolean isApp(Markup markup) {
-      return "app".equals(markup.getTagName());
-    }
+        private fun isApp(markup: Markup): Boolean =
+                "app" == markup.tagName
 
-    private boolean isRdg(Markup markup) {
-      return "rdg".equals(markup.getTagName());
-    }
+        private fun isRdg(markup: Markup): Boolean =
+                "rdg" == markup.tagName
 
-    private boolean isVariationStartingMarkup(Markup markup) {
-      return "del".equals(markup.getTagName());
-    }
+        private fun isVariationStartingMarkup(markup: Markup): Boolean =
+                "del" == markup.tagName
 
-    private boolean isVariationEndingMarkup(Markup markup) {
-      return "add".equals(markup.getTagName());
-    }
+        private fun isVariationEndingMarkup(markup: Markup): Boolean =
+                "add" == markup.tagName
 
-    void closeMarkup(Markup markup) {
-      if (ignoreRdgStack.peek()) {
-        if (isRdg(markup) && isLitRdg(openMarkup.pop())) {
-          ignoreRdgStack.pop();
+        fun closeMarkup(markup: Markup) {
+            if (ignoreRdgStack.peek()) {
+                if (isRdg(markup) && isLitRdg(openMarkup.pop())) {
+                    ignoreRdgStack.pop()
+                }
+                return
+            }
+            val firstToClose = openMarkup.peek()
+            if (graph.getTokenVertexListForMarkup(firstToClose).isEmpty()) {
+                // add milestone
+                addNewToken("")
+            }
+            openMarkup.pop()
+            parentXPath = buildParentXPath()
+            val closingTag = markup.tagName
+            val expectedTag = firstToClose.tagName
+            if (expectedTag != closingTag) {
+                throw RuntimeException(
+                        "XML error: expected </$expectedTag>, got </$closingTag>")
+            }
+            when {
+                !inAppStack.peek() && isVariationStartingMarkup(markup) -> {
+                    unconnectedVertices.push(lastTokenVertex)
+                    branchIds.pop()
+                    afterDel = true
+                }
+                !inAppStack.peek() && isVariationEndingMarkup(markup) -> {
+                    variationEndVertices.push(lastTokenVertex)
+                    branchIds.pop()
+                }
+                isApp(markup) -> {
+                    variationStartVertices.pop()
+                    inAppStack.pop()
+                    afterAppStack.push(true)
+                }
+                isRdg(markup) -> {
+                    unconnectedRdgVerticesStack.peek().add(lastTokenVertex)
+                    branchIds.pop()
+                }
+            }
         }
-        return;
-      }
 
-      Markup firstToClose = openMarkup.peek();
-      if (graph.getTokenVertexListForMarkup(firstToClose).isEmpty()) {
-        // add milestone
-        addNewToken("");
-      }
-      openMarkup.pop();
-      parentXPath = buildParentXPath();
-      String closingTag = markup.getTagName();
-      String expectedTag = firstToClose.getTagName();
-      if (!expectedTag.equals(closingTag)) {
-        throw new RuntimeException(
-            "XML error: expected </" + expectedTag + ">, got </" + closingTag + ">");
-      }
+        private fun isLitRdg(markup: Markup): Boolean =
+                "lit" == markup.getAttributeValue("type").orElse("")
 
-      if (!inAppStack.peek() && isVariationStartingMarkup(markup)) {
-        unconnectedVertices.push(lastTokenVertex);
-        branchIds.pop();
-        afterDel = true;
-
-      } else if (!inAppStack.peek() && isVariationEndingMarkup(markup)) {
-        variationEndVertices.push(lastTokenVertex);
-        branchIds.pop();
-
-      } else if (isApp(markup)) {
-        variationStartVertices.pop();
-        inAppStack.pop();
-        afterAppStack.push(true);
-
-      } else if (isRdg(markup)) {
-        unconnectedRdgVerticesStack.peek().add(lastTokenVertex);
-        branchIds.pop();
-      }
-    }
-
-    private boolean isLitRdg(Markup markup) {
-      return "lit".equals(markup.getAttributeValue("type").orElse(""));
-    }
-
-    void addNewToken(String content) {
-      if (ignoreRdgStack.peek()) {
-        return;
-      }
-
-      MarkedUpToken token =
-          new MarkedUpToken()
-              .setContent(content)
-              .setWitness(witness)
-              .setRdg(rdg)
-              .setIndexNumber(tokenCounter++)
-              .setParentXPath(parentXPath)
-              .setNormalizedContent(normalizer.apply(content));
-      SimpleTokenVertex tokenVertex = new SimpleTokenVertex(token);
-      Integer[] ascendingBranchIds = toArray(branchIds.descendingIterator(), Integer.class);
-      List<Integer> branchPath = asList(ascendingBranchIds);
-      tokenVertex.setBranchPath(branchPath);
-      graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex);
-
-      if (afterDel) { // del without add
-        // add link from vertex preceding the <del> to vertex following </del>
-        graph.addOutgoingTokenVertexToTokenVertex(variationStartVertices.pop(), tokenVertex);
-        unconnectedVertices.pop();
-        afterDel = false;
-      }
-
-      while (afterAppStack.peek()) {
-        unconnectedRdgVerticesStack.pop().stream()
-            .filter(v -> !v.equals(lastTokenVertex))
-            .forEach(v -> graph.addOutgoingTokenVertexToTokenVertex(v, tokenVertex));
-        afterAppStack.pop();
-      }
-
-      this.openMarkup
-          .descendingIterator()
-          .forEachRemaining(markup -> graph.addMarkupToTokenVertex(tokenVertex, markup));
-      checkUnconnectedVertices(tokenVertex);
-      lastTokenVertex = tokenVertex;
-    }
-
-    private void checkUnconnectedVertices(SimpleTokenVertex tokenVertex) {
-      if (!variationEndVertices.isEmpty() && lastTokenVertex.equals(variationEndVertices.peek())) {
-        variationEndVertices.pop();
-        if (!unconnectedVertices.isEmpty()) {
-          TokenVertex unconnectedVertex = unconnectedVertices.pop();
-          graph.addOutgoingTokenVertexToTokenVertex(unconnectedVertex, tokenVertex);
-          checkUnconnectedVertices(tokenVertex);
+        fun addNewToken(content: String) {
+            if (ignoreRdgStack.peek()) {
+                return
+            }
+            val token = MarkedUpToken()
+                    .setContent(content)
+                    .setWitness(witness)
+                    .setRdg(rdg)
+                    .setIndexNumber(tokenCounter++)
+                    .setParentXPath(parentXPath)
+                    .setNormalizedContent(normalizer.apply(content))
+            val tokenVertex = SimpleTokenVertex(token)
+            tokenVertex.branchPath = branchIds.descendingIterator().asSequence().toList()
+            graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex)
+            if (afterDel) { // del without add
+                // add link from vertex preceding the <del> to vertex following </del>
+                graph.addOutgoingTokenVertexToTokenVertex(variationStartVertices.pop(), tokenVertex)
+                unconnectedVertices.pop()
+                afterDel = false
+            }
+            while (afterAppStack.peek()) {
+                unconnectedRdgVerticesStack.pop()
+                        .filter { v: TokenVertex -> v != lastTokenVertex }
+                        .forEach { v: TokenVertex -> graph.addOutgoingTokenVertexToTokenVertex(v, tokenVertex) }
+                afterAppStack.pop()
+            }
+            openMarkup
+                    .descendingIterator()
+                    .forEachRemaining { markup: Markup -> graph.addMarkupToTokenVertex(tokenVertex, markup) }
+            checkUnconnectedVertices(tokenVertex)
+            lastTokenVertex = tokenVertex
         }
-      }
-    }
 
-    void closeDocument() {
-      TokenVertex endTokenVertex = graph.getEndTokenVertex();
-      graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, endTokenVertex);
-      while (!unconnectedVertices.isEmpty()) {
-        // add link from vertex preceding the <add> to end vertex
-        TokenVertex unconnectedVertex = unconnectedVertices.pop();
-        if (!unconnectedVertex.equals(lastTokenVertex)) {
-          graph.addOutgoingTokenVertexToTokenVertex(unconnectedVertex, endTokenVertex);
+        private fun checkUnconnectedVertices(tokenVertex: SimpleTokenVertex) {
+            if (!variationEndVertices.isEmpty() && lastTokenVertex == variationEndVertices.peek()) {
+                variationEndVertices.pop()
+                if (!unconnectedVertices.isEmpty()) {
+                    val unconnectedVertex = unconnectedVertices.pop()
+                    graph.addOutgoingTokenVertexToTokenVertex(unconnectedVertex, tokenVertex)
+                    checkUnconnectedVertices(tokenVertex)
+                }
+            }
         }
-      }
-      while (!variationStartVertices.isEmpty()) {
-        // add link from vertex preceding the <del> to end vertex
-        graph.addOutgoingTokenVertexToTokenVertex(variationStartVertices.pop(), endTokenVertex);
-      }
+
+        fun closeDocument() {
+            val endTokenVertex = graph.endTokenVertex
+            graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, endTokenVertex)
+            while (!unconnectedVertices.isEmpty()) {
+                // add link from vertex preceding the <add> to end vertex
+                val unconnectedVertex = unconnectedVertices.pop()
+                if (unconnectedVertex != lastTokenVertex) {
+                    graph.addOutgoingTokenVertexToTokenVertex(unconnectedVertex, endTokenVertex)
+                }
+            }
+            while (!variationStartVertices.isEmpty()) {
+                // add link from vertex preceding the <del> to end vertex
+                graph.addOutgoingTokenVertexToTokenVertex(variationStartVertices.pop(), endTokenVertex)
+            }
+        }
+
+        private fun buildParentXPath(): String =
+                ("/"
+                        + streamIterator(openMarkup.descendingIterator())
+                        .map { obj: Markup -> obj.tagName }
+                        .collect(Collectors.joining("/")))
+
+        private fun streamIterator(iterator: Iterator<Markup>): Stream<Markup> {
+            val spliterator = Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED)
+            return StreamSupport.stream(spliterator, false)
+        }
+
+        init {
+            lastTokenVertex = graph.startTokenVertex
+            this.witness = witness
+            afterAppStack.push(false)
+            ignoreRdgStack.push(false)
+            inAppStack.push(false)
+            unconnectedRdgVerticesStack.push(ArrayList())
+            branchIds.push(nextBranchId())
+        }
     }
 
-    private String buildParentXPath() {
-      return "/"
-          + streamIterator(openMarkup.descendingIterator())
-              .map(Markup::getTagName)
-              .collect(joining("/"));
+    companion object {
+        fun normalizedSigil(rawSigil: String): String {
+            return rawSigil.replace("[^0-9a-zA-Z]".toRegex(), "")
+        }
     }
-
-    private Stream<Markup> streamIterator(Iterator<Markup> iterator) {
-      Spliterator<Markup> spliterator =
-          Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED);
-      return StreamSupport.stream(spliterator, false);
-    }
-  }
 }

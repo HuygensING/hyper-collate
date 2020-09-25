@@ -21,7 +21,7 @@ package nl.knaw.huygens.hypercollate.importer
  */
 
 import nl.knaw.huygens.hypercollate.HyperCollateTest
-import nl.knaw.huygens.hypercollate.importer.XMLImporter.normalizedSigil
+import nl.knaw.huygens.hypercollate.importer.XMLImporter.Companion.normalizedSigil
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
 import nl.knaw.huygens.hypercollate.tools.DotFactory
 import nl.knaw.huygens.hypercollate.tools.TokenMerger
