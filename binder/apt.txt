@@ -1,2 +1,3 @@
 openjdk-8-jdk
 gcc
+graphviz
