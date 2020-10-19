@@ -124,10 +124,12 @@
         <testResources>
             <testResource>
                 <directory>src/test/resources</directory>
+                <filtering>true</filtering>
             </testResource>
             <testResource>
                 <directory>src/test/java</directory>
                 <includes>
+                    <include>**/*.txt</include>
                     <include>**/*.html</include>
                     <include>**/*.properties</include>
                     <include>**/*.xml</include>
