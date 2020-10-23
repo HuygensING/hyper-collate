@@ -27,10 +27,20 @@ import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.stream.Stream
 
-class CollationGraph @JvmOverloads constructor(val sigils: MutableList<String> = mutableListOf()) : Hypergraph<Node, Edge>(GraphType.ORDERED) {
+class CollationGraph(val sigils: MutableList<String> = mutableListOf()) : Hypergraph<Node, Edge>(GraphType.ORDERED) {
     val textStartNode = TextDelimiterNode()
     val textEndNode = TextDelimiterNode()
+
     private val markupNodeIndex: MutableMap<Markup, MarkupNode> = HashMap()
+
+    val isEmpty: Boolean
+        get() = sigils.isEmpty()
+
+    val markupStream: Stream<Markup>
+        get() = markupNodeIndex.keys.stream()
+
+    val markupNodeStream: Stream<MarkupNode>
+        get() = markupNodeIndex.values.stream()
 
     fun addTextNodeWithTokens(vararg tokens: Token?): TextNode {
         val newNode = TextNode(*tokens)
@@ -48,20 +58,19 @@ class CollationGraph @JvmOverloads constructor(val sigils: MutableList<String> =
     fun linkMarkupToText(markupNode: MarkupNode, textNode: TextNode) {
         val markupHyperEdges: List<MarkupHyperEdge> = getOutgoingEdges(markupNode)
                 .filterIsInstance<MarkupHyperEdge>()
-        if (markupHyperEdges.isEmpty()) {
-            val newEdge = MarkupHyperEdge()
-            addDirectedHyperEdge(newEdge, MarkupHyperEdge.LABEL, markupNode, textNode)
-        } else {
-            if (markupHyperEdges.size != 1) {
-                throw RuntimeException("MarkupNode $markupNode should have exactly 1 MarkupHyperEdge, but has ${markupHyperEdges.size}")
+        when {
+            markupHyperEdges.isEmpty() -> {
+                val newEdge = MarkupHyperEdge()
+                addDirectedHyperEdge(newEdge, MarkupHyperEdge.LABEL, markupNode, textNode)
             }
-            val edge = markupHyperEdges[0]
-            addTargetsToHyperEdge(edge, textNode)
+            markupHyperEdges.size == 1 -> {
+                val edge = markupHyperEdges[0]
+                addTargetsToHyperEdge(edge, textNode)
+            }
+            else -> throw RuntimeException("MarkupNode $markupNode should have exactly 1 MarkupHyperEdge, but has ${markupHyperEdges.size}")
+
         }
     }
-
-    val isEmpty: Boolean
-        get() = sigils.isEmpty()
 
     fun getTarget(edge: TextEdge): TextNode {
         val nodes = getTargets(edge)
@@ -110,12 +119,6 @@ class CollationGraph @JvmOverloads constructor(val sigils: MutableList<String> =
             getIncomingEdges(node)
                     .filterIsInstance<TextEdge>()
                     .stream()
-
-    val markupStream: Stream<Markup>
-        get() = markupNodeIndex.keys.stream()
-
-    val markupNodeStream: Stream<MarkupNode>
-        get() = markupNodeIndex.values.stream()
 
     fun getTextNodeStreamForMarkup(markup: Markup): Stream<TextNode> {
         val originalMarkupNode = getMarkupNode(markup)

@@ -121,7 +121,8 @@ object TokenMerger {
     private fun canMerge(
             originalGraph: VariantWitnessGraph,
             originalVertex: TokenVertex,
-            originalOutgoingVertices: List<TokenVertex>): Boolean =
+            originalOutgoingVertices: List<TokenVertex>
+    ): Boolean =
             (originalOutgoingVertices.size == 1
                     && (originalGraph.getMarkupListForTokenVertex(originalVertex)
                     == originalGraph.getMarkupListForTokenVertex(originalOutgoingVertices[0])))
