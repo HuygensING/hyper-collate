@@ -21,7 +21,6 @@ package nl.knaw.huygens.hypercollate.model
  * #L%
  */
 
-import com.google.common.base.Preconditions
 import nl.knaw.huygens.hypercollate.collator.VariantWitnessGraphTraversal.Companion.of
 import java.util.*
 import java.util.stream.Stream
@@ -40,12 +39,7 @@ class VariantWitnessGraph(val sigil: String) {
         Collections.addAll(markupList, *markup)
     }
 
-    fun addOutgoingTokenVertexToTokenVertex(token0: TokenVertex?, token1: TokenVertex?) {
-        if (token0 == null || token1 == null) {
-            return
-        }
-        Preconditions.checkNotNull(token0)
-        Preconditions.checkNotNull(token1)
+    fun addOutgoingTokenVertexToTokenVertex(token0: TokenVertex, token1: TokenVertex) {
         token0.addOutgoingTokenVertex(token1) // (token0)->(token1)
         token1.addIncomingTokenVertex(token0) // (token1)<-(token0)
     }

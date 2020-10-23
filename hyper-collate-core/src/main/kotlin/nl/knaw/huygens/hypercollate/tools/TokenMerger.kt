@@ -68,8 +68,10 @@ object TokenMerger {
                     .incomingTokenVertexStream
                     .forEach { tv: TokenVertex ->
                         val indexNumber = (tv.token as MarkedUpToken).indexNumber
-                        val mergedTokenVertex = originalToMergedMap[indexNumber]
-                        mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedTokenVertex, endTokenVertex)
+                        originalToMergedMap[indexNumber]?.let { mergedTokenVertex: TokenVertex ->
+                            mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedTokenVertex, endTokenVertex)
+                        }
+
                     }
             endTokenHandled.set(true)
             return
@@ -77,7 +79,7 @@ object TokenMerger {
         val originalToken = originalVertex.token as MarkedUpToken
         val tokenNumber = originalToken.indexNumber
         if (tokenNumber in handledTokens) {
-            val mergedTokenVertex = originalToMergedMap[tokenNumber]
+            val mergedTokenVertex = originalToMergedMap[tokenNumber]!!
             mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedVertexToLinkTo, mergedTokenVertex)
             return
         }
