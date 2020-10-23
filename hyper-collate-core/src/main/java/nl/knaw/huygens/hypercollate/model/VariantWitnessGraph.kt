@@ -1,4 +1,5 @@
-package nl.knaw.huygens.hypercollate.model;
+package nl.knaw.huygens.hypercollate.model
+
 
 /*-
  * #%L
@@ -20,75 +21,53 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
-import com.google.common.base.Preconditions;
-import nl.knaw.huygens.hypercollate.collator.VariantWitnessGraphTraversal;
+import com.google.common.base.Preconditions
+import nl.knaw.huygens.hypercollate.collator.VariantWitnessGraphTraversal.Companion.of
+import java.util.*
+import java.util.stream.Stream
 
-import java.util.*;
-import java.util.stream.Stream;
+class VariantWitnessGraph(val sigil: String) {
+    private val markupList: MutableList<Markup> = ArrayList()
+    val startTokenVertex: TokenVertex
+    val endTokenVertex: TokenVertex
+    private val markup2TokenVertexList: MutableMap<Markup, MutableList<TokenVertex>> = HashMap()
+    private val tokenVertex2MarkupList: MutableMap<TokenVertex, MutableList<Markup>> = HashMap()
 
-public class VariantWitnessGraph {
+    val markupStream: Stream<Markup>
+        get() = markupList.stream()
 
-  private final String sigil;
-  private final List<Markup> markupList = new ArrayList<>();
-
-  private final TokenVertex startTokenVertex;
-  private final TokenVertex endTokenVertex;
-
-  private final Map<Markup, List<TokenVertex>> markup2TokenVertexList = new HashMap<>();
-  private final Map<TokenVertex, List<Markup>> tokenVertex2MarkupList = new HashMap<>();
-
-  public VariantWitnessGraph(String sigil) {
-    this.sigil = sigil;
-    startTokenVertex = new StartTokenVertex(sigil);
-    endTokenVertex = new EndTokenVertex(sigil);
-  }
-
-  public TokenVertex getStartTokenVertex() {
-    return this.startTokenVertex;
-  }
-
-  public TokenVertex getEndTokenVertex() {
-    return this.endTokenVertex;
-  }
-
-  public String getSigil() {
-    return this.sigil;
-  }
-
-  public Stream<Markup> getMarkupStream() {
-    return this.markupList.stream();
-  }
-
-  public void addMarkup(Markup... markup) {
-    Collections.addAll(this.markupList, markup);
-  }
-
-  public void addOutgoingTokenVertexToTokenVertex(TokenVertex token0, TokenVertex token1) {
-    if (token0 == null || token1 == null) {
-      return;
+    fun addMarkup(vararg markup: Markup) {
+        Collections.addAll(markupList, *markup)
     }
-    Preconditions.checkNotNull(token0);
-    Preconditions.checkNotNull(token1);
-    token0.addOutgoingTokenVertex(token1); // (token0)->(token1)
-    token1.addIncomingTokenVertex(token0); // (token1)<-(token0)
-  }
 
-  public void addMarkupToTokenVertex(SimpleTokenVertex tokenVertex, Markup markup) {
-    markup2TokenVertexList.putIfAbsent(markup, new ArrayList<>());
-    markup2TokenVertexList.get(markup).add(tokenVertex);
-    tokenVertex2MarkupList.putIfAbsent(tokenVertex, new ArrayList<>());
-    tokenVertex2MarkupList.get(tokenVertex).add(markup);
-  }
+    fun addOutgoingTokenVertexToTokenVertex(token0: TokenVertex?, token1: TokenVertex?) {
+        if (token0 == null || token1 == null) {
+            return
+        }
+        Preconditions.checkNotNull(token0)
+        Preconditions.checkNotNull(token1)
+        token0.addOutgoingTokenVertex(token1) // (token0)->(token1)
+        token1.addIncomingTokenVertex(token0) // (token1)<-(token0)
+    }
 
-  public List<Markup> getMarkupListForTokenVertex(TokenVertex tokenVertex) {
-    return tokenVertex2MarkupList.getOrDefault(tokenVertex, new ArrayList<>());
-  }
+    fun addMarkupToTokenVertex(tokenVertex: SimpleTokenVertex, markup: Markup) {
+        markup2TokenVertexList.putIfAbsent(markup, ArrayList())
+        markup2TokenVertexList[markup]!!.add(tokenVertex)
+        tokenVertex2MarkupList.putIfAbsent(tokenVertex, ArrayList())
+        tokenVertex2MarkupList[tokenVertex]!!.add(markup)
+    }
 
-  public List<TokenVertex> getTokenVertexListForMarkup(Markup markup) {
-    return markup2TokenVertexList.getOrDefault(markup, new ArrayList<>());
-  }
+    fun getMarkupListForTokenVertex(tokenVertex: TokenVertex): List<Markup> =
+            tokenVertex2MarkupList.getOrDefault(tokenVertex, ArrayList())
 
-  public Iterable<TokenVertex> vertices() {
-    return VariantWitnessGraphTraversal.of(this);
-  }
+    fun getTokenVertexListForMarkup(markup: Markup): List<TokenVertex> =
+            markup2TokenVertexList.getOrDefault(markup, ArrayList())
+
+    fun vertices(): Iterable<TokenVertex> =
+            of(this)
+
+    init {
+        startTokenVertex = StartTokenVertex(sigil)
+        endTokenVertex = EndTokenVertex(sigil)
+    }
 }
