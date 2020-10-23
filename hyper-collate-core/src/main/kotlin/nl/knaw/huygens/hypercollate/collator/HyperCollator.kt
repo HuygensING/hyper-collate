@@ -186,7 +186,7 @@ class HyperCollator {
     ) {
         witnessGraph
                 .getMarkupListForTokenVertex(tokenVertexForWitnessGraph)
-                .forEach { markup: Markup -> collationGraph.linkMarkupToText(markupNodeIndex[markup], matchingNode) }
+                .forEach { markup: Markup -> collationGraph.linkMarkupToText(markupNodeIndex[markup]!!, matchingNode) }
     }
 
     private fun getOptimalMatchList(matchList: List<CollatedMatch>): MutableList<CollatedMatch> =

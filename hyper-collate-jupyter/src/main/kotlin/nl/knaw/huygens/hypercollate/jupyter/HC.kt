@@ -20,7 +20,6 @@ package nl.knaw.huygens.hypercollate.jupyter
  * #L%
  */
 
-
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import nl.knaw.huygens.graphviz.DotEngine
@@ -40,9 +39,9 @@ object HC {
         val version = properties.getProperty("version", "unknown")
         println("Welcome to HyperCollate $version")
         val dotEngine = DotEngine()
-        if (dotEngine.hasDot){
+        if (dotEngine.hasDot) {
             println("Using GraphViz: ${dotEngine.dotVersion}")
-        }else{
+        } else {
             println("No dot executable found. Is GraphViz installed?. GraphViz is needed to render the graphs.")
         }
     }

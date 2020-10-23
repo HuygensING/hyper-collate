@@ -24,7 +24,7 @@ import eu.interedition.collatex.Token
 import eu.interedition.collatex.Witness
 import nl.knaw.huygens.hypercollate.HyperCollateTest
 import nl.knaw.huygens.hypercollate.model.TokenVertex
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.*
 import java.util.stream.Stream
@@ -37,9 +37,13 @@ class MatchTest : HyperCollateTest() {
         val v2 = mockVertexWithSigil("B")
         val v3 = mockVertexWithSigil("C")
         val v4 = mockVertexWithSigil("D")
-        val match = Match(v1, v2, v3, v4).setRank("A", 1).setRank("B", 2).setRank("C", 3).setRank("D", 4)
+        val match = Match(v1, v2, v3, v4)
+                .setRank("A", 1)
+                .setRank("B", 2)
+                .setRank("C", 3)
+                .setRank("D", 4)
         val lowestRankForWitnessesOtherThan = match.getLowestRankForWitnessesOtherThan("A")
-        Assertions.assertThat(lowestRankForWitnessesOtherThan).isEqualTo(2)
+        assertThat(lowestRankForWitnessesOtherThan).isEqualTo(2)
     }
 
     class DummyWitness : Witness {

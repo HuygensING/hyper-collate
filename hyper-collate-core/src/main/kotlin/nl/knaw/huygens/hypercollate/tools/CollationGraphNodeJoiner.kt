@@ -40,7 +40,9 @@ object CollationGraphNodeJoiner {
     }
 
     private fun mergeNodes(
-            originalGraph: CollationGraph, mergedGraph: CollationGraph): Map<TextNode, TextNode> {
+            originalGraph: CollationGraph,
+            mergedGraph: CollationGraph
+    ): Map<TextNode, TextNode> {
         val originalToMerged: MutableMap<TextNode, TextNode> = HashMap()
         var mergedNode: TextNode = mergedGraph.textStartNode
         var isRootNode = true
@@ -61,8 +63,13 @@ object CollationGraphNodeJoiner {
     }
 
     private fun canMergeNodes(
-            mergedNode: TextNode, originalNode: TextNode, originalGraph: CollationGraph): Boolean {
-        val incomingEdges: Collection<TextEdge> = originalGraph.getIncomingTextEdgeStream(originalNode).collect(Collectors.toList())
+            mergedNode: TextNode,
+            originalNode: TextNode,
+            originalGraph: CollationGraph
+    ): Boolean {
+        val incomingEdges: Collection<TextEdge> = originalGraph
+                .getIncomingTextEdgeStream(originalNode)
+                .collect(Collectors.toList())
         if (incomingEdges.size != 1) {
             return false
         }
@@ -122,11 +129,11 @@ object CollationGraphNodeJoiner {
             originalGraph: CollationGraph,
             originalToMerged: Map<TextNode, TextNode>,
             mergedGraph: CollationGraph) {
-        val linkedNodes: MutableSet<Node?> = HashSet()
+        val linkedNodes: MutableSet<Node> = HashSet()
         originalGraph
                 .traverseTextNodes()
                 .forEach { node: TextNode ->
-                    val mergedNode: Node? = originalToMerged[node]
+                    val mergedNode: Node = originalToMerged[node]!!
                     if (mergedNode !in linkedNodes) {
                         originalGraph
                                 .getIncomingTextEdgeStream(node)
@@ -147,15 +154,17 @@ object CollationGraphNodeJoiner {
     private fun copyMarkupHyperEdges(
             originalGraph: CollationGraph,
             originalToMerged: Map<TextNode, TextNode>,
-            mergedGraph: CollationGraph) =
+            mergedGraph: CollationGraph
+    ) =
             originalGraph
                     .markupStream
                     .forEach { m: Markup ->
-                        val mergedMarkupNode = mergedGraph.getMarkupNode(m)
+                        val mergedMarkupNode: MarkupNode = mergedGraph.getMarkupNode(m)
                         originalGraph
                                 .getTextNodeStreamForMarkup(m)
                                 .map { key: TextNode -> originalToMerged[key] }
+                                .filter { it != null }
                                 .distinct()
-                                .forEach { mergedTextNode -> mergedGraph.linkMarkupToText(mergedMarkupNode, mergedTextNode) }
+                                .forEach { mergedTextNode -> mergedGraph.linkMarkupToText(mergedMarkupNode, mergedTextNode!!) }
                     }
 }
