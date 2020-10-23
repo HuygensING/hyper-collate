@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.model;
+package nl.knaw.huygens.hypercollate.model
 
 /*-
  * #%L
@@ -19,21 +19,10 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
-public class MarkupNode implements Node {
-  public static final String LABEL = "Markup";
-  private final String sigil;
-  private final Markup markup;
 
-  MarkupNode(String sigil, Markup markup) {
-    this.sigil = sigil;
-    this.markup = markup;
-  }
+class MarkupNode internal constructor(val sigil: String, val markup: Markup) : Node {
 
-  public String getSigil() {
-    return sigil;
-  }
-
-  public Markup getMarkup() {
-    return markup;
-  }
+    companion object {
+        const val LABEL = "Markup"
+    }
 }

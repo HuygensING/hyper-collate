@@ -87,7 +87,7 @@ object CollationGraphVisualizer {
             setCellLayer(cell, " ")
         } else {
             tokens.forEach { token: MarkedUpToken ->
-                var content = token.content.replace("\n".toRegex(), " ").replace(" +".toRegex(), whitespaceCharacter)
+                var content = token.content!!.replace("\n".toRegex(), " ").replace(" +".toRegex(), whitespaceCharacter)
                 val parentXPath = token.parentXPath
                 when {
                     parentXPath.endsWith("/del/add") -> content = "[za] $content"
@@ -197,12 +197,12 @@ object CollationGraphVisualizer {
                 cells[sigil]!! += nodeTokensPerWitness[sigil]!!
                         .sortedBy { it.indexNumber }
                         .joinToString("&nbsp;") {
-                            var asHtml = it.content.replace(" ", "&nbsp;")
+                            var asHtml = it.content!!.replace(" ", "&nbsp;")
                             if (it.parentXPath.contains("app/rdg")) {
                                 asHtml += "<br/>"
                             }
                             if (it in matchingTokens) {
-                                asHtml = "<span style=\"background:orange\">$asHtml</span>"
+                                asHtml = """<span style="background:orange">$asHtml</span>"""
                             }
                             when {
                                 it.parentXPath.endsWith("/del/add") -> "<sup><sup>$asHtml</sup></sup>"

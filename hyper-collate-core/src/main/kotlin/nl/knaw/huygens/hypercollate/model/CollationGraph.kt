@@ -38,7 +38,7 @@ class CollationGraph @JvmOverloads constructor(val sigils: MutableList<String> =
         return newNode
     }
 
-    fun addMarkupNode(sigil: String?, markup: Markup): MarkupNode {
+    fun addMarkupNode(sigil: String, markup: Markup): MarkupNode {
         val newNode = MarkupNode(sigil, markup)
         addNode(newNode, MarkupNode.LABEL)
         markupNodeIndex[markup] = newNode
@@ -72,7 +72,7 @@ class CollationGraph @JvmOverloads constructor(val sigils: MutableList<String> =
     }
 
     fun addDirectedEdge(source: Node, target: Node, sigils: Set<String>) {
-        val edge = TextEdge(sigils)
+        val edge = TextEdge(sigils.toMutableSet())
         super.addDirectedHyperEdge(edge, TextEdge.LABEL, source, target)
     }
 

@@ -1,75 +1,69 @@
-package nl.knaw.huygens.hypercollate.model;
+package nl.knaw.huygens.hypercollate.model
 
 /*-
- * #%L
+* #%L
  * hyper-collate-core
  * =======
  * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *  
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  * #L%
- */
+*/
 
-import eu.interedition.collatex.Token;
+import eu.interedition.collatex.Token
+import java.util.*
+import java.util.stream.Collectors
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+open class TextNode internal constructor(vararg tokens: Token?) : Node {
+    private val tokenMap: MutableMap<String, Token> = HashMap()
+    private val branchPaths: MutableMap<String, List<Int>> = HashMap()
 
-import static java.util.stream.Collectors.joining;
-
-public class TextNode implements Node {
-  final Map<String, Token> tokenMap = new HashMap<>();
-  private final Map<String, List<Integer>> branchPaths = new HashMap<>();
-  public static final String LABEL = "Text";
-
-  TextNode(Token... tokens) {
-    for (Token token : tokens) {
-      addToken(token);
+    fun addToken(token: Token?) {
+        if (token != null && token.witness != null) {
+            tokenMap[token.witness.sigil] = token
+        }
     }
-  }
 
-  public void addToken(Token token) {
-    if (token != null && token.getWitness() != null) {
-      tokenMap.put(token.getWitness().getSigil(), token);
+    fun getTokenForWitness(sigil: String): Token? {
+        return tokenMap[sigil]
     }
-  }
 
-  public Token getTokenForWitness(String sigil) {
-    return tokenMap.get(sigil);
-  }
+    val sigils: Set<String>
+        get() = tokenMap.keys
 
-  public Set<String> getSigils() {
-    return tokenMap.keySet();
-  }
+    override fun toString(): String {
+        val tokensString = sigils.stream()
+                .sorted()
+                .map { key: String -> tokenMap[key]!! }
+                .map { obj: Token -> obj.toString() }
+                .collect(Collectors.joining(", "))
+        return "($tokensString)"
+    }
 
-  @Override
-  public String toString() {
-    String tokensString =
-        getSigils().stream()
-            .sorted()
-            .map(tokenMap::get)
-            .map(Token::toString)
-            .collect(joining(", "));
-    return "(" + tokensString + ")";
-  }
+    fun getBranchPath(s: String): List<Int> =
+            branchPaths[s]!!
 
-  public List<Integer> getBranchPath(String s) {
-    return branchPaths.get(s);
-  }
+    fun addBranchPath(sigil: String, branchPath: List<Int>) {
+        branchPaths[sigil] = branchPath
+    }
 
-  public void addBranchPath(String sigil, List<Integer> branchPath) {
-    branchPaths.put(sigil, branchPath);
-  }
+    companion object {
+        const val LABEL = "Text"
+    }
+
+    init {
+        for (token in tokens) {
+            addToken(token)
+        }
+    }
 }

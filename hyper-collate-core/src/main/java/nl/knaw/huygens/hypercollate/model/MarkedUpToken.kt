@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.model;
+package nl.knaw.huygens.hypercollate.model
 
 /*-
  * #%L
@@ -20,91 +20,76 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
-import eu.interedition.collatex.Token;
-import eu.interedition.collatex.Witness;
+import eu.interedition.collatex.Token
+import eu.interedition.collatex.Witness
 
-public class MarkedUpToken implements Token {
-  private String content;
-  private String normalizedContent;
-  private SimpleWitness witness;
-  private Long index = 0L;
-  private String parentXPath = "";
-  private String rdg;
+class MarkedUpToken : Token {
 
-  public MarkedUpToken setContent(String content) {
-    this.content = content;
-    return this;
-  }
+    var content: String? = null
+        private set
 
-  public String getContent() {
-    return this.content;
-  }
+    var normalizedContent: String? = null
 
-  public MarkedUpToken setNormalizedContent(String normalizedContent) {
-    this.normalizedContent = normalizedContent;
-    return this;
-  }
+    private var witness: SimpleWitness? = null
 
-  public String getNormalizedContent() {
-    return this.normalizedContent;
-  }
+    var indexNumber = 0L
+        private set
 
-  public MarkedUpToken setWitness(SimpleWitness witness) {
-    this.witness = witness;
-    return this;
-  }
+    var parentXPath = ""
+        private set
 
-  public MarkedUpToken setRdg(String rdg) {
-    this.rdg = rdg;
-    return this;
-  }
+    var rdg: String? = null
+        private set
 
-  public String getRdg() {
-    return rdg;
-  }
+    fun withContent(content: String): MarkedUpToken {
+        this.content = content
+        return this
+    }
 
-  @Override
-  public Witness getWitness() {
-    return witness;
-  }
+    fun withNormalizedContent(normalizedContent: String): MarkedUpToken {
+        this.normalizedContent = normalizedContent
+        return this
+    }
 
-  public MarkedUpToken setIndexNumber(Long index) {
-    this.index = index;
-    return this;
-  }
+    fun withWitness(witness: SimpleWitness): MarkedUpToken {
+        this.witness = witness
+        return this
+    }
 
-  public Long getIndexNumber() {
-    return this.index;
-  }
+    fun withRdg(rdg: String): MarkedUpToken {
+        this.rdg = rdg
+        return this
+    }
 
-  public MarkedUpToken setParentXPath(String parentXPath) {
-    this.parentXPath = parentXPath;
-    return this;
-  }
+    override fun getWitness(): Witness {
+        return witness!!
+    }
 
-  public String getParentXPath() {
-    return this.parentXPath;
-  }
+    fun withIndexNumber(index: Long): MarkedUpToken {
+        indexNumber = index
+        return this
+    }
 
-  @Override
-  public String toString() {
-    return witness.getSigil()
-        + index
-        + ":"
-        + getParentXPath()
-        + "='"
-        + content.replace("\n", "\\n")
-        + "'";
-  }
+    fun withParentXPath(parentXPath: String): MarkedUpToken {
+        this.parentXPath = parentXPath
+        return this
+    }
 
-  @Override
-  public MarkedUpToken clone() {
-    return new MarkedUpToken()
-        .setWitness(witness)
-        .setContent(content)
-        .setRdg(rdg)
-        .setNormalizedContent(normalizedContent)
-        .setIndexNumber(index)
-        .setParentXPath(parentXPath);
-  }
+    override fun toString(): String =
+            (witness!!.sigil
+                    + indexNumber
+                    + ":"
+                    + parentXPath
+                    + "='"
+                    + content!!.replace("\n", "\\n")
+                    + "'")
+
+    fun clone(): MarkedUpToken =
+            MarkedUpToken()
+                    .withWitness(witness!!)
+                    .withContent(content!!)
+                    .withRdg(rdg!!)
+                    .withNormalizedContent(normalizedContent!!)
+                    .withIndexNumber(indexNumber)
+                    .withParentXPath(parentXPath)
 }

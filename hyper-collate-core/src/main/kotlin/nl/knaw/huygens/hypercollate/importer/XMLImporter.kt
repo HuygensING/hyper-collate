@@ -113,7 +113,7 @@ class XMLImporter {
 
     private fun handleStartElement(startElement: StartElement, context: Context) {
         val tagName = startElement.name.toString()
-        val markup = Markup(tagName).setDepth(context.openMarkup.size)
+        val markup = Markup(tagName).withDepth(context.openMarkup.size)
         startElement
                 .attributes
                 .forEachRemaining { `object`: Any ->
@@ -297,12 +297,12 @@ class XMLImporter {
                 return
             }
             val token = MarkedUpToken()
-                    .setContent(content)
-                    .setWitness(witness)
-                    .setRdg(rdg)
-                    .setIndexNumber(tokenCounter++)
-                    .setParentXPath(parentXPath)
-                    .setNormalizedContent(normalizer.apply(content))
+                    .withContent(content)
+                    .withWitness(witness)
+                    .withRdg(rdg!!)
+                    .withIndexNumber(tokenCounter++)
+                    .withParentXPath(parentXPath!!)
+                    .withNormalizedContent(normalizer.apply(content))
             val tokenVertex = SimpleTokenVertex(token)
             tokenVertex.branchPath = branchIds.descendingIterator().asSequence().toList()
             graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex)

@@ -26,7 +26,6 @@ import nl.knaw.huygens.hypercollate.HyperCollateTest
 import nl.knaw.huygens.hypercollate.model.TokenVertex
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.util.*
 import java.util.stream.Stream
 
 class MatchTest : HyperCollateTest() {
@@ -58,12 +57,20 @@ class MatchTest : HyperCollateTest() {
 
     private fun mockVertexWithSigil(sigil: String): TokenVertex =
             object : TokenVertex {
-                override fun getToken(): Token = dummyToken
+                override val sigil: String
+                    get() = sigil
+                override val token: Token
+                    get() = dummyToken
+                override val incomingTokenVertexStream: Stream<TokenVertex>
+                    get() = Stream.empty()
+                override val outgoingTokenVertexStream: Stream<TokenVertex>
+                    get() = Stream.empty()
+                override var branchPath: List<Int>
+                    get() = emptyList()
+                    set(value) {}
+
                 override fun addIncomingTokenVertex(incoming: TokenVertex) {}
-                override fun getIncomingTokenVertexStream(): Stream<TokenVertex> = Stream.empty()
+
                 override fun addOutgoingTokenVertex(outgoing: TokenVertex) {}
-                override fun getOutgoingTokenVertexStream(): Stream<TokenVertex> = Stream.empty()
-                override fun getSigil(): String = sigil
-                override fun getBranchPath(): List<Int> = ArrayList()
             }
 }

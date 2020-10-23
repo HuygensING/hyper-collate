@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.model;
+package nl.knaw.huygens.hypercollate.model
 
 /*-
  * #%L
@@ -19,6 +19,9 @@ package nl.knaw.huygens.hypercollate.model;
  * limitations under the License.
  * #L%
  */
-public class MarkupHyperEdge implements Edge {
-  public static final String LABEL = "MarksupTextNodes";
+
+class MarkupHyperEdge : Edge {
+    companion object {
+        const val LABEL = "MarksUpTextNodes"
+    }
 }

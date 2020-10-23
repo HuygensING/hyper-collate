@@ -143,7 +143,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
 
     private fun vertexVariable(tokenVertex: TokenVertex): String? {
         if (tokenVertex is SimpleTokenVertex) {
-            val token = tokenVertex.getToken() as MarkedUpToken
+            val token = tokenVertex.token as MarkedUpToken
             return "v${token.witness.sigil}_${format("%03d", token.indexNumber)}"
         }
         if (tokenVertex is StartTokenVertex) {
@@ -229,7 +229,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
             if (token != null) {
                 val mToken = token as MarkedUpToken
                 val markup = mToken.parentXPath
-                contentLabel[s] = asLabel(mToken.content, whitespaceCharacter)
+                contentLabel[s] = asLabel(mToken.content!!, whitespaceCharacter)
                 markupLabel[s] = markup
             }
         }

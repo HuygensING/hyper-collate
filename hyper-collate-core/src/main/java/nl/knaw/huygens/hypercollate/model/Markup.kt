@@ -1,66 +1,49 @@
-package nl.knaw.huygens.hypercollate.model;
+package nl.knaw.huygens.hypercollate.model
 
 /*-
- * #%L
+* #%L
  * hyper-collate-core
  * =======
  * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *  
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  * #L%
- */
+*/
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.*
 
-public class Markup {
-  private final String tagName;
-  private final Map<String, String> attributeMap = new TreeMap<>();
-  private int depth;
+class Markup(val tagName: String) {
+    internal val attributeMap: MutableMap<String, String> = TreeMap()
 
-  public Markup(String tagName) {
-    this.tagName = tagName;
-  }
+    var depth = 0
+        private set
 
-  public Markup addAttribute(String key, String value) {
-    attributeMap.put(key, value);
-    return this;
-  }
+    fun addAttribute(key: String, value: String): Markup {
+        attributeMap[key] = value
+        return this
+    }
 
-  public Optional<String> getAttributeValue(String key) {
-    return Optional.ofNullable(attributeMap.get(key));
-  }
+    fun getAttributeValue(key: String): Optional<String> =
+            Optional.ofNullable(attributeMap[key])
 
-  public String getTagName() {
-    return this.tagName;
-  }
+    override fun toString(): String =
+            String.format("<%s %s>", tagName, attributeMap)
 
-  @Override
-  public String toString() {
-    return String.format("<%s %s>", tagName, attributeMap);
-  }
+    fun getAttributeMap(): Map<String, String> =
+            attributeMap
 
-  public Map<String, String> getAttributeMap() {
-    return attributeMap;
-  }
-
-  public Markup setDepth(int depth) {
-    this.depth = depth;
-    return this;
-  }
-
-  public int getDepth() {
-    return this.depth;
-  }
+    fun withDepth(depth: Int): Markup {
+        this.depth = depth
+        return this
+    }
 }

@@ -41,7 +41,7 @@ data class CollatedMatch(val collatedNode: TextNode, val witnessVertex: TokenVer
         } else {
             val sigil = collatedNode.sigils.iterator().next()
             val token = collatedNode.getTokenForWitness(sigil) as MarkedUpToken
-            token.normalizedContent
+            token.normalizedContent!!
         }
     }
 

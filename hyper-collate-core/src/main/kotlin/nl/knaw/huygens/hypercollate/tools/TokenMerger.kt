@@ -65,7 +65,7 @@ object TokenMerger {
             }
             val endTokenVertex = mergedGraph.endTokenVertex
             originalVertex
-                    .getIncomingTokenVertexStream()
+                    .incomingTokenVertexStream
                     .forEach { tv: TokenVertex ->
                         val indexNumber = (tv.token as MarkedUpToken).indexNumber
                         val mergedTokenVertex = originalToMergedMap[indexNumber]
@@ -82,13 +82,13 @@ object TokenMerger {
             return
         }
         val mergedToken = MarkedUpToken()
-                .setContent(originalToken.content)
-                .setNormalizedContent(originalToken.normalizedContent)
-                .setParentXPath(originalToken.parentXPath)
-                .setWitness(originalToken.witness as SimpleWitness)
-                .setRdg(originalToken.rdg)
-                .setIndexNumber(tokenNumber)
-        val mergedVertex = SimpleTokenVertex(mergedToken).setBranchPath(originalVertex.branchPath)
+                .withContent(originalToken.content!!)
+                .withNormalizedContent(originalToken.normalizedContent!!)
+                .withParentXPath(originalToken.parentXPath)
+                .withWitness(originalToken.witness as SimpleWitness)
+                .withRdg(originalToken.rdg ?: "")
+                .withIndexNumber(tokenNumber)
+        val mergedVertex = SimpleTokenVertex(mergedToken).withBranchPath(originalVertex.branchPath)
         originalGraph
                 .getMarkupListForTokenVertex(originalVertex)
                 .forEach { markup: Markup -> mergedGraph.addMarkupToTokenVertex(mergedVertex, markup) }
@@ -99,7 +99,7 @@ object TokenMerger {
         while (canMerge(originalGraph, originalVertex, originalOutgoingVertices)) {
             val nextOriginalToken = originalOutgoingVertices[0].token as MarkedUpToken
             mergedToken
-                    .setContent(mergedToken.content + nextOriginalToken.content).normalizedContent = mergedToken.normalizedContent + nextOriginalToken.normalizedContent
+                    .withContent(mergedToken.content + nextOriginalToken.content).normalizedContent = mergedToken.normalizedContent + nextOriginalToken.normalizedContent
             originalToMergedMap[nextOriginalToken.indexNumber] = mergedVertex
             originalVertex = originalOutgoingVertices[0]
             originalOutgoingVertices = originalVertex.outgoingTokenVertexStream.collect(Collectors.toList())

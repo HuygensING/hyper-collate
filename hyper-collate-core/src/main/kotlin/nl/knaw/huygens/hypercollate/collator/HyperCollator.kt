@@ -273,11 +273,11 @@ class HyperCollator {
     ): Set<Match> {
         val allPotentialMatches: MutableSet<Match> = HashSet()
         val vertexToMatch: MutableMap<TokenVertex, Match> = HashMap()
-        for (t in permute(witnesses.size)) {
-            val witness1 = witnesses[t.left!!]
-            val ranking1 = rankings[t.left!!]
-            val witness2 = witnesses[t.right!!]
-            val ranking2 = rankings[t.right!!]
+        for (t: Tuple<Int> in permute(witnesses.size)) {
+            val witness1 = witnesses[t.left]
+            val ranking1 = rankings[t.left]
+            val witness2 = witnesses[t.right]
+            val ranking2 = rankings[t.right]
             match(witness1, witness2, ranking1, ranking2, allPotentialMatches, vertexToMatch)
             val endMatch = getEndMatch(witness1, ranking1, witness2, ranking2)
             allPotentialMatches += endMatch

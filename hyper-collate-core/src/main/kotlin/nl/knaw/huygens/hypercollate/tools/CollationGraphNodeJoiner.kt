@@ -103,14 +103,14 @@ object CollationGraphNodeJoiner {
             val tokenForWitness = lastNode.getTokenForWitness(s) as MarkedUpToken
             val tokenToMerge = originalNode.getTokenForWitness(s) as MarkedUpToken
             tokenForWitness
-                    .setContent(tokenForWitness.content + tokenToMerge.content)
+                    .withContent(tokenForWitness.content + tokenToMerge.content)
                     .normalizedContent = tokenForWitness.normalizedContent + tokenToMerge.normalizedContent
         }
     }
 
     private fun copyNode(originalNode: TextNode, mergedGraph: CollationGraph): TextNode {
         val tokens: Array<Token> = originalNode.sigils
-                .map { originalNode.getTokenForWitness(it) }
+                .map { originalNode.getTokenForWitness(it)!! }
                 .map { cloneToken(it) }
                 .toTypedArray()
         val newNode = mergedGraph.addTextNodeWithTokens(*tokens)
