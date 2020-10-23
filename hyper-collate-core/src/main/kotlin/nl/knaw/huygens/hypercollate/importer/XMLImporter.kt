@@ -165,7 +165,7 @@ class XMLImporter {
     private fun handleProcessingInstruction(event: XMLEvent, context: Context): Unit =
             throw RuntimeException("unexpected event: ProcessingInstruction")
 
-    private class Context internal constructor(
+    private class Context(
             private val graph: VariantWitnessGraph, // tokenvertex after the </del> yet
             private val normalizer: Function<String, String>,
             witness: SimpleWitness

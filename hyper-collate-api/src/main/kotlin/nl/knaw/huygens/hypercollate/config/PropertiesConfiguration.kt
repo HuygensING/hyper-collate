@@ -35,7 +35,7 @@ class PropertiesConfiguration(propertiesFile: String, isResource: Boolean) {
 
     @Synchronized
     fun getProperty(key: String, defaultValue: String): String =
-            getValue(key) ?: defaultValue!!
+            getValue(key) ?: defaultValue
 
     private fun getValue(key: String): String? {
         var value: String? = null

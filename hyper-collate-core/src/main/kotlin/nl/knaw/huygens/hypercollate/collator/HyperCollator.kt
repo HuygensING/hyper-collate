@@ -134,7 +134,7 @@ class HyperCollator {
     ) {
         val baseRanking = CollationGraphRanking.of(collationGraph)
         val filteredSortedMatchesForWitness = sortedMatchesForWitness
-                .filter { m: Match -> collationGraph.sigils.any { m.hasWitness(it) } }
+                .filter { m: Match -> collationGraph.sigils.any { m.hasWitness(sigil = it) } }
         val witnessSigil = witnessGraph.sigil
         collationGraph.sigils += witnessSigil
         addMarkupNodes(collationGraph, markupNodeIndex, witnessGraph)
