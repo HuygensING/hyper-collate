@@ -1147,7 +1147,7 @@ class HyperCollatorTest {
                 expectedTable: String
         ): CollationGraph {
             val stopwatch = Stopwatch.createStarted()
-            val collation0 = hyperCollator.collate(witness1, witness2)
+            val (collation0, processLogger) = hyperCollator.collateWithLogger(witness1, witness2)
             stopwatch.stop()
             val duration = stopwatch.elapsed(TimeUnit.MILLISECONDS)
             LOG.info("Collating took {} ms.", duration)
@@ -1168,6 +1168,7 @@ class HyperCollatorTest {
             val html = CollationGraphVisualizer.toTableHTML(collation)
             LOG.debug("html=\n{}", html)
 
+            LOG.info(processLogger.visualize())
             return collation
         }
     }
@@ -1181,89 +1182,89 @@ class HyperCollatorTest {
             val wF = importer.importXML(
                     "F",
                     """
-                |<text>
-                |    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,
-                |        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>
-                |</text>
-                """.trimMargin())
+                    |<text>
+                    |    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,
+                    |        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>
+                    |</text>
+                    """.trimMargin())
             val wQ = importer.importXML(
                     "Q",
                     """
-                |<text>
-                |    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !
-                |        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>
-                |</text>
-                """.trimMargin())
+                    |<text>
+                    |    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !
+                    |        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>
+                    |</text>
+                    """.trimMargin())
             val wZ = importer.importXML(
                     "Z",
                     """
-                |<text>
-                |    <s>Hoe zoet moet nochtans zijn dit trachten naar een vrouw !
-                |        Die dagen van ongewisheid vóór de liefelijke toestemming.</s>
-                |</text>
-                """.trimMargin())
+                    |<text>
+                    |    <s>Hoe zoet moet nochtans zijn dit trachten naar een vrouw !
+                    |        Die dagen van ongewisheid vóór de liefelijke toestemming.</s>
+                    |</text>
+                    """.trimMargin())
             val expectedDot = """
-            digraph CollationGraph{
-            labelloc=b
-            t000 [label="";shape=doublecircle,rank=middle]
-            t001 [label="";shape=doublecircle,rank=middle]
-            t002 [label=<F,Q,Z: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F,Q,Z: <i>/text/s</i>>]
-            t003 [label=<F,Q: &#9251;<br/>F,Q: <i>/text/s</i>>]
-            t004 [label=<F,Q,Z: een&#9251;<br/>F,Q,Z: <i>/text/s</i>>]
-            t005 [label=<F: vrouw<br/>Q: vrouw&#9251;<br/>Z: vrouw&#9251;<br/>F,Q,Z: <i>/text/s</i>>]
-            t006 [label=<F: ,&#x21A9;<br/>&#9251;de&#9251;<br/>F: <i>/text/s</i>>]
-            t007 [label=<F,Z: ongewisheid&#9251;<br/>F,Z: <i>/text/s</i>>]
-            t008 [label=<F,Q,Z: vóór&#9251;de&#9251;<br/>F,Q,Z: <i>/text/s</i>>]
-            t009 [label=<F: <br/>F: <i>/text/s/lb</i>>]
-            t010 [label=<F,Q,Z: liefelijke&#9251;toestemming<br/>F,Q,Z: <i>/text/s</i>>]
-            t011 [label=<F: !<br/>F: <i>/text/s</i>>]
-            t012 [label=<F: <br/>F: <i>/text/s/lb</i>>]
-            t013 [label=<F,Q: werven&#9251;om<br/>F,Q: <i>/text/s/del</i>>]
-            t014 [label=<F: trachten&#9251;naar<br/>Q: trachten&#9251;naar<br/>Z: trachten&#9251;naar&#9251;<br/>F: <i>/text/s/add</i><br/>Q: <i>/text/s/add</i><br/>Z: <i>/text/s</i><br/>>]
-            t015 [label=<Q: <br/>Q: <i>/text/s/lb</i>>]
-            t016 [label=<Q: !&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;<br/>Z: !Die&#9251;dagen&#9251;van&#9251;<br/>Q,Z: <i>/text/s</i>>]
-            t017 [label=<Q: nerveuze&#9251;verwachting&#9251;<br/>Q: <i>/text/s</i>>]
-            t018 [label=<Q,Z: .<br/>Q,Z: <i>/text/s</i>>]
-            t000->t002[label="F,Q,Z"]
-            t002->t012[label="F"]
-            t002->t013[label="Q"]
-            t002->t014[label="Q,Z"]
-            t003->t004[label="F,Q"]
-            t004->t005[label="F,Z"]
-            t004->t015[label="Q"]
-            t005->t006[label="F"]
-            t005->t016[label="Q,Z"]
-            t006->t007[label="F"]
-            t007->t008[label="F,Z"]
-            t008->t009[label="F"]
-            t008->t010[label="Q,Z"]
-            t009->t010[label="F"]
-            t010->t011[label="F"]
-            t010->t018[label="Q,Z"]
-            t011->t001[label="F"]
-            t012->t013[label="F"]
-            t012->t014[label="F"]
-            t013->t003[label="F,Q"]
-            t014->t003[label="F,Q"]
-            t014->t004[label="Z"]
-            t015->t005[label="Q"]
-            t016->t007[label="Z"]
-            t016->t017[label="Q"]
-            t017->t008[label="Q"]
-            t018->t001[label="Q,Z"]
-            }
-            """.trimIndent()
+                digraph CollationGraph{
+                labelloc=b
+                t000 [label="";shape=doublecircle,rank=middle]
+                t001 [label="";shape=doublecircle,rank=middle]
+                t002 [label=<F,Q,Z: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F,Q,Z: <i>/text/s</i>>]
+                t003 [label=<F,Q: &#9251;<br/>F,Q: <i>/text/s</i>>]
+                t004 [label=<F,Q,Z: een&#9251;<br/>F,Q,Z: <i>/text/s</i>>]
+                t005 [label=<F: vrouw<br/>Q: vrouw&#9251;<br/>Z: vrouw&#9251;<br/>F,Q,Z: <i>/text/s</i>>]
+                t006 [label=<F: ,&#x21A9;<br/>&#9251;de&#9251;<br/>F: <i>/text/s</i>>]
+                t007 [label=<F,Z: ongewisheid&#9251;<br/>F,Z: <i>/text/s</i>>]
+                t008 [label=<F,Q,Z: vóór&#9251;de&#9251;<br/>F,Q,Z: <i>/text/s</i>>]
+                t009 [label=<F: <br/>F: <i>/text/s/lb</i>>]
+                t010 [label=<F,Q,Z: liefelijke&#9251;toestemming<br/>F,Q,Z: <i>/text/s</i>>]
+                t011 [label=<F: !<br/>F: <i>/text/s</i>>]
+                t012 [label=<F: <br/>F: <i>/text/s/lb</i>>]
+                t013 [label=<F,Q: werven&#9251;om<br/>F,Q: <i>/text/s/del</i>>]
+                t014 [label=<F: trachten&#9251;naar<br/>Q: trachten&#9251;naar<br/>Z: trachten&#9251;naar&#9251;<br/>F: <i>/text/s/add</i><br/>Q: <i>/text/s/add</i><br/>Z: <i>/text/s</i><br/>>]
+                t015 [label=<Q: <br/>Q: <i>/text/s/lb</i>>]
+                t016 [label=<Q: !&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;<br/>Z: !Die&#9251;dagen&#9251;van&#9251;<br/>Q,Z: <i>/text/s</i>>]
+                t017 [label=<Q: nerveuze&#9251;verwachting&#9251;<br/>Q: <i>/text/s</i>>]
+                t018 [label=<Q,Z: .<br/>Q,Z: <i>/text/s</i>>]
+                t000->t002[label="F,Q,Z"]
+                t002->t012[label="F"]
+                t002->t013[label="Q"]
+                t002->t014[label="Q,Z"]
+                t003->t004[label="F,Q"]
+                t004->t005[label="F,Z"]
+                t004->t015[label="Q"]
+                t005->t006[label="F"]
+                t005->t016[label="Q,Z"]
+                t006->t007[label="F"]
+                t007->t008[label="F,Z"]
+                t008->t009[label="F"]
+                t008->t010[label="Q,Z"]
+                t009->t010[label="F"]
+                t010->t011[label="F"]
+                t010->t018[label="Q,Z"]
+                t011->t001[label="F"]
+                t012->t013[label="F"]
+                t012->t014[label="F"]
+                t013->t003[label="F,Q"]
+                t014->t003[label="F,Q"]
+                t014->t004[label="Z"]
+                t015->t005[label="Q"]
+                t016->t007[label="Z"]
+                t016->t017[label="Q"]
+                t017->t008[label="Q"]
+                t018->t001[label="Q,Z"]
+                }
+                """.trimIndent()
             val expectedTable = """
-            ┌───┬────────────────────────────────┬─────┬─────────────────┬─┬────┬─────┬──────┬────────────────┬─────────────────────┬────────┬─────┬──────────────────────┬─┐
-            │[F]│                                │     │[+] trachten_naar│ │    │     │      │                │                     │        │     │                      │ │
-            │   │Hoe_zoet_moet_nochtans_zijn_dit_│<lb/>│[-] werven_om    │_│een_│     │vrouw │,_de_           │ongewisheid_         │vóór_de_│<lb/>│liefelijke_toestemming│!│
-            ├───┼────────────────────────────────┼─────┼─────────────────┼─┼────┼─────┼──────┼────────────────┼─────────────────────┼────────┼─────┼──────────────────────┼─┤
-            │[Q]│                                │     │[+] trachten_naar│ │    │     │      │                │                     │        │     │                      │ │
-            │   │Hoe_zoet_moet_nochtans_zijn_dit_│     │[-] werven_om    │_│een_│<lb/>│vrouw_│!_Die_dagen_van_│nerveuze_verwachting_│vóór_de_│     │liefelijke_toestemming│.│
-            ├───┼────────────────────────────────┼─────┼─────────────────┼─┼────┼─────┼──────┼────────────────┼─────────────────────┼────────┼─────┼──────────────────────┼─┤
-            │[Z]│Hoe_zoet_moet_nochtans_zijn_dit_│     │trachten_naar_   │ │een_│     │vrouw_│!Die_dagen_van_ │ongewisheid_         │vóór_de_│     │liefelijke_toestemming│.│
-            └───┴────────────────────────────────┴─────┴─────────────────┴─┴────┴─────┴──────┴────────────────┴─────────────────────┴────────┴─────┴──────────────────────┴─┘
-            """.trimIndent()
+                ┌───┬────────────────────────────────┬─────┬─────────────────┬─┬────┬─────┬──────┬────────────────┬─────────────────────┬────────┬─────┬──────────────────────┬─┐
+                │[F]│                                │     │[+] trachten_naar│ │    │     │      │                │                     │        │     │                      │ │
+                │   │Hoe_zoet_moet_nochtans_zijn_dit_│<lb/>│[-] werven_om    │_│een_│     │vrouw │,_de_           │ongewisheid_         │vóór_de_│<lb/>│liefelijke_toestemming│!│
+                ├───┼────────────────────────────────┼─────┼─────────────────┼─┼────┼─────┼──────┼────────────────┼─────────────────────┼────────┼─────┼──────────────────────┼─┤
+                │[Q]│                                │     │[+] trachten_naar│ │    │     │      │                │                     │        │     │                      │ │
+                │   │Hoe_zoet_moet_nochtans_zijn_dit_│     │[-] werven_om    │_│een_│<lb/>│vrouw_│!_Die_dagen_van_│nerveuze_verwachting_│vóór_de_│     │liefelijke_toestemming│.│
+                ├───┼────────────────────────────────┼─────┼─────────────────┼─┼────┼─────┼──────┼────────────────┼─────────────────────┼────────┼─────┼──────────────────────┼─┤
+                │[Z]│Hoe_zoet_moet_nochtans_zijn_dit_│     │trachten_naar_   │ │een_│     │vrouw_│!Die_dagen_van_ │ongewisheid_         │vóór_de_│     │liefelijke_toestemming│.│
+                └───┴────────────────────────────────┴─────┴─────────────────┴─┴────┴─────┴──────┴────────────────┴─────────────────────┴────────┴─────┴──────────────────────┴─┘
+                """.trimIndent()
             val collationGraph = testHyperCollation3(wF, wQ, wZ, expectedDot, expectedTable)
 
             // test matching tokens
@@ -1318,9 +1319,11 @@ class HyperCollatorTest {
         ): CollationGraph {
             //    Map<String, Long> collationDuration = new HashMap<>();
             val stopwatch = Stopwatch.createStarted()
-            var collation = hyperCollator.collate(witness1, witness2, witness3)
+            var (collation, processLogger) = hyperCollator.collateWithLogger(witness1, witness2, witness3)
             stopwatch.stop()
+
             val duration = stopwatch.elapsed(TimeUnit.MILLISECONDS)
+            processLogger.durationInMilliSeconds = duration
             LOG.info("Collating took {} ms.", duration)
             val markupBeforeJoin = collation.markupStream.collect(Collectors.toSet())
             //    LOG.info("before join: collation markup = {}",
@@ -1343,6 +1346,7 @@ class HyperCollatorTest {
             val html = CollationGraphVisualizer.toTableHTML(collation)
             LOG.debug("html=\n{}", html)
 
+            LOG.info(processLogger.visualize())
             return collation
         }
     }
@@ -1351,15 +1355,17 @@ class HyperCollatorTest {
     @Timeout(10000)
     fun permute() {
         val permute1 = hyperCollator.permute(3)
-        LOG.info("permute={}", visualize(permute1))
+        LOG.info("permute={}", permute1.visualize())
         assertThat(Sets.newHashSet(permute1)).hasSameSizeAs(permute1)
         assertThat(permute1).hasSize(3)
+
         val permute2 = hyperCollator.permute(4)
-        LOG.info("permute={}", visualize(permute2))
+        LOG.info("permute={}", permute2.visualize())
         assertThat(Sets.newHashSet(permute2)).hasSameSizeAs(permute2)
         assertThat(permute2).hasSize(6)
+
         val permute3 = hyperCollator.permute(10)
-        LOG.info("permute={}", visualize(permute3))
+        LOG.info("permute={}", permute3.visualize())
         assertThat(Sets.newHashSet(permute3)).hasSameSizeAs(permute3)
         assertThat(permute3).hasSize(45)
     }
@@ -1387,18 +1393,23 @@ class HyperCollatorTest {
         val match7 = "<A:EndTokenVertex,C:EndTokenVertex>"
         val match8 = "<B:EndTokenVertex,C:EndTokenVertex>"
         assertThat(allPotentialMatches).hasSize(8)
+
         val matchStrings = allPotentialMatches.map { it.toString() }.toSet()
         assertThat(matchStrings)
                 .contains(match1, match2, match3, match4, match5, match6, match7, match8)
+
         val sortAndFilterMatchesByWitness = hyperCollator.sortAndFilterMatchesByWitness(
                 allPotentialMatches, listOf(sigil1, sigil2, sigil3))
         LOG.info("sortAndFilterMatchesByWitness={}", sortAndFilterMatchesByWitness)
         assertThat(sortAndFilterMatchesByWitness).containsOnlyKeys(sigil1, sigil2, sigil3)
-        val listA = stringList(sortAndFilterMatchesByWitness, sigil1)
+
+        val listA: List<String> = sortAndFilterMatchesByWitness.stringList(sigil1)
         assertThat(listA).containsOnly(match1, match2, match3, match6, match7)
-        val listB = stringList(sortAndFilterMatchesByWitness, sigil2)
+
+        val listB: List<String> = sortAndFilterMatchesByWitness.stringList(sigil2)
         assertThat(listB).containsOnly(match4, match1, match5, match6, match8)
-        val listC = stringList(sortAndFilterMatchesByWitness, sigil3)
+
+        val listC: List<String> = sortAndFilterMatchesByWitness.stringList(sigil3)
         assertThat(listC).containsOnly(match4, match2, match3, match5, match7, match8)
     }
 
@@ -1417,16 +1428,24 @@ class HyperCollatorTest {
         private val LOG = LoggerFactory.getLogger(HyperCollateTest::class.java)
         val hyperCollator = HyperCollator()
 
-        private fun stringList(
-                sortAndFilterMatchesByWitness: Map<String, List<Match>>,
-                key: String
-        ): List<String> =
-                (sortAndFilterMatchesByWitness[key] ?: error("key $key not found in sortAndFilterMatchesByWitness"))
+        private fun Map<String, List<Match>>.stringList(key: String): List<String> =
+                (this[key] ?: error("key $key not found in sortAndFilterMatchesByWitness"))
                         .map(Match::toString)
 
-        private fun visualize(list: List<Tuple<Int>>): String =
-                list.joinToString("") { format("<{0},{1}>", it.left, it.right) }
+        private fun List<Tuple<Int>>.visualize(): String =
+                joinToString("") { format("<{0},{1}>", it.left, it.right) }
+
+        private fun ProcessLogger.visualize(): String =
+                """
+                |ProcessLogger:
+                |${"-".repeat(120)}
+                |$this
+                |${"-".repeat(120)}
+                |${this.toHTML()}
+                |${"-".repeat(120)}
+                |""".trimMargin()
 
     }
 
 }
+

@@ -30,7 +30,10 @@ import java.util.stream.Collectors.toSet
 
 class HyperCollator {
 
-    fun collate(vararg graphs: VariantWitnessGraph): CollationGraph {
+    fun collate(vararg graphs: VariantWitnessGraph): CollationGraph =
+            collateWithLogger(*graphs).first
+
+    fun collateWithLogger(vararg graphs: VariantWitnessGraph): Pair<CollationGraph, ProcessLogger> {
         val sigils: MutableList<String> = mutableListOf()
         val witnesses: MutableList<VariantWitnessGraph> = mutableListOf()
         val rankings: MutableList<VariantWitnessGraphRanking> = mutableListOf()
@@ -49,21 +52,25 @@ class HyperCollator {
         val markupNodeIndex: MutableMap<Markup, MarkupNode> = HashMap()
         initialize(collationGraph, collatedTokenVertexMap, markupNodeIndex, first)
 //        visualize(collationGraph)
+        val processLogger = ProcessLogger(first.sigil)
         for (witnessGraph in witnesses) {
             val sortedMatchesForWitness = matchesSortedByRankPerWitness[witnessGraph.sigil] ?: error("sigil not found")
-            collate(
+            processLogger.collationSteps += CollationStep(witnessGraph.sigil)
+            collateWitness(
                     collationGraph,
                     witnessGraph,
                     sortedMatchesForWitness,
                     markupNodeIndex,
-                    collatedTokenVertexMap)
-            visualize(collationGraph)
+                    collatedTokenVertexMap,
+                    processLogger
+            )
+            collationGraph.visualize()
         }
-        return collationGraph
+        return collationGraph to processLogger
     }
 
-    private fun visualize(collationGraph: CollationGraph) {
-        val dot = CollationGraphVisualizer.toDot(collationGraph, true, false)
+    private fun CollationGraph.visualize() {
+        val dot = CollationGraphVisualizer.toDot(this, emphasizeWhitespace = true, hideMarkup = false)
         LOG.debug("dot={}", dot)
     }
 
@@ -75,7 +82,7 @@ class HyperCollator {
     ) {
         val sigil = witnessGraph.sigil
         collationGraph.sigils += sigil
-        addMarkupNodes(collationGraph, markupNodeIndex, witnessGraph)
+        collationGraph.addMarkupNodes(markupNodeIndex, witnessGraph)
         collatedTokenVertexMap[witnessGraph.startTokenVertex] = collationGraph.textStartNode
         witnessGraph.vertices()
                 .asSequence()
@@ -89,18 +96,17 @@ class HyperCollator {
                             markupNodeIndex)
                 }
         collatedTokenVertexMap[witnessGraph.endTokenVertex] = collationGraph.textEndNode
-        addEdges(collationGraph, collatedTokenVertexMap)
+        collationGraph.addEdges(collatedTokenVertexMap)
     }
 
-    private fun addMarkupNodes(
-            collationGraph: CollationGraph,
+    private fun CollationGraph.addMarkupNodes(
             markupNodeIndex: MutableMap<Markup, MarkupNode>,
             witnessGraph: VariantWitnessGraph
     ) {
         witnessGraph
                 .markupStream
                 .forEach { markup: Markup ->
-                    val markupNode = collationGraph.addMarkupNode(witnessGraph.sigil, markup)
+                    val markupNode = addMarkupNode(witnessGraph.sigil, markup)
                     markupNodeIndex[markup] = markupNode
                 }
     }
@@ -125,24 +131,25 @@ class HyperCollator {
                 .withVertexRank(match.getRankForWitness(sigil)!!)
     }
 
-    private fun collate(
+    private fun collateWitness(
             collationGraph: CollationGraph,
             witnessGraph: VariantWitnessGraph,
             sortedMatchesForWitness: List<Match>,
             markupNodeIndex: MutableMap<Markup, MarkupNode>,
-            collatedTokenVertexMap: MutableMap<TokenVertex, TextNode>
+            collatedTokenVertexMap: MutableMap<TokenVertex, TextNode>,
+            processLogger: ProcessLogger
     ) {
         val baseRanking = CollationGraphRanking.of(collationGraph)
         val filteredSortedMatchesForWitness = sortedMatchesForWitness
                 .filter { m: Match -> collationGraph.sigils.any { m.hasWitness(sigil = it) } }
         val witnessSigil = witnessGraph.sigil
         collationGraph.sigils += witnessSigil
-        addMarkupNodes(collationGraph, markupNodeIndex, witnessGraph)
+        collationGraph.addMarkupNodes(markupNodeIndex, witnessGraph)
         val matchList = getCollatedMatches(collatedTokenVertexMap, filteredSortedMatchesForWitness, witnessSigil)
                 .map { m: CollatedMatch -> adjustRankForCollatedNode(m, baseRanking) }
                 .distinct()
         LOG.debug("matchList={}, size={}", matchList, matchList.size)
-        val optimalMatchList = getOptimalMatchList(matchList)
+        val optimalMatchList = matchList.toOptimalMatchList()
         LOG.debug("optimalMatchList={}, size={}", optimalMatchList, optimalMatchList.size)
         val witnessIterator: Iterator<TokenVertex> = VariantWitnessGraphTraversal.of(witnessGraph).iterator()
         val first = witnessIterator.next()
@@ -173,7 +180,7 @@ class HyperCollator {
         }
         collatedTokenVertexMap[witnessGraph.endTokenVertex] = collationGraph.textEndNode
 //        logCollated(collatedTokenVertexMap)
-        addEdges(collationGraph, collatedTokenVertexMap)
+        collationGraph.addEdges(collatedTokenVertexMap)
 //        logCollated(collatedTokenVertexMap)
     }
 
@@ -189,8 +196,8 @@ class HyperCollator {
                 .forEach { markup: Markup -> collationGraph.linkMarkupToText(markupNodeIndex[markup]!!, matchingNode) }
     }
 
-    private fun getOptimalMatchList(matchList: List<CollatedMatch>): MutableList<CollatedMatch> =
-            OptimalCollatedMatchListAlgorithm().getOptimalCollatedMatchList(matchList)
+    private fun List<CollatedMatch>.toOptimalMatchList(): MutableList<CollatedMatch> =
+            OptimalCollatedMatchListAlgorithm().getOptimalCollatedMatchList(this)
 
     private fun adjustRankForCollatedNode(
             m: CollatedMatch,
@@ -214,7 +221,8 @@ class HyperCollator {
             tokenVertexIterator: Iterator<TokenVertex>,
             tokenVertexForWitness: TokenVertex,
             witnessGraph: VariantWitnessGraph,
-            markupNodeIndex: Map<Markup, MarkupNode>) {
+            markupNodeIndex: Map<Markup, MarkupNode>
+    ) {
         if (tokenVertexIterator.hasNext()) {
             var nextWitnessVertex = tokenVertexIterator.next()
             while (tokenVertexIterator.hasNext() && nextWitnessVertex != tokenVertexForWitness) {
@@ -234,7 +242,8 @@ class HyperCollator {
             collatedTokenVertexMap: MutableMap<TokenVertex, TextNode>,
             tokenVertex: TokenVertex,
             witnessGraph: VariantWitnessGraph,
-            markupNodeIndex: Map<Markup, MarkupNode>) {
+            markupNodeIndex: Map<Markup, MarkupNode>
+    ) {
         if (!collatedTokenVertexMap.containsKey(tokenVertex)) {
             val collationNode = collationGraph.addTextNodeWithTokens(tokenVertex.token)
             collationNode.addBranchPath(tokenVertex.sigil, tokenVertex.branchPath)
@@ -247,24 +256,10 @@ class HyperCollator {
     fun sortAndFilterMatchesByWitness(matches: Set<Match>, sigils: List<String>): Map<String, List<Match>> {
         val map: MutableMap<String, List<Match>> = HashMap()
         sigils.forEach { s: String ->
-            val sortedMatchesForWitness = filterAndSortMatchesForWitness(matches, s)
+            val sortedMatchesForWitness = matches.filterAndSortForWitness(s)
             map[s] = sortedMatchesForWitness
         }
         return map
-    }
-
-    private fun filterAndSortMatchesForWitness(matches: Set<Match>, sigil: String): List<Match> {
-        val comparator = Comparator { match1: Match, match2: Match ->
-            var rank1 = match1.getRankForWitness(sigil) ?: error("invalid sigil $sigil")
-            var rank2 = match2.getRankForWitness(sigil) ?: error("invalid sigil $sigil")
-            if (rank1 == rank2) {
-                rank1 = match1.getLowestRankForWitnessesOtherThan(sigil)
-                rank2 = match2.getLowestRankForWitnessesOtherThan(sigil)
-            }
-            rank1.compareTo(rank2)
-        }
-        return matches.filter { m: Match -> m.hasWitness(sigil) }
-                .sortedWith(comparator)
     }
 
     fun getPotentialMatches(
@@ -285,11 +280,36 @@ class HyperCollator {
         return allPotentialMatches
     }
 
+    fun permute(max: Int): List<Tuple<Int>> {
+        val list: MutableList<Tuple<Int>> = ArrayList()
+        for (left in 0 until max) {
+            for (right in left + 1 until max) {
+                list += Tuple(left, right)
+            }
+        }
+        return list
+    }
+
+    private fun Set<Match>.filterAndSortForWitness(sigil: String): List<Match> {
+        val comparator = Comparator { match1: Match, match2: Match ->
+            var rank1 = match1.getRankForWitness(sigil) ?: error("invalid sigil $sigil")
+            var rank2 = match2.getRankForWitness(sigil) ?: error("invalid sigil $sigil")
+            if (rank1 == rank2) {
+                rank1 = match1.getLowestRankForWitnessesOtherThan(sigil)
+                rank2 = match2.getLowestRankForWitnessesOtherThan(sigil)
+            }
+            rank1.compareTo(rank2)
+        }
+        return filter { m: Match -> m.hasWitness(sigil) }
+                .sortedWith(comparator)
+    }
+
     private fun getEndMatch(
             witness1: VariantWitnessGraph,
             ranking1: VariantWitnessGraphRanking,
             witness2: VariantWitnessGraph,
-            ranking2: VariantWitnessGraphRanking): Match {
+            ranking2: VariantWitnessGraphRanking
+    ): Match {
         val endTokenVertex1 = witness1.endTokenVertex
         val endTokenVertex2 = witness2.endTokenVertex
         val endMatch = Match(endTokenVertex1, endTokenVertex2)
@@ -300,16 +320,6 @@ class HyperCollator {
         val rank2 = ranking2.apply(endTokenVertex2)
         endMatch.setRank(sigil2, rank2)
         return endMatch
-    }
-
-    fun permute(max: Int): List<Tuple<Int>> {
-        val list: MutableList<Tuple<Int>> = ArrayList()
-        for (left in 0 until max) {
-            for (right in left + 1 until max) {
-                list += Tuple(left, right)
-            }
-        }
-        return list
     }
 
     private fun match(
@@ -330,7 +340,7 @@ class HyperCollator {
                     traversal2
                             .filterIsInstance<SimpleTokenVertex>()
                             .forEach { tv2: SimpleTokenVertex ->
-                                if (verticesMatch(tv1, tv2)) {
+                                if (tv1.verticesMatchWith(tv2)) {
                                     val match = Match(tv1, tv2)
                                             .setRank(sigil1, ranking1.apply(tv1))
                                             .setRank(sigil2, ranking2.apply(tv2))
@@ -345,24 +355,21 @@ class HyperCollator {
     companion object {
         private val LOG = LoggerFactory.getLogger(HyperCollator::class.java)
 
-        private fun verticesMatch(stv1: SimpleTokenVertex, stv2: SimpleTokenVertex): Boolean {
-            if (stv1.normalizedContent.isEmpty() && stv2.normalizedContent.isEmpty()) {
-                return if (stv1.content.isEmpty() && stv2.content.isEmpty()) {
+        private fun SimpleTokenVertex.verticesMatchWith(stv2: SimpleTokenVertex): Boolean {
+            if (normalizedContent.isEmpty() && stv2.normalizedContent.isEmpty()) {
+                return if (content.isEmpty() && stv2.content.isEmpty()) {
                     // both are milestones, so compare their tags.
-                    val parentTag1 = stv1.parentXPath.replace("/.*/", "")
+                    val parentTag1 = parentXPath.replace("/.*/", "")
                     val parentTag2 = stv2.parentXPath.replace("/.*/", "")
                     parentTag1 == parentTag2
                 } else {
-                    stv1.content == stv2.content
+                    content == stv2.content
                 }
             }
-            return stv1.normalizedContent == stv2.normalizedContent
+            return normalizedContent == stv2.normalizedContent
         }
 
-        private fun addEdges(
-                collationGraph: CollationGraph,
-                collatedTokenVertexMap: Map<TokenVertex, TextNode>
-        ) {
+        private fun CollationGraph.addEdges(collatedTokenVertexMap: Map<TokenVertex, TextNode>) {
             collatedTokenVertexMap
                     .keys
                     .forEach { tv: TokenVertex ->
@@ -370,20 +377,18 @@ class HyperCollator {
                                 .forEach { itv: TokenVertex ->
                                     val source = collatedTokenVertexMap[itv] ?: error("source is null!")
                                     val target = collatedTokenVertexMap[tv] ?: error("target is null!")
-                                    val existingTargetNodes = collationGraph
-                                            .getOutgoingTextEdgeStream(source)
-                                            .map { edge: TextEdge -> collationGraph.getTarget(edge) }
+                                    val existingTargetNodes = getOutgoingTextEdgeStream(source)
+                                            .map { edge: TextEdge -> getTarget(edge) }
                                             .map { it as TextNode }
                                             .collect(toSet())
                                     val sigil = tv.sigil
                                     if (target !in existingTargetNodes) {
                                         val sigils: MutableSet<String> = mutableSetOf(sigil)
-                                        collationGraph.addDirectedEdge(source, target, sigils)
+                                        addDirectedEdge(source, target, sigils)
                                         // System.out.println("> " + source + " -> " + target);
                                     } else {
-                                        val edge = collationGraph
-                                                .getOutgoingTextEdgeStream(source)
-                                                .filter { e: TextEdge -> target == collationGraph.getTarget(e) }
+                                        val edge = getOutgoingTextEdgeStream(source)
+                                                .filter { e: TextEdge -> target == getTarget(e) }
                                                 .findFirst()
                                                 .orElseThrow { RuntimeException("There should be an edge!") }
                                         edge.addSigil(sigil)
