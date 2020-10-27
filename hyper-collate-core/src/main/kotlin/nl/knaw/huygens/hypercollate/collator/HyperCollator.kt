@@ -111,24 +111,16 @@ class HyperCollator {
                 }
     }
 
-    private fun getCollatedMatches(
-            collatedTokenVertexMap: Map<TokenVertex, TextNode>,
-            matches: List<Match>,
-            sigil: String
-    ): List<CollatedMatch> =
-            matches.map { toCollatedMatch(it, sigil, collatedTokenVertexMap) }
-
-    private fun toCollatedMatch(
-            match: Match,
+    private fun Match.toCollatedMatch(
             sigil: String,
             collatedTokenVertexMap: Map<TokenVertex, TextNode>
     ): CollatedMatch {
-        val vertex = match.tokenVertexList.firstOrNull { tv: TokenVertex -> tv.sigil != sigil } ?: error("No vertex!")
-        val tokenVertexForWitness = match.getTokenVertexForWitness(sigil)
+        val vertex = tokenVertexList.firstOrNull { tv: TokenVertex -> tv.sigil != sigil } ?: error("No vertex!")
+        val tokenVertexForWitness = getTokenVertexForWitness(sigil)
                 ?: error("no TokenVertex found for sigil $sigil")
         val node = collatedTokenVertexMap[vertex] ?: error("no node found for vertex")
         return CollatedMatch(node, tokenVertexForWitness)
-                .withVertexRank(match.getRankForWitness(sigil)!!)
+                .withVertexRank(getRankForWitness(sigil)!!)
     }
 
     private fun collateWitness(
@@ -145,8 +137,9 @@ class HyperCollator {
         val witnessSigil = witnessGraph.sigil
         collationGraph.sigils += witnessSigil
         collationGraph.addMarkupNodes(markupNodeIndex, witnessGraph)
-        val matchList = getCollatedMatches(collatedTokenVertexMap, filteredSortedMatchesForWitness, witnessSigil)
-                .map { m: CollatedMatch -> adjustRankForCollatedNode(m, baseRanking) }
+        val matchList = filteredSortedMatchesForWitness
+                .map { match: Match -> match.toCollatedMatch(witnessSigil, collatedTokenVertexMap) }
+                .map { m: CollatedMatch -> m.adjustRankForCollatedNode(baseRanking) }
                 .distinct()
         LOG.debug("matchList={}, size={}", matchList, matchList.size)
         val optimalMatchList = matchList.toOptimalMatchList()
@@ -199,14 +192,9 @@ class HyperCollator {
     private fun List<CollatedMatch>.toOptimalMatchList(): MutableList<CollatedMatch> =
             OptimalCollatedMatchListAlgorithm().getOptimalCollatedMatchList(this)
 
-    private fun adjustRankForCollatedNode(
-            m: CollatedMatch,
-            baseRanking: CollationGraphRanking
-    ): CollatedMatch {
-        val node = m.collatedNode
-        val rank = baseRanking.apply(node)
-        m.nodeRank = rank
-        return m
+    private fun CollatedMatch.adjustRankForCollatedNode(baseRanking: CollationGraphRanking): CollatedMatch {
+        nodeRank = baseRanking.apply(collatedNode)
+        return this
     }
 
     private fun logCollated(collatedTokenVertexMap: Map<TokenVertex, TextNode>) {
