@@ -45,14 +45,14 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
 
         matchesSortedByNode = allPotentialMatches.sortedByNode()
         matchesSortedByWitness = allPotentialMatches.sortedByWitness()
-        val startNode = QuantumCollatedMatchList(listOf(), ArrayList(allPotentialMatches))
+        val startNode = QuantumCollatedMatchList(listOf(), allPotentialMatches.toList())
         val startCost = LostPotential(0)
         val sw = Stopwatch.createStarted()
         val winningPath = aStar(startNode, startCost)
         sw.stop()
         LOG.debug("aStar took {} ms", sw.elapsed(TimeUnit.MILLISECONDS))
         val winningGoal = winningPath.last() ?: error("no winningPath found")
-        return ArrayList(winningGoal.chosenMatches)
+        return winningGoal.chosenMatches.toMutableList()
     }
 
     override fun isGoal(matchList: QuantumCollatedMatchList): Boolean =
