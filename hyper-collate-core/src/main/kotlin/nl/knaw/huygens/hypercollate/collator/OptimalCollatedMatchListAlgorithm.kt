@@ -43,8 +43,8 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
         val uniqueVerticesInMatches = allPotentialMatches.map { it.witnessVertex }.distinct().size
         maxPotential = min(uniqueNodesInMatches, uniqueVerticesInMatches)
 
-        matchesSortedByNode = sortMatchesByNode(allPotentialMatches)
-        matchesSortedByWitness = sortMatchesByWitness(allPotentialMatches)
+        matchesSortedByNode = allPotentialMatches.sortedByNode()
+        matchesSortedByWitness = allPotentialMatches.sortedByWitness()
         val startNode = QuantumCollatedMatchList(listOf(), ArrayList(allPotentialMatches))
         val startCost = LostPotential(0)
         val sw = Stopwatch.createStarted()
@@ -75,14 +75,14 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
         }
         val nextPotentialMatches: MutableSet<QuantumCollatedMatchList> = mutableSetOf()
         if (nextMatchSequence.isEmpty()) {
-            val firstPotentialMatch1 = getFirstPotentialMatch(matchesSortedByNode, matchList)
-            addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch1)
-            val firstPotentialMatch2 = getFirstPotentialMatch(matchesSortedByWitness, matchList)
+            val firstPotentialMatch1 = matchesSortedByNode.firstPotentialMatch(matchList)
+            nextPotentialMatches.addNeighborNodes(matchList, firstPotentialMatch1)
+            val firstPotentialMatch2 = matchesSortedByWitness.firstPotentialMatch(matchList)
             if (firstPotentialMatch1 != firstPotentialMatch2) {
-                addNeighborNodes(matchList, nextPotentialMatches, firstPotentialMatch2)
+                nextPotentialMatches.addNeighborNodes(matchList, firstPotentialMatch2)
             }
         } else {
-            addNeighborNodes(matchList, nextPotentialMatches, nextMatchSequence)
+            nextPotentialMatches.addNeighborNodes(matchList, nextMatchSequence)
         }
         return nextPotentialMatches
     }
@@ -93,28 +93,28 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
     override fun distBetween(matchList0: QuantumCollatedMatchList, matchList1: QuantumCollatedMatchList): LostPotential =
             LostPotential(abs(matchList0.maxPotentialSize() - matchList1.maxPotentialSize()))
 
-    private fun addNeighborNodes(
+    private fun MutableSet<QuantumCollatedMatchList>.addNeighborNodes(
             matchList: QuantumCollatedMatchList,
-            nextPotentialMatches: MutableSet<QuantumCollatedMatchList>,
-            firstPotentialMatch: CollatedMatch) {
+            firstPotentialMatch: CollatedMatch
+    ) {
         val quantumMatchSet1 = matchList.chooseMatch(firstPotentialMatch)
         val fingerprint1 = quantumMatchSet1.fingerprint
         if (fingerprint1 !in quantumCollatedMatchFingerprints) {
-            nextPotentialMatches += quantumMatchSet1
+            this += quantumMatchSet1
             quantumCollatedMatchFingerprints += fingerprint1
         }
         val quantumMatchSet2 = matchList.discardMatch(firstPotentialMatch)
         val fingerprint2 = quantumMatchSet2.fingerprint
         if (fingerprint2 !in quantumCollatedMatchFingerprints) {
-            nextPotentialMatches += quantumMatchSet2
+            this += quantumMatchSet2
             quantumCollatedMatchFingerprints += fingerprint2
         }
     }
 
-    private fun addNeighborNodes(
+    private fun MutableSet<QuantumCollatedMatchList>.addNeighborNodes(
             matchList: QuantumCollatedMatchList,
-            nextPotentialMatches: MutableSet<QuantumCollatedMatchList>,
-            matchSequence: List<CollatedMatch>) {
+            matchSequence: List<CollatedMatch>
+    ) {
         var chooseMatchSet = matchList
         var discardMatchSet = matchList
         for (cm in matchSequence) {
@@ -125,18 +125,18 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
         }
         val fingerprint1 = chooseMatchSet.fingerprint
         if (fingerprint1 !in quantumCollatedMatchFingerprints) {
-            nextPotentialMatches += chooseMatchSet
+            this += chooseMatchSet
             quantumCollatedMatchFingerprints += fingerprint1
         }
         val fingerprint2 = discardMatchSet.fingerprint
         if (fingerprint2 !in quantumCollatedMatchFingerprints) {
-            nextPotentialMatches += discardMatchSet
+            this += discardMatchSet
             quantumCollatedMatchFingerprints += fingerprint2
         }
     }
 
-    private fun getFirstPotentialMatch(matches: List<CollatedMatch>, matchList: QuantumCollatedMatchList): CollatedMatch =
-            matches.first { it in matchList.potentialMatches }
+    private fun List<CollatedMatch>.firstPotentialMatch(matchList: QuantumCollatedMatchList): CollatedMatch =
+            first { it in matchList.potentialMatches }
 
     private fun QuantumCollatedMatchList.maxPotentialSize(): Int {
         val uniquePotentialNodeMatches = this.potentialMatches.map { it.collatedNode }.distinct().size
@@ -150,14 +150,14 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
         private val matchNodeComparator = Comparator.comparing { obj: CollatedMatch -> obj.nodeRank }
                 .thenComparing { obj: CollatedMatch -> obj.vertexRank }
 
-        private fun sortMatchesByNode(matches: Collection<CollatedMatch>): List<CollatedMatch> =
-                matches.sortedWith(matchNodeComparator)
+        private fun Collection<CollatedMatch>.sortedByNode(): List<CollatedMatch> =
+                sortedWith(matchNodeComparator)
 
-        private val matchWitnessComparator = Comparator.comparing { obj: CollatedMatch -> obj.vertexRank }
-                .thenComparing { obj: CollatedMatch -> obj.nodeRank }
+        private val matchWitnessComparator = Comparator.comparing(CollatedMatch::vertexRank)
+                .thenComparing(CollatedMatch::nodeRank)
 
-        private fun sortMatchesByWitness(matches: Collection<CollatedMatch>): List<CollatedMatch> =
-                matches.sortedWith(matchWitnessComparator)
+        private fun Collection<CollatedMatch>.sortedByWitness(): List<CollatedMatch> =
+                sortedWith(matchWitnessComparator)
 
         private fun <A> runWithStopwatch(stopwatch: Stopwatch, func: () -> A): A {
             stopwatch.start()
