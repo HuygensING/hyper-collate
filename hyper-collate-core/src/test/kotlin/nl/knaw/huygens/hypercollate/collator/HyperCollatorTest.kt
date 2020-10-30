@@ -28,6 +28,7 @@ import nl.knaw.huygens.hypercollate.importer.XMLImporter
 import nl.knaw.huygens.hypercollate.model.*
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer
+import org.assertj.core.api.SoftAssertions
 import org.assertj.core.util.Sets
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -42,9 +43,9 @@ class HyperCollatorTest {
     @Nested
     inner class TwoWitnessTests : HyperCollateTest() {
 
-//        @Test
+        @Test
         @Timeout(15)
-        fun trd_642() {
+        fun trd_642_0() {
             val importer = XMLImporter()
             val wA = importer.importXML(
                     "A", "<e>well <subst><del>in his own way</del><add>at his own pace</add></subst>.</e>")
@@ -91,6 +92,273 @@ class HyperCollatorTest {
                 └───┴─────┴───────┴───────────┴────────┴─┘
                 """.trimIndent()
             testHyperCollation(wA, wB, expectedDot, expectedTable)
+        }
+
+        //        1: Duplicates in add en del branches
+        //
+        //        W1: <root> a long <subst><add> text that is very long </add><del> text that is different</del></subst> </root>
+        //
+        //        W2: <root> a long text that is very long </root>
+        //
+        //        Gewenste uitkomst: Moet alleen de add volgen.
+        @Test
+        @Timeout(15)
+        fun trd_642_1a() {
+            val importer = XMLImporter()
+            val w1 = importer.importXML(
+                    "1", "<root>a long <subst><add>text that is very long</add><del>text that is different</del></subst></root>")
+            val w2 = importer.importXML(
+                    "2", "<root>a long text that is very long</root>")
+            val expectedDot = """
+                digraph CollationGraph{
+                labelloc=b
+                t000 [label="";shape=doublecircle,rank=middle]
+                t001 [label="";shape=doublecircle,rank=middle]
+                t002 [label=<1,2: a&#9251;long&#9251;<br/>1,2: <i>/root</i>>]
+                t003 [label=<1,2: text&#9251;that&#9251;is&#9251;very&#9251;long<br/>1: <i>/root/subst/add</i><br/>2: <i>/root</i><br/>>]
+                t004 [label=<1: text&#9251;that&#9251;is&#9251;different<br/>1: <i>/root/subst/del</i>>]
+                t000->t002[label="1,2"]
+                t002->t003[label="1,2"]
+                t002->t004[label="1"]
+                t003->t001[label="1,2"]
+                t003->t004[label="1"]
+                t004->t001[label="1"]
+                }
+                """.trimIndent()
+            val expectedTable = """
+                ┌───┬─────┬───────┬───────────┬────────┬─┐
+                │[A]│     │[+] at │[+] his own│[+] pace│ │
+                │   │well │[-] in │[-] his own│[-] way │.│
+                ├───┼─────┼───────┼───────────┼────────┼─┤
+                │[B]│well │at     │his own    │gait    │.│
+                └───┴─────┴───────┴───────────┴────────┴─┘
+                """.trimIndent()
+            testHyperCollation(w1, w2, expectedDot, expectedTable)
+        }
+
+        @Test
+        @Timeout(15)
+        fun trd_642_1b() {
+            val importer = XMLImporter()
+            val w1 = importer.importXML(
+                    "1", "<root>a long <subst><del>text that is different</del><add>text that is very long</add></subst></root>")
+            val w2 = importer.importXML(
+                    "2", "<root>a long text that is very long</root>")
+            val expectedDot = """
+                digraph CollationGraph{
+                labelloc=b
+                t000 [label="";shape=doublecircle,rank=middle]
+                t001 [label="";shape=doublecircle,rank=middle]
+                t002 [label=<1,2: a&#9251;long&#9251;<br/>1,2: <i>/root</i>>]
+                t003 [label=<1: text&#9251;<br/>1: <i>/root/subst/del</i>>]
+                t004 [label=<1,2: that&#9251;<br/>1: <i>/root/subst/del</i><br/>2: <i>/root</i><br/>>]
+                t005 [label=<1,2: is&#9251;<br/>1: <i>/root/subst/del</i><br/>2: <i>/root</i><br/>>]
+                t006 [label=<1: different<br/>1: <i>/root/subst/del</i>>]
+                t007 [label=<1,2: text&#9251;that&#9251;is&#9251;<br/>1: <i>/root/subst/add</i><br/>2: <i>/root</i><br/>>]
+                t008 [label=<1,2: very&#9251;long<br/>1: <i>/root/subst/add</i><br/>2: <i>/root</i><br/>>]
+                t000->t002[label="1,2"]
+                t002->t003[label="1"]
+                t002->t007[label="1,2"]
+                t003->t004[label="1"]
+                t004->t005[label="1"]
+                t005->t006[label="1"]
+                t005->t008[label="2"]
+                t006->t001[label="1"]
+                t007->t005[label="2"]
+                t007->t008[label="1"]
+                t008->t001[label="1,2"]
+                }
+                """.trimIndent()
+            val expectedTable = """
+                ┌───┬───────┬─────────────────┬─────────┬───────┬─────────────┐
+                │[1]│       │[+] text that  is│         │       │[+] very long│
+                │   │a long │[-] text         │[-] that │[-] is │[-] different│
+                ├───┼───────┼─────────────────┼─────────┼───────┼─────────────┤
+                │[2]│a long │text that is     │that     │is     │very long    │
+                └───┴───────┴─────────────────┴─────────┴───────┴─────────────┘
+                """.trimIndent()
+            testHyperCollation(w1, w2, expectedDot, expectedTable)
+        }
+
+        //
+        //        2: Add en del branches hebben beide interessante tokens, er zijn geen duplicates.
+        //
+        //        W1: <root>  a b <subst><add> c d e </add><del> f g </del></subst> </root>
+        //
+        //        W2: <root> a b c d e f g </root>
+        //
+        //        Gewenste uitkomst:
+        //        root volgen, daarna add, daarna del. Je switcht dan niet heen en weer van branches tijdens de alignment.
+        //
+        @Test
+        @Timeout(15)
+        fun trd_642_2() {
+            val importer = XMLImporter()
+            val w1 = importer.importXML(
+                    "1", "<root>a b <subst><add>c d e</add><del>f g</del></subst></root>")
+            val w2 = importer.importXML(
+                    "2", "<root>a b c d e f g</root>")
+            val expectedDot = """
+                digraph CollationGraph{
+                labelloc=b
+                t000 [label="";shape=doublecircle,rank=middle]
+                t001 [label="";shape=doublecircle,rank=middle]
+                t002 [label=<A,B: well&#9251;<br/>A,B: <i>/e</i>>]
+                t003 [label=<A: in&#9251;<br/>A: <i>/e/subst/del</i>>]
+                t004 [label=<A,B: his&#9251;<br/>A: <i>/e/subst/del</i><br/>B: <i>/e</i><br/>>]
+                t005 [label=<A: own&#9251;way<br/>A: <i>/e/subst/del</i>>]
+                t006 [label=<A,B: at&#9251;<br/>A: <i>/e/subst/add</i><br/>B: <i>/e</i><br/>>]
+                t007 [label=<A: his&#9251;<br/>A: <i>/e/subst/add</i>>]
+                t008 [label=<A,B: own&#9251;<br/>A: <i>/e/subst/add</i><br/>B: <i>/e</i><br/>>]
+                t009 [label=<A: pace<br/>A: <i>/e/subst/add</i>>]
+                t010 [label=<A,B: .<br/>A,B: <i>/e</i>>]
+                t011 [label=<B: gait<br/>B: <i>/e</i>>]
+                t000->t002[label="A,B"]
+                t002->t003[label="A"]
+                t002->t006[label="A,B"]
+                t003->t004[label="A"]
+                t004->t005[label="A"]
+                t004->t008[label="B"]
+                t005->t010[label="A"]
+                t006->t004[label="B"]
+                t006->t007[label="A"]
+                t007->t008[label="A"]
+                t008->t009[label="A"]
+                t008->t011[label="B"]
+                t009->t010[label="A"]
+                t010->t001[label="A,B"]
+                t011->t010[label="B"]
+                }
+                """.trimIndent()
+            val expectedTable = """
+                ┌───┬─────┬───────┬───────────┬────────┬─┐
+                │[A]│     │[+] at │[+] his own│[+] pace│ │
+                │   │well │[-] in │[-] his own│[-] way │.│
+                ├───┼─────┼───────┼───────────┼────────┼─┤
+                │[B]│well │at     │his own    │gait    │.│
+                └───┴─────┴───────┴───────────┴────────┴─┘
+                """.trimIndent()
+            testHyperCollation(w1, w2, expectedDot, expectedTable)
+        }
+
+        //        3: Branches in branches
+        //
+        //        W1: <root>  a b <subst><add> c d e <subst><add> f g h</add><del> bla die bla</del></subst></add><del> f g </del></subst> </root>
+        //
+        //        W2: <root> a b c d e f g h </root>
+        //
+        //        Gewenste uitkomst:
+        //        root volgen, dan de eerste subst/add, dan de tweede subs/add.
+        @Test
+        @Timeout(15)
+        fun trd_642_3() {
+            val importer = XMLImporter()
+            val w1 = importer.importXML(
+                    "1", "<root>a b <subst><add>c d e<subst><add>f g h</add><del>bla die bla</del></subst></add><del>f g</del></subst></root>")
+            val w2 = importer.importXML(
+                    "2", "<root>a b c d e f g h</root>")
+            val expectedDot = """
+                digraph CollationGraph{
+                labelloc=b
+                t000 [label="";shape=doublecircle,rank=middle]
+                t001 [label="";shape=doublecircle,rank=middle]
+                t002 [label=<A,B: well&#9251;<br/>A,B: <i>/e</i>>]
+                t003 [label=<A: in&#9251;<br/>A: <i>/e/subst/del</i>>]
+                t004 [label=<A,B: his&#9251;<br/>A: <i>/e/subst/del</i><br/>B: <i>/e</i><br/>>]
+                t005 [label=<A: own&#9251;way<br/>A: <i>/e/subst/del</i>>]
+                t006 [label=<A,B: at&#9251;<br/>A: <i>/e/subst/add</i><br/>B: <i>/e</i><br/>>]
+                t007 [label=<A: his&#9251;<br/>A: <i>/e/subst/add</i>>]
+                t008 [label=<A,B: own&#9251;<br/>A: <i>/e/subst/add</i><br/>B: <i>/e</i><br/>>]
+                t009 [label=<A: pace<br/>A: <i>/e/subst/add</i>>]
+                t010 [label=<A,B: .<br/>A,B: <i>/e</i>>]
+                t011 [label=<B: gait<br/>B: <i>/e</i>>]
+                t000->t002[label="A,B"]
+                t002->t003[label="A"]
+                t002->t006[label="A,B"]
+                t003->t004[label="A"]
+                t004->t005[label="A"]
+                t004->t008[label="B"]
+                t005->t010[label="A"]
+                t006->t004[label="B"]
+                t006->t007[label="A"]
+                t007->t008[label="A"]
+                t008->t009[label="A"]
+                t008->t011[label="B"]
+                t009->t010[label="A"]
+                t010->t001[label="A,B"]
+                t011->t010[label="B"]
+                }
+                """.trimIndent()
+            val expectedTable = """
+                ┌───┬─────┬───────┬───────────┬────────┬─┐
+                │[A]│     │[+] at │[+] his own│[+] pace│ │
+                │   │well │[-] in │[-] his own│[-] way │.│
+                ├───┼─────┼───────┼───────────┼────────┼─┤
+                │[B]│well │at     │his own    │gait    │.│
+                └───┴─────┴───────┴───────────┴────────┴─┘
+                """.trimIndent()
+            testHyperCollation(w1, w2, expectedDot, expectedTable)
+        }
+
+        //
+        //        4. De beste match kan ook deels na de branch liggen.
+        //
+        //        W1: <root>  a b <subst><add> c d <del> e f  </del></subst> e  f g h i j</root>
+        //
+        //        W2: <root> a b c d e f g h i j </root>
+        //
+        //        Gewenste uitkomst:
+        //        root volgen, dan de add, daar c d uithalen, dan e f g h i j matchen na de branch, want de match na de branch is langer dan wat er in del staat.
+        //
+        @Test
+        @Timeout(15)
+        fun trd_642_4() {
+            val importer = XMLImporter()
+            val w1 = importer.importXML(
+                    "1", "<root>a b <subst><add>c d<del>e f</del></subst> e f g h i j</root>")
+            val w2 = importer.importXML(
+                    "2", "<root>a b c d e f g h i j</root>")
+            val expectedDot = """
+                digraph CollationGraph{
+                labelloc=b
+                t000 [label="";shape=doublecircle,rank=middle]
+                t001 [label="";shape=doublecircle,rank=middle]
+                t002 [label=<A,B: well&#9251;<br/>A,B: <i>/e</i>>]
+                t003 [label=<A: in&#9251;<br/>A: <i>/e/subst/del</i>>]
+                t004 [label=<A,B: his&#9251;<br/>A: <i>/e/subst/del</i><br/>B: <i>/e</i><br/>>]
+                t005 [label=<A: own&#9251;way<br/>A: <i>/e/subst/del</i>>]
+                t006 [label=<A,B: at&#9251;<br/>A: <i>/e/subst/add</i><br/>B: <i>/e</i><br/>>]
+                t007 [label=<A: his&#9251;<br/>A: <i>/e/subst/add</i>>]
+                t008 [label=<A,B: own&#9251;<br/>A: <i>/e/subst/add</i><br/>B: <i>/e</i><br/>>]
+                t009 [label=<A: pace<br/>A: <i>/e/subst/add</i>>]
+                t010 [label=<A,B: .<br/>A,B: <i>/e</i>>]
+                t011 [label=<B: gait<br/>B: <i>/e</i>>]
+                t000->t002[label="A,B"]
+                t002->t003[label="A"]
+                t002->t006[label="A,B"]
+                t003->t004[label="A"]
+                t004->t005[label="A"]
+                t004->t008[label="B"]
+                t005->t010[label="A"]
+                t006->t004[label="B"]
+                t006->t007[label="A"]
+                t007->t008[label="A"]
+                t008->t009[label="A"]
+                t008->t011[label="B"]
+                t009->t010[label="A"]
+                t010->t001[label="A,B"]
+                t011->t010[label="B"]
+                }
+                """.trimIndent()
+            val expectedTable = """
+                ┌───┬─────┬───────┬───────────┬────────┬─┐
+                │[A]│     │[+] at │[+] his own│[+] pace│ │
+                │   │well │[-] in │[-] his own│[-] way │.│
+                ├───┼─────┼───────┼───────────┼────────┼─┤
+                │[B]│well │at     │his own    │gait    │.│
+                └───┴─────┴───────┴───────────┴────────┴─┘
+                """.trimIndent()
+            testHyperCollation(w1, w2, expectedDot, expectedTable)
         }
 
         @Test
@@ -1203,21 +1471,24 @@ class HyperCollatorTest {
             val duration = stopwatch.elapsed(TimeUnit.MILLISECONDS)
             LOG.info("Collating took {} ms.", duration)
             val collation = CollationGraphNodeJoiner.join(collation0)
-            val dot = CollationGraphVisualizer.toDot(
-                    collation,
-                    emphasizeWhitespace = true,
-                    hideMarkup = false
-            )
-            LOG.debug("dot=\n{}", dot)
-            writeGraph(dot, "graph")
-            assertThat(dot).isEqualTo(expectedDot)
+            SoftAssertions().apply {
+                val dot = CollationGraphVisualizer.toDot(
+                        collation,
+                        emphasizeWhitespace = true,
+                        hideMarkup = false
+                )
+                LOG.debug("dot=\n{}", dot)
+                writeGraph(dot, "graph")
+                assertThat(dot).isEqualTo(expectedDot)
 
-            val table = CollationGraphVisualizer.toTableASCII(collation, false)
-            LOG.debug("table=\n{}", table)
-            assertThat(table).isEqualTo(expectedTable.replace("\n", System.lineSeparator()))
+                val table = CollationGraphVisualizer.toTableASCII(collation, false)
+                LOG.debug("table=\n{}", table)
+                assertThat(table).isEqualTo(expectedTable.replace("\n", System.lineSeparator()))
 
-            val html = CollationGraphVisualizer.toTableHTML(collation)
-            LOG.debug("html=\n{}", html)
+                val html = CollationGraphVisualizer.toTableHTML(collation)
+                LOG.debug("html=\n{}", html)
+                assertAll()
+            }
 
             return collation
         }

@@ -39,8 +39,17 @@ data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val 
 
     fun chooseMatch(match: CollatedMatch): QuantumCollatedMatchList {
         val newChosen = chosenMatches + match
-        val newPotential = potentialMatches.newPotentialWhenChoosing(match)
+        val chosenBranchPaths: Set<List<Int>> = newChosen.map { it.branchPaths() }.flatten().toSet()
+        val newPotential = potentialMatches.newPotentialWhenChoosing(match, chosenBranchPaths)
         return QuantumCollatedMatchList(newChosen, newPotential)
+    }
+
+    private fun CollatedMatch.branchPaths(): Set<List<Int>> {
+        val witnessBranchPaths = witnessVertex.branchPath
+        val nodeBranchPaths = collatedNode.sigils.map { collatedNode.getBranchPath(it) }
+        val all = mutableListOf(witnessBranchPaths)
+        all.addAll(nodeBranchPaths)
+        return all.toSet()
     }
 
     fun discardMatch(match: CollatedMatch): QuantumCollatedMatchList {
@@ -50,9 +59,10 @@ data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val 
     }
 
     private fun List<CollatedMatch>.newPotentialWhenChoosing(
-            match: CollatedMatch
+            match: CollatedMatch,
+            chosenBranchPaths: Set<List<Int>>
     ): List<CollatedMatch> =
-            this - matchesInvalidatedByChoosing(match)
+            this - matchesInvalidatedByChoosing(match, chosenBranchPaths) - match
 
     private val stringSerialization: String by lazy { "($chosenMatches | $potentialMatches)" }
     override fun toString(): String = stringSerialization
@@ -63,17 +73,31 @@ data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val 
             other === this
 
     companion object {
-        private fun List<CollatedMatch>.matchesInvalidatedByChoosing(match: CollatedMatch): List<CollatedMatch> {
+        private fun List<CollatedMatch>.matchesInvalidatedByChoosing(
+                match: CollatedMatch,
+                chosenBranchPaths: Set<List<Int>>
+        ): List<CollatedMatch> {
             val node = match.collatedNode
             val tokenVertexForWitness = match.witnessVertex
             val minNodeRank = match.nodeRank
             val minVertexRank = match.vertexRank
-            return filter { m: CollatedMatch ->
-                m.collatedNode == node ||
-                        m.witnessVertex == tokenVertexForWitness ||
-                        m.vertexRank < minVertexRank ||
-                        (m.nodeRank < minNodeRank && m hasSigilOverlapWith node)
-            }
+            val groupBy = this.groupBy { it.toString() }
+            val map = groupBy
+                    .map { entry ->
+                        if (entry.value.size == 1)
+                            entry.value
+                        else {
+                            entry.value.filter { cm -> cm.sigils.map { cm.getBranchPath(it) }.any { it !in chosenBranchPaths } }
+                        }
+                    }
+            return map
+                    .flatten()
+                    .filter { m: CollatedMatch ->
+                        m.collatedNode == node ||
+                                m.witnessVertex == tokenVertexForWitness ||
+                                m.vertexRank < minVertexRank ||
+                                (m.nodeRank < minNodeRank && m hasSigilOverlapWith node)
+                    }
         }
 
         // m and node have witnesses in common
