@@ -39,7 +39,7 @@ data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val 
 
     fun chooseMatch(match: CollatedMatch): QuantumCollatedMatchList {
         val newChosen = chosenMatches + match
-        val newPotential = calculateNewPotential(potentialMatches, match)
+        val newPotential = potentialMatches.newPotentialWhenChoosing(match)
         return QuantumCollatedMatchList(newChosen, newPotential)
     }
 
@@ -49,13 +49,10 @@ data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val 
         return QuantumCollatedMatchList(newChosen, newPotential)
     }
 
-    private fun calculateNewPotential(
-            potentialMatches: List<CollatedMatch>,
+    private fun List<CollatedMatch>.newPotentialWhenChoosing(
             match: CollatedMatch
-    ): List<CollatedMatch> {
-        val invalidatedMatches = calculateInvalidatedMatches(potentialMatches, match)
-        return potentialMatches - invalidatedMatches
-    }
+    ): List<CollatedMatch> =
+            this - matchesInvalidatedByChoosing(match)
 
     private val stringSerialization: String by lazy { "($chosenMatches | $potentialMatches)" }
     override fun toString(): String = stringSerialization
@@ -66,28 +63,26 @@ data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val 
             other === this
 
     companion object {
-        private fun calculateInvalidatedMatches(potentialMatches: List<CollatedMatch>, match: CollatedMatch): List<CollatedMatch> {
+        private fun List<CollatedMatch>.matchesInvalidatedByChoosing(match: CollatedMatch): List<CollatedMatch> {
             val node = match.collatedNode
             val tokenVertexForWitness = match.witnessVertex
             val minNodeRank = match.nodeRank
             val minVertexRank = match.vertexRank
-            return potentialMatches
-                    .filter { m: CollatedMatch ->
-                        m.collatedNode == node ||
-                                m.witnessVertex == tokenVertexForWitness ||
-                                m.vertexRank < minVertexRank ||
-                                (m.nodeRank < minNodeRank && hasSigilOverlap(m, node))
-                    }
+            return filter { m: CollatedMatch ->
+                m.collatedNode == node ||
+                        m.witnessVertex == tokenVertexForWitness ||
+                        m.vertexRank < minVertexRank ||
+                        (m.nodeRank < minNodeRank && m hasSigilOverlapWith node)
+            }
         }
 
         // m and node have witnesses in common
-        // for those witnesses they have in common, the branchpath of one is the startsubpath otf the
+        // for those witnesses they have in common, the branch path of one is the start subpath of the
         // other.
-        private fun hasSigilOverlap(m: CollatedMatch, node: TextNode): Boolean =
-                m.sigils
-                        .asSequence()
+        private infix fun CollatedMatch.hasSigilOverlapWith(node: TextNode): Boolean =
+                sigils.asSequence()
                         .filter { it in node.sigils }
-                        .any { branchPathsOverlap(m.getBranchPath(it)!!, node.getBranchPath(it)) }
+                        .any { branchPathsOverlap(getBranchPath(it)!!, node.getBranchPath(it)) }
 
         fun branchPathsOverlap(matchBranchPath: List<Int>, nodeBranchPath: List<Int>): Boolean {
             val minSize = min(matchBranchPath.size, nodeBranchPath.size)

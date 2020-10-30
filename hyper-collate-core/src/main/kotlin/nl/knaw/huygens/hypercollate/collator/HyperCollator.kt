@@ -103,13 +103,6 @@ class HyperCollator {
                 }
     }
 
-    private fun getCollatedMatches(
-            collatedTokenVertexMap: Map<TokenVertex, TextNode>,
-            matches: List<Match>,
-            sigil: String
-    ): List<CollatedMatch> =
-            matches.map { it.toCollatedMatch(sigil, collatedTokenVertexMap) }
-
     private fun Match.toCollatedMatch(
             sigil: String,
             collatedTokenVertexMap: Map<TokenVertex, TextNode>
@@ -135,7 +128,8 @@ class HyperCollator {
         val witnessSigil = witnessGraph.sigil
         collationGraph.sigils += witnessSigil
         markupNodeIndex.addMarkupNodes(collationGraph, witnessGraph)
-        val matchList = getCollatedMatches(collatedTokenVertexMap, filteredSortedMatchesForWitness, witnessSigil)
+        val matchList = filteredSortedMatchesForWitness
+                .map { it.toCollatedMatch(witnessSigil, collatedTokenVertexMap) }
                 .map { m: CollatedMatch -> m.adjustRankForCollatedNode(baseRanking) }
                 .distinct()
         LOG.debug("matchList={}, size={}", matchList, matchList.size)
