@@ -90,13 +90,16 @@ data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val 
                             entry.value.filter { cm -> cm.sigils.map { cm.getBranchPath(it) }.any { it !in chosenBranchPaths } }
                         }
                     }
-            return map
+            val flatten = map
                     .flatten()
+//            return flatten
+            return this
                     .filter { m: CollatedMatch ->
                         m.collatedNode == node ||
                                 m.witnessVertex == tokenVertexForWitness ||
                                 m.vertexRank < minVertexRank ||
-                                (m.nodeRank < minNodeRank && m hasSigilOverlapWith node)
+                                (m.nodeRank < minNodeRank && m hasSigilOverlapWith node) /*||
+                                (m.vertexRank == match.vertexRank)*/
                     }
         }
 

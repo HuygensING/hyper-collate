@@ -705,9 +705,9 @@ class XMLImporterTest : HyperCollateTest() {
     fun normalize_sigil() {
         val softly = SoftAssertions()
         with(softly) {
-            assertThat(normalizedSigil("A")).isEqualTo("A")
-            assertThat(normalizedSigil("remove space")).isEqualTo("removespace")
-            assertThat(normalizedSigil("1 2 3 4")).isEqualTo("1234")
+            assertThat("A".normalizedSigil()).isEqualTo("A")
+            assertThat("remove space".normalizedSigil()).isEqualTo("removespace")
+            assertThat("1 2 3 4".normalizedSigil()).isEqualTo("1234")
             assertAll()
         }
     }

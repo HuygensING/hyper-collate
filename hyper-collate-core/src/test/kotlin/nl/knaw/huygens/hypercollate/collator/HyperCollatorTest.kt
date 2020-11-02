@@ -44,7 +44,7 @@ class HyperCollatorTest {
     @Nested
     inner class TwoWitnessTests : HyperCollateTest() {
 
-        @Disabled
+//        @Disabled
         @Test
         @Timeout(15)
         fun trd_642_0() {

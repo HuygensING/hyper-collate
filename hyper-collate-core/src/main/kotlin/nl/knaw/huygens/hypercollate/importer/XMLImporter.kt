@@ -72,7 +72,7 @@ class XMLImporter {
             }
 
     fun importXML(rawSigil: String, input: InputStream): VariantWitnessGraph {
-        val sigil = normalizedSigil(rawSigil)
+        val sigil = rawSigil.normalizedSigil()
         val graph = VariantWitnessGraph(sigil)
         val witness = SimpleWitness(sigil)
         val factory = XMLInputFactory.newInstance()
@@ -203,11 +203,11 @@ class XMLImporter {
             openMarkup.push(markup)
             parentXPath = buildParentXPath()
             when {
-                !inAppStack.peek() && isVariationStartingMarkup(markup) -> { // del
+                !inAppStack.peek() && markup.isVariationStartingMarkup() -> { // del
                     variationStartVertices.push(lastTokenVertex)
                     branchIds.push(nextBranchId())
                 }
-                !inAppStack.peek() && isVariationEndingMarkup(markup) -> { // add
+                !inAppStack.peek() && markup.isVariationEndingMarkup() -> { // add
                     if (afterDel) {
                         lastTokenVertex = variationStartVertices.pop()
                     } else { // add without immediately preceding del
@@ -218,14 +218,14 @@ class XMLImporter {
                     afterDel = false
                     branchIds.push(nextBranchId())
                 }
-                isApp(markup) -> { // app
+                markup.isApp() -> { // app
                     variationStartVertices.push(lastTokenVertex)
                     inAppStack.push(true)
                     unconnectedRdgVerticesStack.push(ArrayList())
                 }
-                isRdg(markup) -> { // rdg
+                markup.isRdg() -> { // rdg
                     rdg = markup.attributeMap["varSeq"] ?: rdgCounter.getAndIncrement().toString()
-                    if (isLitRdg(markup)) {
+                    if (markup.isLitRdg()) {
                         ignoreRdgStack.push(true)
                     } else {
                         lastTokenVertex = variationStartVertices.peek()
@@ -235,21 +235,9 @@ class XMLImporter {
             }
         }
 
-        private fun isApp(markup: Markup): Boolean =
-                "app" == markup.tagName
-
-        private fun isRdg(markup: Markup): Boolean =
-                "rdg" == markup.tagName
-
-        private fun isVariationStartingMarkup(markup: Markup): Boolean =
-                "del" == markup.tagName
-
-        private fun isVariationEndingMarkup(markup: Markup): Boolean =
-                "add" == markup.tagName
-
         fun closeMarkup(markup: Markup) {
             if (ignoreRdgStack.peek()) {
-                if (isRdg(markup) && isLitRdg(openMarkup.pop())) {
+                if (markup.isRdg() && openMarkup.pop().isLitRdg()) {
                     ignoreRdgStack.pop()
                 }
                 return
@@ -268,29 +256,29 @@ class XMLImporter {
                         "XML error: expected </$expectedTag>, got </$closingTag>")
             }
             when {
-                !inAppStack.peek() && isVariationStartingMarkup(markup) -> {
+                !inAppStack.peek() && markup.isVariationStartingMarkup() -> {
                     unconnectedVertices.push(lastTokenVertex)
                     branchIds.pop()
                     afterDel = true
                 }
-                !inAppStack.peek() && isVariationEndingMarkup(markup) -> {
+                !inAppStack.peek() && markup.isVariationEndingMarkup() -> {
                     variationEndVertices.push(lastTokenVertex)
                     branchIds.pop()
                 }
-                isApp(markup) -> {
+                markup.isApp() -> {
                     variationStartVertices.pop()
                     inAppStack.pop()
                     afterAppStack.push(true)
                 }
-                isRdg(markup) -> {
+                markup.isRdg() -> {
                     unconnectedRdgVerticesStack.peek().add(lastTokenVertex)
                     branchIds.pop()
                 }
             }
         }
 
-        private fun isLitRdg(markup: Markup): Boolean =
-                "lit" == markup.getAttributeValue("type").orElse("")
+        private fun Markup.isLitRdg(): Boolean =
+                "lit" == getAttributeValue("type").orElse("")
 
         fun addNewToken(content: String) {
             if (ignoreRdgStack.peek()) {
@@ -354,12 +342,12 @@ class XMLImporter {
 
         private fun buildParentXPath(): String =
                 ("/"
-                        + streamIterator(openMarkup.descendingIterator())
+                        + openMarkup.descendingIterator().streamIterator()
                         .map { obj: Markup -> obj.tagName }
                         .collect(Collectors.joining("/")))
 
-        private fun streamIterator(iterator: Iterator<Markup>): Stream<Markup> {
-            val spliterator = Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED)
+        private fun Iterator<Markup>.streamIterator(): Stream<Markup> {
+            val spliterator = Spliterators.spliteratorUnknownSize(this, Spliterator.ORDERED)
             return StreamSupport.stream(spliterator, false)
         }
 
@@ -375,8 +363,14 @@ class XMLImporter {
     }
 
     companion object {
-        fun normalizedSigil(rawSigil: String): String {
-            return rawSigil.replace("[^0-9a-zA-Z]".toRegex(), "")
-        }
+        fun String.normalizedSigil(): String = replace("[^0-9a-zA-Z]".toRegex(), "")
+        private fun Markup.isApp(): Boolean = "app" == tagName
+
+        private fun Markup.isRdg(): Boolean = "rdg" == tagName
+
+        private fun Markup.isVariationStartingMarkup(): Boolean = "del" == tagName
+
+        private fun Markup.isVariationEndingMarkup(): Boolean = "add" == tagName
+
     }
 }
