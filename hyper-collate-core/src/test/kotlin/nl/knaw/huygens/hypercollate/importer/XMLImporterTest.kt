@@ -34,6 +34,31 @@ import java.util.stream.Collectors
 
 class XMLImporterTest : HyperCollateTest() {
     @Test
+    fun witness_with_subst() {
+        val importer = XMLImporter()
+        val wg0 = importer.importXML("A", "<xml>Mondays are <subst><sic>deaf bat</sic><corr>def bad</corr></subst>!</xml>")
+        val expectedDot = """
+            digraph VariantWitnessGraph{
+            graph [rankdir=LR]
+            labelloc=b
+            begin [label="";shape=doublecircle,rank=middle]
+            vA_000 [label=<Mondays&#9251;are&#9251;<br/><i>A: /xml</i>>]
+            vA_002 [label=<deaf&#9251;bat<br/><i>A: /xml/subst/sic</i>>]
+            vA_004 [label=<def&#9251;bad<br/><i>A: /xml/subst/corr</i>>]
+            vA_006 [label=<!<br/><i>A: /xml</i>>]
+            end [label="";shape=doublecircle,rank=middle]
+            begin->vA_000
+            vA_000->vA_002
+            vA_000->vA_004
+            vA_002->vA_006
+            vA_004->vA_006
+            vA_006->end
+            }
+            """.trimIndent()
+        verifyDotExport(wg0, expectedDot)
+    }
+
+    @Test
     fun testHoeLanger() {
         val importer = XMLImporter()
         //    VariantWitnessGraph wg0 = importer.importXML("A", "<xml>kon den vorst <del>min en

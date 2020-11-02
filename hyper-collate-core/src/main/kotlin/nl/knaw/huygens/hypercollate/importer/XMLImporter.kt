@@ -165,7 +165,7 @@ class XMLImporter {
     private fun handleProcessingInstruction(event: XMLEvent, context: Context): Unit =
             throw RuntimeException("unexpected event: ProcessingInstruction")
 
-    private class Context internal constructor(
+    private class Context(
             private val graph: VariantWitnessGraph, // tokenvertex after the </del> yet
             private val normalizer: Function<String, String>,
             witness: SimpleWitness
@@ -184,11 +184,16 @@ class XMLImporter {
         private var afterDel = false
         private val branchCounter = AtomicInteger(0)
         private val branchIds: Deque<Int> = LinkedList()
+
         private val inAppStack: Deque<Boolean> = LinkedList()
         private val ignoreRdgStack: Deque<Boolean> = LinkedList()
         private val afterAppStack: Deque<Boolean> = LinkedList()
         private val unconnectedRdgVerticesStack: Deque<MutableList<TokenVertex>> = LinkedList()
         private val rdgCounter = AtomicInteger(1)
+
+        private val inSubstStack: Deque<Boolean> = LinkedList()
+        private val afterSubstStack: Deque<Boolean> = LinkedList()
+        private val unconnectedSubstVerticesStack: Deque<MutableList<TokenVertex>> = LinkedList()
 
         private fun nextBranchId(): Int = branchCounter.getAndIncrement()
 
@@ -203,11 +208,11 @@ class XMLImporter {
             openMarkup.push(markup)
             parentXPath = buildParentXPath()
             when {
-                !inAppStack.peek() && markup.isVariationStartingMarkup() -> { // del
+                notInAppOrSubst() && markup.isVariationStartingMarkup() -> { // del
                     variationStartVertices.push(lastTokenVertex)
                     branchIds.push(nextBranchId())
                 }
-                !inAppStack.peek() && markup.isVariationEndingMarkup() -> { // add
+                notInAppOrSubst() && markup.isVariationEndingMarkup() -> { // add
                     if (afterDel) {
                         lastTokenVertex = variationStartVertices.pop()
                     } else { // add without immediately preceding del
@@ -217,6 +222,11 @@ class XMLImporter {
                     }
                     afterDel = false
                     branchIds.push(nextBranchId())
+                }
+                markup.isSubst() -> { // subst
+                    variationStartVertices.push(lastTokenVertex)
+                    inSubstStack.push(true)
+                    unconnectedSubstVerticesStack.push(ArrayList())
                 }
                 markup.isApp() -> { // app
                     variationStartVertices.push(lastTokenVertex)
@@ -231,6 +241,10 @@ class XMLImporter {
                         lastTokenVertex = variationStartVertices.peek()
                         branchIds.push(nextBranchId())
                     }
+                }
+                inSubst() -> {
+                    lastTokenVertex = variationStartVertices.peek()
+                    branchIds.push(nextBranchId())
                 }
             }
         }
@@ -252,18 +266,22 @@ class XMLImporter {
             val closingTag = markup.tagName
             val expectedTag = firstToClose.tagName
             if (expectedTag != closingTag) {
-                throw RuntimeException(
-                        "XML error: expected </$expectedTag>, got </$closingTag>")
+                throw RuntimeException("XML error: expected </$expectedTag>, got </$closingTag>")
             }
             when {
-                !inAppStack.peek() && markup.isVariationStartingMarkup() -> {
+                notInAppOrSubst() && markup.isVariationStartingMarkup() -> {
                     unconnectedVertices.push(lastTokenVertex)
                     branchIds.pop()
                     afterDel = true
                 }
-                !inAppStack.peek() && markup.isVariationEndingMarkup() -> {
+                notInAppOrSubst() && markup.isVariationEndingMarkup() -> {
                     variationEndVertices.push(lastTokenVertex)
                     branchIds.pop()
+                }
+                markup.isSubst() -> {
+                    variationStartVertices.pop()
+                    inSubstStack.pop()
+                    afterSubstStack.push(true)
                 }
                 markup.isApp() -> {
                     variationStartVertices.pop()
@@ -274,8 +292,20 @@ class XMLImporter {
                     unconnectedRdgVerticesStack.peek().add(lastTokenVertex)
                     branchIds.pop()
                 }
+                inSubst() -> {
+                    unconnectedSubstVerticesStack.peek().add(lastTokenVertex)
+                    branchIds.pop()
+                }
             }
         }
+
+        private fun notInAppOrSubst() = notInApp() && notInSubst()
+
+        private fun notInSubst() = !inSubst()
+
+        private fun inSubst() = inSubstStack.peek()
+
+        private fun notInApp() = !inAppStack.peek()
 
         private fun Markup.isLitRdg(): Boolean =
                 "lit" == getAttributeValue("type").orElse("")
@@ -305,6 +335,12 @@ class XMLImporter {
                         .filter { v: TokenVertex -> v != lastTokenVertex }
                         .forEach { v: TokenVertex -> graph.addOutgoingTokenVertexToTokenVertex(v, tokenVertex) }
                 afterAppStack.pop()
+            }
+            while (afterSubstStack.peek()) {
+                unconnectedSubstVerticesStack.pop()
+                        .filter { v: TokenVertex -> v != lastTokenVertex }
+                        .forEach { v: TokenVertex -> graph.addOutgoingTokenVertexToTokenVertex(v, tokenVertex) }
+                afterSubstStack.pop()
             }
             openMarkup
                     .descendingIterator()
@@ -352,8 +388,11 @@ class XMLImporter {
         }
 
         init {
-            lastTokenVertex = graph.startTokenVertex
             this.witness = witness
+            lastTokenVertex = graph.startTokenVertex
+            afterSubstStack.push(false)
+            inSubstStack.push(false)
+            unconnectedSubstVerticesStack.push(ArrayList())
             afterAppStack.push(false)
             ignoreRdgStack.push(false)
             inAppStack.push(false)
@@ -364,12 +403,11 @@ class XMLImporter {
 
     companion object {
         fun String.normalizedSigil(): String = replace("[^0-9a-zA-Z]".toRegex(), "")
+
+        private fun Markup.isSubst(): Boolean = "subst" == tagName
         private fun Markup.isApp(): Boolean = "app" == tagName
-
         private fun Markup.isRdg(): Boolean = "rdg" == tagName
-
         private fun Markup.isVariationStartingMarkup(): Boolean = "del" == tagName
-
         private fun Markup.isVariationEndingMarkup(): Boolean = "add" == tagName
 
     }

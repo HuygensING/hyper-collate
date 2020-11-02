@@ -121,23 +121,23 @@ class HyperCollatorTest {
                 t004 [label=<1: text&#9251;that&#9251;is&#9251;different<br/>1: <i>/root/subst/del</i>>]
                 t000->t002[label="1,2"]
                 t002->t003[label="1,2"]
-                t002->t004[label="1"]
                 t003->t001[label="1,2"]
                 t003->t004[label="1"]
                 t004->t001[label="1"]
                 }
                 """.trimIndent()
             val expectedTable = """
-                ┌───┬───────┬──────────────────────────┬──────────────────────────┐
-                │[1]│a long │[+] text that is very long│[-] text that is different│
-                ├───┼───────┼──────────────────────────┼──────────────────────────┤
-                │[2]│a long │text that is very long    │                          │
-                └───┴───────┴──────────────────────────┴──────────────────────────┘
+                ┌───┬───────┬──────────────┬────────────────┐
+                │[1]│       │[+] text  that│[+] is very long│
+                │   │a long │[-] text that │[-] is different│
+                ├───┼───────┼──────────────┼────────────────┤
+                │[2]│a long │text that     │is very long    │
+                └───┴───────┴──────────────┴────────────────┘
                 """.trimIndent()
             testHyperCollation(w1, w2, expectedDot, expectedTable)
         }
 
-        @Disabled
+//        @Disabled
         @Test
         @Timeout(15)
         fun trd_642_1b() {
@@ -172,12 +172,12 @@ class HyperCollatorTest {
                 }
                 """.trimIndent()
             val expectedTable = """
-                ┌───┬───────┬──────────────────────────┬─────────────────────┐
-                │[1]│       │[+] text that is very long│                     │
-                │   │a long │[-] text                  │[-] that is different│
-                ├───┼───────┼──────────────────────────┼─────────────────────┤
-                │[2]│a long │text that is very long    │                     │            
-                └───┴───────┴──────────────────────────┴─────────────────────┘
+                ┌───┬───────┬──────────────┬────────────────┐
+                │[1]│       │[+] text  that│[+] is very long│
+                │   │a long │[-] text that │[-] is different│
+                ├───┼───────┼──────────────┼────────────────┤
+                │[2]│a long │text that     │is very long    │
+                └───┴───────┴──────────────┴────────────────┘
                 """.trimIndent()
             testHyperCollation(w1, w2, expectedDot, expectedTable)
         }

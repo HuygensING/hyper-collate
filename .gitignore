@@ -116,3 +116,8 @@ assertions-generation-report.txt
 hyper-collate-core/src/test/generated-assertions/
 **/dependency-reduced-pom.xml
 test-*.txt
+/doc/nla-433/1-generated/generated-variation-in-order-1.dot.svg
+/doc/nla-433/2-corrected/variation-in-structure-1.png
+/doc/nla-433/2-corrected/variation-in-structure-1.svg
+/doc/nla-433/2-corrected/variation-in-structure-2.png
+/doc/nla-433/2-corrected/variation-in-structure-2.svg
