@@ -48,11 +48,11 @@ object HC {
     }
 
     fun initCell() {
-        println("initCell")
+//        println("initCell")
     }
 
     fun shutdown() {
-        println("Goodbye from hyper-collate")
+//        println("Goodbye from hyper-collate")
     }
 
     fun importXMLWitness(sigil: String, xml: String): VariantWitnessGraph =
