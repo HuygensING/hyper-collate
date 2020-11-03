@@ -1,7 +1,7 @@
 {
   "description": "Collation machine",
   "properties": {
-    "v": "1.3.3-SNAPSHOT"
+    "v": "1.3.5-SNAPSHOT-2020110316"
   },
   "link": "https://github.com/HuygensING/hyper-collate",
   "dependencies": [
@@ -13,7 +13,7 @@
     "nl.knaw.huygens.hypercollate.model.*",
     "nl.knaw.huygens.hypercollate.jupyter.*"
   ],
-  "init": ["HC.init()\nfun VariantWitnessGraph.show(colored: Boolean = true, join: Boolean = true, emphasizeWhitespace: Boolean = false) = MIME(this.asSVGPair(colored, join, emphasizeWhitespace))\nfun CollationGraph.asHtml() = HTML(this.asHTMLString())\nfun CollationGraph.show(join: Boolean = true, emphasizeWhitespace: Boolean = false) = MIME(this.asSVGPair(join, emphasizeWhitespace))\n"],
+  "init": ["HC.init()\nfun VariantWitnessGraph.show(colored: Boolean = true, join: Boolean = true, emphasizeWhitespace: Boolean = false) = MIME(this.asSVGPair(colored, join, emphasizeWhitespace))\nfun CollationGraph.asHtml() = HTML(this.asHTMLString())\nfun CollationGraph.show(join: Boolean = true, emphasizeWhitespace: Boolean = false) = MIME(this.asSVGPair(join, emphasizeWhitespace))\nHTML(\"<style>div.output_area pre {white-space: pre;}</style>\")\n"],
   "initCell": ["HC.initCell()"],
   "shutdown": ["HC.shutdown()"],
   "renderers": {"nl.knaw.huygens.hypercollate.model.CollationGraph":  "HTML(LibraryConfig.renderCollationGraph($it))"}
