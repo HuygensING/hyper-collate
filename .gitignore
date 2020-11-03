@@ -8,6 +8,7 @@
 *.class
 *.cover
 *.ctxt
+*.DS_Store
 *.ear
 *.egg
 *.egg-info/
