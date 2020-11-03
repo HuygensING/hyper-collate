@@ -97,8 +97,7 @@ class XMLImporter {
                     XMLStreamConstants.NAMESPACE -> handleNameSpace(event, context)
                     XMLStreamConstants.NOTATION_DECLARATION -> handleNotationDeclaration(event, context)
                     XMLStreamConstants.ENTITY_DECLARATION -> handleEntityDeclaration(event, context)
-                    else -> {
-                    }
+                    else -> error("Unknown eventType: ${event.eventType}")
                 }
             }
             graph
@@ -168,17 +167,14 @@ class XMLImporter {
     private class Context(
             private val graph: VariantWitnessGraph, // tokenvertex after the </del> yet
             private val normalizer: Function<String, String>,
-            witness: SimpleWitness
+            private val witness: SimpleWitness
     ) {
         val openMarkup: Deque<Markup> = LinkedList()
         private var lastTokenVertex: TokenVertex
         private var tokenCounter = 0L
         private val variationStartVertices: Deque<TokenVertex> = LinkedList() // the tokenvertices whose outgoing vertices are the variant vertices
-
-        // (add/del)
         private val variationEndVertices: Deque<TokenVertex> = LinkedList() // the tokenvertices that are the last in a <del>
         private val unconnectedVertices: Deque<TokenVertex> = LinkedList() // the last tokenvertex in an <add> which hasn't been linked to the
-        private val witness: SimpleWitness
         private var rdg: String? = ""
         private var parentXPath: String? = null
         private var afterDel = false
@@ -216,9 +212,7 @@ class XMLImporter {
                     if (afterDel) {
                         lastTokenVertex = variationStartVertices.pop()
                     } else { // add without immediately preceding del
-                        unconnectedVertices.push(
-                                lastTokenVertex) // add link from vertex preceding the <add> to vertex following
-                        // </add>
+                        unconnectedVertices.push(lastTokenVertex) // add link from vertex preceding the <add> to vertex following </add>
                     }
                     afterDel = false
                     branchIds.push(nextBranchId())
@@ -388,15 +382,17 @@ class XMLImporter {
         }
 
         init {
-            this.witness = witness
             lastTokenVertex = graph.startTokenVertex
+
             afterSubstStack.push(false)
             inSubstStack.push(false)
             unconnectedSubstVerticesStack.push(ArrayList())
+
             afterAppStack.push(false)
             ignoreRdgStack.push(false)
             inAppStack.push(false)
             unconnectedRdgVerticesStack.push(ArrayList())
+
             branchIds.push(nextBranchId())
         }
     }

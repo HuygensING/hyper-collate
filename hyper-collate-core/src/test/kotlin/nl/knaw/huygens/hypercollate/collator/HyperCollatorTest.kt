@@ -28,6 +28,7 @@ import nl.knaw.huygens.hypercollate.importer.XMLImporter
 import nl.knaw.huygens.hypercollate.model.*
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer
+import nl.knaw.huygens.hypercollate.tools.DotFactory
 import org.assertj.core.api.SoftAssertions
 import org.assertj.core.util.Sets
 import org.junit.jupiter.api.Disabled
@@ -44,15 +45,22 @@ class HyperCollatorTest {
     @Nested
     inner class TwoWitnessTests : HyperCollateTest() {
 
-//        @Disabled
+        @Disabled
+        // both app/rdg and subst/* lead to witness branches
+        // join matches from different branches of a witness, if the branches are joined
+        // keep a list of which branches are joined (include sub-branches)
+        // when sorting the matchlist on witness, deal with matches where multiple joined branches are involved
+        // in the dot serialization, use $sigil<sup>$branchId</sup>
+        // when determining next neighbor, if the next match is in multiple joined branches of the witness, extra neighbors must be generated
         @Test
         @Timeout(15)
         fun trd_642_0() {
             val importer = XMLImporter()
             val wA = importer.importXML(
-                    "A", "<e>well <subst><del>in his own way</del><add>at his own pace</add></subst>.</e>")
+                    "A", "<e>well <subst><add>at his own pace</add><del>in his own way</del></subst>.</e>")
             val wB = importer.importXML(
                     "B", "<e>well at his own gait.</e>")
+            log.info("wA={}", wA.asDot())
             val expectedDot = """
                 digraph CollationGraph{
                 labelloc=b
@@ -97,12 +105,10 @@ class HyperCollatorTest {
         }
 
         //        1: Duplicates in add en del branches
-        //
         //        W1: <root> a long <subst><add> text that is very long </add><del> text that is different</del></subst> </root>
-        //
         //        W2: <root> a long text that is very long </root>
-        //
         //        Gewenste uitkomst: Moet alleen de add volgen.
+        @Disabled
         @Test
         @Timeout(15)
         fun trd_642_1a() {
@@ -137,7 +143,7 @@ class HyperCollatorTest {
             testHyperCollation(w1, w2, expectedDot, expectedTable)
         }
 
-//        @Disabled
+        @Disabled
         @Test
         @Timeout(15)
         fun trd_642_1b() {
@@ -182,16 +188,11 @@ class HyperCollatorTest {
             testHyperCollation(w1, w2, expectedDot, expectedTable)
         }
 
-        //
         //        2: Add en del branches hebben beide interessante tokens, er zijn geen duplicates.
-        //
         //        W1: <root>  a b <subst><add> c d e </add><del> f g </del></subst> </root>
-        //
         //        W2: <root> a b c d e f g </root>
-        //
         //        Gewenste uitkomst:
         //        root volgen, daarna add, daarna del. Je switcht dan niet heen en weer van branches tijdens de alignment.
-        //
         @Disabled
         @Test
         @Timeout(15)
@@ -244,11 +245,8 @@ class HyperCollatorTest {
         }
 
         //        3: Branches in branches
-        //
         //        W1: <root>  a b <subst><add> c d e <subst><add> f g h</add><del> bla die bla</del></subst></add><del> f g </del></subst> </root>
-        //
         //        W2: <root> a b c d e f g h </root>
-        //
         //        Gewenste uitkomst:
         //        root volgen, dan de eerste subst/add, dan de tweede subs/add.
         @Disabled
@@ -258,6 +256,7 @@ class HyperCollatorTest {
             val importer = XMLImporter()
             val w1 = importer.importXML(
                     "1", "<root>a b <subst><add>c d e<subst><add>f g h</add><del>bla die bla</del></subst></add><del>f g</del></subst></root>")
+            log.info("w1={}", w1.asDot())
             val w2 = importer.importXML(
                     "2", "<root>a b c d e f g h</root>")
             val expectedDot = """
@@ -302,16 +301,11 @@ class HyperCollatorTest {
             testHyperCollation(w1, w2, expectedDot, expectedTable)
         }
 
-        //
         //        4. De beste match kan ook deels na de branch liggen.
-        //
         //        W1: <root>  a b <subst><add> c d <del> e f  </del></subst> e  f g h i j</root>
-        //
         //        W2: <root> a b c d e f g h i j </root>
-        //
         //        Gewenste uitkomst:
         //        root volgen, dan de add, daar c d uithalen, dan e f g h i j matchen na de branch, want de match na de branch is langer dan wat er in del staat.
-        //
         @Disabled
         @Test
         @Timeout(15)
@@ -539,8 +533,8 @@ class HyperCollatorTest {
                 │    │[-] Ik had een buurvrouw, │een paar deuren verder, en │het    │ │was zo'n type │[-] dat naar het │[-] museum │      │   │[-] ging en │[-] cappuccino's │     │ │     │     │[-] dronk│     │[-] , dus ik │       │[-] kon er│ │weinig mee│[+] ko │[-] m│[+] n│, en zij kon weinig │met │        │   │mij│;    │ │we │      │ │knikten alleen naar elkaar, en als ik │Rocky │     │  │bij me had, │          │maakte ze van het knikken iets dat nog wat sneller │afgehandeld │     │           │moest │     │ │worden dan anders.│
                 └────┴──────────────────────────┴───────────────────────────┴───────┴─┴──────────────┴─────────────────┴───────────┴──────┴───┴────────────┴─────────────────┴─────┴─┴─────┴─────┴─────────┴─────┴─────────────┴───────┴──────────┴─┴──────────┴───────┴─────┴─────┴────────────────────┴────┴────────┴───┴───┴─────┴─┴───┴──────┴─┴──────────────────────────────────────┴──────┴─────┴──┴────────────┴──────────┴───────────────────────────────────────────────────┴────────────┴─────┴───────────┴──────┴─────┴─┴──────────────────┘
                 """.trimIndent()
-            LOG.info("w1={}", xml1)
-            LOG.info("w2={}", xml2)
+            log.info("w1={}", xml1)
+            log.info("w2={}", xml2)
             testHyperCollation(w1, w2, expectedDot, expectedTable)
         }
 
@@ -562,8 +556,8 @@ class HyperCollatorTest {
                 |</text>
                 """.trimMargin()
             val wQ = importer.importXML("Q", qXML)
-            LOG.info(fXML)
-            LOG.info(qXML)
+            log.info(fXML)
+            log.info(qXML)
             val expectedDotF = """
                 digraph VariantWitnessGraph{
                 graph [rankdir=LR]
@@ -988,7 +982,7 @@ class HyperCollatorTest {
                 </div>
                 </text>
                 """.trimIndent()
-            LOG.info("H: {}", xml1)
+            log.info("H: {}", xml1)
             val wF = importer.importXML("H", xml1)
             val xml2 = """
                 <text>
@@ -1000,7 +994,7 @@ class HyperCollatorTest {
                 </p>
                 </text>
                 """.trimIndent()
-            LOG.info("T: {}", xml2)
+            log.info("T: {}", xml2)
             val wQ = importer.importXML("T", xml2)
             val expectedDot = """
                 digraph CollationGraph{
@@ -1070,14 +1064,14 @@ class HyperCollatorTest {
                 </text>
                 """.trimIndent()
             val wF = importer.importXML("N", xmlN)
-            LOG.info("N: {}", xmlN)
+            log.info("N: {}", xmlN)
             val xmlF = """
                 <text>
                 <p>
                 <s>so infinitely miserable, so destitute of every hope of consolation to live?</s> <s>Oh, no! ... </s>
                 </p></text>
                 """.trimIndent()
-            LOG.info("F: {}", xmlF)
+            log.info("F: {}", xmlF)
             val wQ = importer.importXML("F", xmlF)
             val expectedDot = """
                 digraph CollationGraph{
@@ -1191,7 +1185,7 @@ class HyperCollatorTest {
             </text>
             """.trimIndent()
             val wF = importer.importXML("N", xmlN)
-            LOG.info("N: {}", xmlN)
+            log.info("N: {}", xmlN)
             val xmlF = """
             <text>
             <s>Frankenstein discovered
@@ -1200,7 +1194,7 @@ class HyperCollatorTest {
             </s>
             </text>
             """.trimIndent()
-            LOG.info("F: {}", xmlF)
+            log.info("F: {}", xmlF)
             val wQ = importer.importXML("F", xmlF)
             val expectedDot = """
             digraph CollationGraph{
@@ -1471,7 +1465,7 @@ class HyperCollatorTest {
             val collation0 = hyperCollator.collate(witness1, witness2)
             stopwatch.stop()
             val duration = stopwatch.elapsed(TimeUnit.MILLISECONDS)
-            LOG.info("Collating took {} ms.", duration)
+            log.info("Collating took {} ms.", duration)
             val collation = CollationGraphNodeJoiner.join(collation0)
             SoftAssertions().apply {
                 val dot = CollationGraphVisualizer.toDot(
@@ -1479,22 +1473,25 @@ class HyperCollatorTest {
                         emphasizeWhitespace = true,
                         hideMarkup = false
                 )
-                LOG.debug("dot=\n{}", dot)
+                log.debug("dot=\n{}", dot)
                 writeGraph(dot, "graph")
                 assertThat(dot).isEqualTo(expectedDot)
 
                 val table = CollationGraphVisualizer.toTableASCII(collation, false).replace(" ", " ")
-                LOG.debug("table=\n{}", table)
+                log.debug("table=\n{}", table)
                 assertThat(table).isEqualTo(expectedTable.replace("\n", System.lineSeparator()))
 
                 val html = CollationGraphVisualizer.toTableHTML(collation)
-                LOG.debug("html=\n{}", html)
+                log.debug("html=\n{}", html)
                 assertAll()
             }
 
             return collation
         }
     }
+
+    private fun VariantWitnessGraph.asDot(): String =
+            DotFactory(emphasizeWhitespace = true).fromVariantWitnessGraphSimple(this)
 
     @Nested
     inner class ThreeWitnessTests : HyperCollateTest() {
@@ -1645,7 +1642,7 @@ class HyperCollatorTest {
             var collation = hyperCollator.collate(witness1, witness2, witness3)
             stopwatch.stop()
             val duration = stopwatch.elapsed(TimeUnit.MILLISECONDS)
-            LOG.info("Collating took {} ms.", duration)
+            log.info("Collating took {} ms.", duration)
             val markupBeforeJoin = collation.markupStream.collect(Collectors.toSet())
             //    LOG.info("before join: collation markup = {}",
             // collation.getMarkupStream().map(Markup::toString).sorted().collect(toList()));
@@ -1656,16 +1653,16 @@ class HyperCollatorTest {
             assertThat(markupAfterJoin).containsExactlyElementsOf(markupBeforeJoin)
 
             val dot = CollationGraphVisualizer.toDot(collation, emphasizeWhitespace = true, hideMarkup = false)
-            LOG.info("dot=\n{}", dot)
+            log.info("dot=\n{}", dot)
             writeGraph(dot, "graph")
             assertThat(dot).isEqualTo(expectedDot)
 
             val table = CollationGraphVisualizer.toTableASCII(collation, true)
-            LOG.info("table=\n{}", table)
+            log.info("table=\n{}", table)
             assertThat(table).isEqualTo(expectedTable.replace("\n", System.lineSeparator()))
 
             val html = CollationGraphVisualizer.toTableHTML(collation)
-            LOG.debug("html=\n{}", html)
+            log.debug("html=\n{}", html)
 
             return collation
         }
@@ -1674,34 +1671,34 @@ class HyperCollatorTest {
     @Test
     @Timeout(10000)
     fun permute() {
-        val permute1 = hyperCollator.permute(3)
-        LOG.info("permute={}", visualize(permute1))
+        val permute1 = HyperCollator.permute(3)
+        log.info("permute={}", visualize(permute1))
         assertThat(Sets.newHashSet(permute1)).hasSameSizeAs(permute1)
         assertThat(permute1).hasSize(3)
-        val permute2 = hyperCollator.permute(4)
-        LOG.info("permute={}", visualize(permute2))
+        val permute2 = HyperCollator.permute(4)
+        log.info("permute={}", visualize(permute2))
         assertThat(Sets.newHashSet(permute2)).hasSameSizeAs(permute2)
         assertThat(permute2).hasSize(6)
-        val permute3 = hyperCollator.permute(10)
-        LOG.info("permute={}", visualize(permute3))
+        val permute3 = HyperCollator.permute(10)
+        log.info("permute={}", visualize(permute3))
         assertThat(Sets.newHashSet(permute3)).hasSameSizeAs(permute3)
         assertThat(permute3).hasSize(45)
     }
 
     @Test
     @Timeout(10000)
-    fun testPotentialMatches() {
+    fun potential_matches_1() {
         val importer = XMLImporter()
         val sigil1 = "A"
-        val sigil2 = "B"
-        val sigil3 = "C"
         val w1 = importer.importXML(sigil1, "<x>the black cat</x>")
+        val sigil2 = "B"
         val w2 = importer.importXML(sigil2, "<x>the blue dog</x>")
+        val sigil3 = "C"
         val w3 = importer.importXML(sigil3, "<x>the black dog</x>")
         val witnesses = listOf(w1, w2, w3)
         val rankings = witnesses.map { VariantWitnessGraphRanking.of(it) }
         val allPotentialMatches = hyperCollator.getPotentialMatches(witnesses, rankings)
-        LOG.info("allPotentialMatches={}", allPotentialMatches)
+        log.info("allPotentialMatches={}", allPotentialMatches)
         val match1 = "<A0,B0>"
         val match2 = "<A0,C0>"
         val match3 = "<A1,C1>"
@@ -1711,20 +1708,72 @@ class HyperCollatorTest {
         val match7 = "<A:EndTokenVertex,C:EndTokenVertex>"
         val match8 = "<B:EndTokenVertex,C:EndTokenVertex>"
         assertThat(allPotentialMatches).hasSize(8)
+
         val matchStrings = allPotentialMatches.map { it.toString() }.toSet()
-        assertThat(matchStrings)
-                .contains(match1, match2, match3, match4, match5, match6, match7, match8)
+        assertThat(matchStrings).containsOnly(match1, match2, match3, match4, match5, match6, match7, match8)
+
         val sortAndFilterMatchesByWitness = hyperCollator.sortAndFilterMatchesByWitness(
                 allPotentialMatches, listOf(sigil1, sigil2, sigil3))
-        LOG.info("sortAndFilterMatchesByWitness={}", sortAndFilterMatchesByWitness)
+        log.info("sortAndFilterMatchesByWitness={}", sortAndFilterMatchesByWitness)
         assertThat(sortAndFilterMatchesByWitness).containsOnlyKeys(sigil1, sigil2, sigil3)
-        val listA = stringList(sortAndFilterMatchesByWitness, sigil1)
+
+        val listA = sortAndFilterMatchesByWitness.stringList(sigil1)
         assertThat(listA).containsOnly(match1, match2, match3, match6, match7)
-        val listB = stringList(sortAndFilterMatchesByWitness, sigil2)
+
+        val listB = sortAndFilterMatchesByWitness.stringList(sigil2)
         assertThat(listB).containsOnly(match4, match1, match5, match6, match8)
-        val listC = stringList(sortAndFilterMatchesByWitness, sigil3)
+
+        val listC = sortAndFilterMatchesByWitness.stringList(sigil3)
         assertThat(listC).containsOnly(match4, match2, match3, match5, match7, match8)
     }
+
+    @Disabled
+    @Test
+    @Timeout(10000)
+    fun potential_matches_with_subst() {
+        val importer = XMLImporter()
+        val sigil1 = "A"
+        val w1 = importer.importXML(sigil1, "<e>well <subst><del>in his own way</del><add>at his own pace</add></subst>.</e>")
+        val sigil2 = "B"
+        val w2 = importer.importXML(sigil2, "<e>well at his own gait.</e>")
+        val witnesses = listOf(w1, w2)
+        val rankings = witnesses.map { VariantWitnessGraphRanking.of(it) }
+        val allPotentialMatches = hyperCollator.getPotentialMatches(witnesses, rankings)
+        log.info("allPotentialMatches={}", allPotentialMatches)
+
+        val matchA0B0 = "<A0,B0> - 'well '"
+        val matchA5B1 = "<A5,B1> - 'at '"
+        val matchA2B2 = "<A2,B2> - 'his '"
+        val matchA6B2 = "<A6,B2> - 'his '"
+        val matchA3B3 = "<A3,B3> - 'own '"
+        val matchA7B3 = "<A7,B3> - 'own '"
+        val matchA9B5 = "<A9,B5> - '.'"
+        val matchAendBend = "<A:EndTokenVertex,B:EndTokenVertex> - </end>"
+        assertThat(allPotentialMatches).hasSize(8)
+
+        val matchStrings = allPotentialMatches.map { it.pretty() }.toSet()
+        assertThat(matchStrings).containsOnly(matchA0B0, matchA3B3, matchA5B1, matchA2B2, matchA6B2, matchA7B3, matchA9B5, matchAendBend)
+
+        val sortAndFilterMatchesByWitness = hyperCollator.sortAndFilterMatchesByWitness(
+                allPotentialMatches, listOf(sigil1, sigil2))
+        log.info("sortAndFilterMatchesByWitness={}", sortAndFilterMatchesByWitness)
+        assertThat(sortAndFilterMatchesByWitness).containsOnlyKeys(sigil1, sigil2)
+
+        val listA = sortAndFilterMatchesByWitness[sigil1]?.map { it.pretty() }
+        assertThat(listA).containsExactly(matchA0B0, matchA3B3, matchA5B1, matchA6B2, matchA2B2, matchA7B3, matchA9B5, matchAendBend)
+
+        val listB = sortAndFilterMatchesByWitness[sigil2]?.map { it.pretty() }
+        assertThat(listB).containsExactly(matchA0B0, matchA3B3, matchA5B1, matchA2B2, matchA6B2, matchA7B3, matchA9B5, matchAendBend)
+    }
+
+    private fun Match.pretty(): String =
+            toString() + " - " + tokenVertexList.map {
+                when (it) {
+                    is SimpleTokenVertex -> "'" + it.content + "'"
+                    is EndTokenVertex -> "</end>"
+                    else -> "<somethingelse/>"
+                }
+            }.first()
 
     @Test
     fun min_or_null() {
@@ -1738,14 +1787,11 @@ class HyperCollatorTest {
     }
 
     companion object {
-        private val LOG = LoggerFactory.getLogger(HyperCollateTest::class.java)
+        private val log = LoggerFactory.getLogger(HyperCollateTest::class.java)
         val hyperCollator = HyperCollator()
 
-        private fun stringList(
-                sortAndFilterMatchesByWitness: Map<String, List<Match>>,
-                key: String
-        ): List<String> =
-                (sortAndFilterMatchesByWitness[key] ?: error("key $key not found in sortAndFilterMatchesByWitness"))
+        private fun Map<String, List<Match>>.stringList(key: String): List<String> =
+                (this[key] ?: error("key $key not found in sortAndFilterMatchesByWitness"))
                         .map(Match::toString)
 
         private fun visualize(list: List<Tuple<Int>>): String =

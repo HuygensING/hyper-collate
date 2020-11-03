@@ -51,8 +51,7 @@ class HyperCollator {
 //        visualize(collationGraph)
         for (witnessGraph in witnesses) {
             val sortedMatchesForWitness = matchesSortedByRankPerWitness[witnessGraph.sigil] ?: error("sigil not found")
-            collate(
-                    collationGraph,
+            collationGraph.collate(
                     witnessGraph,
                     sortedMatchesForWitness,
                     markupNodeIndex,
@@ -64,7 +63,7 @@ class HyperCollator {
 
     private fun CollationGraph.visualize() {
         val dot = CollationGraphVisualizer.toDot(this, emphasizeWhitespace = true, hideMarkup = false)
-        LOG.debug("dot={}", dot)
+        log.debug("dot={}", dot)
     }
 
     fun initialize(
@@ -98,8 +97,7 @@ class HyperCollator {
         witnessGraph
                 .markupStream
                 .forEach { markup: Markup ->
-                    val markupNode = collationGraph.addMarkupNode(witnessGraph.sigil, markup)
-                    this[markup] = markupNode
+                    this[markup] = collationGraph.addMarkupNode(witnessGraph.sigil, markup)
                 }
     }
 
@@ -115,37 +113,35 @@ class HyperCollator {
                 .withVertexRank(getRankForWitness(sigil)!!)
     }
 
-    private fun collate(
-            collationGraph: CollationGraph,
+    private fun CollationGraph.collate(
             witnessGraph: VariantWitnessGraph,
             sortedMatchesForWitness: List<Match>,
             markupNodeIndex: MutableMap<Markup, MarkupNode>,
             collatedTokenVertexMap: MutableMap<TokenVertex, TextNode>
     ) {
-        val baseRanking = CollationGraphRanking.of(collationGraph)
+        val baseRanking = CollationGraphRanking.of(this)
         val filteredSortedMatchesForWitness = sortedMatchesForWitness
-                .filter { m: Match -> collationGraph.sigils.any { m.hasWitness(it) } }
+                .filter { m: Match -> sigils.any { m.hasWitness(it) } }
         val witnessSigil = witnessGraph.sigil
-        collationGraph.sigils += witnessSigil
-        markupNodeIndex.addMarkupNodes(collationGraph, witnessGraph)
+        sigils += witnessSigil
+        markupNodeIndex.addMarkupNodes(this, witnessGraph)
         val matchList = filteredSortedMatchesForWitness
                 .map { it.toCollatedMatch(witnessSigil, collatedTokenVertexMap) }
                 .map { m: CollatedMatch -> m.adjustRankForCollatedNode(baseRanking) }
                 .distinct()
-        LOG.debug("matchList={}, size={}", matchList, matchList.size)
+        log.debug("matchList={}, size={}", matchList, matchList.size)
         val optimalMatchList = matchList.getOptimalMatchList()
-        LOG.debug("optimalMatchList={}, size={}", optimalMatchList, optimalMatchList.size)
+        log.debug("optimalMatchList={}, size={}", optimalMatchList, optimalMatchList.size)
         val witnessIterator: Iterator<TokenVertex> = VariantWitnessGraphTraversal.of(witnessGraph).iterator()
         val first = witnessIterator.next()
-        val rootNode: TextNode = collationGraph.textStartNode
+        val rootNode: TextNode = textStartNode
         collatedTokenVertexMap[first] = rootNode
-//        logCollated(collatedTokenVertexMap)
         while (optimalMatchList.isNotEmpty()) {
             val match: CollatedMatch = optimalMatchList.removeAt(0)
-            LOG.debug("match={}", match)
+            log.debug("match={}", match)
             val tokenVertexForWitnessGraph = match.witnessVertex
             witnessIterator.advanceWitness(
-                    collationGraph,
+                    this,
                     collatedTokenVertexMap,
                     tokenVertexForWitnessGraph,
                     witnessGraph,
@@ -158,13 +154,11 @@ class HyperCollator {
                         tokenVertexForWitnessGraph.sigil, tokenVertexForWitnessGraph.branchPath)
             }
             collatedTokenVertexMap[tokenVertexForWitnessGraph] = matchingNode
-            collationGraph.addMarkupHyperEdges(
+            addMarkupHyperEdges(
                     witnessGraph, markupNodeIndex, tokenVertexForWitnessGraph, matchingNode)
         }
-        collatedTokenVertexMap[witnessGraph.endTokenVertex] = collationGraph.textEndNode
-//        logCollated(collatedTokenVertexMap)
-        collationGraph.addEdges(collatedTokenVertexMap)
-//        logCollated(collatedTokenVertexMap)
+        collatedTokenVertexMap[witnessGraph.endTokenVertex] = textEndNode
+        addEdges(collatedTokenVertexMap)
     }
 
     private fun CollationGraph.addMarkupHyperEdges(
@@ -184,16 +178,14 @@ class HyperCollator {
     private fun CollatedMatch.adjustRankForCollatedNode(
             baseRanking: CollationGraphRanking
     ): CollatedMatch {
-        val node = collatedNode
-        val rank = baseRanking.apply(node)
-        nodeRank = rank
+        nodeRank = baseRanking.apply(collatedNode)
         return this
     }
 
-    private fun logCollated(collatedTokenVertexMap: Map<TokenVertex, TextNode>) {
+    private fun Map<TokenVertex, TextNode>.logCollated() {
         val lines: MutableList<String> = ArrayList()
-        collatedTokenVertexMap.forEach { (k: TokenVertex, v: TextNode) -> lines += "${k.sigil}:${k.token} -> $v" }
-        LOG.debug("collated={}", lines.sorted().joinToString("\n"))
+        forEach { (k: TokenVertex, v: TextNode) -> lines += "${k.sigil}:${k.token} -> $v" }
+        log.debug("collated={}", lines.sorted().joinToString("\n"))
     }
 
     private fun Iterator<TokenVertex>.advanceWitness(
@@ -264,7 +256,8 @@ class HyperCollator {
             val ranking1 = rankings[t.left!!]
             val witness2 = witnesses[t.right!!]
             val ranking2 = rankings[t.right!!]
-            match(witness1, witness2, ranking1, ranking2, allPotentialMatches, vertexToMatch)
+            allPotentialMatches.addMatchesFor(witness1, witness2, ranking1, ranking2, vertexToMatch)
+
             val endMatch = getEndMatch(witness1, ranking1, witness2, ranking2)
             allPotentialMatches += endMatch
         }
@@ -289,22 +282,11 @@ class HyperCollator {
         return endMatch
     }
 
-    fun permute(max: Int): List<Tuple<Int>> {
-        val list: MutableList<Tuple<Int>> = ArrayList()
-        for (left in 0 until max) {
-            for (right in left + 1 until max) {
-                list += Tuple(left, right)
-            }
-        }
-        return list
-    }
-
-    private fun match(
+    private fun MutableSet<Match>.addMatchesFor(
             witness1: VariantWitnessGraph,
             witness2: VariantWitnessGraph,
             ranking1: VariantWitnessGraphRanking,
             ranking2: VariantWitnessGraphRanking,
-            allPotentialMatches: MutableSet<Match>,
             vertexToMatch: MutableMap<TokenVertex, Match>
     ) {
         val traversal1 = VariantWitnessGraphTraversal.of(witness1)
@@ -321,7 +303,7 @@ class HyperCollator {
                                     val match = Match(tv1, tv2)
                                             .setRank(sigil1, ranking1.apply(tv1))
                                             .setRank(sigil2, ranking2.apply(tv2))
-                                    allPotentialMatches += match
+                                    this += match
                                     vertexToMatch[tv1] = match
                                     vertexToMatch[tv2] = match
                                 }
@@ -330,7 +312,7 @@ class HyperCollator {
     }
 
     companion object {
-        private val LOG = LoggerFactory.getLogger(HyperCollator::class.java)
+        private val log = LoggerFactory.getLogger(HyperCollator::class.java)
 
         private fun SimpleTokenVertex.matches(other: SimpleTokenVertex): Boolean {
             if (normalizedContent.isEmpty() && other.normalizedContent.isEmpty()) {
@@ -346,9 +328,7 @@ class HyperCollator {
             return normalizedContent == other.normalizedContent
         }
 
-        private fun CollationGraph.addEdges(
-                collatedTokenVertexMap: Map<TokenVertex, TextNode>
-        ) {
+        private fun CollationGraph.addEdges(collatedTokenVertexMap: Map<TokenVertex, TextNode>) {
             collatedTokenVertexMap
                     .keys
                     .forEach { tv: TokenVertex ->
@@ -374,6 +354,16 @@ class HyperCollator {
                                     }
                                 }
                     }
+        }
+
+        fun permute(max: Int): List<Tuple<Int>> {
+            val list: MutableList<Tuple<Int>> = ArrayList()
+            for (left in 0 until max) {
+                for (right in left + 1 until max) {
+                    list += Tuple(left, right)
+                }
+            }
+            return list
         }
     }
 }
