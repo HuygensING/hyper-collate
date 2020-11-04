@@ -33,7 +33,7 @@ import kotlin.math.max
 
 object CollationGraphVisualizer {
     private const val NBSP = "\u00A0"
-    val LOG: Logger = LoggerFactory.getLogger(this.javaClass)
+    val log: Logger = LoggerFactory.getLogger(this.javaClass)
 
     @JvmStatic
     fun toTableASCII(graph: CollationGraph, emphasizeWhitespace: Boolean): String {
@@ -42,7 +42,7 @@ object CollationGraphVisualizer {
         val rowMap: MutableMap<String, MutableList<Cell>> = HashMap()
         sigils.forEach { sigil: String -> rowMap[sigil] = ArrayList() }
         val ranking = CollationGraphRanking.of(graph)
-        LOG.info("ranking size={}", ranking.size)
+        log.info("ranking size={}", ranking.size)
         val maxLayers: MutableMap<String, Int> = HashMap()
         sigils.forEach { sigil: String -> maxLayers[sigil] = 1 }
         for (nodeSet in ranking) {

@@ -218,8 +218,7 @@ class HyperCollator {
             val collationNode = addTextNodeWithTokens(tokenVertex.token)
             collationNode.addBranchPath(tokenVertex.sigil, tokenVertex.branchPath)
             collatedTokenVertexMap[tokenVertex] = collationNode
-            addMarkupHyperEdges(
-                    witnessGraph, markupNodeIndex, tokenVertex, collationNode)
+            addMarkupHyperEdges(witnessGraph, markupNodeIndex, tokenVertex, collationNode)
         }
     }
 

@@ -8,13 +8,27 @@
     "nl.knaw.huygens:hyper-collate-core:$v",
     "nl.knaw.huygens:hyper-collate-jupyter:$v"
   ],
-  "repositories": ["http://maven.huygens.knaw.nl/repository/"],
+  "repositories": [
+    "http://maven.huygens.knaw.nl/repository/"
+  ],
   "imports": [
     "nl.knaw.huygens.hypercollate.model.*",
     "nl.knaw.huygens.hypercollate.jupyter.*"
   ],
-  "init": ["HC.init()\nfun VariantWitnessGraph.show(colored: Boolean = true, join: Boolean = true, emphasizeWhitespace: Boolean = false) = MIME(this.asSVGPair(colored, join, emphasizeWhitespace))\nfun CollationGraph.asHtml() = HTML(this.asHTMLString())\nfun CollationGraph.show(join: Boolean = true, emphasizeWhitespace: Boolean = false) = MIME(this.asSVGPair(join, emphasizeWhitespace))\n"],
-  "initCell": ["HC.initCell()\nHTML(\"<style>div.output_area pre {white-space: pre;};.rendered_html td {border: 1px solid}</style>\")"],
-  "shutdown": ["HC.shutdown()"],
-  "renderers": {"nl.knaw.huygens.hypercollate.model.CollationGraph":  "HTML(LibraryConfig.renderCollationGraph($it))"}
+  "init": [
+    "HC.init()",
+    "fun VariantWitnessGraph.show(colored: Boolean = true, join: Boolean = true, emphasizeWhitespace: Boolean = false) = MIME(this.asSVGPair(colored, join, emphasizeWhitespace))",
+    "fun CollationGraph.asHtml() = HTML(this.asHTMLString())",
+    "fun CollationGraph.show(join: Boolean = true, emphasizeWhitespace: Boolean = false) = MIME(this.asSVGPair(join, emphasizeWhitespace))",
+    "DISPLAY(HTML(\"<style>div.output_area pre {white-space: pre;} .rendered_html td {border: 1px solid}</style>\"))"
+  ],
+  "initCell": [
+    "HC.initCell()"
+  ],
+  "shutdown": [
+    "HC.shutdown()"
+  ],
+  "renderers": {
+    "nl.knaw.huygens.hypercollate.model.CollationGraph": "HTML(LibraryConfig.renderCollationGraph($it))"
+  }
 }
