@@ -27,8 +27,5 @@
   ],
   "shutdown": [
     "HC.shutdown()"
-  ],
-  "renderers": {
-    "nl.knaw.huygens.hypercollate.model.CollationGraph": "HTML(LibraryConfig.renderCollationGraph($it))"
-  }
+  ]
 }
