@@ -1,0 +1,24 @@
+digraph CollationGraph{
+    labelloc=b
+
+    t000 [label="";shape=doublecircle,rank=middle]
+    t001 [label="";shape=doublecircle,rank=middle]
+    t002 [label=<A,B: well&#9251;<br/>A,B: <i>/e</i>>]
+    t003 [label=<A<sup>-</sup>: in&#9251;<br/>A: <i>/e/subst/del</i>>]
+    t004 [label=<A<sup>+</sup>,B: at&#9251;<br/>A: <i>/e/subst/add</i><br/>B: <i>/e</i><br/>>]
+    t004a [label=<A<sup>-</sup>,A<sup>+</sup>,B: his&#9251;own&#9251;<br/>A: <i>/e/subst/del</i><br/>A: <i>/e/subst/add</i><br/>B: <i>/e</i><br/>>]
+    t005 [label=<A<sup>+</sup>: pace<br/>A: <i>/e/subst/add</i>>]
+    t005a [label=<A<sup>-</sup>: way<br/>A: <i>/e/subst/del</i>>]
+    t006 [label=<A,B: .<br/>A,B: <i>/e</i>>]
+    t007 [label=<B: gait<br/>B: <i>/e</i>>]
+
+    t000->t002[label="A,B"]
+    t002->t003[label=<A<sup>-</sup>>]
+    t002->t004[label=<A<sup>+</sup>,B>]
+    t003->t004a[label=<A<sup>-</sup>>]
+    t004->t004a[label=<A<sup>+</sup>,B>]
+    t004a->t005->t006[label=<A<sup>+</sup>>]
+    t004a->t005a->t006[label=<A<sup>-</sup>>]
+    t004a->t007->t006[label="B"]
+    t006->t001[label="A,B"]
+}

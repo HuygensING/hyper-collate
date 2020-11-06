@@ -31,16 +31,9 @@ import java.util.stream.Collectors.toSet
 class HyperCollator {
 
     fun collate(vararg graphs: VariantWitnessGraph): CollationGraph {
-        val sigils: MutableList<String> = mutableListOf()
-        val witnesses: MutableList<VariantWitnessGraph> = mutableListOf()
-        val rankings: MutableList<VariantWitnessGraphRanking> = mutableListOf()
-        graphs
-                .sortedBy { it.sigil }
-                .forEach { graph: VariantWitnessGraph ->
-                    sigils += graph.sigil
-                    witnesses += graph
-                    rankings += VariantWitnessGraphRanking.of(graph)
-                }
+        val witnesses: MutableList<VariantWitnessGraph> = graphs.sortedBy { it.sigil }.toMutableList()
+        val sigils: List<String> = witnesses.map { it.sigil }
+        val rankings: List<VariantWitnessGraphRanking> = witnesses.map { VariantWitnessGraphRanking.of(it) }
         val matches = getPotentialMatches(witnesses, rankings)
         val collationGraph = CollationGraph()
         val collatedTokenVertexMap: MutableMap<TokenVertex, TextNode> = HashMap()
@@ -130,7 +123,7 @@ class HyperCollator {
                 .map { m: CollatedMatch -> m.adjustRankForCollatedNode(baseRanking) }
                 .distinct()
         log.debug("matchList={}, size={}", matchList, matchList.size)
-        val optimalMatchList = matchList.getOptimalMatchList()
+        val optimalMatchList = matchList.optimized().toMutableList()
         log.debug("optimalMatchList={}, size={}", optimalMatchList, optimalMatchList.size)
         val witnessIterator: Iterator<TokenVertex> = VariantWitnessGraphTraversal.of(witnessGraph).iterator()
         val first = witnessIterator.next()
@@ -168,11 +161,11 @@ class HyperCollator {
             matchingNode: TextNode
     ) {
         witnessGraph
-                .getMarkupListForTokenVertex(tokenVertexForWitnessGraph)
+                .markupListForTokenVertex(tokenVertexForWitnessGraph)
                 .forEach { markup: Markup -> linkMarkupToText(markupNodeIndex[markup], matchingNode) }
     }
 
-    private fun List<CollatedMatch>.getOptimalMatchList(): MutableList<CollatedMatch> =
+    private fun List<CollatedMatch>.optimized(): List<CollatedMatch> =
             OptimalCollatedMatchListAlgorithm().getOptimalCollatedMatchList(this)
 
     private fun CollatedMatch.adjustRankForCollatedNode(
@@ -183,8 +176,7 @@ class HyperCollator {
     }
 
     private fun Map<TokenVertex, TextNode>.logCollated() {
-        val lines: MutableList<String> = ArrayList()
-        forEach { (k: TokenVertex, v: TextNode) -> lines += "${k.sigil}:${k.token} -> $v" }
+        val lines: List<String> = map { (k: TokenVertex, v: TextNode) -> "${k.sigil}:${k.token} -> $v" }
         log.debug("collated={}", lines.sorted().joinToString("\n"))
     }
 
@@ -222,27 +214,23 @@ class HyperCollator {
         }
     }
 
-    fun sortAndFilterMatchesByWitness(matches: Set<Match>, sigils: List<String>): Map<String, List<Match>> {
-        val map: MutableMap<String, List<Match>> = HashMap()
-        sigils.forEach { s: String ->
-            map[s] = matches.filterAndSortMatchesForWitness(s)
-        }
-        return map
-    }
+    fun sortAndFilterMatchesByWitness(matches: Set<Match>, sigils: List<String>): Map<String, List<Match>> =
+            sigils.map { it to matches.sortedAndFilteredForWitness(it) }.toMap()
 
-    private fun Set<Match>.filterAndSortMatchesForWitness(sigil: String): List<Match> {
-        val comparator = Comparator { match1: Match, match2: Match ->
-            var rank1 = match1.getRankForWitness(sigil) ?: error("invalid sigil $sigil")
-            var rank2 = match2.getRankForWitness(sigil) ?: error("invalid sigil $sigil")
-            if (rank1 == rank2) {
-                rank1 = match1.getLowestRankForWitnessesOtherThan(sigil)
-                rank2 = match2.getLowestRankForWitnessesOtherThan(sigil)
+    private fun Set<Match>.sortedAndFilteredForWitness(sigil: String): List<Match> =
+            filter { m: Match -> m.hasWitness(sigil) }
+                    .sortedWith(matchComparatorForSigil(sigil))
+
+    private fun matchComparatorForSigil(sigil: String): Comparator<Match> =
+            Comparator { match1: Match, match2: Match ->
+                var rank1 = match1.getRankForWitness(sigil) ?: error("invalid sigil $sigil")
+                var rank2 = match2.getRankForWitness(sigil) ?: error("invalid sigil $sigil")
+                if (rank1 == rank2) {
+                    rank1 = match1.getLowestRankForWitnessesOtherThan(sigil)
+                    rank2 = match2.getLowestRankForWitnessesOtherThan(sigil)
+                }
+                rank1.compareTo(rank2)
             }
-            rank1.compareTo(rank2)
-        }
-        return filter { m: Match -> m.hasWitness(sigil) }
-                .sortedWith(comparator)
-    }
 
     fun getPotentialMatches(
             witnesses: List<VariantWitnessGraph>,

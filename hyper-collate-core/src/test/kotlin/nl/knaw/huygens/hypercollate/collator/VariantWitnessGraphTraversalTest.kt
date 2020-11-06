@@ -80,7 +80,7 @@ class VariantWitnessGraphTraversalTest : HyperCollateTest() {
     }
 
     private fun markupTags(witnessGraph: VariantWitnessGraph, tokenVertex: TokenVertex): List<String> =
-            witnessGraph.getMarkupListForTokenVertex(tokenVertex)
+            witnessGraph.markupListForTokenVertex(tokenVertex)
                     .map { it.tagName }
 
 }

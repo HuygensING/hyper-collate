@@ -90,7 +90,7 @@ object TokenMerger {
                 .setIndexNumber(tokenNumber)
         val mergedVertex = SimpleTokenVertex(mergedToken).setBranchPath(originalVertex.branchPath)
         originalGraph
-                .getMarkupListForTokenVertex(originalVertex)
+                .markupListForTokenVertex(originalVertex)
                 .forEach { markup: Markup -> mergedGraph.addMarkupToTokenVertex(mergedVertex, markup) }
         originalToMergedMap[tokenNumber] = mergedVertex
         mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedVertexToLinkTo, mergedVertex)
@@ -121,6 +121,6 @@ object TokenMerger {
             originalVertex: TokenVertex,
             originalOutgoingVertices: List<TokenVertex>): Boolean =
             (originalOutgoingVertices.size == 1
-                    && (originalGraph.getMarkupListForTokenVertex(originalVertex)
-                    == originalGraph.getMarkupListForTokenVertex(originalOutgoingVertices[0])))
+                    && (originalGraph.markupListForTokenVertex(originalVertex)
+                    == originalGraph.markupListForTokenVertex(originalOutgoingVertices[0])))
 }

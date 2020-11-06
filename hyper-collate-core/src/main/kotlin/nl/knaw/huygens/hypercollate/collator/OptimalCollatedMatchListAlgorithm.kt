@@ -35,10 +35,9 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
 
     private val quantumCollatedMatchFingerprints: MutableSet<String> = mutableSetOf()
 
-    override val name: String
-        get() = "Four-Neighbours"
+    override val name: String = "Four-Neighbours"
 
-    override fun getOptimalCollatedMatchList(allPotentialMatches: Collection<CollatedMatch>): MutableList<CollatedMatch> {
+    override fun getOptimalCollatedMatchList(allPotentialMatches: Collection<CollatedMatch>): List<CollatedMatch> {
         val uniqueNodesInMatches = allPotentialMatches.map { it.collatedNode }.distinct().size
         val uniqueVerticesInMatches = allPotentialMatches.map { it.witnessVertex }.distinct().size
         maxPotential = min(uniqueNodesInMatches, uniqueVerticesInMatches)
@@ -52,7 +51,7 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
         sw.stop()
         LOG.debug("aStar took {} ms", sw.elapsed(TimeUnit.MILLISECONDS))
         val winningGoal = winningPath.last() ?: error("no winningPath found")
-        return winningGoal.chosenMatches.toMutableList()
+        return winningGoal.chosenMatches
     }
 
     override fun isGoal(matchList: QuantumCollatedMatchList): Boolean =

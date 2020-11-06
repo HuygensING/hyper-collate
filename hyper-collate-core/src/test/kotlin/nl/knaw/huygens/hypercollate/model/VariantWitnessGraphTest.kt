@@ -62,7 +62,7 @@ class VariantWitnessGraphTest : HyperCollateTest() {
         val endTokenVertex = vwg1.endTokenVertex
         vwg1.addOutgoingTokenVertexToTokenVertex(mtv5, endTokenVertex) // (.)->(END)
         vwg1.addMarkupToTokenVertex(mtv5, sMarkup)
-        val hardMarkup = vwg1.getMarkupListForTokenVertex(mtv3)
+        val hardMarkup = vwg1.markupListForTokenVertex(mtv3)
         assertThat(hardMarkup).containsExactly(sMarkup, delMarkup)
 
         val incoming = mtv5.incomingTokenVertexStream.collect(Collectors.toList())

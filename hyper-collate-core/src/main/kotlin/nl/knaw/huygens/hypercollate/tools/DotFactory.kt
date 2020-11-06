@@ -43,7 +43,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
         val clusterCounter = AtomicInteger()
         val colorContext = ColorContext()
         for (tokenVertex in graph.vertices()) {
-            val markupListForTokenVertex = graph.getMarkupListForTokenVertex(tokenVertex)
+            val markupListForTokenVertex = graph.markupListForTokenVertex(tokenVertex)
             val opened: MutableSet<Markup> = HashSet()
             opened.addAll(openMarkup)
             val markupToClose: MutableList<Markup> = ArrayList()

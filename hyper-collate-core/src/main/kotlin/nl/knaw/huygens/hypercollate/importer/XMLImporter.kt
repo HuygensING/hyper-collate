@@ -251,7 +251,7 @@ class XMLImporter {
                 return
             }
             val firstToClose = openMarkup.peek()
-            if (graph.getTokenVertexListForMarkup(firstToClose).isEmpty()) {
+            if (graph.tokenVertexListForMarkup(firstToClose).isEmpty()) {
                 // add milestone
                 addNewToken("")
             }

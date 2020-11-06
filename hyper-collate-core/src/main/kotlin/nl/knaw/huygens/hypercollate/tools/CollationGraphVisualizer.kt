@@ -84,10 +84,11 @@ object CollationGraphVisualizer {
     private fun newCell(tokens: List<MarkedUpToken>, whitespaceCharacter: String): Cell {
         val cell = Cell()
         if (tokens.isEmpty()) {
-            setCellLayer(cell, " ")
+            cell.setLayer(" ")
         } else {
             tokens.forEach { token: MarkedUpToken ->
-                var content = token.content.replace("\n".toRegex(), " ").replace(" +".toRegex(), whitespaceCharacter)
+                var content = token.content.replace("\n".toRegex(), " ")
+                        .replace(" +".toRegex(), whitespaceCharacter)
                 val parentXPath = token.parentXPath
                 when {
                     parentXPath.endsWith("/del/add") -> content = "[za] $content"
@@ -103,7 +104,7 @@ object CollationGraphVisualizer {
                     content = "<" + parentXPath.replace(".*/".toRegex(), "") + "/>"
                 }
                 //        String layerName = determineLayerName(parentXPath);
-                setCellLayer(cell, content)
+                cell.setLayer(content)
             }
         }
         return cell
@@ -120,8 +121,8 @@ object CollationGraphVisualizer {
         return layerName
     }
 
-    private fun setCellLayer(cell: Cell, content: String) {
-        cell.layerContent += content
+    private fun Cell.setLayer(content: String) {
+        layerContent += content
         //    String previousContent = cell.getLayerContent().put(layerName, content);
         //    Preconditions.checkState(previousContent == null, "layerName " + layerName + " used
         // twice!");
@@ -133,8 +134,7 @@ object CollationGraphVisualizer {
             cellHeights: Map<String, Int>
     ): AsciiTable {
         val table = AsciiTable().setTextAlignment(TextAlignment.LEFT)
-        val cwc = CWC_LongestLine()
-        table.renderer.cwc = cwc
+        table.renderer.cwc = CWC_LongestLine()
         table.addRule()
         sigils.forEach { sigil: String ->
             val row = (rowMap[sigil] ?: error("rowMap[$sigil] == null"))
@@ -153,16 +153,15 @@ object CollationGraphVisualizer {
         // ASCIITable has no TextAlignment.BOTTOM option, so add empty lines manually
         val emptyLinesToAdd = cellHeight - cell.layerContent.size
         for (i in 0 until emptyLinesToAdd) {
-            contentBuilder.append(
-                    "$NBSP<br>") // regular space or just <br> leads to ASCIITable error when rendering
+            contentBuilder.append("$NBSP<br>") // regular space or just <br> leads to ASCIITable error when rendering
         }
         val layerContent: List<String> = cell.layerContent.sorted().reversed()
         val joiner = StringJoiner("<br>")
         for (s in layerContent) {
             joiner.add(
-                    s.replace("\\[z]".toRegex(), "[+]")
-                            .replace("\\[a]".toRegex(), "[-]")
-                            .replace("\\[za]".toRegex(), "[+-]"))
+                    s.replace("""\[z]""".toRegex(), "[+]")
+                            .replace("""\[a]""".toRegex(), "[-]")
+                            .replace("""\[za]""".toRegex(), "[+-]"))
         }
         val content = joiner.toString()
         return contentBuilder.append(content).toString()
