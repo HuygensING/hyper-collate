@@ -50,7 +50,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
             markupToClose.addAll(opened)
             markupToClose.removeAll(markupListForTokenVertex)
             markupToClose.sortWith(Comparator.comparingInt { obj: Markup -> obj.depth })
-            markupToClose.forEach { closeMarkup(dotBuilder) }
+            repeat(markupToClose.size) { closeMarkup(dotBuilder) }
             val markupToOpen: MutableList<Markup> = ArrayList()
             markupToOpen.addAll(markupListForTokenVertex)
             markupToOpen.removeAll(opened)

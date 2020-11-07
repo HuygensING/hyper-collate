@@ -144,21 +144,15 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
     }
 
     class CollatedMatchNodeRankComparator : Comparator<CollatedMatch> {
-        override fun compare(o1: CollatedMatch?, o2: CollatedMatch?): Int {
-            if (o1 == null || o2 == null) {
-                return 0;
-            }
-            return o1.nodeRank.compareTo(o2.nodeRank)
-        }
+        override fun compare(o1: CollatedMatch?, o2: CollatedMatch?): Int =
+                if (o1 == null || o2 == null) 0
+                else o1.nodeRank.compareTo(o2.nodeRank)
     }
 
     class CollatedMatchVertexRankComparator : Comparator<CollatedMatch> {
-        override fun compare(o1: CollatedMatch?, o2: CollatedMatch?): Int {
-            if (o1 == null || o2 == null) {
-                return 0;
-            }
-            return o1.vertexRank.compareTo(o2.vertexRank)
-        }
+        override fun compare(o1: CollatedMatch?, o2: CollatedMatch?): Int =
+                if (o1 == null || o2 == null) 0
+                else o1.vertexRank.compareTo(o2.vertexRank)
     }
 
     companion object {
