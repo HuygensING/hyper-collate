@@ -65,6 +65,8 @@ public class CollationsResource {
   private static final String COLLATION_FORMATPATH = COLLATION_PATH + ".";
   private static final String COLLATION_ASCII_TABLE_PATH =
       COLLATION_SUBPATH + ResourcePaths.COLLATIONS_ASCII_TABLE;
+  private static final String COLLATION_HTML_TABLE_PATH =
+      COLLATION_SUBPATH + ResourcePaths.COLLATIONS_HTML_TABLE;
   private static final String COLLATION_DOT_PATH =
       COLLATION_FORMATPATH + ResourcePaths.COLLATIONS_DOT;
   private static final String COLLATION_SVG_PATH =
@@ -313,6 +315,21 @@ public class CollationsResource {
     return Response.ok(table).build();
   }
 
+  @GET
+  @Path(COLLATION_HTML_TABLE_PATH)
+  @Timed
+  @Produces(UTF8MediaType.TEXT_HTML)
+  @ApiOperation(
+      value =
+          "Get an HTML table visualization of the collation graph, with optional emphasizing of whitespace.")
+  public Response getHtmlTableVisualization(
+      @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,
+      @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace) {
+    CollationGraph collation = getExistingCollationGraph(name);
+    String table = CollationGraphVisualizer.toTableHTML(collation, emphasizeWhitespace);
+    return Response.ok(table).build();
+  }
+
   private URI collationURI(String collationId) {
     return URI.create(
         format(
@@ -388,7 +405,11 @@ public class CollationsResource {
   }
 
   private String getDot(
-      String name, String sigil, boolean emphasizeWhitespace, boolean joinTokens) {
+      String name,
+      String sigil,
+      boolean emphasizeWhitespace,
+      boolean joinTokens
+  ) {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     VariantWitnessGraph variantWitnessGraph = collationInfo.getWitnessGraphMap().get(sigil);
     if (joinTokens) {

@@ -74,7 +74,7 @@ fun CollationGraph.asASCIITable(emphasizeWhitespace: Boolean = false): String =
         CollationGraphVisualizer.toTableASCII(this, emphasizeWhitespace)
 
 fun CollationGraph.asHTMLString(emphasizeWhitespace: Boolean = false): String =
-        CollationGraphVisualizer.toTableHTML(this)
+        CollationGraphVisualizer.toTableHTML(this, emphasizeWhitespace)
 
 fun CollationGraph.asSVGPair(
         join: Boolean = false,

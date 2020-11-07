@@ -49,7 +49,7 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
         val sw = Stopwatch.createStarted()
         val winningPath = aStar(startNode, startCost)
         sw.stop()
-        LOG.debug("aStar took {} ms", sw.elapsed(TimeUnit.MILLISECONDS))
+        log.debug("aStar took {} ms", sw.elapsed(TimeUnit.MILLISECONDS))
         val winningGoal = winningPath.last() ?: error("no winningPath found")
         return winningGoal.chosenMatches
     }
@@ -143,17 +143,35 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
         return this.chosenMatches.size + min(uniquePotentialNodeMatches, uniquePotentialVertexMatches)
     }
 
-    companion object {
-        private val LOG = LoggerFactory.getLogger(OptimalCollatedMatchListAlgorithm::class.java)
+    class CollatedMatchNodeRankComparator : Comparator<CollatedMatch> {
+        override fun compare(o1: CollatedMatch?, o2: CollatedMatch?): Int {
+            if (o1 == null || o2 == null) {
+                return 0;
+            }
+            return o1.nodeRank.compareTo(o2.nodeRank)
+        }
+    }
 
-        private val matchNodeComparator = Comparator.comparing { obj: CollatedMatch -> obj.nodeRank }
-                .thenComparing { obj: CollatedMatch -> obj.vertexRank }
+    class CollatedMatchVertexRankComparator : Comparator<CollatedMatch> {
+        override fun compare(o1: CollatedMatch?, o2: CollatedMatch?): Int {
+            if (o1 == null || o2 == null) {
+                return 0;
+            }
+            return o1.vertexRank.compareTo(o2.vertexRank)
+        }
+    }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(OptimalCollatedMatchListAlgorithm::class.java)
+
+        private val matchNodeComparator = CollatedMatchNodeRankComparator()
+                .then(CollatedMatchVertexRankComparator())
 
         private fun Collection<CollatedMatch>.sortedByNode(): List<CollatedMatch> =
                 sortedWith(matchNodeComparator)
 
-        private val matchWitnessComparator = Comparator.comparing(CollatedMatch::vertexRank)
-                .thenComparing(CollatedMatch::nodeRank)
+        private val matchWitnessComparator = CollatedMatchVertexRankComparator()
+                .then(CollatedMatchNodeRankComparator())
 
         private fun Collection<CollatedMatch>.sortedByWitness(): List<CollatedMatch> =
                 sortedWith(matchWitnessComparator)

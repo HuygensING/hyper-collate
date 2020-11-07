@@ -38,7 +38,7 @@ import java.util.Optional;
 
 // to make these fields read-only
 @JsonIgnoreProperties(
-    value = {"^dot", "^png", "^svg", "^ascii_table"},
+    value = {"^dot", "^png", "^svg", "^ascii_table", "^html_table"},
     allowGetters = true)
 public class CollationInfo {
 
@@ -58,8 +58,7 @@ public class CollationInfo {
   State collationState = State.needs_witness;
   private boolean join = true;
 
-  CollationInfo() {
-  }
+  CollationInfo() {}
 
   public CollationInfo(String collationId, String baseURL) {
     this.id = collationId;
@@ -135,6 +134,11 @@ public class CollationInfo {
   @JsonProperty(value = "^ascii_table" /* , access = JsonProperty.Access.READ_ONLY */)
   public URI getAsciiTableURI() {
     return URI.create(uriBase + "/" + ResourcePaths.COLLATIONS_ASCII_TABLE);
+  }
+
+  @JsonProperty(value = "^html_table" /* , access = JsonProperty.Access.READ_ONLY */)
+  public URI getHtmlTableURI() {
+    return URI.create(uriBase + "/" + ResourcePaths.COLLATIONS_HTML_TABLE);
   }
 
   @JsonProperty(value = "witness_visualisations")

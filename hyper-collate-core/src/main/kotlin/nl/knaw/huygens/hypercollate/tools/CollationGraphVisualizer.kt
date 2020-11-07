@@ -167,8 +167,10 @@ object CollationGraphVisualizer {
         return contentBuilder.append(content).toString()
     }
 
-    fun toTableHTML(graph: CollationGraph): String {
+    @JvmStatic
+    fun toTableHTML(graph: CollationGraph, emphasizeWhitespace: Boolean): String {
         val sigils = graph.sigils
+        val whitespaceCharacter = if (emphasizeWhitespace) "_" else "&nbsp;"
         val ranking = CollationGraphRanking.of(graph)
         val cells: Map<String, MutableList<String>> = sigils.map { it to mutableListOf<String>() }.toMap()
         for (nodeSet in ranking) {
@@ -196,7 +198,7 @@ object CollationGraphVisualizer {
                 cells[sigil]!! += nodeTokensPerWitness[sigil]!!
                         .sortedBy { it.indexNumber }
                         .joinToString("&nbsp;") {
-                            var asHtml = it.content.replace(" ", "&nbsp;")
+                            var asHtml = it.content.replace(" ", whitespaceCharacter)
                             if (it.parentXPath.contains("app/rdg")) {
                                 asHtml += "<br/>"
                             }

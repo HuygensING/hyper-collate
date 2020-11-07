@@ -68,12 +68,12 @@ class CachedCollationStoreTest {
     fun testAddSampleCollations() {
         val store = CachedCollationStore(config)
         val collationIds = store.collationIds
-        LOG.info("collationIds={}", collationIds)
+        log.info("collationIds={}", collationIds)
         assertThat(collationIds).isNotEmpty
         assertThat(collationIds).allSatisfy { id: String -> id.startsWith("sample-") }
     }
 
     companion object {
-        private val LOG = LoggerFactory.getLogger(CachedCollationStore::class.java)
+        private val log = LoggerFactory.getLogger(CachedCollationStore::class.java)
     }
 }

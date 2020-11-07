@@ -1481,7 +1481,7 @@ class HyperCollatorTest {
                 log.debug("table=\n{}", table)
                 assertThat(table).isEqualTo(expectedTable.replace("\n", System.lineSeparator()))
 
-                val html = CollationGraphVisualizer.toTableHTML(collation)
+                val html = CollationGraphVisualizer.toTableHTML(collation, false)
                 log.debug("html=\n{}", html)
                 assertAll()
             }
@@ -1661,7 +1661,7 @@ class HyperCollatorTest {
             log.info("table=\n{}", table)
             assertThat(table).isEqualTo(expectedTable.replace("\n", System.lineSeparator()))
 
-            val html = CollationGraphVisualizer.toTableHTML(collation)
+            val html = CollationGraphVisualizer.toTableHTML(collation, true)
             log.debug("html=\n{}", html)
 
             return collation

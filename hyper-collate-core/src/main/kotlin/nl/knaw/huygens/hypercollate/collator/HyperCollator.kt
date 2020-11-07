@@ -123,7 +123,7 @@ class HyperCollator {
                 .map { m: CollatedMatch -> m.adjustRankForCollatedNode(baseRanking) }
                 .distinct()
         log.debug("matchList={}, size={}", matchList, matchList.size)
-        val optimalMatchList = matchList.optimized().toMutableList()
+        val optimalMatchList = optimized(matchList).toMutableList()
         log.debug("optimalMatchList={}, size={}", optimalMatchList, optimalMatchList.size)
         val witnessIterator: Iterator<TokenVertex> = VariantWitnessGraphTraversal.of(witnessGraph).iterator()
         val first = witnessIterator.next()
@@ -165,8 +165,8 @@ class HyperCollator {
                 .forEach { markup: Markup -> linkMarkupToText(markupNodeIndex[markup], matchingNode) }
     }
 
-    private fun List<CollatedMatch>.optimized(): List<CollatedMatch> =
-            OptimalCollatedMatchListAlgorithm().getOptimalCollatedMatchList(this)
+    private fun optimized(list: List<CollatedMatch>): List<CollatedMatch> =
+            OptimalCollatedMatchListAlgorithm().getOptimalCollatedMatchList(list)
 
     private fun CollatedMatch.adjustRankForCollatedNode(
             baseRanking: CollationGraphRanking

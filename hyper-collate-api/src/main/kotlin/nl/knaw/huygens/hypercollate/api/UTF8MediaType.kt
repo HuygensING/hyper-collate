@@ -25,6 +25,7 @@ import javax.ws.rs.core.MediaType
 object UTF8MediaType {
     private const val CHARSET_UTF8 = "; charset=UTF-8"
     const val TEXT_PLAIN = MediaType.TEXT_PLAIN + CHARSET_UTF8
+    const val TEXT_HTML = MediaType.TEXT_HTML + CHARSET_UTF8
     const val TEXT_XML = MediaType.TEXT_XML + CHARSET_UTF8
     const val APPLICATION_JSON = MediaType.APPLICATION_JSON + CHARSET_UTF8
 }

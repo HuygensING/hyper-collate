@@ -28,7 +28,7 @@ object ResourcePaths {
     const val COLLATIONS_DOT = "dot"
     const val COLLATIONS_SVG = "svg"
     const val COLLATIONS_PNG = "png"
-    const val COLLATIONS_ASCII_TABLE = "ascii_table"
-    const val COLLATIONS_HTML_TABLE = "html_table"
+    const val COLLATIONS_ASCII_TABLE = "table.txt"
+    const val COLLATIONS_HTML_TABLE = "table.html"
     const val WITNESSES = "witnesses"
 }

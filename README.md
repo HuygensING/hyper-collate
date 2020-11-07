@@ -118,7 +118,7 @@ You can visualise an individual witness as a variant graph via the `GET/collatio
   
 #### Get an ASCII table visualization of the collation graph:  
 
-`GET /collations/{name}/ascii_table`   
+`GET /collations/{name}/table.txt`   
 Click on `Try it out` and enter the name of the collation. Click on `Execute`. This should return response code `200 - OK`. The response body has a table of the collated text using ASCII. 
  
 This should return the table:
@@ -134,6 +134,11 @@ This should return the table:
 </pre>
 
 In this table the `<del>`eted text is indicated with `[-]`, and the `<add>`ed text with `[+]`. Significant whitespace in the witnesses is indicated with `_`
+
+#### Get an HTML table visualization of the collation graph:  
+
+`GET /collations/{name}/table.html`   
+Click on `Try it out` and enter the name of the collation. Click on `Execute`. This should return response code `200 - OK`. The response body has a table of the collated text using HTML. 
     
 
 #### Get a .dot visualization of the collation graph:
@@ -215,7 +220,7 @@ IMPORTANT: Make sure to run the `curl` commands in a _new_ terminal window; not 
 `curl -X PUT --header 'Content-Type: text/xml; charset=UTF-8' --header 'Accept: application/json; charset=UTF-8' -d '<xml>The rain in Spain falls mainly on the <del>street</del><add>plain</add>.</xml>' 'http://localhost:2018/collations/testcollation/witnesses/B'` 
 
 #### Get an ASCII table visualization of the collation graph:  
-`curl -X GET --header 'Accept: text/plain' 'http://localhost:2018/collations/testcollation/ascii_table'`    
+`curl -X GET --header 'Accept: text/plain' 'http://localhost:2018/collations/testcollation/table.txt'`    
 
 This should return the response body:
 
