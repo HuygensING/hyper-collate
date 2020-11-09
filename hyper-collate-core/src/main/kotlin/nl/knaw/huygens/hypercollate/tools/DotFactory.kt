@@ -24,6 +24,7 @@ import nl.knaw.huygens.hypercollate.model.*
 import java.lang.String.format
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.stream.Stream
 
 class DotFactory(emphasizeWhitespace: Boolean) {
     private val whitespaceCharacter: String = if (emphasizeWhitespace) "&#9251;" else "&nbsp;"
@@ -188,11 +189,33 @@ class DotFactory(emphasizeWhitespace: Boolean) {
                     .forEach { e: TextEdge ->
                         val source = collation.getSource(e)
                         val target: Node = collation.getTarget(e)
-                        val edgeLabel = e.sigils.sorted().joinToString(",")
-                        edgeLines += "${nodeIdentifiers[source]}->${nodeIdentifiers[target]}[label=\"$edgeLabel\"${e.penWidthParameter()}]\n"
+                        val edgeLabel = e.sigils.sorted().joinToString(",") { it.extendedSigil(collation.getMarkupNodeStreamForTextNode(node)) }
+                        edgeLines += "${nodeIdentifiers[source]}->${nodeIdentifiers[target]}[label=<$edgeLabel>${e.penWidthParameter()}]\n"
                     }
         }
         edgeLines.forEach { str: String? -> append(str) }
+    }
+
+    private fun String.extendedSigil(markupNodeStream: Stream<MarkupNode>): String {
+        val parentMarkupNode = markupNodeStream
+                .filter { it.sigil == this }
+                .sorted { n1, n2 -> n2.markup.depth.compareTo(n1.markup.depth) }
+                .findFirst()
+        if (!parentMarkupNode.isPresent) {
+            return this
+        }
+        val parentMarkup = parentMarkupNode.get().markup
+        val extension = when (parentMarkup.tagName) {
+            "add" -> "+"
+            "del" -> "-"
+            else -> null
+        }
+        return if (extension == null)
+            this
+        else
+//            "${this}<sup>$extension</sup>"
+            this
+
     }
 
     private fun StringBuilder.appendNodeLine(
@@ -221,11 +244,11 @@ class DotFactory(emphasizeWhitespace: Boolean) {
 
     private fun TextNode.generateNodeLabel(hideMarkup: Boolean): String {
         val label = StringBuilder()
+        val sortedSigils = sigils.sorted()
         val contentLabel: MutableMap<String, String> = HashMap()
         val markupLabel: MutableMap<String, String> = HashMap()
-        val sortedSigils = sigils.sorted()
-        val joinedSigils = sortedSigils.joinToString(",")
         prepare(sortedSigils, this, contentLabel, markupLabel)
+        val joinedSigils = sortedSigils.joinToString(",")
         label.appendContent(contentLabel, sortedSigils, joinedSigils)
         if (!hideMarkup) {
             if (label.isNotEmpty()) {
@@ -258,14 +281,14 @@ class DotFactory(emphasizeWhitespace: Boolean) {
             sortedSigils: List<String>,
             joinedSigils: String
     ) {
-        val markupLabelSet: Set<String> = HashSet(markupLabel.values)
+        val markupLabelSet: Set<String> = markupLabel.values.toSet()
         if (markupLabelSet.size == 1) {
             append(joinedSigils)
                     .append(": <i>")
                     .append(markupLabelSet.iterator().next())
                     .append("</i>")
         } else {
-            sortedSigils.forEach { s: String? -> append(s).append(": <i>").append(markupLabel[s]).append("</i><br/>") }
+            sortedSigils.forEach { s: String -> append(s).append(": <i>").append(markupLabel[s]).append("</i><br/>") }
         }
     }
 
@@ -274,7 +297,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
             sortedSigils: List<String>,
             joinedSigils: String
     ) {
-        val contentLabelSet: Set<String> = HashSet(contentLabel.values)
+        val contentLabelSet: Set<String> = contentLabel.values.toSet()
         if (contentLabelSet.size == 1) {
             append(joinedSigils).append(": ").append(contentLabelSet.iterator().next())
         } else {
