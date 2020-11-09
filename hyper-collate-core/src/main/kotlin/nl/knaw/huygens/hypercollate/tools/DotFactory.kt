@@ -190,7 +190,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
                         val source = collation.getSource(e)
                         val target: Node = collation.getTarget(e)
                         val edgeLabel = e.sigils.sorted().joinToString(",") { it.extendedSigil(collation.getMarkupNodeStreamForTextNode(node)) }
-                        edgeLines += "${nodeIdentifiers[source]}->${nodeIdentifiers[target]}[label=<$edgeLabel>${e.penWidthParameter()}]\n"
+                        edgeLines += "${nodeIdentifiers[source]}->${nodeIdentifiers[target]}[label=\"$edgeLabel\"${e.penWidthParameter()}]\n"
                     }
         }
         edgeLines.forEach { str: String? -> append(str) }
