@@ -25,6 +25,7 @@ import java.lang.String.format
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.stream.Stream
+import kotlin.Comparator
 
 class DotFactory(emphasizeWhitespace: Boolean) {
     private val whitespaceCharacter: String = if (emphasizeWhitespace) "&#9251;" else "&nbsp;"
@@ -160,12 +161,16 @@ class DotFactory(emphasizeWhitespace: Boolean) {
                 else -> null
             }
 
-    private val byNode = Comparator.comparing(TextNode::toString)
+    class TextNodeComparator : Comparator<TextNode> {
+        override fun compare(o1: TextNode?, o2: TextNode?): Int =
+                if (o1 == null || o2 == null) 0
+                else o1.toString().compareTo(o2.toString())
+    }
 
     fun fromCollationGraph(collation: CollationGraph, hideMarkup: Boolean): String {
         val dotBuilder = StringBuilder("digraph CollationGraph{\nlabelloc=b\n")
         val nodeIdentifiers: MutableMap<TextNode, String> = HashMap()
-        val nodes = collation.traverseTextNodes().sortedWith(byNode)
+        val nodes = collation.traverseTextNodes().sortedWith(TextNodeComparator())
         for (i in nodes.indices) {
             val node = nodes[i]
             val nodeId = "t" + String.format("%03d", i)

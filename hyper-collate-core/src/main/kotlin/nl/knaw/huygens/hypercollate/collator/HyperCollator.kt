@@ -219,15 +219,15 @@ class HyperCollator {
 
     private fun Set<Match>.sortedAndFilteredForWitness(sigil: String): List<Match> =
             filter { m: Match -> m.hasWitness(sigil) }
-                    .sortedWith(matchComparatorForSigil(sigil))
+                    .sortedWith(sigil.matchComparator())
 
-    private fun matchComparatorForSigil(sigil: String): Comparator<Match> =
+    private fun String.matchComparator(): Comparator<Match> =
             Comparator { match1: Match, match2: Match ->
-                var rank1 = match1.getRankForWitness(sigil) ?: error("invalid sigil $sigil")
-                var rank2 = match2.getRankForWitness(sigil) ?: error("invalid sigil $sigil")
+                var rank1 = match1.getRankForWitness(this) ?: error("invalid sigil ${this}")
+                var rank2 = match2.getRankForWitness(this) ?: error("invalid sigil ${this}")
                 if (rank1 == rank2) {
-                    rank1 = match1.getLowestRankForWitnessesOtherThan(sigil)
-                    rank2 = match2.getLowestRankForWitnessesOtherThan(sigil)
+                    rank1 = match1.getLowestRankForWitnessesOtherThan(this)
+                    rank2 = match2.getLowestRankForWitnessesOtherThan(this)
                 }
                 rank1.compareTo(rank2)
             }

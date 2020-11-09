@@ -203,7 +203,7 @@ object CollationGraphVisualizer {
                                 asHtml += "<br/>"
                             }
                             if (it in matchingTokens) {
-                                asHtml = "<span style=\"background:lightblue\">$asHtml</span>"
+                                asHtml = "<span style=\"background-color:lightblue\">$asHtml</span>"
                             }
                             when {
                                 it.parentXPath.endsWith("/del/add") -> "<sup><sup>$asHtml</sup></sup>"
