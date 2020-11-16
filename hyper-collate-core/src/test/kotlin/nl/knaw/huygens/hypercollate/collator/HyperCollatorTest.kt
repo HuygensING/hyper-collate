@@ -45,7 +45,7 @@ class HyperCollatorTest {
     @Nested
     inner class TwoWitnessTests : HyperCollateTest() {
 
-        @Disabled
+//        @Disabled
         // both app/rdg and subst/* lead to witness branches
         // join matches from different branches of a witness, if the branches are joined
         // keep a list of which branches are joined (include sub-branches)
@@ -66,40 +66,30 @@ class HyperCollatorTest {
                 labelloc=b
                 t000 [label="";shape=doublecircle,rank=middle]
                 t001 [label="";shape=doublecircle,rank=middle]
-                t002 [label=<A,B: well&#9251;<br/>A,B: <i>/e</i>>]
-                t003 [label=<A: in&#9251;<br/>A: <i>/e/subst/del</i>>]
-                t004 [label=<A,B: his&#9251;<br/>A: <i>/e/subst/del</i><br/>B: <i>/e</i><br/>>]
-                t005 [label=<A: own&#9251;way<br/>A: <i>/e/subst/del</i>>]
-                t006 [label=<A,B: at&#9251;<br/>A: <i>/e/subst/add</i><br/>B: <i>/e</i><br/>>]
-                t007 [label=<A: his&#9251;<br/>A: <i>/e/subst/add</i>>]
-                t008 [label=<A,B: own&#9251;<br/>A: <i>/e/subst/add</i><br/>B: <i>/e</i><br/>>]
-                t009 [label=<A: pace<br/>A: <i>/e/subst/add</i>>]
-                t010 [label=<A,B: .<br/>A,B: <i>/e</i>>]
-                t011 [label=<B: gait<br/>B: <i>/e</i>>]
-                t000->t002[label="A,B"]
-                t002->t003[label="A"]
-                t002->t006[label="A,B"]
+                t002 [label=<A,B: well&#9251;<br/>A,B: <i>/e</i>>;penwidth=2]
+                t003 [label=<A,B: at&#9251;his&#9251;own&#9251;<br/>A: <i>/e/subst/add</i><br/>B: <i>/e</i><br/>>;penwidth=2]
+                t004 [label=<A: pace<br/>A: <i>/e/subst/add</i>>]
+                t005 [label=<A: in&#9251;his&#9251;own&#9251;way<br/>A: <i>/e/subst/del</i>>]
+                t006 [label=<A,B: .<br/>A,B: <i>/e</i>>;penwidth=2]
+                t007 [label=<B: gait<br/>B: <i>/e</i>>]
+                t000->t002[label="A,B";penwidth=2]
+                t002->t003[label="A,B";penwidth=2]
+                t002->t005[label="A"]
                 t003->t004[label="A"]
-                t004->t005[label="A"]
-                t004->t008[label="B"]
-                t005->t010[label="A"]
-                t006->t004[label="B"]
-                t006->t007[label="A"]
-                t007->t008[label="A"]
-                t008->t009[label="A"]
-                t008->t011[label="B"]
-                t009->t010[label="A"]
-                t010->t001[label="A,B"]
-                t011->t010[label="B"]
+                t003->t007[label="B"]
+                t004->t006[label="A"]
+                t005->t006[label="A"]
+                t006->t001[label="A,B";penwidth=2]
+                t007->t006[label="B"]
                 }
                 """.trimIndent()
             val expectedTable = """
-                ┌───┬─────┬───────┬───────────┬────────┬─┐
-                │[A]│     │[+] at │[+] his own│[+] pace│ │
-                │   │well │[-] in │[-] his own│[-] way │.│
-                ├───┼─────┼───────┼───────────┼────────┼─┤
-                │[B]│well │at     │his own    │gait    │.│
-                └───┴─────┴───────┴───────────┴────────┴─┘
+                ┌───┬─────┬──────────────────┬────────┬─┐
+                │[A]│     │[+]  at  his   own│        │ │
+                │   │well │[-] in his own way│[+] pace│.│
+                ├───┼─────┼──────────────────┼────────┼─┤
+                │[B]│well │at his own        │gait    │.│
+                └───┴─────┴──────────────────┴────────┴─┘
                 """.trimIndent()
             testHyperCollation(wA, wB, expectedDot, expectedTable)
         }
@@ -108,7 +98,7 @@ class HyperCollatorTest {
         //        W1: <root> a long <subst><add> text that is very long </add><del> text that is different</del></subst> </root>
         //        W2: <root> a long text that is very long </root>
         //        Gewenste uitkomst: Moet alleen de add volgen.
-        @Disabled
+//        @Disabled
         @Test
         @Timeout(15)
         fun trd_642_1a() {
@@ -122,28 +112,28 @@ class HyperCollatorTest {
                 labelloc=b
                 t000 [label="";shape=doublecircle,rank=middle]
                 t001 [label="";shape=doublecircle,rank=middle]
-                t002 [label=<1,2: a&#9251;long&#9251;<br/>1,2: <i>/root</i>>]
-                t003 [label=<1,2: text&#9251;that&#9251;is&#9251;very&#9251;long<br/>1: <i>/root/subst/add</i><br/>2: <i>/root</i><br/>>]
+                t002 [label=<1,2: a&#9251;long&#9251;<br/>1,2: <i>/root</i>>;penwidth=2]
+                t003 [label=<1,2: text&#9251;that&#9251;is&#9251;very&#9251;long<br/>1: <i>/root/subst/add</i><br/>2: <i>/root</i><br/>>;penwidth=2]
                 t004 [label=<1: text&#9251;that&#9251;is&#9251;different<br/>1: <i>/root/subst/del</i>>]
-                t000->t002[label="1,2"]
-                t002->t003[label="1,2"]
-                t003->t001[label="1,2"]
-                t003->t004[label="1"]
+                t000->t002[label="1,2";penwidth=2]
+                t002->t003[label="1,2";penwidth=2]
+                t002->t004[label="1"]
+                t003->t001[label="2"]
                 t004->t001[label="1"]
                 }
                 """.trimIndent()
             val expectedTable = """
-                ┌───┬───────┬──────────────┬────────────────┐
-                │[1]│       │[+] text  that│[+] is very long│
-                │   │a long │[-] text that │[-] is different│
-                ├───┼───────┼──────────────┼────────────────┤
-                │[2]│a long │text that     │is very long    │
-                └───┴───────┴──────────────┴────────────────┘
+                ┌───┬───────┬──────────────────────────┐
+                │[1]│       │[+] text that is very long│
+                │   │a long │[-] text that is different│
+                ├───┼───────┼──────────────────────────┤
+                │[2]│a long │text that is very long    │
+                └───┴───────┴──────────────────────────┘
                 """.trimIndent()
             testHyperCollation(w1, w2, expectedDot, expectedTable)
         }
 
-        @Disabled
+//        @Disabled
         @Test
         @Timeout(15)
         fun trd_642_1b() {
@@ -157,33 +147,22 @@ class HyperCollatorTest {
                 labelloc=b
                 t000 [label="";shape=doublecircle,rank=middle]
                 t001 [label="";shape=doublecircle,rank=middle]
-                t002 [label=<1,2: a&#9251;long&#9251;<br/>1,2: <i>/root</i>>]
-                t003 [label=<1: text&#9251;<br/>1: <i>/root/subst/del</i>>]
-                t004 [label=<1,2: that&#9251;<br/>1: <i>/root/subst/del</i><br/>2: <i>/root</i><br/>>]
-                t005 [label=<1,2: is&#9251;<br/>1: <i>/root/subst/del</i><br/>2: <i>/root</i><br/>>]
-                t006 [label=<1: different<br/>1: <i>/root/subst/del</i>>]
-                t007 [label=<1,2: text&#9251;that&#9251;is&#9251;<br/>1: <i>/root/subst/add</i><br/>2: <i>/root</i><br/>>]
-                t008 [label=<1,2: very&#9251;long<br/>1: <i>/root/subst/add</i><br/>2: <i>/root</i><br/>>]
-                t000->t002[label="1,2"]
+                t002 [label=<1,2: a&#9251;long&#9251;<br/>1,2: <i>/root</i>>;penwidth=2]
+                t003 [label=<1: text&#9251;that&#9251;is&#9251;different<br/>1: <i>/root/subst/del</i>>]
+                t004 [label=<1,2: text&#9251;that&#9251;is&#9251;very&#9251;long<br/>1: <i>/root/subst/add</i><br/>2: <i>/root</i><br/>>;penwidth=2]
+                t000->t002[label="1,2";penwidth=2]
                 t002->t003[label="1"]
-                t002->t007[label="1,2"]
-                t003->t004[label="1"]
-                t004->t005[label="1"]
-                t005->t006[label="1"]
-                t005->t008[label="2"]
-                t006->t001[label="1"]
-                t007->t005[label="2"]
-                t007->t008[label="1"]
-                t008->t001[label="1,2"]
+                t002->t004[label="1,2";penwidth=2]
+                t004->t001[label="1,2";penwidth=2]
                 }
                 """.trimIndent()
             val expectedTable = """
-                ┌───┬───────┬──────────────┬────────────────┐
-                │[1]│       │[+] text  that│[+] is very long│
-                │   │a long │[-] text that │[-] is different│
-                ├───┼───────┼──────────────┼────────────────┤
-                │[2]│a long │text that     │is very long    │
-                └───┴───────┴──────────────┴────────────────┘
+                ┌───┬───────┬──────────────────────────┐
+                │[1]│       │[+] text that is very long│
+                │   │a long │[-] text that is different│
+                ├───┼───────┼──────────────────────────┤
+                │[2]│a long │text that is very long    │
+                └───┴───────┴──────────────────────────┘
                 """.trimIndent()
             testHyperCollation(w1, w2, expectedDot, expectedTable)
         }
@@ -193,7 +172,7 @@ class HyperCollatorTest {
         //        W2: <root> a b c d e f g </root>
         //        Gewenste uitkomst:
         //        root volgen, daarna add, daarna del. Je switcht dan niet heen en weer van branches tijdens de alignment.
-        @Disabled
+//        @Disabled
         @Test
         @Timeout(15)
         fun trd_642_2() {
@@ -207,31 +186,14 @@ class HyperCollatorTest {
                 labelloc=b
                 t000 [label="";shape=doublecircle,rank=middle]
                 t001 [label="";shape=doublecircle,rank=middle]
-                t002 [label=<A,B: well&#9251;<br/>A,B: <i>/e</i>>]
-                t003 [label=<A: in&#9251;<br/>A: <i>/e/subst/del</i>>]
-                t004 [label=<A,B: his&#9251;<br/>A: <i>/e/subst/del</i><br/>B: <i>/e</i><br/>>]
-                t005 [label=<A: own&#9251;way<br/>A: <i>/e/subst/del</i>>]
-                t006 [label=<A,B: at&#9251;<br/>A: <i>/e/subst/add</i><br/>B: <i>/e</i><br/>>]
-                t007 [label=<A: his&#9251;<br/>A: <i>/e/subst/add</i>>]
-                t008 [label=<A,B: own&#9251;<br/>A: <i>/e/subst/add</i><br/>B: <i>/e</i><br/>>]
-                t009 [label=<A: pace<br/>A: <i>/e/subst/add</i>>]
-                t010 [label=<A,B: .<br/>A,B: <i>/e</i>>]
-                t011 [label=<B: gait<br/>B: <i>/e</i>>]
-                t000->t002[label="A,B"]
-                t002->t003[label="A"]
-                t002->t006[label="A,B"]
-                t003->t004[label="A"]
-                t004->t005[label="A"]
-                t004->t008[label="B"]
-                t005->t010[label="A"]
-                t006->t004[label="B"]
-                t006->t007[label="A"]
-                t007->t008[label="A"]
-                t008->t009[label="A"]
-                t008->t011[label="B"]
-                t009->t010[label="A"]
-                t010->t001[label="A,B"]
-                t011->t010[label="B"]
+                t002 [label=<1,2: Cookie&#9251;Monster&#9251;<br/>1,2: <i>/root</i>>;penwidth=2]
+                t003 [label=<1: wants&#9251;chocolate&#9251;cookies<br/>2: wants&#9251;chocolate&#9251;cookies&#9251;<br/>1: <i>/root/subst/add</i><br/>2: <i>/root</i><br/>>;penwidth=2]
+                t004 [label=<1,2: eating&#9251;carrots<br/>1: <i>/root/subst/del</i><br/>2: <i>/root</i><br/>>;penwidth=2]
+                t000->t002[label="1,2";penwidth=2]
+                t002->t003[label="1,2";penwidth=2]
+                t002->t004[label="1"]
+                t003->t004[label="2"]
+                t004->t001[label="1,2";penwidth=2]
                 }
                 """.trimIndent()
             val expectedTable = """
@@ -249,7 +211,7 @@ class HyperCollatorTest {
         //        W2: <root> a b c d e f g h </root>
         //        Gewenste uitkomst:
         //        root volgen, dan de eerste subst/add, dan de tweede subs/add.
-        @Disabled
+//        @Disabled
         @Test
         @Timeout(15)
         fun trd_642_3() {
@@ -264,39 +226,29 @@ class HyperCollatorTest {
                 labelloc=b
                 t000 [label="";shape=doublecircle,rank=middle]
                 t001 [label="";shape=doublecircle,rank=middle]
-                t002 [label=<A,B: well&#9251;<br/>A,B: <i>/e</i>>]
-                t003 [label=<A: in&#9251;<br/>A: <i>/e/subst/del</i>>]
-                t004 [label=<A,B: his&#9251;<br/>A: <i>/e/subst/del</i><br/>B: <i>/e</i><br/>>]
-                t005 [label=<A: own&#9251;way<br/>A: <i>/e/subst/del</i>>]
-                t006 [label=<A,B: at&#9251;<br/>A: <i>/e/subst/add</i><br/>B: <i>/e</i><br/>>]
-                t007 [label=<A: his&#9251;<br/>A: <i>/e/subst/add</i>>]
-                t008 [label=<A,B: own&#9251;<br/>A: <i>/e/subst/add</i><br/>B: <i>/e</i><br/>>]
-                t009 [label=<A: pace<br/>A: <i>/e/subst/add</i>>]
-                t010 [label=<A,B: .<br/>A,B: <i>/e</i>>]
-                t011 [label=<B: gait<br/>B: <i>/e</i>>]
-                t000->t002[label="A,B"]
-                t002->t003[label="A"]
-                t002->t006[label="A,B"]
-                t003->t004[label="A"]
-                t004->t005[label="A"]
-                t004->t008[label="B"]
-                t005->t010[label="A"]
-                t006->t004[label="B"]
-                t006->t007[label="A"]
-                t007->t008[label="A"]
-                t008->t009[label="A"]
-                t008->t011[label="B"]
-                t009->t010[label="A"]
-                t010->t001[label="A,B"]
-                t011->t010[label="B"]
+                t002 [label=<1,2: a&#9251;b&#9251;<br/>1,2: <i>/root</i>>;penwidth=2]
+                t003 [label=<1: f&#9251;g<br/>1: <i>/root/subst/del</i>>]
+                t004 [label=<1: c&#9251;d&#9251;e<br/>2: c&#9251;d&#9251;e&#9251;<br/>1: <i>/root/subst/add</i><br/>2: <i>/root</i><br/>>;penwidth=2]
+                t005 [label=<1,2: f&#9251;g&#9251;h<br/>1: <i>/root/subst/add/subst/add</i><br/>2: <i>/root</i><br/>>;penwidth=2]
+                t006 [label=<1: bla&#9251;die&#9251;bla<br/>1: <i>/root/subst/add/subst/del</i>>]
+                t000->t002[label="1,2";penwidth=2]
+                t002->t003[label="1"]
+                t002->t004[label="1,2";penwidth=2]
+                t003->t001[label="1"]
+                t004->t005[label="1,2";penwidth=2]
+                t004->t006[label="1"]
+                t005->t001[label="2"]
+                t005->t003[label="1"]
+                t006->t003[label="1"]
                 }
                 """.trimIndent()
             val expectedTable = """
-                ┌───┬────┬─────────┬─────────┬───────────────┬───────┐
-                │[1]│a b │[+] c d e│[+] f g h│[-] bla die bla│[-] f g│
-                ├───┼────┼─────────┼─────────┼───────────────┼───────┤
-                │[2]│a b │c d e    │f g h    │               │       │
-                └───┴────┴─────────┴─────────┴───────────────┴───────┘
+                ┌───┬────┬─────────┬───────────────┬───────┐
+                │[1]│    │         │[+]   f   g   h│       │
+                │   │a b │[+] c d e│[-] bla die bla│[-] f g│
+                ├───┼────┼─────────┼───────────────┼───────┤
+                │[2]│a b │c d e    │f g h          │       │
+                └───┴────┴─────────┴───────────────┴───────┘
                 """.trimIndent()
             testHyperCollation(w1, w2, expectedDot, expectedTable)
         }
@@ -306,7 +258,7 @@ class HyperCollatorTest {
         //        W2: <root> a b c d e f g h i j </root>
         //        Gewenste uitkomst:
         //        root volgen, dan de add, daar c d uithalen, dan e f g h i j matchen na de branch, want de match na de branch is langer dan wat er in del staat.
-        @Disabled
+//        @Disabled
         @Test
         @Timeout(15)
         fun trd_642_4() {
@@ -320,45 +272,34 @@ class HyperCollatorTest {
                 labelloc=b
                 t000 [label="";shape=doublecircle,rank=middle]
                 t001 [label="";shape=doublecircle,rank=middle]
-                t002 [label=<A,B: well&#9251;<br/>A,B: <i>/e</i>>]
-                t003 [label=<A: in&#9251;<br/>A: <i>/e/subst/del</i>>]
-                t004 [label=<A,B: his&#9251;<br/>A: <i>/e/subst/del</i><br/>B: <i>/e</i><br/>>]
-                t005 [label=<A: own&#9251;way<br/>A: <i>/e/subst/del</i>>]
-                t006 [label=<A,B: at&#9251;<br/>A: <i>/e/subst/add</i><br/>B: <i>/e</i><br/>>]
-                t007 [label=<A: his&#9251;<br/>A: <i>/e/subst/add</i>>]
-                t008 [label=<A,B: own&#9251;<br/>A: <i>/e/subst/add</i><br/>B: <i>/e</i><br/>>]
-                t009 [label=<A: pace<br/>A: <i>/e/subst/add</i>>]
-                t010 [label=<A,B: .<br/>A,B: <i>/e</i>>]
-                t011 [label=<B: gait<br/>B: <i>/e</i>>]
-                t000->t002[label="A,B"]
-                t002->t003[label="A"]
-                t002->t006[label="A,B"]
-                t003->t004[label="A"]
-                t004->t005[label="A"]
-                t004->t008[label="B"]
-                t005->t010[label="A"]
-                t006->t004[label="B"]
-                t006->t007[label="A"]
-                t007->t008[label="A"]
-                t008->t009[label="A"]
-                t008->t011[label="B"]
-                t009->t010[label="A"]
-                t010->t001[label="A,B"]
-                t011->t010[label="B"]
+                t002 [label=<1,2: a&#9251;b&#9251;<br/>1,2: <i>/root</i>>;penwidth=2]
+                t003 [label=<1: c&#9251;d<br/>2: c&#9251;d&#9251;<br/>1: <i>/root/subst/add</i><br/>2: <i>/root</i><br/>>;penwidth=2]
+                t004 [label=<1: e&#9251;f<br/>1: <i>/root/subst/del</i>>]
+                t005 [label=<1: &#9251;<br/>1: <i>/root</i>>]
+                t006 [label=<1,2: e&#9251;f&#9251;g&#9251;h&#9251;i&#9251;j<br/>1,2: <i>/root</i>>;penwidth=2]
+                t000->t002[label="1,2";penwidth=2]
+                t002->t003[label="1,2";penwidth=2]
+                t002->t004[label="1"]
+                t003->t005[label="1"]
+                t003->t006[label="2"]
+                t004->t005[label="1"]
+                t005->t006[label="1"]
+                t006->t001[label="1,2";penwidth=2]
                 }
                 """.trimIndent()
             val expectedTable = """
-                ┌───┬────┬───────┬───────┬─────┬───────┐
-                │[1]│a b │[+] c d│[-] e f│e f  │g h i j│
-                ├───┼────┼───────┼───────┼─────┼───────┤
-                │[2]│a b │c d    │e f    │     │g h i j│
-                └───┴────┴───────┴───────┴─────┴───────┘
+                ┌───┬────┬───────┬─┬───────────┐
+                │[1]│    │[+] c d│ │           │
+                │   │a b │[-] e f│ │e f g h i j│
+                ├───┼────┼───────┼─┼───────────┤
+                │[2]│a b │c d    │ │e f g h i j│
+                └───┴────┴───────┴─┴───────────┘
                 """.trimIndent()
             testHyperCollation(w1, w2, expectedDot, expectedTable)
         }
 
         @Test
-        @Timeout(15)
+        @Timeout(60)
         fun testCollationWithManyMatches() {
             val importer = XMLImporter()
             val xml1 = ("<seg>Ik had een buurvrouw, een paar deuren verder,"

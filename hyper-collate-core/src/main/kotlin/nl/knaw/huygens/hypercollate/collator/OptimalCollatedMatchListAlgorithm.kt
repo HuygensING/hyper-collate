@@ -32,18 +32,21 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
     private var matchesSortedByNode: List<CollatedMatch> = listOf()
     private var matchesSortedByWitness: List<CollatedMatch> = listOf()
     private var maxPotential: Int? = null
+    private var groupedByBranchPathForSigil: Map<String, Map<BranchPath, List<CollatedMatch>>> = mapOf()
 
     private val quantumCollatedMatchFingerprints: MutableSet<String> = mutableSetOf()
 
     override val name: String = "Four-Neighbours"
 
-    override fun getOptimalCollatedMatchList(allPotentialMatches: Collection<CollatedMatch>): List<CollatedMatch> {
+    override fun getOptimalCollatedMatchList(allPotentialMatches: Collection<CollatedMatch>, sigils: List<String>): List<CollatedMatch> {
         val uniqueNodesInMatches = allPotentialMatches.map { it.collatedNode }.distinct().size
         val uniqueVerticesInMatches = allPotentialMatches.map { it.witnessVertex }.distinct().size
         maxPotential = min(uniqueNodesInMatches, uniqueVerticesInMatches)
 
         matchesSortedByNode = allPotentialMatches.sortedByNode()
         matchesSortedByWitness = allPotentialMatches.sortedByWitness()
+        groupedByBranchPathForSigil = sigils.map { s -> s to allPotentialMatches.groupBy { it.getBranchPath(s) } }.toMap()
+
         val startNode = QuantumCollatedMatchList(listOf(), allPotentialMatches.toList())
         val startCost = LostPotential(0)
         val sw = Stopwatch.createStarted()
@@ -58,18 +61,59 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
             matchList.isDetermined
 
     override fun neighborNodes(matchList: QuantumCollatedMatchList): Iterable<QuantumCollatedMatchList> {
+        val relevantMatchesSortedByNode = (matchesSortedByNode - matchList.chosenMatches).asSequence().filter { it in matchList.potentialMatches }
+        val matchesByNodeRank = relevantMatchesSortedByNode.groupBy { it.nodeRank }
+        val relevantMatchesSortedByWitness = (matchesSortedByWitness - matchList.chosenMatches).asSequence().filter { it in matchList.potentialMatches }
+        val matchesByVertexRank = relevantMatchesSortedByWitness.groupBy { it.vertexRank }
         val nextMatchSequence: MutableList<CollatedMatch> = mutableListOf()
-        val cms1 = (matchesSortedByNode - matchList.chosenMatches).asSequence().filter { it in matchList.potentialMatches }.iterator()
-        val cms2 = (matchesSortedByWitness - matchList.chosenMatches).asSequence().filter { it in matchList.potentialMatches }.iterator()
-        var goOn = cms1.hasNext()
+        val chosenBranchesPerSigil: MutableMap<String, MutableSet<BranchPath>> = mutableMapOf()
+        matchList.chosenMatches.forEach { m ->
+            m.sigils.forEach { s ->
+                chosenBranchesPerSigil
+                        .getOrPut(s) { mutableSetOf() }
+                        .add(m.getBranchPath(s))
+            }
+        }
+
+        val nodeRankIterator = matchesByNodeRank.keys.sorted().iterator()
+        val vertexRankIterator = matchesByVertexRank.keys.sorted().iterator()
+        var goOn = nodeRankIterator.hasNext()
         while (goOn) {
-            val next1 = cms1.next()
-            val next2 = cms2.next()
-            if (next1 == next2) {
-                nextMatchSequence += next1
-                goOn = cms1.hasNext()
-            } else {
+            val nodeRank = nodeRankIterator.next()
+            val vertexRank = vertexRankIterator.next()
+            val allNextByNode = matchesByNodeRank[nodeRank] ?: error("rank $nodeRank not found in matchesByNodeRank")
+            val allNextByVertex = matchesByVertexRank[vertexRank]
+                    ?: error("rank $vertexRank not found in matchesByVertexRank")
+            val nextByNodeFromChosenBranch = allNextByNode.filter { m ->
+                m.sigils.any { s ->
+                    m.getBranchPath(s)!!.size > 1 &&
+                            chosenBranchesPerSigil.containsKey(s) &&
+                            chosenBranchesPerSigil[s]!!.isNotEmpty() &&
+                            m.getBranchPath(s) in chosenBranchesPerSigil[s]!!
+                }
+            }
+            val nextByVertexFromChosenBranch = allNextByVertex.filter { m ->
+                m.sigils.any { s ->
+                    m.getBranchPath(s)!!.size > 1 &&
+                            m.getBranchPath(s)!!.size > 1 &&
+                            chosenBranchesPerSigil.containsKey(s) &&
+                            chosenBranchesPerSigil[s]!!.isNotEmpty() &&
+                            m.getBranchPath(s) in chosenBranchesPerSigil[s]!!
+                }
+            }
+            val nextByNode = if (nextByNodeFromChosenBranch.isNotEmpty()) nextByNodeFromChosenBranch else allNextByNode
+            val nextByVertex = if (nextByVertexFromChosenBranch.isNotEmpty()) nextByVertexFromChosenBranch else allNextByVertex
+            val nextMatch = nextByNode[0]
+            if ((nextByNode.size > 1 || nextByVertex.size > 1 || nextMatch != nextByVertex[0]))
                 goOn = false
+            else {
+                nextMatchSequence += nextMatch
+                nextMatch.sigils.forEach { s ->
+                    chosenBranchesPerSigil
+                            .getOrPut(s) { mutableSetOf() }
+                            .add(nextMatch.getBranchPath(s))
+                }
+                goOn = nodeRankIterator.hasNext()
             }
         }
         val nextPotentialMatches: MutableSet<QuantumCollatedMatchList> = mutableSetOf()

@@ -28,6 +28,8 @@ import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.stream.Collectors.toSet
 
+typealias BranchPath = List<Int>?
+
 class HyperCollator {
 
     fun collate(vararg graphs: VariantWitnessGraph): CollationGraph {
@@ -123,7 +125,7 @@ class HyperCollator {
                 .map { m: CollatedMatch -> m.adjustRankForCollatedNode(baseRanking) }
                 .distinct()
         log.debug("matchList={}, size={}", matchList, matchList.size)
-        val optimalMatchList = optimized(matchList).toMutableList()
+        val optimalMatchList = matchList.optimized(sigils).toMutableList()
         log.debug("optimalMatchList={}, size={}", optimalMatchList, optimalMatchList.size)
         val witnessIterator: Iterator<TokenVertex> = VariantWitnessGraphTraversal.of(witnessGraph).iterator()
         val first = witnessIterator.next()
@@ -165,8 +167,8 @@ class HyperCollator {
                 .forEach { markup: Markup -> linkMarkupToText(markupNodeIndex[markup], matchingNode) }
     }
 
-    private fun optimized(list: List<CollatedMatch>): List<CollatedMatch> =
-            OptimalCollatedMatchListAlgorithm().getOptimalCollatedMatchList(list)
+    private fun List<CollatedMatch>.optimized(sigils: List<String>): List<CollatedMatch> =
+            OptimalCollatedMatchListAlgorithm().getOptimalCollatedMatchList(this, sigils)
 
     private fun CollatedMatch.adjustRankForCollatedNode(
             baseRanking: CollationGraphRanking

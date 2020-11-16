@@ -39,10 +39,12 @@ data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val 
 
     fun chooseMatch(match: CollatedMatch): QuantumCollatedMatchList {
         val newChosen = chosenMatches + match
-        val chosenBranchPaths: Set<List<Int>> = newChosen.map { it.branchPaths() }.flatten().toSet()
-        val newPotential = potentialMatches.newPotentialWhenChoosing(match, chosenBranchPaths)
+        val newPotential = potentialMatches.newPotentialWhenChoosing(match)
         return QuantumCollatedMatchList(newChosen, newPotential)
     }
+
+    private fun List<CollatedMatch>.newPotentialWhenChoosing(match: CollatedMatch): List<CollatedMatch> =
+            this - matchesInvalidatedByChoosing(match) - match
 
     private fun CollatedMatch.branchPaths(): Set<List<Int>> {
         val witnessBranchPaths = witnessVertex.branchPath
@@ -58,12 +60,6 @@ data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val 
         return QuantumCollatedMatchList(newChosen, newPotential)
     }
 
-    private fun List<CollatedMatch>.newPotentialWhenChoosing(
-            match: CollatedMatch,
-            chosenBranchPaths: Set<List<Int>>
-    ): List<CollatedMatch> =
-            this - matchesInvalidatedByChoosing(match, chosenBranchPaths) - match
-
     private val stringSerialization: String by lazy { "($chosenMatches | $potentialMatches)" }
     override fun toString(): String = stringSerialization
 
@@ -73,21 +69,20 @@ data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val 
             other === this
 
     companion object {
-        private fun List<CollatedMatch>.matchesInvalidatedByChoosing(
-                match: CollatedMatch,
-                chosenBranchPaths: Set<List<Int>>
-        ): List<CollatedMatch> {
+        private fun List<CollatedMatch>.matchesInvalidatedByChoosing(match: CollatedMatch): List<CollatedMatch> {
+            val chosenBranchPaths: Map<String, List<Int>?> = match.sigils.map { it to match.getBranchPath(it) }.toMap()
             val node = match.collatedNode
             val tokenVertexForWitness = match.witnessVertex
             val minNodeRank = match.nodeRank
             val minVertexRank = match.vertexRank
+            val matchesInTheSameBranchAsTheChosenMatch: List<CollatedMatch> = this.filter { m -> m.sigils.map { it to m.getBranchPath(it) }.toMap() == chosenBranchPaths }
             val groupBy = this.groupBy { it.toString() }
             val map = groupBy
                     .map { entry ->
                         if (entry.value.size == 1)
                             entry.value
                         else {
-                            entry.value.filter { cm -> cm.sigils.map { cm.getBranchPath(it) }.any { it !in chosenBranchPaths } }
+                            entry.value.filter { cm -> cm.sigils.map { cm.getBranchPath(it) }.any { it !in chosenBranchPaths.values } }
                         }
                     }
             val flatten = map
