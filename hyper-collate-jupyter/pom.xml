@@ -5,7 +5,7 @@
     <parent>
         <artifactId>hyper-collate</artifactId>
         <groupId>nl.knaw.huygens</groupId>
-        <version>1.3.5-SNAPSHOT-3</version>
+        <version>1.3.5-SNAPSHOT-4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
