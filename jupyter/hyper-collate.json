@@ -1,7 +1,7 @@
 {
   "description": "Collation machine",
   "properties": {
-    "v": "1.3.5-SNAPSHOT-2"
+    "v": "1.3.5-SNAPSHOT-3"
   },
   "link": "https://github.com/HuygensING/hyper-collate",
   "dependencies": [
@@ -9,6 +9,7 @@
     "nl.knaw.huygens:hyper-collate-jupyter:$v"
   ],
   "repositories": [
+    "*mavenLocal",
     "http://maven.huygens.knaw.nl/repository/"
   ],
   "imports": [
