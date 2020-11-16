@@ -98,7 +98,7 @@ class HyperCollatorTest {
         //        W1: <root> a long <subst><add> text that is very long </add><del> text that is different</del></subst> </root>
         //        W2: <root> a long text that is very long </root>
         //        Gewenste uitkomst: Moet alleen de add volgen.
-//        @Disabled
+        @Disabled
         @Test
         @Timeout(15)
         fun trd_642_1a() {
