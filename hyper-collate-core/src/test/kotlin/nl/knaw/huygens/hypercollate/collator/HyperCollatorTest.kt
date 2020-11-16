@@ -133,7 +133,7 @@ class HyperCollatorTest {
             testHyperCollation(w1, w2, expectedDot, expectedTable)
         }
 
-//        @Disabled
+        @Disabled
         @Test
         @Timeout(15)
         fun trd_642_1b() {
