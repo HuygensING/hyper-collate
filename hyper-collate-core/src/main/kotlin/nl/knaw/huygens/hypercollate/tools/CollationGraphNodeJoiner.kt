@@ -24,7 +24,6 @@ import com.google.common.base.Preconditions
 import eu.interedition.collatex.Token
 import nl.knaw.huygens.hypercollate.model.*
 import java.util.*
-import java.util.stream.Collectors
 
 object CollationGraphNodeJoiner {
     @JvmStatic

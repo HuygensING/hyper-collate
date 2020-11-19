@@ -22,7 +22,6 @@ package nl.knaw.huygens.hypercollate.model
 
 import nl.knaw.huygens.hypercollate.collator.VariantWitnessGraphTraversal
 import java.util.*
-import java.util.stream.Stream
 
 class VariantWitnessGraph(val sigil: String) {
     val startTokenVertex: TokenVertex
