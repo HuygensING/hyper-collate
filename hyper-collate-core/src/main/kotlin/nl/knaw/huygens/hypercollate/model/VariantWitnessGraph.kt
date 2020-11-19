@@ -28,12 +28,9 @@ class VariantWitnessGraph(val sigil: String) {
     val startTokenVertex: TokenVertex
     val endTokenVertex: TokenVertex
 
-    private val markupList: MutableList<Markup> = mutableListOf()
+    val markupList: MutableList<Markup> = mutableListOf()
     private val markup2TokenVertexList: MutableMap<Markup, MutableList<TokenVertex>> = mutableMapOf()
     private val tokenVertex2MarkupList: MutableMap<TokenVertex, MutableList<Markup>> = mutableMapOf()
-
-    val markupStream: Stream<Markup>
-        get() = markupList.stream()
 
     fun addMarkup(vararg markup: Markup) {
         Collections.addAll(markupList, *markup)

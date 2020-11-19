@@ -118,8 +118,9 @@ public class CollationGraphAssert
     }
     Set<MarkupNodeSketch> actualMarkupNodeSketchesForTextNode =
         actual
-            .getMarkupNodeStreamForTextNode(textNode)
-            .map(this::toMarkupNodeSketch)
+            .getMarkupNodeListForTextNode(textNode)
+            .stream()
+            .map(node -> toMarkupNodeSketch(node))
             .collect(toSet());
     Iterables.instance()
         .assertContains(info, actualMarkupNodeSketchesForTextNode, markupNodeSketches);
@@ -133,7 +134,8 @@ public class CollationGraphAssert
         .assertContains(info, actualMarkupNodeSketches, new MarkupNodeSketch[]{markupNodeSketch});
     this.markupNode =
         actual
-            .getMarkupNodeStream()
+            .getMarkupNodeList()
+            .stream()
             .filter(
                 n -> {
                   MarkupNodeSketch actualMarkupNodeSketch = toMarkupNodeSketch(n);
@@ -152,7 +154,8 @@ public class CollationGraphAssert
     }
     Set<TextNodeSketch> actualTextNodeSketchesForMarkupNode =
         actual
-            .getTextNodeStreamForMarkup(markupNode.getMarkup())
+            .getTextNodeListForMarkup(markupNode.getMarkup())
+            .stream()
             .map(this::toTextNodeSketch)
             .collect(toSet());
     Iterables.instance()
@@ -272,6 +275,6 @@ public class CollationGraphAssert
   }
 
   private Set<MarkupNodeSketch> getActualMarkupNodeSketches() {
-    return actual.getMarkupNodeStream().map(this::toMarkupNodeSketch).collect(toSet());
+    return actual.getMarkupNodeList().stream().map(this::toMarkupNodeSketch).collect(toSet());
   }
 }

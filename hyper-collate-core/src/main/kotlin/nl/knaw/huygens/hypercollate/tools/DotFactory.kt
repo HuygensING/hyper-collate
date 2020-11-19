@@ -24,7 +24,6 @@ import nl.knaw.huygens.hypercollate.model.*
 import java.lang.String.format
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.stream.Stream
 import kotlin.Comparator
 
 class DotFactory(emphasizeWhitespace: Boolean) {
@@ -190,19 +189,19 @@ class DotFactory(emphasizeWhitespace: Boolean) {
         val edgeLines: MutableSet<String> = TreeSet()
         for (node in nodes) {
             collation
-                    .getIncomingTextEdgeStream(node)
+                    .getIncomingTextEdgeList(node)
                     .forEach { e: TextEdge ->
                         val source = collation.getSource(e)
                         val target: Node = collation.getTarget(e)
-                        val edgeLabel = e.sigils.sorted().joinToString(",") { it.extendedSigil(collation.getMarkupNodeStreamForTextNode(node)) }
+                        val edgeLabel = e.sigils.sorted().joinToString(",") { it.extendedSigil(collation.getMarkupNodeListForTextNode(node)) }
                         edgeLines += "${nodeIdentifiers[source]}->${nodeIdentifiers[target]}[label=\"$edgeLabel\"${e.penWidthParameter()}]\n"
                     }
         }
         edgeLines.forEach { str: String? -> append(str) }
     }
 
-    private fun String.extendedSigil(markupNodeStream: Stream<MarkupNode>): String {
-        val parentMarkupNode = markupNodeStream
+    private fun String.extendedSigil(markupNodes: List<MarkupNode>): String {
+        val parentMarkupNode = markupNodes.stream()
                 .filter { it.sigil == this }
                 .sorted { n1, n2 -> n2.markup.depth.compareTo(n1.markup.depth) }
                 .findFirst()

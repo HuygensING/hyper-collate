@@ -28,7 +28,7 @@ object TokenMerger {
     @JvmStatic
     fun merge(originalGraph: VariantWitnessGraph): VariantWitnessGraph {
         val mergedGraph = VariantWitnessGraph(originalGraph.sigil)
-        originalGraph.markupStream.forEach { markup: Markup -> mergedGraph.addMarkup(markup) }
+        originalGraph.markupList.forEach { markup: Markup -> mergedGraph.addMarkup(markup) }
         val originalToMergedMap: MutableMap<Long, TokenVertex> = HashMap()
         val originalTokenVertex = originalGraph.startTokenVertex
         val verticesToAdd = originalTokenVertex.outgoingTokenVertexList

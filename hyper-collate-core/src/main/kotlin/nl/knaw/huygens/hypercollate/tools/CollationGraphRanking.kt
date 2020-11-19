@@ -43,7 +43,7 @@ class CollationGraphRanking : Iterable<Set<TextNode>>, Function<TextNode, Int> {
             val ranking = CollationGraphRanking()
             for (textNode in topologicallySortedTextNodes(graph)) {
                 var rank: Int = -1
-                for (incomingTextEdge in graph.getIncomingTextEdgeStream(textNode)) {
+                for (incomingTextEdge in graph.getIncomingTextEdgeList(textNode)) {
                     val incomingTextNode = graph.getSource(incomingTextEdge)
                     rank = max(rank, ranking.byNode[incomingTextNode] ?: -1)
                 }
@@ -64,11 +64,11 @@ class CollationGraphRanking : Iterable<Set<TextNode>>, Function<TextNode, Int> {
                 val textNode = todo.iterator().next()
                 todo.remove(textNode)
                 sorted += textNode
-                for (e in graph.getOutgoingTextEdgeStream(textNode)) {
+                for (e in graph.getOutgoingTextEdgeList(textNode)) {
                     if (e !in handledEdges) {
                         handledEdges += e
                         val node = graph.getTarget(e)
-                        if (graph.getIncomingTextEdgeStream(node).allMatch { handledEdges.contains(it) }) {
+                        if (graph.getIncomingTextEdgeList(node).stream().allMatch { handledEdges.contains(it) }) {
                             todo += node
                         }
                     }

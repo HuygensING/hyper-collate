@@ -26,7 +26,6 @@ import nl.knaw.huygens.hypercollate.tools.CollationGraphRanking
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer
 import org.slf4j.LoggerFactory
 import java.util.*
-import java.util.stream.Collectors.toSet
 
 typealias BranchPath = List<Int>?
 
@@ -89,11 +88,9 @@ class HyperCollator {
             collationGraph: CollationGraph,
             witnessGraph: VariantWitnessGraph
     ) {
-        witnessGraph
-                .markupStream
-                .forEach { markup: Markup ->
-                    this[markup] = collationGraph.addMarkupNode(witnessGraph.sigil, markup)
-                }
+        for (markup: Markup in witnessGraph.markupList) {
+            this[markup] = collationGraph.addMarkupNode(witnessGraph.sigil, markup)
+        }
     }
 
     private fun Match.toCollatedMatch(
@@ -325,17 +322,16 @@ class HyperCollator {
                                 .forEach { itv: TokenVertex ->
                                     val source = collatedTokenVertexMap[itv] ?: error("source is null!")
                                     val target = collatedTokenVertexMap[tv] ?: error("target is null!")
-                                    val existingTargetNodes = getOutgoingTextEdgeStream(source)
+                                    val existingTargetNodes = getOutgoingTextEdgeList(source)
                                             .map { edge: TextEdge -> getTarget(edge) }
-                                            .map { it as TextNode }
-                                            .collect(toSet())
+                                            .toSet()
                                     val sigil = tv.sigil
                                     if (target !in existingTargetNodes) {
                                         val sigils: MutableSet<String> = mutableSetOf(sigil)
                                         addDirectedEdge(source, target, sigils)
                                         // System.out.println("> " + source + " -> " + target);
                                     } else {
-                                        val edge = getOutgoingTextEdgeStream(source)
+                                        val edge = getOutgoingTextEdgeList(source).stream()
                                                 .filter { e: TextEdge -> target == getTarget(e) }
                                                 .findFirst()
                                                 .orElseThrow { RuntimeException("There should be an edge!") }

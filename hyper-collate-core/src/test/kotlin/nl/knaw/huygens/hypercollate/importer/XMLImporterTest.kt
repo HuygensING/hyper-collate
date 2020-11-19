@@ -31,7 +31,6 @@ import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
-import java.util.stream.Collectors
 
 class XMLImporterTest : HyperCollateTest() {
     @Test
@@ -734,7 +733,7 @@ class XMLImporterTest : HyperCollateTest() {
         val importer = XMLImporter()
         val a = importer.importXML(
                 "1", "<p><s>&amp; himself corrected <add>and augmented</add> them</s></p>")
-        val markups = a.markupStream.collect(Collectors.toList())
+        val markups = a.markupList
         assertThat(markups).hasSize(3)
         val dot = DotFactory(true).fromVariantWitnessGraphColored(a)
         val expectedDot = """

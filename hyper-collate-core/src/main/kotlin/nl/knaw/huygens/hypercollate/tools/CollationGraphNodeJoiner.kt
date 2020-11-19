@@ -31,7 +31,7 @@ object CollationGraphNodeJoiner {
     fun join(originalGraph: CollationGraph): CollationGraph {
         val mergedGraph = CollationGraph(originalGraph.sigils)
         originalGraph
-                .markupNodeStream
+                .markupNodeList
                 .forEach { markupNode: MarkupNode -> mergedGraph.addMarkupNode(markupNode.sigil, markupNode.markup) }
         val originalToMerged = mergeNodes(originalGraph, mergedGraph)
         copyIncomingEdges(originalGraph, originalToMerged, mergedGraph)
@@ -62,7 +62,7 @@ object CollationGraphNodeJoiner {
 
     private fun canMergeNodes(
             mergedNode: TextNode, originalNode: TextNode, originalGraph: CollationGraph): Boolean {
-        val incomingEdges: Collection<TextEdge> = originalGraph.getIncomingTextEdgeStream(originalNode).collect(Collectors.toList())
+        val incomingEdges: Collection<TextEdge> = originalGraph.getIncomingTextEdgeList(originalNode)
         if (incomingEdges.size != 1) {
             return false
         }
@@ -129,7 +129,7 @@ object CollationGraphNodeJoiner {
                     val mergedNode: Node? = originalToMerged[node]
                     if (mergedNode !in linkedNodes) {
                         originalGraph
-                                .getIncomingTextEdgeStream(node)
+                                .getIncomingTextEdgeList(node)
                                 .forEach { e: TextEdge ->
                                     val oSource = originalGraph.getSource(e)
                                     val mSource: Node = originalToMerged[oSource]!!
@@ -149,11 +149,11 @@ object CollationGraphNodeJoiner {
             originalToMerged: Map<TextNode, TextNode>,
             mergedGraph: CollationGraph) =
             originalGraph
-                    .markupStream
+                    .markupList
                     .forEach { m: Markup ->
                         val mergedMarkupNode = mergedGraph.getMarkupNode(m)
                         originalGraph
-                                .getTextNodeStreamForMarkup(m)
+                                .getTextNodeListForMarkup(m)
                                 .map { key: TextNode -> originalToMerged[key] }
                                 .distinct()
                                 .forEach { mergedTextNode -> mergedGraph.linkMarkupToText(mergedMarkupNode, mergedTextNode) }

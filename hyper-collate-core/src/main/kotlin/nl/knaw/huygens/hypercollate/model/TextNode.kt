@@ -22,7 +22,6 @@ package nl.knaw.huygens.hypercollate.model
 
 import eu.interedition.collatex.Token
 import java.util.*
-import java.util.stream.Collectors
 
 open class TextNode(vararg tokens: Token) : Node {
     private val tokenMap: MutableMap<String, Token> = HashMap()
@@ -41,11 +40,10 @@ open class TextNode(vararg tokens: Token) : Node {
         get() = tokenMap.keys
 
     override fun toString(): String {
-        val tokensString = sigils.stream()
+        val tokensString = sigils
                 .sorted()
                 .map { key: String -> tokenMap[key]!! }
-                .map { obj: Token -> obj.toString() }
-                .collect(Collectors.joining(", "))
+                .joinToString(", ") { obj: Token -> obj.toString() }
         return "($tokensString)"
     }
 

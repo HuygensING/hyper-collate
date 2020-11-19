@@ -25,7 +25,6 @@ import eu.interedition.collatex.Token
 import nl.knaw.huygens.hypergraph.core.Hypergraph
 import org.slf4j.LoggerFactory
 import java.util.*
-import java.util.stream.Stream
 
 class CollationGraph
 @JvmOverloads constructor(val sigils: MutableList<String> = mutableListOf()) : Hypergraph<Node, Edge>(GraphType.ORDERED) {
@@ -83,9 +82,9 @@ class CollationGraph
         super.addDirectedHyperEdge(edge, TextEdge.LABEL, source, target)
     }
 
-    fun getOutgoingTextEdgeStream(source: Node?): Stream<TextEdge> =
+    fun getOutgoingTextEdgeList(source: Node?): List<TextEdge> =
             getOutgoingEdges(source)
-                    .filterIsInstance<TextEdge>().stream()
+                    .filterIsInstance<TextEdge>()
 
     fun traverseTextNodes(): List<TextNode> {
         val visitedNodes: MutableSet<Node> = HashSet()
@@ -99,7 +98,7 @@ class CollationGraph
                     result.add(pop)
                 }
                 visitedNodes.add(pop)
-                getOutgoingTextEdgeStream(pop)
+                getOutgoingTextEdgeList(pop)
                         .forEach { e: TextEdge ->
                             val target = getTarget(e)
                             nodesToVisit.add(target)
@@ -111,35 +110,33 @@ class CollationGraph
         return result
     }
 
-    fun getIncomingTextEdgeStream(node: TextNode?): Stream<TextEdge> =
+    fun getIncomingTextEdgeList(node: TextNode?): List<TextEdge> =
             getIncomingEdges(node)
                     .filterIsInstance<TextEdge>()
-                    .stream()
 
-    val markupStream: Stream<Markup>
-        get() = markupNodeIndex.keys.stream()
+    val markupList: List<Markup>
+        get() = markupNodeIndex.keys.toList()
 
-    val markupNodeStream: Stream<MarkupNode>
-        get() = markupNodeIndex.values.stream()
+    val markupNodeList: List<MarkupNode>
+        get() = markupNodeIndex.values.toList()
 
-    fun getTextNodeStreamForMarkup(markup: Markup): Stream<TextNode> {
+    fun getTextNodeListForMarkup(markup: Markup): List<TextNode> {
         val originalMarkupNode = getMarkupNode(markup)
         val markupHyperEdges: List<MarkupHyperEdge> = getOutgoingEdges(originalMarkupNode)
                 .filterIsInstance<MarkupHyperEdge>()
         Preconditions.checkArgument(markupHyperEdges.size == 1)
         return getTargets(markupHyperEdges[0])
-                .filterIsInstance<TextNode>().stream()
+                .filterIsInstance<TextNode>()
     }
 
     fun getMarkupNode(markup: Markup): MarkupNode =
             getMarkupNode(markupNodeIndex[markup])!!
 
-    fun getMarkupNodeStreamForTextNode(textNode: TextNode?): Stream<MarkupNode> =
+    fun getMarkupNodeListForTextNode(textNode: TextNode?): List<MarkupNode> =
             getIncomingEdges(textNode)
                     .filterIsInstance<MarkupHyperEdge>()
                     .map { e: MarkupHyperEdge? -> getSource(e) }
                     .map(MarkupNode::class.java::cast)
-                    .stream()
 
     private fun getMarkupNode(markupNode: Node?): MarkupNode? =
             markupNode as MarkupNode?

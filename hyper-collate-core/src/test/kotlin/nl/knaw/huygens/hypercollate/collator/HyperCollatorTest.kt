@@ -37,14 +37,13 @@ import org.junit.jupiter.api.Timeout
 import org.slf4j.LoggerFactory
 import java.text.MessageFormat.format
 import java.util.concurrent.TimeUnit
-import java.util.stream.Collectors
 
 class HyperCollatorTest {
 
     @Nested
     inner class TwoWitnessTests : HyperCollateTest() {
 
-//        @Disabled
+        //        @Disabled
         // both app/rdg and subst/* lead to witness branches
         // join matches from different branches of a witness, if the branches are joined
         // keep a list of which branches are joined (include sub-branches)
@@ -132,7 +131,7 @@ class HyperCollatorTest {
             testHyperCollation(w1, w2, expectedDot, expectedTable)
         }
 
-//        @Disabled
+        //        @Disabled
         @Test
         @Timeout(15)
         fun trd_642_1b() {
@@ -1584,11 +1583,11 @@ class HyperCollatorTest {
             stopwatch.stop()
             val duration = stopwatch.elapsed(TimeUnit.MILLISECONDS)
             log.info("Collating took {} ms.", duration)
-            val markupBeforeJoin = collation.markupStream.collect(Collectors.toSet())
+            val markupBeforeJoin = collation.markupList.toSet()
             //    LOG.info("before join: collation markup = {}",
             // collation.getMarkupStream().map(Markup::toString).sorted().collect(toList()));
             collation = CollationGraphNodeJoiner.join(collation)
-            val markupAfterJoin = collation.markupStream.collect(Collectors.toSet())
+            val markupAfterJoin = collation.markupList.toSet()
             //    LOG.info("after join: collation markup = {}",
             // collation.getMarkupStream().map(Markup::toString).sorted().collect(toList()));
             assertThat(markupAfterJoin).containsExactlyElementsOf(markupBeforeJoin)
