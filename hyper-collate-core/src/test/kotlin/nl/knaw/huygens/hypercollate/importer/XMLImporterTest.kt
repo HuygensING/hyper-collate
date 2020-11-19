@@ -76,7 +76,7 @@ class XMLImporterTest : HyperCollateTest() {
         val branchSetRankingRanges: Map<Int, IntRange> = ranking.branchSetRankingRanges()
         println(branchSetRankingRanges)
         for ((n, range) in branchSetRankingRanges) {
-            val tokensForRange = range.map { ranking.byRank[it]!!.map { v -> v.token } }
+            val tokensForRange = range.map { (ranking.byRank[it] ?: error("")).map { v -> v.token } }
             println("branchset $n has tokens $tokensForRange")
         }
         return branchSetRankingRanges
@@ -90,7 +90,7 @@ class XMLImporterTest : HyperCollateTest() {
         var branchSetStartRank = 0
         var branchSetEndRank = 0
         for (rank in ranks) {
-            if (byRank[rank]!!.size > 1) { // multiple vertices at this rank -> in a branchset
+            if ((byRank[rank] ?: error("")).size > 1) { // multiple vertices at this rank -> in a branchset
                 if (!inBranchSet) { // start a new branchset
                     inBranchSet = true
                     branchSetStartRank = rank

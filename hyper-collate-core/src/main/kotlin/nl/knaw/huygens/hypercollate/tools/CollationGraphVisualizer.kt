@@ -195,7 +195,7 @@ object CollationGraphVisualizer {
                 }
             }
             for (sigil: String in sigils) {
-                cells[sigil]!! += nodeTokensPerWitness[sigil]!!
+                cells[sigil] ?: error("") += nodeTokensPerWitness[sigil]!!
                         .sortedBy { it.indexNumber }
                         .joinToString("&nbsp;") {
                             var asHtml = it.content.replace(" ", whitespaceCharacter)
@@ -216,7 +216,7 @@ object CollationGraphVisualizer {
             }
         }
 
-        val rows: String = graph.sigils.joinToString("\n") { witnessRow(it, cells[it]!!) }
+        val rows: String = graph.sigils.joinToString("\n") { witnessRow(it, cells[it] ?: error("")) }
         return """<table border="1">
             $rows
             </table>""".trimIndent()

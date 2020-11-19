@@ -81,7 +81,7 @@ class MarkedUpToken : Token {
                 + ":"
                 + parentXPath
                 + "='"
-                + content!!.replace("\n", "\\n")
+                + content.replace("\n", "\\n")
                 + "'")
     }
 

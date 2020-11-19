@@ -33,17 +33,17 @@ class CollationGraph
 //    textEndNode.setSigils(sigils);
     val textStartNode = TextDelimiterNode()
     val textEndNode = TextDelimiterNode()
-    val markupNodeIndex: MutableMap<Markup, MarkupNode> = HashMap()
+    private val markupNodeIndex: MutableMap<Markup, MarkupNode> = HashMap()
 
     fun addTextNodeWithTokens(vararg tokens: Token): TextNode {
         val newNode = TextNode(*tokens)
-        addNode(newNode, TextNode.Companion.LABEL)
+        addNode(newNode, TextNode.LABEL)
         return newNode
     }
 
     fun addMarkupNode(sigil: String, markup: Markup): MarkupNode {
         val newNode = MarkupNode(sigil, markup)
-        addNode(newNode, MarkupNode.Companion.LABEL)
+        addNode(newNode, MarkupNode.LABEL)
         markupNodeIndex[markup] = newNode
         return newNode
     }
@@ -102,7 +102,6 @@ class CollationGraph
                 getOutgoingTextEdgeStream(pop)
                         .forEach { e: TextEdge ->
                             val target = getTarget(e)
-                                    ?: throw RuntimeException("edge target is null for edge $pop->")
                             nodesToVisit.add(target)
                         }
             } else {

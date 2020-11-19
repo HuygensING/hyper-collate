@@ -164,7 +164,7 @@ class HyperCollator {
     ) {
         witnessGraph
                 .markupListForTokenVertex(tokenVertexForWitnessGraph)
-                .forEach { markup: Markup -> linkMarkupToText(markupNodeIndex[markup]!!, matchingNode) }
+                .forEach { markup: Markup -> linkMarkupToText(markupNodeIndex[markup] ?: error(""), matchingNode) }
     }
 
     private fun List<CollatedMatch>.optimized(sigils: List<String>): List<CollatedMatch> =
@@ -225,8 +225,8 @@ class HyperCollator {
 
     private fun String.matchComparator(): Comparator<Match> =
             Comparator { match1: Match, match2: Match ->
-                var rank1 = match1.getRankForWitness(this) ?: error("invalid sigil ${this}")
-                var rank2 = match2.getRankForWitness(this) ?: error("invalid sigil ${this}")
+                var rank1 = match1.getRankForWitness(this) ?: error("invalid sigil $this")
+                var rank2 = match2.getRankForWitness(this) ?: error("invalid sigil $this")
                 if (rank1 == rank2) {
                     rank1 = match1.getLowestRankForWitnessesOtherThan(this)
                     rank2 = match2.getLowestRankForWitnessesOtherThan(this)

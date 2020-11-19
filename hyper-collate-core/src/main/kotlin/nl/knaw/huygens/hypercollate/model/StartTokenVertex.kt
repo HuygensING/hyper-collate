@@ -44,6 +44,6 @@ class StartTokenVertex(override val sigil: String) : TokenVertex {
     }
 
     override fun addOutgoingTokenVertex(outgoing: TokenVertex) {
-        outgoingTokenVertices.add(outgoing!!)
+        outgoingTokenVertices.add(outgoing)
     }
 }
