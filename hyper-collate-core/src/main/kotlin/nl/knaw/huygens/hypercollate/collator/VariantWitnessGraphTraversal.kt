@@ -36,10 +36,10 @@ class VariantWitnessGraphTraversal private constructor(private val graph: Varian
 
                 override fun next(): TokenVertex {
                     val next = next.get()
-                    next.outgoingTokenVertexStream
+                    next.outgoingTokenVertexList
                             .forEach { outgoing: TokenVertex ->
                                 val endEncountered = Optional.ofNullable(encountered[outgoing]).orElse(0L)
-                                val endIncoming = outgoing.incomingTokenVertexStream.count()
+                                val endIncoming = outgoing.incomingTokenVertexList.count().toLong()
                                 check(endIncoming != endEncountered) { String.format("Encountered cycle traversing %s to %s", next, outgoing) }
                                 if (endIncoming - endEncountered == 1L) {
                                     queue += outgoing

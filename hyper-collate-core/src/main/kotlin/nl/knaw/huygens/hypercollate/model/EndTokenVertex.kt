@@ -22,7 +22,6 @@ package nl.knaw.huygens.hypercollate.model
 
 import eu.interedition.collatex.Token
 import java.util.*
-import java.util.stream.Stream
 
 class EndTokenVertex(override val sigil: String) : TokenVertex {
     private val incomingTokenVertices: MutableList<TokenVertex> = ArrayList()
@@ -30,11 +29,11 @@ class EndTokenVertex(override val sigil: String) : TokenVertex {
     override val token: Token?
         get() = null
 
-    override val incomingTokenVertexStream: Stream<TokenVertex>
-        get() = incomingTokenVertices.stream()
+    override val incomingTokenVertexList: List<TokenVertex>
+        get() = incomingTokenVertices
 
-    override val outgoingTokenVertexStream: Stream<TokenVertex>
-        get() = Stream.empty()
+    override val outgoingTokenVertexList: List<TokenVertex>
+        get() = emptyList()
 
     override val branchPath: List<Int>
         get() = ArrayList()

@@ -21,14 +21,15 @@ package nl.knaw.huygens.hypercollate.model
  */
 
 import eu.interedition.collatex.Token
-import java.util.stream.Stream
 
 interface TokenVertex {
     val token: Token?
-    fun addIncomingTokenVertex(incoming: TokenVertex)
-    val incomingTokenVertexStream: Stream<TokenVertex>
-    fun addOutgoingTokenVertex(outgoing: TokenVertex)
-    val outgoingTokenVertexStream: Stream<TokenVertex>
     val sigil: String
     val branchPath: List<Int>
+
+    fun addIncomingTokenVertex(incoming: TokenVertex)
+    val incomingTokenVertexList: List<TokenVertex>
+
+    fun addOutgoingTokenVertex(outgoing: TokenVertex)
+    val outgoingTokenVertexList: List<TokenVertex>
 }

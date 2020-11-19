@@ -74,7 +74,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
                 dotBuilder.append(tokenVariable).append(" [label=\"\";shape=doublecircle,rank=middle]\n")
             }
             tokenVertex
-                    .outgoingTokenVertexStream
+                    .outgoingTokenVertexList
                     .forEach { ot: TokenVertex ->
                         val vertexVariable = ot.vertexVariable()
                         edges += "$tokenVariable->$vertexVariable"
@@ -132,7 +132,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
                     dotBuilder.append(tokenVariable).append(" [label=\"\";shape=doublecircle,rank=middle]\n")
                 }
                 tokenVertex
-                        .outgoingTokenVertexStream
+                        .outgoingTokenVertexList
                         .forEach { ot: TokenVertex ->
                             val vertexVariable = ot.vertexVariable()
                             edges += "$tokenVariable->$vertexVariable"
@@ -271,7 +271,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
             markupLabel: MutableMap<String, String>
     ) {
         sortedSigils.forEach { s: String ->
-            val token = node.getTokenForWitness(s)
+            val token = node.tokenForSigil(s)
             if (token != null) {
                 val mToken = token as MarkedUpToken
                 val markup = mToken.parentXPath

@@ -202,7 +202,7 @@ public class CollationGraphAssert
         .forEach(
             s ->
                 textNodeSketch.withWitnessSegmentSketch(
-                    s, ((MarkedUpToken) node.getTokenForWitness(s)).getContent()));
+                    s, ((MarkedUpToken) node.tokenForSigil(s)).getContent()));
     return textNodeSketch;
   }
 

@@ -321,7 +321,7 @@ class HyperCollator {
             collatedTokenVertexMap
                     .keys
                     .forEach { tv: TokenVertex ->
-                        tv.incomingTokenVertexStream
+                        tv.incomingTokenVertexList
                                 .forEach { itv: TokenVertex ->
                                     val source = collatedTokenVertexMap[itv] ?: error("source is null!")
                                     val target = collatedTokenVertexMap[tv] ?: error("target is null!")

@@ -75,8 +75,8 @@ object CollationGraphNodeJoiner {
         if (sigilsMatch) {
             var parentXPathsMatch = true
             for (s in mergedNode.sigils) {
-                val mWitnessToken = mergedNode.getTokenForWitness(s)
-                val nWitnessToken = originalNode.getTokenForWitness(s)
+                val mWitnessToken = mergedNode.tokenForSigil(s)
+                val nWitnessToken = originalNode.tokenForSigil(s)
                 if (nWitnessToken == null) {
                     // it's an endtoken, so not mergeable
                     parentXPathsMatch = false
@@ -91,10 +91,10 @@ object CollationGraphNodeJoiner {
     }
 
     private fun mergeNodeTokens(lastNode: TextNode, originalNode: TextNode) {
-        originalNode.sigils.forEach { s: String -> lastNode.addBranchPath(s, originalNode.getBranchPath(s)) }
+        originalNode.sigils.forEach { s: String -> lastNode.addBranchPath(s, originalNode.branchPathForSigil(s)) }
         for (s in lastNode.sigils) {
-            val tokenForWitness = lastNode.getTokenForWitness(s) as MarkedUpToken
-            val tokenToMerge = originalNode.getTokenForWitness(s) as MarkedUpToken
+            val tokenForWitness = lastNode.tokenForSigil(s) as MarkedUpToken
+            val tokenToMerge = originalNode.tokenForSigil(s) as MarkedUpToken
             tokenForWitness
                     .withContent(tokenForWitness.content + tokenToMerge.content)
                     .normalizedContent = tokenForWitness.normalizedContent + tokenToMerge.normalizedContent
@@ -103,11 +103,11 @@ object CollationGraphNodeJoiner {
 
     private fun copyNode(originalNode: TextNode, mergedGraph: CollationGraph): TextNode {
         val tokens: Array<Token> = originalNode.sigils
-                .mapNotNull { originalNode.getTokenForWitness(it) }
+                .mapNotNull { originalNode.tokenForSigil(it) }
                 .map { cloneToken(it) }
                 .toTypedArray()
         val newNode = mergedGraph.addTextNodeWithTokens(*tokens)
-        originalNode.sigils.forEach { s: String -> newNode.addBranchPath(s, originalNode.getBranchPath(s)) }
+        originalNode.sigils.forEach { s: String -> newNode.addBranchPath(s, originalNode.branchPathForSigil(s)) }
         return newNode
     }
 

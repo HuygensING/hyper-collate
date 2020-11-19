@@ -23,7 +23,6 @@ package nl.knaw.huygens.hypercollate.tools
 import nl.knaw.huygens.hypercollate.model.*
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.stream.Collectors
 
 object TokenMerger {
     @JvmStatic
@@ -32,7 +31,7 @@ object TokenMerger {
         originalGraph.markupStream.forEach { markup: Markup -> mergedGraph.addMarkup(markup) }
         val originalToMergedMap: MutableMap<Long, TokenVertex> = HashMap()
         val originalTokenVertex = originalGraph.startTokenVertex
-        val verticesToAdd = originalTokenVertex.outgoingTokenVertexStream.collect(Collectors.toList())
+        val verticesToAdd = originalTokenVertex.outgoingTokenVertexList
         val handledTokens: MutableList<Long> = ArrayList()
         val endTokenHandled = AtomicBoolean(false)
         val mergedVertexToLinkTo = mergedGraph.startTokenVertex
@@ -65,7 +64,7 @@ object TokenMerger {
             }
             val endTokenVertex = mergedGraph.endTokenVertex
             originalVertex
-                    .incomingTokenVertexStream
+                    .incomingTokenVertexList
                     .forEach { tv: TokenVertex ->
                         val indexNumber = (tv.token as MarkedUpToken).indexNumber
                         val mergedTokenVertex = originalToMergedMap[indexNumber]
@@ -95,14 +94,14 @@ object TokenMerger {
         originalToMergedMap[tokenNumber] = mergedVertex
         mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedVertexToLinkTo, mergedVertex)
         handledTokens += tokenNumber
-        var originalOutgoingVertices = originalVertex.outgoingTokenVertexStream.collect(Collectors.toList())
+        var originalOutgoingVertices = originalVertex.outgoingTokenVertexList
         while (canMerge(originalGraph, originalVertex, originalOutgoingVertices)) {
             val nextOriginalToken = originalOutgoingVertices[0].token as MarkedUpToken
             mergedToken.content += nextOriginalToken.content
             mergedToken.normalizedContent += nextOriginalToken.normalizedContent
             originalToMergedMap[nextOriginalToken.indexNumber] = mergedVertex
             originalVertex = originalOutgoingVertices[0]
-            originalOutgoingVertices = originalVertex.outgoingTokenVertexStream.collect(Collectors.toList())
+            originalOutgoingVertices = originalVertex.outgoingTokenVertexList
         }
         originalOutgoingVertices.forEach { oVertex: TokenVertex ->
             handle(

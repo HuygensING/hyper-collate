@@ -58,7 +58,7 @@ class VariantWitnessGraphRanking : Iterable<Set<TokenVertex>>, Function<TokenVer
             val ranking = VariantWitnessGraphRanking()
             for (v in graph.vertices()) {
                 val rank = AtomicInteger(-1)
-                v.incomingTokenVertexStream
+                v.incomingTokenVertexList
                         .forEach { incoming: TokenVertex -> rank.set(max(rank.get(), ranking._byVertex[incoming]!!)) }
                 rank.getAndIncrement()
                 ranking._byVertex[v] = rank.get()

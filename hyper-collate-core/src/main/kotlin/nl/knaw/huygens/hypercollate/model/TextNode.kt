@@ -26,7 +26,6 @@ import java.util.stream.Collectors
 
 open class TextNode(vararg tokens: Token) : Node {
     private val tokenMap: MutableMap<String, Token> = HashMap()
-
     private val branchPaths: MutableMap<String, List<Int>> = HashMap()
 
     fun addToken(token: Token) {
@@ -35,7 +34,7 @@ open class TextNode(vararg tokens: Token) : Node {
         }
     }
 
-    fun getTokenForWitness(sigil: String): Token? =
+    fun tokenForSigil(sigil: String): Token? =
             tokenMap[sigil]
 
     val sigils: Set<String>
@@ -50,7 +49,7 @@ open class TextNode(vararg tokens: Token) : Node {
         return "($tokensString)"
     }
 
-    fun getBranchPath(s: String): List<Int> =
+    fun branchPathForSigil(s: String): List<Int> =
             branchPaths[s]!!
 
     fun addBranchPath(sigil: String, branchPath: List<Int>) {

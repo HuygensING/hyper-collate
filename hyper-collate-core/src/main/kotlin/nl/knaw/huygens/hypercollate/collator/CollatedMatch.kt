@@ -40,7 +40,7 @@ data class CollatedMatch(val collatedNode: TextNode, val witnessVertex: TokenVer
             ""
         } else {
             val sigil = collatedNode.sigils.iterator().next()
-            val token = collatedNode.getTokenForWitness(sigil) as MarkedUpToken
+            val token = collatedNode.tokenForSigil(sigil) as MarkedUpToken
             token.normalizedContent
         }
     }
@@ -83,7 +83,7 @@ data class CollatedMatch(val collatedNode: TextNode, val witnessVertex: TokenVer
         tmp.addAll(collatedNode.sigils)
         sigils = tmp.toSet()
         for (s in collatedNode.sigils) {
-            branchPaths[s] = collatedNode.getBranchPath(s)
+            branchPaths[s] = collatedNode.branchPathForSigil(s)
         }
         branchPaths[witnessVertex.sigil] = witnessVertex.branchPath
     }

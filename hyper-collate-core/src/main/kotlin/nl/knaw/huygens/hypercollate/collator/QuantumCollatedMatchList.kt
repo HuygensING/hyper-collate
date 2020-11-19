@@ -48,7 +48,7 @@ data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val 
 
     private fun CollatedMatch.branchPaths(): Set<List<Int>> {
         val witnessBranchPaths = witnessVertex.branchPath
-        val nodeBranchPaths = collatedNode.sigils.map { collatedNode.getBranchPath(it) }
+        val nodeBranchPaths = collatedNode.sigils.map { collatedNode.branchPathForSigil(it) }
         val all = mutableListOf(witnessBranchPaths)
         all.addAll(nodeBranchPaths)
         return all.toSet()
@@ -104,7 +104,7 @@ data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val 
         private infix fun CollatedMatch.hasSigilOverlapWith(node: TextNode): Boolean =
                 sigils.asSequence()
                         .filter { it in node.sigils }
-                        .any { branchPathsOverlap(getBranchPath(it)!!, node.getBranchPath(it)) }
+                        .any { branchPathsOverlap(getBranchPath(it)!!, node.branchPathForSigil(it)) }
 
         fun branchPathsOverlap(matchBranchPath: List<Int>, nodeBranchPath: List<Int>): Boolean {
             val minSize = min(matchBranchPath.size, nodeBranchPath.size)

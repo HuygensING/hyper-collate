@@ -26,7 +26,6 @@ import nl.knaw.huygens.hypercollate.HyperCollateTest
 import nl.knaw.huygens.hypercollate.model.TokenVertex
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-import java.util.stream.Stream
 
 class MatchTest : HyperCollateTest() {
 
@@ -58,14 +57,14 @@ class MatchTest : HyperCollateTest() {
         override fun addIncomingTokenVertex(incoming: TokenVertex) {
         }
 
-        override val incomingTokenVertexStream: Stream<TokenVertex>
-            get() = Stream.empty()
+        override val incomingTokenVertexList: List<TokenVertex>
+            get() = emptyList()
 
         override fun addOutgoingTokenVertex(outgoing: TokenVertex) {
         }
 
-        override val outgoingTokenVertexStream: Stream<TokenVertex>
-            get() = Stream.empty()
+        override val outgoingTokenVertexList: List<TokenVertex>
+            get() = emptyList()
 
         override val branchPath: List<Int>
             get() = emptyList()

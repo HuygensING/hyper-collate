@@ -54,7 +54,7 @@ object CollationGraphVisualizer {
             sigils.forEach { sigil: String ->
                 nodeTokensPerWitness[sigil] = ArrayList()
                 nodeSet.forEach { node: TextNode ->
-                    val token = node.getTokenForWitness(sigil)
+                    val token = node.tokenForSigil(sigil)
                     if (token != null) {
                         val mToken = token as MarkedUpToken
                         nodeTokensPerWitness[sigil]!!.add(mToken)
@@ -184,7 +184,7 @@ object CollationGraphVisualizer {
                 nodeTokensPerWitness[sigil] = ArrayList()
                 nodeSet.forEach { node: TextNode ->
                     val isMatch = node.sigils.size > 1
-                    val token = node.getTokenForWitness(sigil)
+                    val token = node.tokenForSigil(sigil)
                     if (token != null) {
                         val mToken = token as MarkedUpToken
                         nodeTokensPerWitness[sigil]!!.add(mToken)

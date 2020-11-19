@@ -25,7 +25,6 @@ import nl.knaw.huygens.hypercollate.tools.DotFactory
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
-import java.util.stream.Collectors
 
 class VariantWitnessGraphTest : HyperCollateTest() {
     @Test
@@ -65,7 +64,7 @@ class VariantWitnessGraphTest : HyperCollateTest() {
         val hardMarkup = vwg1.markupListForTokenVertex(mtv3)
         assertThat(hardMarkup).containsExactly(sMarkup, delMarkup)
 
-        val incoming = mtv5.incomingTokenVertexStream.collect(Collectors.toList())
+        val incoming = mtv5.incomingTokenVertexList
         assertThat(incoming).containsOnly(mtv3, mtv4)
 
         val dot = DotFactory(false).fromVariantWitnessGraphSimple(vwg1)

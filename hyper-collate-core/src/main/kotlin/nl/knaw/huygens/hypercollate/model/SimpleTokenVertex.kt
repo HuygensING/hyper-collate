@@ -21,7 +21,6 @@ package nl.knaw.huygens.hypercollate.model
 */
 
 import java.util.*
-import java.util.stream.Stream
 
 class SimpleTokenVertex(override val token: MarkedUpToken) : TokenVertex, Comparable<SimpleTokenVertex> {
     private val incomingVertices: MutableList<TokenVertex> = ArrayList()
@@ -34,15 +33,15 @@ class SimpleTokenVertex(override val token: MarkedUpToken) : TokenVertex, Compar
         incomingVertices.add(incoming)
     }
 
-    override val incomingTokenVertexStream: Stream<TokenVertex>
-        get() = incomingVertices.stream()
+    override val incomingTokenVertexList: List<TokenVertex>
+        get() = incomingVertices
 
     override fun addOutgoingTokenVertex(outgoing: TokenVertex) {
         outgoingVertices.add(outgoing)
     }
 
-    override val outgoingTokenVertexStream: Stream<TokenVertex>
-        get() = outgoingVertices.stream()
+    override val outgoingTokenVertexList: List<TokenVertex>
+        get() = outgoingVertices
 
     override val sigil: String
         get() = token.witness.sigil
