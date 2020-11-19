@@ -31,7 +31,6 @@ import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer
 import nl.knaw.huygens.hypercollate.tools.DotFactory
 import org.assertj.core.api.SoftAssertions
 import org.assertj.core.util.Sets
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Timeout
@@ -98,7 +97,7 @@ class HyperCollatorTest {
         //        W1: <root> a long <subst><add> text that is very long </add><del> text that is different</del></subst> </root>
         //        W2: <root> a long text that is very long </root>
         //        Gewenste uitkomst: Moet alleen de add volgen.
-        @Disabled
+//        @Disabled
         @Test
         @Timeout(15)
         fun trd_642_1a() {
@@ -133,7 +132,7 @@ class HyperCollatorTest {
             testHyperCollation(w1, w2, expectedDot, expectedTable)
         }
 
-        @Disabled
+//        @Disabled
         @Test
         @Timeout(15)
         fun trd_642_1b() {
@@ -1668,45 +1667,6 @@ class HyperCollatorTest {
 
         val listC = sortAndFilterMatchesByWitness.stringList(sigil3)
         assertThat(listC).containsOnly(match4, match2, match3, match5, match7, match8)
-    }
-
-    @Disabled
-    @Test
-    @Timeout(10000)
-    fun potential_matches_with_subst() {
-        val importer = XMLImporter()
-        val sigil1 = "A"
-        val w1 = importer.importXML(sigil1, "<e>well <subst><del>in his own way</del><add>at his own pace</add></subst>.</e>")
-        val sigil2 = "B"
-        val w2 = importer.importXML(sigil2, "<e>well at his own gait.</e>")
-        val witnesses = listOf(w1, w2)
-        val rankings = witnesses.map { VariantWitnessGraphRanking.of(it) }
-        val allPotentialMatches = hyperCollator.getPotentialMatches(witnesses, rankings)
-        log.info("allPotentialMatches={}", allPotentialMatches)
-
-        val matchA0B0 = "<A0,B0> - 'well '"
-        val matchA5B1 = "<A5,B1> - 'at '"
-        val matchA2B2 = "<A2,B2> - 'his '"
-        val matchA6B2 = "<A6,B2> - 'his '"
-        val matchA3B3 = "<A3,B3> - 'own '"
-        val matchA7B3 = "<A7,B3> - 'own '"
-        val matchA9B5 = "<A9,B5> - '.'"
-        val matchAendBend = "<A:EndTokenVertex,B:EndTokenVertex> - </end>"
-        assertThat(allPotentialMatches).hasSize(8)
-
-        val matchStrings = allPotentialMatches.map { it.pretty() }.toSet()
-        assertThat(matchStrings).containsOnly(matchA0B0, matchA3B3, matchA5B1, matchA2B2, matchA6B2, matchA7B3, matchA9B5, matchAendBend)
-
-        val sortAndFilterMatchesByWitness = hyperCollator.sortAndFilterMatchesByWitness(
-                allPotentialMatches, listOf(sigil1, sigil2))
-        log.info("sortAndFilterMatchesByWitness={}", sortAndFilterMatchesByWitness)
-        assertThat(sortAndFilterMatchesByWitness).containsOnlyKeys(sigil1, sigil2)
-
-        val listA = sortAndFilterMatchesByWitness[sigil1]?.map { it.pretty() }
-        assertThat(listA).containsExactly(matchA0B0, matchA3B3, matchA5B1, matchA6B2, matchA2B2, matchA7B3, matchA9B5, matchAendBend)
-
-        val listB = sortAndFilterMatchesByWitness[sigil2]?.map { it.pretty() }
-        assertThat(listB).containsExactly(matchA0B0, matchA3B3, matchA5B1, matchA2B2, matchA6B2, matchA7B3, matchA9B5, matchAendBend)
     }
 
     private fun Match.pretty(): String =

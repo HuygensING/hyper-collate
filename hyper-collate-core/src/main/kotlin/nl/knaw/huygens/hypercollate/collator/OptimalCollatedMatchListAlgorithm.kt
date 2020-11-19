@@ -61,6 +61,36 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
             matchList.isDetermined
 
     override fun neighborNodes(matchList: QuantumCollatedMatchList): Iterable<QuantumCollatedMatchList> {
+        val nextMatchSequence: MutableList<CollatedMatch> = mutableListOf()
+        val cms1 = (matchesSortedByNode - matchList.chosenMatches).filter { it in matchList.potentialMatches }.toMutableList()
+        val cms2 = (matchesSortedByWitness - matchList.chosenMatches).filter { it in matchList.potentialMatches }.toMutableList()
+        var goOn = cms1.isNotEmpty()
+        while (goOn) {
+            val next1 = cms1.removeAt(0)
+            val next2 = cms2.removeAt(0)
+            if (next1 == next2) {
+                nextMatchSequence += next1
+                goOn = cms1.isNotEmpty()
+            } else {
+                goOn = false
+            }
+        }
+
+        val nextPotentialMatches: MutableSet<QuantumCollatedMatchList> = mutableSetOf()
+        if (nextMatchSequence.isEmpty()) {
+            val firstPotentialMatch1 = matchesSortedByNode.firstPotentialMatch(matchList)
+            nextPotentialMatches.addNeighborNodes(matchList, firstPotentialMatch1)
+            val firstPotentialMatch2 = matchesSortedByWitness.firstPotentialMatch(matchList)
+            if (firstPotentialMatch1 != firstPotentialMatch2) {
+                nextPotentialMatches.addNeighborNodes(matchList, firstPotentialMatch2)
+            }
+        } else {
+            nextPotentialMatches.addNeighborNodes(matchList, nextMatchSequence)
+        }
+        return nextPotentialMatches
+    }
+
+    /*override*/ fun neighborNodes0(matchList: QuantumCollatedMatchList): Iterable<QuantumCollatedMatchList> {
         val relevantMatchesSortedByNode = (matchesSortedByNode - matchList.chosenMatches).asSequence().filter { it in matchList.potentialMatches }
         val matchesByNodeRank = relevantMatchesSortedByNode.groupBy { it.nodeRank }
         val relevantMatchesSortedByWitness = (matchesSortedByWitness - matchList.chosenMatches).asSequence().filter { it in matchList.potentialMatches }

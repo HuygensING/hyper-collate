@@ -164,7 +164,7 @@ class HyperCollator {
     ) {
         witnessGraph
                 .markupListForTokenVertex(tokenVertexForWitnessGraph)
-                .forEach { markup: Markup -> linkMarkupToText(markupNodeIndex[markup], matchingNode) }
+                .forEach { markup: Markup -> linkMarkupToText(markupNodeIndex[markup]!!, matchingNode) }
     }
 
     private fun List<CollatedMatch>.optimized(sigils: List<String>): List<CollatedMatch> =
@@ -209,7 +209,7 @@ class HyperCollator {
             markupNodeIndex: Map<Markup, MarkupNode>
     ) {
         if (!collatedTokenVertexMap.containsKey(tokenVertex)) {
-            val collationNode = addTextNodeWithTokens(tokenVertex.token)
+            val collationNode = addTextNodeWithTokens(tokenVertex.token!!)
             collationNode.addBranchPath(tokenVertex.sigil, tokenVertex.branchPath)
             collatedTokenVertexMap[tokenVertex] = collationNode
             addMarkupHyperEdges(witnessGraph, markupNodeIndex, tokenVertex, collationNode)

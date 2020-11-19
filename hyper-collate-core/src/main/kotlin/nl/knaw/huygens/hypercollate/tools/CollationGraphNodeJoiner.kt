@@ -96,7 +96,7 @@ object CollationGraphNodeJoiner {
             val tokenForWitness = lastNode.getTokenForWitness(s) as MarkedUpToken
             val tokenToMerge = originalNode.getTokenForWitness(s) as MarkedUpToken
             tokenForWitness
-                    .setContent(tokenForWitness.content + tokenToMerge.content)
+                    .withContent(tokenForWitness.content + tokenToMerge.content)
                     .normalizedContent = tokenForWitness.normalizedContent + tokenToMerge.normalizedContent
         }
     }

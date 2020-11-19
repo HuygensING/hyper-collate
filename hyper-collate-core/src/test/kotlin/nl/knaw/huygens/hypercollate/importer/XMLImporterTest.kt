@@ -21,6 +21,7 @@ package nl.knaw.huygens.hypercollate.importer
  */
 
 import nl.knaw.huygens.hypercollate.HyperCollateTest
+import nl.knaw.huygens.hypercollate.collator.VariantWitnessGraphRanking
 import nl.knaw.huygens.hypercollate.importer.XMLImporter.Companion.normalizedSigil
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
 import nl.knaw.huygens.hypercollate.tools.DotFactory
@@ -36,7 +37,19 @@ class XMLImporterTest : HyperCollateTest() {
     @Test
     fun witness_with_subst() {
         val importer = XMLImporter()
-        val wg0 = importer.importXML("A", "<xml>Mondays are <subst><sic>deaf bat</sic><corr>def bad</corr></subst>!</xml>")
+        val xmlString = """
+            <xml>Mondays are <subst>
+              <sic>deaf bat</sic>
+              <corr>def bad</corr>
+            </subst>!</xml>
+            """.trimIndent()
+                .replace("""\s+""".toRegex(), " ")
+                .replace("> <", "><")
+        println(xmlString)
+        val wg0: VariantWitnessGraph = importer.importXML("A", xmlString)
+        val branchSetRankingRanges: Map<Int, IntRange> = wg0.showBranchSetRanges()
+        assertThat(branchSetRankingRanges).containsOnlyKeys(0)
+
         val expectedDot = """
             digraph VariantWitnessGraph{
             graph [rankdir=LR]
@@ -56,6 +69,45 @@ class XMLImporterTest : HyperCollateTest() {
             }
             """.trimIndent()
         verifyDotExport(wg0, expectedDot)
+    }
+
+    private fun VariantWitnessGraph.showBranchSetRanges(): Map<Int, IntRange> {
+        val ranking: VariantWitnessGraphRanking = VariantWitnessGraphRanking.of(this)
+        val branchSetRankingRanges: Map<Int, IntRange> = ranking.branchSetRankingRanges()
+        println(branchSetRankingRanges)
+        for ((n, range) in branchSetRankingRanges) {
+            val tokensForRange = range.map { ranking.byRank[it]!!.map { v -> v.token } }
+            println("branchset $n has tokens $tokensForRange")
+        }
+        return branchSetRankingRanges
+    }
+
+    private fun VariantWitnessGraphRanking.branchSetRankingRanges(): Map<Int, IntRange> {
+        val map: MutableMap<Int, IntRange> = mutableMapOf()
+        val ranks = byRank.keys.sorted()
+        var branchSetNum = 0
+        var inBranchSet = false
+        var branchSetStartRank = 0
+        var branchSetEndRank = 0
+        for (rank in ranks) {
+            if (byRank[rank]!!.size > 1) { // multiple vertices at this rank -> in a branchset
+                if (!inBranchSet) { // start a new branchset
+                    inBranchSet = true
+                    branchSetStartRank = rank
+                }
+            } else {
+                if (inBranchSet) {
+                    inBranchSet = false
+                    branchSetEndRank = rank - 1
+                    map[branchSetNum++] = IntRange(branchSetStartRank, branchSetEndRank)
+                }
+            }
+        }
+        if (inBranchSet) {
+            branchSetEndRank = ranks.size
+            map[branchSetNum] = IntRange(branchSetStartRank, branchSetEndRank)
+        }
+        return map
     }
 
     @Test

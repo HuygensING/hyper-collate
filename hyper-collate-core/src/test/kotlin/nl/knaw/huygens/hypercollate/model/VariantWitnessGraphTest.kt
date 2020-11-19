@@ -122,11 +122,11 @@ class VariantWitnessGraphTest : HyperCollateTest() {
             witness: SimpleWitness
     ): SimpleTokenVertex {
         val token = MarkedUpToken()
-                .setContent(string)
-                .setNormalizedContent(string.toLowerCase())
-                .setParentXPath(parentXPath)
-                .setWitness(witness)
-                .setIndexNumber(index)
+                .withContent(string)
+                .withNormalizedContent(string.toLowerCase())
+                .withParentXPath(parentXPath)
+                .withWitness(witness)
+                .withIndexNumber(index)
         return SimpleTokenVertex(token)
     }
 

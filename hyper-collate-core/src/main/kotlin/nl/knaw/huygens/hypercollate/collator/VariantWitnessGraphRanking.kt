@@ -35,7 +35,7 @@ class VariantWitnessGraphRanking : Iterable<Set<TokenVertex>>, Function<TokenVer
 //        get() = _byVertex.toMap()
 
     val byRank: Map<Int, Set<TokenVertex>>
-        get() = _byRank.toMap()
+        get() = _byRank
 
     val size: Int
         get() = _byRank.keys.size

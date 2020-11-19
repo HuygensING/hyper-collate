@@ -26,17 +26,16 @@ import nl.knaw.huygens.hypercollate.HyperCollateTest
 import nl.knaw.huygens.hypercollate.model.TokenVertex
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-import java.util.*
 import java.util.stream.Stream
 
 class MatchTest : HyperCollateTest() {
 
     @Test
     fun testGetLowestRankForWitnessesOtherThan() {
-        val v1 = mockVertexWithSigil("A")
-        val v2 = mockVertexWithSigil("B")
-        val v3 = mockVertexWithSigil("C")
-        val v4 = mockVertexWithSigil("D")
+        val v1 = MockVertex("A")
+        val v2 = MockVertex("B")
+        val v3 = MockVertex("C")
+        val v4 = MockVertex("D")
         val match = Match(v1, v2, v3, v4).setRank("A", 1).setRank("B", 2).setRank("C", 3).setRank("D", 4)
         val lowestRankForWitnessesOtherThan = match.getLowestRankForWitnessesOtherThan("A")
         Assertions.assertThat(lowestRankForWitnessesOtherThan).isEqualTo(2)
@@ -50,16 +49,26 @@ class MatchTest : HyperCollateTest() {
         override fun getWitness(): Witness = DummyWitness()
     }
 
-    val dummyToken: Token = DummyToken()
+    class MockVertex(override val sigil: String) : TokenVertex {
+        private val dummyToken: Token = DummyToken()
 
-    private fun mockVertexWithSigil(sigil: String): TokenVertex =
-            object : TokenVertex {
-                override fun getToken(): Token = dummyToken
-                override fun addIncomingTokenVertex(incoming: TokenVertex) {}
-                override fun getIncomingTokenVertexStream(): Stream<TokenVertex> = Stream.empty()
-                override fun addOutgoingTokenVertex(outgoing: TokenVertex) {}
-                override fun getOutgoingTokenVertexStream(): Stream<TokenVertex> = Stream.empty()
-                override fun getSigil(): String = sigil
-                override fun getBranchPath(): List<Int> = ArrayList()
-            }
+        override val token: Token?
+            get() = dummyToken
+
+        override fun addIncomingTokenVertex(incoming: TokenVertex) {
+        }
+
+        override val incomingTokenVertexStream: Stream<TokenVertex>
+            get() = Stream.empty()
+
+        override fun addOutgoingTokenVertex(outgoing: TokenVertex) {
+        }
+
+        override val outgoingTokenVertexStream: Stream<TokenVertex>
+            get() = Stream.empty()
+
+        override val branchPath: List<Int>
+            get() = emptyList()
+
+    }
 }

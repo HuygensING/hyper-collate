@@ -176,7 +176,7 @@ class XMLImporter {
         private val variationEndVertices: Deque<TokenVertex> = LinkedList() // the tokenvertices that are the last in a <del>
         private val unconnectedVertices: Deque<TokenVertex> = LinkedList() // the last tokenvertex in an <add> which hasn't been linked to the
         private var rdg: String? = ""
-        private var parentXPath: String? = null
+        private var parentXPath: String = ""
         private var afterDel = false
         private val branchCounter = AtomicInteger(0)
         private val branchIds: Deque<Int> = LinkedList()
@@ -309,12 +309,12 @@ class XMLImporter {
                 return
             }
             val token = MarkedUpToken()
-                    .setContent(content)
-                    .setWitness(witness)
-                    .setRdg(rdg)
-                    .setIndexNumber(tokenCounter++)
-                    .setParentXPath(parentXPath)
-                    .setNormalizedContent(normalizer.apply(content))
+                    .withContent(content)
+                    .withWitness(witness)
+                    .withRdg(rdg!!)
+                    .withIndexNumber(tokenCounter++)
+                    .withParentXPath(parentXPath)
+                    .withNormalizedContent(normalizer.apply(content))
             val tokenVertex = SimpleTokenVertex(token)
             tokenVertex.branchPath = branchIds.descendingIterator().asSequence().toList()
             graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex)

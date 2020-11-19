@@ -86,7 +86,7 @@ class Match(vararg matchingTokenVertices: TokenVertex) {
 
     init {
         for (mtv in matchingTokenVertices) {
-            val sigil = mtv.sigil
+            val sigil = mtv.sigil!!
             tokenVertexMap[sigil] = mtv
         }
     }

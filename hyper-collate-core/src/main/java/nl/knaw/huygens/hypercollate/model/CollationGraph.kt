@@ -1,192 +1,151 @@
-package nl.knaw.huygens.hypercollate.model;
+package nl.knaw.huygens.hypercollate.model
 
 /*-
- * #%L
+* #%L
  * hyper-collate-core
  * =======
  * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *      http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *  
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  * #L%
- */
+*/
 
-import com.google.common.base.Preconditions;
-import eu.interedition.collatex.Token;
-import nl.knaw.huygens.hypergraph.core.Hypergraph;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.google.common.base.Preconditions
+import eu.interedition.collatex.Token
+import nl.knaw.huygens.hypergraph.core.Hypergraph
+import org.slf4j.LoggerFactory
+import java.util.*
+import java.util.stream.Stream
 
-import java.util.*;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
-
-public class CollationGraph extends Hypergraph<Node, Edge> {
-  private static final Logger LOG = LoggerFactory.getLogger(CollationGraph.class);
-  private final List<String> sigils;
-  private final TextDelimiterNode textStartNode = new TextDelimiterNode();
-  private final TextDelimiterNode textEndNode = new TextDelimiterNode();
-  final Map<Markup, MarkupNode> markupNodeIndex = new HashMap<>();
-
-  public CollationGraph() {
-    this(new ArrayList<>());
-  }
-
-  public CollationGraph(List<String> sigils) {
-    super(GraphType.ORDERED);
-    this.sigils = sigils;
+class CollationGraph
+@JvmOverloads constructor(val sigils: MutableList<String> = mutableListOf()) : Hypergraph<Node, Edge>(GraphType.ORDERED) {
     //    textStartNode.setSigils(sigils);
-    //    textEndNode.setSigils(sigils);
-  }
+//    textEndNode.setSigils(sigils);
+    val textStartNode = TextDelimiterNode()
+    val textEndNode = TextDelimiterNode()
+    val markupNodeIndex: MutableMap<Markup, MarkupNode> = HashMap()
 
-  public TextNode addTextNodeWithTokens(Token... tokens) {
-    TextNode newNode = new TextNode(tokens);
-    addNode(newNode, TextNode.LABEL);
-    return newNode;
-  }
-
-  public MarkupNode addMarkupNode(String sigil, Markup markup) {
-    MarkupNode newNode = new MarkupNode(sigil, markup);
-    addNode(newNode, MarkupNode.LABEL);
-    markupNodeIndex.put(markup, newNode);
-    return newNode;
-  }
-
-  public void linkMarkupToText(MarkupNode markupNode, TextNode textNode) {
-    List<MarkupHyperEdge> markupHyperEdges =
-        getOutgoingEdges(markupNode).stream()
-            .filter(MarkupHyperEdge.class::isInstance)
-            .map(MarkupHyperEdge.class::cast)
-            .collect(toList());
-    if (markupHyperEdges.isEmpty()) {
-      MarkupHyperEdge newEdge = new MarkupHyperEdge();
-      addDirectedHyperEdge(newEdge, MarkupHyperEdge.LABEL, markupNode, textNode);
-    } else {
-      if (markupHyperEdges.size() != 1) {
-        throw new RuntimeException(
-            "MarkupNode "
-                + markupNode
-                + " should have exactly 1 MarkupHyperEdge, but has "
-                + markupHyperEdges.size());
-      }
-      MarkupHyperEdge edge = markupHyperEdges.get(0);
-      addTargetsToHyperEdge(edge, textNode);
+    fun addTextNodeWithTokens(vararg tokens: Token): TextNode {
+        val newNode = TextNode(*tokens)
+        addNode(newNode, TextNode.Companion.LABEL)
+        return newNode
     }
-  }
 
-  public TextDelimiterNode getTextStartNode() {
-    return textStartNode;
-  }
-
-  public TextDelimiterNode getTextEndNode() {
-    return textEndNode;
-  }
-
-  public boolean isEmpty() {
-    return sigils.isEmpty();
-  }
-
-  public List<String> getSigils() {
-    return sigils;
-  }
-
-  public TextNode getTarget(TextEdge edge) {
-    Collection<Node> nodes = getTargets(edge);
-    if (nodes.size() != 1) {
-      throw new RuntimeException("trouble!");
+    fun addMarkupNode(sigil: String, markup: Markup): MarkupNode {
+        val newNode = MarkupNode(sigil, markup)
+        addNode(newNode, MarkupNode.Companion.LABEL)
+        markupNodeIndex[markup] = newNode
+        return newNode
     }
-    return (TextNode) nodes.iterator().next();
-  }
 
-  public void addDirectedEdge(Node source, Node target, Set<String> sigils) {
-    TextEdge edge = new TextEdge(sigils);
-    super.addDirectedHyperEdge(edge, TextEdge.LABEL, source, target);
-  }
-
-  public Stream<TextEdge> getOutgoingTextEdgeStream(Node source) {
-    return this.getOutgoingEdges(source).stream()
-        .filter(TextEdge.class::isInstance)
-        .map(TextEdge.class::cast);
-  }
-
-  public List<TextNode> traverseTextNodes() {
-    Set<Node> visitedNodes = new HashSet<>();
-    Stack<Node> nodesToVisit = new Stack<>();
-    nodesToVisit.add(textStartNode);
-    List<TextNode> result = new ArrayList<>();
-    while (!nodesToVisit.isEmpty()) {
-      Node pop = nodesToVisit.pop();
-      if (!visitedNodes.contains(pop)) {
-        if (pop instanceof TextNode) {
-          result.add((TextNode) pop);
+    fun linkMarkupToText(markupNode: MarkupNode, textNode: TextNode?) {
+        val markupHyperEdges: List<MarkupHyperEdge> = getOutgoingEdges(markupNode)
+                .filterIsInstance<MarkupHyperEdge>()
+        if (markupHyperEdges.isEmpty()) {
+            val newEdge = MarkupHyperEdge()
+            addDirectedHyperEdge(newEdge, MarkupHyperEdge.LABEL, markupNode, textNode)
+        } else {
+            if (markupHyperEdges.size != 1) {
+                throw RuntimeException(
+                        "MarkupNode "
+                                + markupNode
+                                + " should have exactly 1 MarkupHyperEdge, but has "
+                                + markupHyperEdges.size)
+            }
+            val edge = markupHyperEdges[0]
+            addTargetsToHyperEdge(edge, textNode)
         }
-        visitedNodes.add(pop);
-        getOutgoingTextEdgeStream(pop)
-            .forEach(
-                e -> {
-                  Node target = this.getTarget(e);
-                  if (target == null) {
-                    throw new RuntimeException("edge target is null for edge " + pop + "->");
-                  }
-                  nodesToVisit.add(target);
-                });
-      } else {
-        LOG.debug("revisiting node {}", pop);
-      }
     }
-    return result;
-  }
 
-  public Stream<TextEdge> getIncomingTextEdgeStream(TextNode node) {
-    return getIncomingEdges(node).stream()
-        .filter(TextEdge.class::isInstance)
-        .map(TextEdge.class::cast);
-  }
+    val isEmpty: Boolean
+        get() = sigils.isEmpty()
 
-  public Stream<Markup> getMarkupStream() {
-    return markupNodeIndex.keySet().stream();
-  }
+    fun getTarget(edge: TextEdge): TextNode {
+        val nodes = getTargets(edge)
+        if (nodes.size != 1) {
+            throw RuntimeException("trouble!")
+        }
+        return nodes.iterator().next() as TextNode
+    }
 
-  public Stream<MarkupNode> getMarkupNodeStream() {
-    return markupNodeIndex.values().stream();
-  }
+    fun addDirectedEdge(source: Node?, target: Node?, sigils: MutableSet<String>) {
+        val edge = TextEdge(sigils)
+        super.addDirectedHyperEdge(edge, TextEdge.LABEL, source, target)
+    }
 
-  public Stream<TextNode> getTextNodeStreamForMarkup(Markup markup) {
-    MarkupNode originalMarkupNode = getMarkupNode(markup);
-    List<MarkupHyperEdge> markupHyperEdges =
-        getOutgoingEdges(originalMarkupNode).stream()
-            .filter(MarkupHyperEdge.class::isInstance)
-            .map(MarkupHyperEdge.class::cast)
-            .collect(toList());
-    Preconditions.checkArgument(markupHyperEdges.size() == 1);
-    return getTargets(markupHyperEdges.get(0)).stream()
-        .filter(TextNode.class::isInstance)
-        .map(TextNode.class::cast);
-  }
+    fun getOutgoingTextEdgeStream(source: Node?): Stream<TextEdge> =
+            getOutgoingEdges(source)
+                    .filterIsInstance<TextEdge>().stream()
 
-  public MarkupNode getMarkupNode(Markup markup) {
-    return getMarkupNode(markupNodeIndex.get(markup));
-  }
+    fun traverseTextNodes(): List<TextNode> {
+        val visitedNodes: MutableSet<Node> = HashSet()
+        val nodesToVisit = Stack<Node>()
+        nodesToVisit.add(textStartNode)
+        val result: MutableList<TextNode> = ArrayList()
+        while (!nodesToVisit.isEmpty()) {
+            val pop = nodesToVisit.pop()
+            if (!visitedNodes.contains(pop)) {
+                if (pop is TextNode) {
+                    result.add(pop)
+                }
+                visitedNodes.add(pop)
+                getOutgoingTextEdgeStream(pop)
+                        .forEach { e: TextEdge ->
+                            val target = getTarget(e)
+                                    ?: throw RuntimeException("edge target is null for edge $pop->")
+                            nodesToVisit.add(target)
+                        }
+            } else {
+                LOG.debug("revisiting node {}", pop)
+            }
+        }
+        return result
+    }
 
-  public Stream<MarkupNode> getMarkupNodeStreamForTextNode(TextNode textNode) {
-    return getIncomingEdges(textNode).stream()
-        .filter(MarkupHyperEdge.class::isInstance)
-        .map(MarkupHyperEdge.class::cast)
-        .map(this::getSource)
-        .map(MarkupNode.class::cast);
-  }
+    fun getIncomingTextEdgeStream(node: TextNode?): Stream<TextEdge> =
+            getIncomingEdges(node)
+                    .filterIsInstance<TextEdge>()
+                    .stream()
 
-  private MarkupNode getMarkupNode(Node markupNode) {
-    return (MarkupNode) markupNode;
-  }
+    val markupStream: Stream<Markup>
+        get() = markupNodeIndex.keys.stream()
+
+    val markupNodeStream: Stream<MarkupNode>
+        get() = markupNodeIndex.values.stream()
+
+    fun getTextNodeStreamForMarkup(markup: Markup): Stream<TextNode> {
+        val originalMarkupNode = getMarkupNode(markup)
+        val markupHyperEdges: List<MarkupHyperEdge> = getOutgoingEdges(originalMarkupNode)
+                .filterIsInstance<MarkupHyperEdge>()
+        Preconditions.checkArgument(markupHyperEdges.size == 1)
+        return getTargets(markupHyperEdges[0])
+                .filterIsInstance<TextNode>().stream()
+    }
+
+    fun getMarkupNode(markup: Markup): MarkupNode =
+            getMarkupNode(markupNodeIndex[markup])!!
+
+    fun getMarkupNodeStreamForTextNode(textNode: TextNode?): Stream<MarkupNode> =
+            getIncomingEdges(textNode)
+                    .filterIsInstance<MarkupHyperEdge>()
+                    .map { e: MarkupHyperEdge? -> getSource(e) }
+                    .map(MarkupNode::class.java::cast)
+                    .stream()
+
+    private fun getMarkupNode(markupNode: Node?): MarkupNode? =
+            markupNode as MarkupNode?
+
+    companion object {
+        private val LOG = LoggerFactory.getLogger(CollationGraph::class.java)
+    }
 }

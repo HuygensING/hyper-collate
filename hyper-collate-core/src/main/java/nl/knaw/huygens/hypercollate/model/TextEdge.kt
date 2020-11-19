@@ -1,4 +1,4 @@
-package nl.knaw.huygens.hypercollate.model;
+package nl.knaw.huygens.hypercollate.model
 
 /*-
  * #%L
@@ -20,21 +20,16 @@ package nl.knaw.huygens.hypercollate.model;
  * #L%
  */
 
-import java.util.Set;
+class TextEdge(internal val sigils: MutableSet<String>) : Edge {
+    fun getSigils(): Set<String> {
+        return sigils
+    }
 
-public class TextEdge implements Edge {
-  public static final String LABEL = "NextTextNode";
-  private final Set<String> sigils;
+    fun addSigil(sigil: String) {
+        sigils.add(sigil)
+    }
 
-  TextEdge(Set<String> sigils) {
-    this.sigils = sigils;
-  }
-
-  public Set<String> getSigils() {
-    return sigils;
-  }
-
-  public void addSigil(String sigil) {
-    sigils.add(sigil);
-  }
+    companion object {
+        const val LABEL = "NextTextNode"
+    }
 }

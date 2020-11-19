@@ -20,7 +20,6 @@ package nl.knaw.huygens.hypercollate.model
  * #L%
  */
 
-import com.google.common.base.Preconditions
 import nl.knaw.huygens.hypercollate.collator.VariantWitnessGraphTraversal
 import java.util.*
 import java.util.stream.Stream
@@ -29,11 +28,9 @@ class VariantWitnessGraph(val sigil: String) {
     val startTokenVertex: TokenVertex
     val endTokenVertex: TokenVertex
 
-    val markupPathToRootForBranch: MutableMap<Int, MutableList<Markup>> = mutableMapOf()
-
-    private val markupList: MutableList<Markup> = ArrayList()
-    private val markup2TokenVertexList: MutableMap<Markup, MutableList<TokenVertex>> = HashMap()
-    private val tokenVertex2MarkupList: MutableMap<TokenVertex, MutableList<Markup>> = HashMap()
+    private val markupList: MutableList<Markup> = mutableListOf()
+    private val markup2TokenVertexList: MutableMap<Markup, MutableList<TokenVertex>> = mutableMapOf()
+    private val tokenVertex2MarkupList: MutableMap<TokenVertex, MutableList<Markup>> = mutableMapOf()
 
     val markupStream: Stream<Markup>
         get() = markupList.stream()
@@ -46,8 +43,6 @@ class VariantWitnessGraph(val sigil: String) {
         if (token0 == null || token1 == null) {
             return
         }
-        Preconditions.checkNotNull(token0)
-        Preconditions.checkNotNull(token1)
         token0.addOutgoingTokenVertex(token1) // (token0)->(token1)
         token1.addIncomingTokenVertex(token0) // (token1)<-(token0)
     }
