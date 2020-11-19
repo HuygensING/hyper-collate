@@ -86,7 +86,7 @@ object TokenMerger {
                 .withNormalizedContent(originalToken.normalizedContent)
                 .withParentXPath(originalToken.parentXPath)
                 .withWitness(originalToken.witness as SimpleWitness)
-                .withRdg(originalToken.rdg!!)
+                .withRdg(originalToken.rdg)
                 .withIndexNumber(tokenNumber)
         val mergedVertex = SimpleTokenVertex(mergedToken).withBranchPath(originalVertex.branchPath)
         originalGraph

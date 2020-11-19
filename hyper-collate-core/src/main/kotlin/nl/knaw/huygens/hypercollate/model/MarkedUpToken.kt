@@ -56,7 +56,7 @@ class MarkedUpToken : Token {
         return this
     }
 
-    fun withRdg(rdg: String): MarkedUpToken {
+    fun withRdg(rdg: String?): MarkedUpToken {
         this.rdg = rdg
         return this
     }

@@ -35,8 +35,8 @@ open class TextNode(vararg tokens: Token) : Node {
         }
     }
 
-    fun getTokenForWitness(sigil: String): Token =
-            tokenMap[sigil]!!
+    fun getTokenForWitness(sigil: String): Token? =
+            tokenMap[sigil]
 
     val sigils: Set<String>
         get() = tokenMap.keys
