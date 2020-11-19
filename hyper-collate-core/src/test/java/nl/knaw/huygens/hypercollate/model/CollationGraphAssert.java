@@ -120,7 +120,7 @@ public class CollationGraphAssert
         actual
             .getMarkupNodeListForTextNode(textNode)
             .stream()
-            .map(node -> toMarkupNodeSketch(node))
+            .map(this::toMarkupNodeSketch)
             .collect(toSet());
     Iterables.instance()
         .assertContains(info, actualMarkupNodeSketchesForTextNode, markupNodeSketches);
