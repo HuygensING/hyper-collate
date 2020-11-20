@@ -374,7 +374,7 @@ class XMLImporter {
         private fun Markup.xpathNode(): String =
                 when (this.tagName) {
                     "rdg" -> {
-                        val identifyingAttribute = this.attributeMap.keys.filter { it in rdgIdentifyingAttributes }.sorted()
+                        val identifyingAttribute = this.attributeMap.keys.filter { it in rdgIdentifyingAttributes }
                         if (identifyingAttribute.isEmpty()) {
                             "rdg"
                         } else {

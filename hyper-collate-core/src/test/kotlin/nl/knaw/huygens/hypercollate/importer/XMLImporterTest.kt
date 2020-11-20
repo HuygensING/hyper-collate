@@ -24,6 +24,7 @@ import nl.knaw.huygens.hypercollate.HyperCollateTest
 import nl.knaw.huygens.hypercollate.collator.VariantWitnessGraphRanking
 import nl.knaw.huygens.hypercollate.importer.XMLImporter.Companion.normalizedSigil
 import nl.knaw.huygens.hypercollate.model.BranchSet
+import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
 import nl.knaw.huygens.hypercollate.tools.DotFactory
 import nl.knaw.huygens.hypercollate.tools.TokenMerger
@@ -34,6 +35,45 @@ import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 
 class XMLImporterTest : HyperCollateTest() {
+
+    @Test
+    fun witness_with_app_rdg_has_rdg_identifier_in_xpath() {
+        val importer = XMLImporter()
+        val xmlString = """
+            <xml>Mondays are <app>
+              <rdg varSeq="1">deaf bat</rdg>
+              <rdg varSeq="2">def bad</rdg>
+            </app>!</xml>
+            """.trimIndent()
+                .replace("""\s+""".toRegex(), " ")
+                .replace("> <", "><")
+        println(xmlString)
+        val wg0: VariantWitnessGraph = importer.importXML("A", xmlString)
+        val deafTokenVertex = wg0.vertices().filterIsInstance<SimpleTokenVertex>().first { it.normalizedContent == "deaf" }
+        assertThat(deafTokenVertex.parentXPath).isEqualTo("/xml/app/rdg[@varSeq='1']")
+        val badTokenVertex = wg0.vertices().filterIsInstance<SimpleTokenVertex>().first { it.normalizedContent == "bad" }
+        assertThat(badTokenVertex.parentXPath).isEqualTo("/xml/app/rdg[@varSeq='2']")
+
+        val expectedDot = """
+            digraph VariantWitnessGraph{
+            graph [rankdir=LR]
+            labelloc=b
+            begin [label="";shape=doublecircle,rank=middle]
+            vA_000 [label=<Mondays&#9251;are&#9251;<br/><i>A: /xml</i>>]
+            vA_002 [label=<deaf&#9251;bat<br/><i>A: /xml/app/rdg[@varSeq='1']</i>>]
+            vA_004 [label=<def&#9251;bad<br/><i>A: /xml/app/rdg[@varSeq='2']</i>>]
+            vA_006 [label=<!<br/><i>A: /xml</i>>]
+            end [label="";shape=doublecircle,rank=middle]
+            begin->vA_000
+            vA_000->vA_002
+            vA_000->vA_004
+            vA_002->vA_006
+            vA_004->vA_006
+            vA_006->end
+            }
+            """.trimIndent()
+        verifyDotExport(wg0, expectedDot)
+    }
 
     @Disabled
     @Test
