@@ -27,6 +27,7 @@ import nl.knaw.huygens.hypercollate.model.BranchSet
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
 import nl.knaw.huygens.hypercollate.tools.DotFactory
+import nl.knaw.huygens.hypercollate.tools.DotFactory.Companion.branchId
 import nl.knaw.huygens.hypercollate.tools.TokenMerger
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
@@ -35,6 +36,17 @@ import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 
 class XMLImporterTest : HyperCollateTest() {
+
+    @Test
+    fun witness_branch_identifier_from_xpath() {
+        assertThat("/xml/subst/add".branchId()).isEqualTo("+")
+        assertThat("/xml/subst/del".branchId()).isEqualTo("-")
+        assertThat("/xml/subst/add/del".branchId()).isEqualTo("+-")
+        assertThat("/xml/subst/add/add".branchId()).isEqualTo("++")
+        assertThat("/xml/app/rdg[@varSeq='1']".branchId()).isEqualTo("1")
+        assertThat("/xml/app/rdg[@type='l1']/add".branchId()).isEqualTo("l1+")
+        assertThat("/xml/app/rdg[@wit='a'".branchId()).isEqualTo("a")
+    }
 
     @Test
     fun witness_with_app_rdg_has_rdg_identifier_in_xpath() {
@@ -896,3 +908,4 @@ class XMLImporterTest : HyperCollateTest() {
         private val LOG = LoggerFactory.getLogger(XMLImporterTest::class.java)
     }
 }
+

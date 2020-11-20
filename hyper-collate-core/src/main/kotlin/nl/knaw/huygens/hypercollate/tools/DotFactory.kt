@@ -151,12 +151,8 @@ class DotFactory(emphasizeWhitespace: Boolean) {
                     val token = token
                     "v${token.witness.sigil}_${format("%03d", token.indexNumber)}"
                 }
-                is StartTokenVertex -> {
-                    "begin"
-                }
-                is EndTokenVertex -> {
-                    "end"
-                }
+                is StartTokenVertex -> "begin"
+                is EndTokenVertex -> "end"
                 else -> null
             }
 
@@ -179,47 +175,6 @@ class DotFactory(emphasizeWhitespace: Boolean) {
         dotBuilder.appendEdgeLines(collation, nodeIdentifiers, nodes)
         dotBuilder.append("}")
         return dotBuilder.toString()
-    }
-
-    private fun StringBuilder.appendEdgeLines(
-            collation: CollationGraph,
-            nodeIdentifiers: Map<TextNode, String>,
-            nodes: List<TextNode>
-    ) {
-        val edgeLines: MutableSet<String> = TreeSet()
-        for (node in nodes) {
-            collation
-                    .getIncomingTextEdgeList(node)
-                    .forEach { e: TextEdge ->
-                        val source = collation.getSource(e)
-                        val target: Node = collation.getTarget(e)
-                        val edgeLabel = e.sigils.sorted().joinToString(",") { it.extendedSigil(collation.getMarkupNodeListForTextNode(node)) }
-                        edgeLines += "${nodeIdentifiers[source]}->${nodeIdentifiers[target]}[label=\"$edgeLabel\"${e.penWidthParameter()}]\n"
-                    }
-        }
-        edgeLines.forEach { str: String? -> append(str) }
-    }
-
-    private fun String.extendedSigil(markupNodes: List<MarkupNode>): String {
-        val parentMarkupNode = markupNodes.stream()
-                .filter { it.sigil == this }
-                .sorted { n1, n2 -> n2.markup.depth.compareTo(n1.markup.depth) }
-                .findFirst()
-        if (!parentMarkupNode.isPresent) {
-            return this
-        }
-        val parentMarkup = parentMarkupNode.get().markup
-        val extension = when (parentMarkup.tagName) {
-            "add" -> "+"
-            "del" -> "-"
-            else -> null
-        }
-        return if (extension == null)
-            this
-        else
-//            "${this}<sup>$extension</sup>"
-            this
-
     }
 
     private fun StringBuilder.appendNodeLine(
@@ -246,67 +201,108 @@ class DotFactory(emphasizeWhitespace: Boolean) {
     private fun Set<String>.penWidthParameter() =
             if (size > 1) ";penwidth=2" else ""
 
+    data class NodeLabels(val content: String, val xpath: String, val sigilExtension: String)
+
     private fun TextNode.generateNodeLabel(hideMarkup: Boolean): String {
         val label = StringBuilder()
         val sortedSigils = sigils.sorted()
-        val contentLabel: MutableMap<String, String> = HashMap()
-        val markupLabel: MutableMap<String, String> = HashMap()
-        prepare(sortedSigils, this, contentLabel, markupLabel)
+        val nodeLabelMap: Map<String, NodeLabels> = sortedSigils.generateNodeLabelsForTextNode(this)
         val joinedSigils = sortedSigils.joinToString(",")
-        label.appendContent(contentLabel, sortedSigils, joinedSigils)
+        label.appendContent(sortedSigils, nodeLabelMap)
         if (!hideMarkup) {
             if (label.isNotEmpty()) {
                 label.append("<br/>")
             }
-            label.appendMarkup(markupLabel, sortedSigils, joinedSigils)
+            label.appendMarkup(sortedSigils, nodeLabelMap, joinedSigils)
         }
         return label.toString()
     }
 
-    private fun prepare(
-            sortedSigils: List<String>,
-            node: TextNode,
-            contentLabel: MutableMap<String, String>,
-            markupLabel: MutableMap<String, String>
+    private fun StringBuilder.appendEdgeLines(
+            collation: CollationGraph,
+            nodeIdentifiers: Map<TextNode, String>,
+            nodes: List<TextNode>
     ) {
-        sortedSigils.forEach { s: String ->
+        val edgeLines: MutableSet<String> = TreeSet()
+        for (node in nodes) {
+            collation
+                    .getIncomingTextEdgeList(node)
+                    .forEach { e: TextEdge ->
+                        val source: TextNode = collation.getSource(e) as TextNode
+                        val sourceSigilExtensionMap = e.sigils
+                                .map { it to (source.tokenForSigil(it) as MarkedUpToken?)?.parentXPath?.branchId() }
+                                .toMap()
+                        val target: TextNode = collation.getTarget(e)
+                        val targetSigilExtensionMap = e.sigils
+                                .map { it to (target.tokenForSigil(it) as MarkedUpToken?)?.parentXPath?.branchId() }
+                                .toMap()
+                        val edgeLabel = e.sigils.sorted().joinToString(",") { sigil: String ->
+                            val longestBranchId = listOfNotNull(sourceSigilExtensionMap[sigil], targetSigilExtensionMap[sigil])
+                                    .maxByOrNull { s -> s.length }
+                            if (longestBranchId.isNullOrEmpty()) {
+                                sigil
+                            } else {
+                                "$sigil<sup>$longestBranchId</sup>"
+                            }
+                        }
+                        edgeLines += "${nodeIdentifiers[source]}->${nodeIdentifiers[target]}[label=<$edgeLabel>${e.penWidthParameter()}]\n"
+                    }
+        }
+        edgeLines.forEach { str: String? -> append(str) }
+    }
+
+    private fun List<String>.generateNodeLabelsForTextNode(
+            node: TextNode
+    ): Map<String, NodeLabels> {
+        val map: MutableMap<String, NodeLabels> = mutableMapOf()
+        forEach { s: String ->
             val token = node.tokenForSigil(s)
             if (token != null) {
                 val mToken = token as MarkedUpToken
-                val markup = mToken.parentXPath
-                contentLabel[s] = mToken.content.asLabel(whitespaceCharacter)
-                markupLabel[s] = markup
+                val xpath = mToken.parentXPath
+                map[s] = NodeLabels(mToken.content.asLabel(whitespaceCharacter), xpath, xpath.branchId())
             }
         }
-    }
-
-    private fun StringBuilder.appendMarkup(
-            markupLabel: Map<String, String>,
-            sortedSigils: List<String>,
-            joinedSigils: String
-    ) {
-        val markupLabelSet: Set<String> = markupLabel.values.toSet()
-        if (markupLabelSet.size == 1) {
-            append(joinedSigils)
-                    .append(": <i>")
-                    .append(markupLabelSet.iterator().next())
-                    .append("</i>")
-        } else {
-            sortedSigils.forEach { s: String -> append(s).append(": <i>").append(markupLabel[s]).append("</i><br/>") }
-        }
+        return map
     }
 
     private fun StringBuilder.appendContent(
-            contentLabel: Map<String, String>,
             sortedSigils: List<String>,
+            nodeLabelMap: Map<String, NodeLabels>
+    ) {
+        val contentLabelSet: Set<String> = nodeLabelMap.values.map { it.content }.toSet()
+        if (contentLabelSet.size == 1) {
+            val sigils = sortedSigils.joinToString(",") { extendedSigil(it, nodeLabelMap) }
+            append(sigils)
+            append(": ").append(contentLabelSet.iterator().next())
+        } else {
+            val witnessLines = sortedSigils.joinToString("<br/>") { sigil ->
+                val eSigil = extendedSigil(sigil, nodeLabelMap)
+                "$eSigil: ${nodeLabelMap[sigil]?.content}"
+            }
+            append(witnessLines)
+        }
+    }
+
+    private fun extendedSigil(sigil: String, nodeLabelMap: Map<String, NodeLabels>): String {
+        val sigilExtension = nodeLabelMap[sigil]?.sigilExtension
+        val sup = if (sigilExtension.isNullOrEmpty()) "" else "<sup>${sigilExtension}</sup>"
+        return "$sigil$sup"
+    }
+
+    private fun StringBuilder.appendMarkup(
+            sortedSigils: List<String>,
+            nodeLabelMap: Map<String, NodeLabels>,
             joinedSigils: String
     ) {
-        val contentLabelSet: Set<String> = contentLabel.values.toSet()
-        if (contentLabelSet.size == 1) {
-            append(joinedSigils).append(": ").append(contentLabelSet.iterator().next())
+        val xpathSet: Set<String> = nodeLabelMap.values.map { it.xpath }.toSet()
+        if (xpathSet.size == 1) {
+            append(joinedSigils)
+                    .append(": <i>")
+                    .append(xpathSet.iterator().next())
+                    .append("</i>")
         } else {
-            val witnessLines = sortedSigils.joinToString("<br/>") { "$it: ${contentLabel[it]}" }
-            append(witnessLines)
+            sortedSigils.forEach { s: String -> append(s).append(": <i>").append(nodeLabelMap[s]?.xpath).append("</i><br/>") }
         }
     }
 
@@ -314,5 +310,19 @@ class DotFactory(emphasizeWhitespace: Boolean) {
             replace("&".toRegex(), "&amp;")
                     .replace("\n".toRegex(), "&#x21A9;<br/>")
                     .replace(" +".toRegex(), whitespaceCharacter)
+
+    companion object {
+        fun String.branchId(): String =
+                this.split("/")
+                        .filter { it.startsWith("rdg[") || it == "del" || it == "add" }
+                        .joinToString("") { tag ->
+                            when {
+                                tag.startsWith("rdg[") -> tag.replace("^.*?'".toRegex(), "").replace("'.*$".toRegex(), "")
+                                tag == "add" -> "+"
+                                tag == "del" -> "-"
+                                else -> ""
+                            }
+                        }
+    }
 
 }
