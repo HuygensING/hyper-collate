@@ -28,9 +28,7 @@ import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.function.Function
-import java.util.stream.Collectors
 import java.util.stream.Stream
-import java.util.stream.StreamSupport
 import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamConstants
 import javax.xml.stream.XMLStreamException
@@ -115,10 +113,10 @@ class XMLImporter {
         val markup = Markup(tagName).setDepth(context.openMarkup.size)
         startElement
                 .attributes
-                .forEachRemaining { `object`: Any ->
-                    val attribute = `object` as Attribute
+                .forEachRemaining { attr: Any ->
+                    val attribute = attr as Attribute
                     val attributeName = attribute.name.toString()
-                    val attributeValue = `object`.value
+                    val attributeValue = attribute.value
                     markup.addAttribute(attributeName, attributeValue)
                 }
         context.openMarkup(markup)
@@ -371,15 +369,22 @@ class XMLImporter {
         }
 
         private fun buildParentXPath(): String =
-                ("/"
-                        + openMarkup.descendingIterator().streamIterator()
-                        .map { obj: Markup -> obj.tagName }
-                        .collect(Collectors.joining("/")))
+                "/" + openMarkup.reversed().joinToString("/") { it.xpathNode() }
 
-        private fun Iterator<Markup>.streamIterator(): Stream<Markup> {
-            val spliterator = Spliterators.spliteratorUnknownSize(this, Spliterator.ORDERED)
-            return StreamSupport.stream(spliterator, false)
-        }
+        private fun Markup.xpathNode(): String =
+                when (this.tagName) {
+                    "rdg" -> {
+                        val id = this.getAttributeValue("wit").orElse(
+                                this.getAttributeValue("varSeq").orElse(
+                                        this.getAttributeValue("type").orElse(
+                                                ""
+                                        )
+                                )
+                        )
+                        if (id.isNotBlank()) "rdg($id)" else "rdg"
+                    }
+                    else -> this.tagName
+                }
 
         init {
             lastTokenVertex = graph.startTokenVertex

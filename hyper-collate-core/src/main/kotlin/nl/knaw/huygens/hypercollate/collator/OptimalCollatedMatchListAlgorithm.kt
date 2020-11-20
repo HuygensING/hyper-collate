@@ -60,7 +60,9 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
     override fun isGoal(matchList: QuantumCollatedMatchList): Boolean =
             matchList.isDetermined
 
-    override fun neighborNodes(matchList: QuantumCollatedMatchList): Iterable<QuantumCollatedMatchList> {
+    override fun neighborNodes(matchList: QuantumCollatedMatchList): Iterable<QuantumCollatedMatchList> = neighborNodes_v1(matchList)
+
+    private fun neighborNodes_v1(matchList: QuantumCollatedMatchList): Iterable<QuantumCollatedMatchList> {
         val nextMatchSequence: MutableList<CollatedMatch> = mutableListOf()
         val cms1 = (matchesSortedByNode - matchList.chosenMatches).filter { it in matchList.potentialMatches }.toMutableList()
         val cms2 = (matchesSortedByWitness - matchList.chosenMatches).filter { it in matchList.potentialMatches }.toMutableList()
@@ -90,7 +92,7 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
         return nextPotentialMatches
     }
 
-    /*override*/ fun neighborNodes0(matchList: QuantumCollatedMatchList): Iterable<QuantumCollatedMatchList> {
+    private fun neighborNodes_v2(matchList: QuantumCollatedMatchList): Iterable<QuantumCollatedMatchList> {
         val relevantMatchesSortedByNode = (matchesSortedByNode - matchList.chosenMatches).asSequence().filter { it in matchList.potentialMatches }
         val matchesByNodeRank = relevantMatchesSortedByNode.groupBy { it.nodeRank }
         val relevantMatchesSortedByWitness = (matchesSortedByWitness - matchList.chosenMatches).asSequence().filter { it in matchList.potentialMatches }
@@ -138,7 +140,7 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
                 goOn = false
             else {
                 nextMatchSequence += nextMatch
-                nextMatch.sigils.forEach { s ->
+                for (s in nextMatch.sigils) {
                     chosenBranchesPerSigil
                             .getOrPut(s) { mutableSetOf() }
                             .add(nextMatch.getBranchPath(s))

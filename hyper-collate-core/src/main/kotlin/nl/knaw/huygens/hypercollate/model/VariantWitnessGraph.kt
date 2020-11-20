@@ -23,11 +23,15 @@ package nl.knaw.huygens.hypercollate.model
 import nl.knaw.huygens.hypercollate.collator.VariantWitnessGraphTraversal
 import java.util.*
 
+typealias BranchSet = MutableList<MutableList<SimpleTokenVertex>>
+
 class VariantWitnessGraph(val sigil: String) {
     val startTokenVertex: TokenVertex
     val endTokenVertex: TokenVertex
 
     val markupList: MutableList<Markup> = mutableListOf()
+    val branchSets: MutableList<BranchSet> = mutableListOf()
+
     private val markup2TokenVertexList: MutableMap<Markup, MutableList<TokenVertex>> = mutableMapOf()
     private val tokenVertex2MarkupList: MutableMap<TokenVertex, MutableList<Markup>> = mutableMapOf()
 

@@ -31,6 +31,7 @@ import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer
 import nl.knaw.huygens.hypercollate.tools.DotFactory
 import org.assertj.core.api.SoftAssertions
 import org.assertj.core.util.Sets
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Timeout
@@ -96,7 +97,7 @@ class HyperCollatorTest {
         //        W1: <root> a long <subst><add> text that is very long </add><del> text that is different</del></subst> </root>
         //        W2: <root> a long text that is very long </root>
         //        Gewenste uitkomst: Moet alleen de add volgen.
-//        @Disabled
+        @Disabled
         @Test
         @Timeout(15)
         fun trd_642_1a() {
@@ -131,7 +132,7 @@ class HyperCollatorTest {
             testHyperCollation(w1, w2, expectedDot, expectedTable)
         }
 
-        //        @Disabled
+        @Disabled
         @Test
         @Timeout(15)
         fun trd_642_1b() {
@@ -256,7 +257,7 @@ class HyperCollatorTest {
         //        W2: <root> a b c d e f g h i j </root>
         //        Gewenste uitkomst:
         //        root volgen, dan de add, daar c d uithalen, dan e f g h i j matchen na de branch, want de match na de branch is langer dan wat er in del staat.
-//        @Disabled
+        @Disabled
         @Test
         @Timeout(15)
         fun trd_642_4() {
@@ -1365,9 +1366,9 @@ class HyperCollatorTest {
                     t002 [label=<W1,W2: One&#9251;must&#9251;have&#9251;lived&#9251;longer&#9251;with&#9251;<br/>W1,W2: <i>/s</i>>;penwidth=2]
                     t003 [label=<W1: &#9251;<br/>W1: <i>/s</i>>]
                     t004 [label=<W1,W2: system,&#9251;to&#9251;appreciate&#9251;its&#9251;advantages.<br/>W1,W2: <i>/s</i>>;penwidth=2]
-                    t005 [label=<W1: this<br/>W2: this&#9251;<br/>W1: <i>/s/app/rdg/del</i><br/>W2: <i>/s</i><br/>>;penwidth=2]
-                    t006 [label=<W1: such&#9251;a<br/>W1: <i>/s/app/rdg/del/add</i>>]
-                    t007 [label=<W1: a<br/>W1: <i>/s/app/rdg/add</i>>]
+                    t005 [label=<W1: this<br/>W2: this&#9251;<br/>W1: <i>/s/app/rdg(1)/del</i><br/>W2: <i>/s</i><br/>>;penwidth=2]
+                    t006 [label=<W1: such&#9251;a<br/>W1: <i>/s/app/rdg(2)/del/add</i>>]
+                    t007 [label=<W1: a<br/>W1: <i>/s/app/rdg(3)/add</i>>]
                     t000->t002[label="W1,W2";penwidth=2]
                     t002->t005[label="W1,W2";penwidth=2]
                     t002->t006[label="W1"]

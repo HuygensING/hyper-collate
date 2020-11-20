@@ -23,6 +23,7 @@ package nl.knaw.huygens.hypercollate.importer
 import nl.knaw.huygens.hypercollate.HyperCollateTest
 import nl.knaw.huygens.hypercollate.collator.VariantWitnessGraphRanking
 import nl.knaw.huygens.hypercollate.importer.XMLImporter.Companion.normalizedSigil
+import nl.knaw.huygens.hypercollate.model.BranchSet
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
 import nl.knaw.huygens.hypercollate.tools.DotFactory
 import nl.knaw.huygens.hypercollate.tools.TokenMerger
@@ -33,6 +34,56 @@ import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 
 class XMLImporterTest : HyperCollateTest() {
+
+    @Disabled
+    @Test
+    fun witness_with_subst_has_expected_branchset() {
+        val importer = XMLImporter()
+        val xmlString = """
+            <xml>Mondays are <subst>
+              <sic>deaf bat</sic>
+              <corr>def bad</corr>
+            </subst>!</xml>
+            """.trimIndent()
+                .replace("""\s+""".toRegex(), " ")
+                .replace("> <", "><")
+        println(xmlString)
+
+        val wg0: VariantWitnessGraph = importer.importXML("A", xmlString)
+        val branchSets: List<BranchSet> = wg0.branchSets
+        assertThat(branchSets).hasSize(1)
+        val branchSet0 = branchSets[0]
+        assertThat(branchSet0).hasSize(2)
+
+        val branch0 = branchSet0[0]
+        assertThat(branch0.map { it.content }).containsExactly("deaf ", "bat")
+        assertThat(branch0.map { it.indexNumber }).containsExactly(3L, 4L)
+
+        val branch1 = branchSet0[1]
+        assertThat(branch1.map { it.content }).containsExactly("def ", "bad")
+        assertThat(branch1.map { it.indexNumber }).containsExactly(5L, 6L)
+
+        val expectedDot = """
+            digraph VariantWitnessGraph{
+            graph [rankdir=LR]
+            labelloc=b
+            begin [label="";shape=doublecircle,rank=middle]
+            vA_000 [label=<Mondays&#9251;are&#9251;<br/><i>A: /xml</i>>]
+            vA_002 [label=<deaf&#9251;bat<br/><i>A: /xml/subst/sic</i>>]
+            vA_004 [label=<def&#9251;bad<br/><i>A: /xml/subst/corr</i>>]
+            vA_006 [label=<!<br/><i>A: /xml</i>>]
+            end [label="";shape=doublecircle,rank=middle]
+            begin->vA_000
+            vA_000->vA_002
+            vA_000->vA_004
+            vA_002->vA_006
+            vA_004->vA_006
+            vA_006->end
+            }
+            """.trimIndent()
+        verifyDotExport(wg0, expectedDot)
+    }
+
     @Test
     fun witness_with_subst() {
         val importer = XMLImporter()
@@ -354,8 +405,8 @@ class XMLImporterTest : HyperCollateTest() {
             labelloc=b
             begin [label="";shape=doublecircle,rank=middle]
             vA_000 [label=<Sinterklaas&#9251;en<br/><i>A: /xml</i>>]
-            vA_002 [label=<Zwarte&#9251;Piet<br/><i>A: /xml/app/rdg</i>>]
-            vA_004 [label=<Roetpiet<br/><i>A: /xml/app/rdg</i>>]
+            vA_002 [label=<Zwarte&#9251;Piet<br/><i>A: /xml/app/rdg(a)</i>>]
+            vA_004 [label=<Roetpiet<br/><i>A: /xml/app/rdg(b)</i>>]
             vA_005 [label=<&#9251;zijn&#9251;weer&#9251;aangekomen.<br/><i>A: /xml</i>>]
             end [label="";shape=doublecircle,rank=middle]
             begin->vA_000
@@ -375,19 +426,19 @@ class XMLImporterTest : HyperCollateTest() {
         val wg0 = importer.importXML(
                 "A",
                 """
-                    <xml>Sinterklaas en<app>
-                    <rdg wit="a">Zwarte Piet</rdg>
-                    <rdg wit="b">Roetpiet</rdg>
-                    </app> zijn weer aangekomen.</xml>
-                    """.trimIndent())
+                <xml>Sinterklaas en<app>
+                <rdg wit="a">Zwarte Piet</rdg>
+                <rdg wit="b">Roetpiet</rdg>
+                </app> zijn weer aangekomen.</xml>
+                """.trimIndent())
         val expectedDot = """
             digraph VariantWitnessGraph{
             graph [rankdir=LR]
             labelloc=b
             begin [label="";shape=doublecircle,rank=middle]
             vA_000 [label=<Sinterklaas&#9251;en<br/><i>A: /xml</i>>]
-            vA_002 [label=<Zwarte&#9251;Piet<br/><i>A: /xml/app/rdg</i>>]
-            vA_004 [label=<Roetpiet<br/><i>A: /xml/app/rdg</i>>]
+            vA_002 [label=<Zwarte&#9251;Piet<br/><i>A: /xml/app/rdg(a)</i>>]
+            vA_004 [label=<Roetpiet<br/><i>A: /xml/app/rdg(b)</i>>]
             vA_005 [label=<&#9251;zijn&#9251;weer&#9251;aangekomen.<br/><i>A: /xml</i>>]
             end [label="";shape=doublecircle,rank=middle]
             begin->vA_000
@@ -406,21 +457,22 @@ class XMLImporterTest : HyperCollateTest() {
         val importer = XMLImporter()
         val wg0 = importer.importXML(
                 "F",
-                """<text>
-    <s>De vent was woedend en maakte 
-        <app>
-            <rdg type="l1">Shiriar</rdg>
-            <rdg type="lit"><hi rend="strike">Shiriar</hi></rdg>
-        </app> den bedremmelden Sultan uit
-        voor "lompen boer".</s>
-</text>""")
+                """
+                <text>
+                    <s>De vent was woedend en maakte 
+                        <app>
+                            <rdg type="l1">Shiriar</rdg>
+                            <rdg type="lit"><hi rend="strike">Shiriar</hi></rdg>
+                        </app> den bedremmelden Sultan uit
+                        voor "lompen boer".</s>
+                </text>""".trimIndent())
         val expectedDot = """
             digraph VariantWitnessGraph{
             graph [rankdir=LR]
             labelloc=b
             begin [label="";shape=doublecircle,rank=middle]
             vF_000 [label=<De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/><i>F: /text/s</i>>]
-            vF_006 [label=<Shiriar<br/><i>F: /text/s/app/rdg</i>>]
+            vF_006 [label=<Shiriar<br/><i>F: /text/s/app/rdg(l1)</i>>]
             vF_007 [label=<&#9251;den&#9251;bedremmelden&#9251;Sultan&#9251;uit&#x21A9;<br/>&#9251;voor&#9251;"lompen&#9251;boer".<br/><i>F: /text/s</i>>]
             end [label="";shape=doublecircle,rank=middle]
             begin->vF_000
@@ -487,9 +539,9 @@ class XMLImporterTest : HyperCollateTest() {
             labelloc=b
             begin [label="";shape=doublecircle,rank=middle]
             vQ_000 [label=<De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/><i>Q: /text/s</i>>]
-            vQ_006 [label=<Shiriar<br/><i>Q: /text/s/app/rdg</i>>]
-            vQ_007 [label=<den&#9251;bedremmelden&#9251;man<br/><i>Q: /text/s/app/rdg</i>>]
-            vQ_010 [label=<den&#9251;bedremmelden&#9251;Sultan<br/><i>Q: /text/s/app/rdg</i>>]
+            vQ_006 [label=<Shiriar<br/><i>Q: /text/s/app/rdg(l1)</i>>]
+            vQ_007 [label=<den&#9251;bedremmelden&#9251;man<br/><i>Q: /text/s/app/rdg(l2)</i>>]
+            vQ_010 [label=<den&#9251;bedremmelden&#9251;Sultan<br/><i>Q: /text/s/app/rdg(l3)</i>>]
             vQ_013 [label=<uit&#9251;voor&#9251;<br/><i>Q: /text/s</i>>]
             vQ_015 [label=<"lompen&#9251;boer"<br/><i>Q: /text/s/q</i>>]
             vQ_017 [label=<.<br/><i>Q: /text/s</i>>]
@@ -583,8 +635,8 @@ class XMLImporterTest : HyperCollateTest() {
             begin [label="";shape=doublecircle,rank=middle]
             vF_000 [label=<Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/><i>F: /text/s</i>>]
             vF_006 [label=<<br/><i>F: /text/s/lb</i>>]
-            vF_007 [label=<werven&#9251;om<br/><i>F: /text/s/app/rdg</i>>]
-            vF_009 [label=<trachten&#9251;naar<br/><i>F: /text/s/app/rdg</i>>]
+            vF_007 [label=<werven&#9251;om<br/><i>F: /text/s/app/rdg(l1)</i>>]
+            vF_009 [label=<trachten&#9251;naar<br/><i>F: /text/s/app/rdg(l2)</i>>]
             vF_011 [label=<&#9251;een&#9251;vrouw,&#9251;de&#9251;ongewisheid&#9251;vóór&#9251;de&#9251;<br/><i>F: /text/s</i>>]
             vF_019 [label=<<br/><i>F: /text/s/lb</i>>]
             vF_020 [label=<liefelijke&#9251;toestemming!<br/><i>F: /text/s</i>>]
@@ -611,8 +663,8 @@ class XMLImporterTest : HyperCollateTest() {
                 """<text>
     <s>Hoe zoet moet nochtans zijn dit <lb/>
         <app>
-            <rdg><del>werven om</del></rdg>
-            <rdg><add>trachten naar</add></rdg>
+            <rdg varSeq="1"><del>werven om</del></rdg>
+            <rdg varSeq="2"><add>trachten naar</add></rdg>
             <rdg type="lit"><hi rend="strike">werven om</hi> <hi rend="supralinear">trachten naar</hi></rdg>
         </app> 
         een vrouw, de ongewisheid vóór de <lb/>liefelijke toestemming!</s>
@@ -624,8 +676,8 @@ class XMLImporterTest : HyperCollateTest() {
             begin [label="";shape=doublecircle,rank=middle]
             vF_000 [label=<Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/><i>F: /text/s</i>>]
             vF_006 [label=<<br/><i>F: /text/s/lb</i>>]
-            vF_007 [label=<werven&#9251;om<br/><i>F: /text/s/app/rdg/del</i>>]
-            vF_009 [label=<trachten&#9251;naar<br/><i>F: /text/s/app/rdg/add</i>>]
+            vF_007 [label=<werven&#9251;om<br/><i>F: /text/s/app/rdg(1)/del</i>>]
+            vF_009 [label=<trachten&#9251;naar<br/><i>F: /text/s/app/rdg(2)/add</i>>]
             vF_011 [label=<&#9251;een&#9251;vrouw,&#9251;de&#9251;ongewisheid&#9251;vóór&#9251;de&#9251;<br/><i>F: /text/s</i>>]
             vF_019 [label=<<br/><i>F: /text/s/lb</i>>]
             vF_020 [label=<liefelijke&#9251;toestemming!<br/><i>F: /text/s</i>>]
@@ -665,8 +717,8 @@ class XMLImporterTest : HyperCollateTest() {
             labelloc=b
             begin [label="";shape=doublecircle,rank=middle]
             vF_000 [label=<Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/><i>F: /text/s</i>>]
-            vF_006 [label=<werven&#9251;om<br/><i>F: /text/s/app/rdg</i>>]
-            vF_008 [label=<trachten&#9251;naar<br/><i>F: /text/s/app/rdg</i>>]
+            vF_006 [label=<werven&#9251;om<br/><i>F: /text/s/app/rdg(l1)</i>>]
+            vF_008 [label=<trachten&#9251;naar<br/><i>F: /text/s/app/rdg(l2)</i>>]
             vF_010 [label=<&#9251;een&#9251;<br/><i>F: /text/s</i>>]
             vF_012 [label=<<br/><i>F: /text/s/lb</i>>]
             vF_013 [label=<vrouw&#9251;!<br/><i>F: /text/s</i>>]
