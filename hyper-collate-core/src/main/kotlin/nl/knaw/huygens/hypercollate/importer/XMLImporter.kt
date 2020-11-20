@@ -374,14 +374,14 @@ class XMLImporter {
         private fun Markup.xpathNode(): String =
                 when (this.tagName) {
                     "rdg" -> {
-                        val id = this.getAttributeValue("wit").orElse(
-                                this.getAttributeValue("varSeq").orElse(
-                                        this.getAttributeValue("type").orElse(
-                                                ""
-                                        )
-                                )
-                        )
-                        if (id.isNotBlank()) "rdg($id)" else "rdg"
+                        val identifyingAttribute = this.attributeMap.keys.filter { it in rdgIdentifyingAttributes }.sorted()
+                        if (identifyingAttribute.isEmpty()) {
+                            "rdg"
+                        } else {
+                            val attr = identifyingAttribute[0]
+                            val value = this.attributeMap[attr]
+                            "rdg[@$attr='$value']"
+                        }
                     }
                     else -> this.tagName
                 }
@@ -399,6 +399,10 @@ class XMLImporter {
             unconnectedRdgVerticesStack.push(ArrayList())
 
             branchIds.push(nextBranchId())
+        }
+
+        companion object {
+            val rdgIdentifyingAttributes = setOf("wit", "varSeq", "type")
         }
     }
 

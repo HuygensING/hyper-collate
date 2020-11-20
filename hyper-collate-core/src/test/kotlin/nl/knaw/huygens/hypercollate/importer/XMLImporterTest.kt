@@ -405,8 +405,8 @@ class XMLImporterTest : HyperCollateTest() {
             labelloc=b
             begin [label="";shape=doublecircle,rank=middle]
             vA_000 [label=<Sinterklaas&#9251;en<br/><i>A: /xml</i>>]
-            vA_002 [label=<Zwarte&#9251;Piet<br/><i>A: /xml/app/rdg(a)</i>>]
-            vA_004 [label=<Roetpiet<br/><i>A: /xml/app/rdg(b)</i>>]
+            vA_002 [label=<Zwarte&#9251;Piet<br/><i>A: /xml/app/rdg[@wit='a']</i>>]
+            vA_004 [label=<Roetpiet<br/><i>A: /xml/app/rdg[@wit='b']</i>>]
             vA_005 [label=<&#9251;zijn&#9251;weer&#9251;aangekomen.<br/><i>A: /xml</i>>]
             end [label="";shape=doublecircle,rank=middle]
             begin->vA_000
@@ -437,8 +437,8 @@ class XMLImporterTest : HyperCollateTest() {
             labelloc=b
             begin [label="";shape=doublecircle,rank=middle]
             vA_000 [label=<Sinterklaas&#9251;en<br/><i>A: /xml</i>>]
-            vA_002 [label=<Zwarte&#9251;Piet<br/><i>A: /xml/app/rdg(a)</i>>]
-            vA_004 [label=<Roetpiet<br/><i>A: /xml/app/rdg(b)</i>>]
+            vA_002 [label=<Zwarte&#9251;Piet<br/><i>A: /xml/app/rdg[@wit='a']</i>>]
+            vA_004 [label=<Roetpiet<br/><i>A: /xml/app/rdg[@wit='b']</i>>]
             vA_005 [label=<&#9251;zijn&#9251;weer&#9251;aangekomen.<br/><i>A: /xml</i>>]
             end [label="";shape=doublecircle,rank=middle]
             begin->vA_000
@@ -472,7 +472,7 @@ class XMLImporterTest : HyperCollateTest() {
             labelloc=b
             begin [label="";shape=doublecircle,rank=middle]
             vF_000 [label=<De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/><i>F: /text/s</i>>]
-            vF_006 [label=<Shiriar<br/><i>F: /text/s/app/rdg(l1)</i>>]
+            vF_006 [label=<Shiriar<br/><i>F: /text/s/app/rdg[@type='l1']</i>>]
             vF_007 [label=<&#9251;den&#9251;bedremmelden&#9251;Sultan&#9251;uit&#x21A9;<br/>&#9251;voor&#9251;"lompen&#9251;boer".<br/><i>F: /text/s</i>>]
             end [label="";shape=doublecircle,rank=middle]
             begin->vF_000
@@ -539,9 +539,9 @@ class XMLImporterTest : HyperCollateTest() {
             labelloc=b
             begin [label="";shape=doublecircle,rank=middle]
             vQ_000 [label=<De&#9251;vent&#9251;was&#9251;woedend&#9251;en&#9251;maakte&#9251;<br/><i>Q: /text/s</i>>]
-            vQ_006 [label=<Shiriar<br/><i>Q: /text/s/app/rdg(l1)</i>>]
-            vQ_007 [label=<den&#9251;bedremmelden&#9251;man<br/><i>Q: /text/s/app/rdg(l2)</i>>]
-            vQ_010 [label=<den&#9251;bedremmelden&#9251;Sultan<br/><i>Q: /text/s/app/rdg(l3)</i>>]
+            vQ_006 [label=<Shiriar<br/><i>Q: /text/s/app/rdg[@type='l1']</i>>]
+            vQ_007 [label=<den&#9251;bedremmelden&#9251;man<br/><i>Q: /text/s/app/rdg[@type='l2']</i>>]
+            vQ_010 [label=<den&#9251;bedremmelden&#9251;Sultan<br/><i>Q: /text/s/app/rdg[@type='l3']</i>>]
             vQ_013 [label=<uit&#9251;voor&#9251;<br/><i>Q: /text/s</i>>]
             vQ_015 [label=<"lompen&#9251;boer"<br/><i>Q: /text/s/q</i>>]
             vQ_017 [label=<.<br/><i>Q: /text/s</i>>]
@@ -635,8 +635,8 @@ class XMLImporterTest : HyperCollateTest() {
             begin [label="";shape=doublecircle,rank=middle]
             vF_000 [label=<Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/><i>F: /text/s</i>>]
             vF_006 [label=<<br/><i>F: /text/s/lb</i>>]
-            vF_007 [label=<werven&#9251;om<br/><i>F: /text/s/app/rdg(l1)</i>>]
-            vF_009 [label=<trachten&#9251;naar<br/><i>F: /text/s/app/rdg(l2)</i>>]
+            vF_007 [label=<werven&#9251;om<br/><i>F: /text/s/app/rdg[@type='l1']</i>>]
+            vF_009 [label=<trachten&#9251;naar<br/><i>F: /text/s/app/rdg[@type='l2']</i>>]
             vF_011 [label=<&#9251;een&#9251;vrouw,&#9251;de&#9251;ongewisheid&#9251;vóór&#9251;de&#9251;<br/><i>F: /text/s</i>>]
             vF_019 [label=<<br/><i>F: /text/s/lb</i>>]
             vF_020 [label=<liefelijke&#9251;toestemming!<br/><i>F: /text/s</i>>]
@@ -676,8 +676,8 @@ class XMLImporterTest : HyperCollateTest() {
             begin [label="";shape=doublecircle,rank=middle]
             vF_000 [label=<Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/><i>F: /text/s</i>>]
             vF_006 [label=<<br/><i>F: /text/s/lb</i>>]
-            vF_007 [label=<werven&#9251;om<br/><i>F: /text/s/app/rdg(1)/del</i>>]
-            vF_009 [label=<trachten&#9251;naar<br/><i>F: /text/s/app/rdg(2)/add</i>>]
+            vF_007 [label=<werven&#9251;om<br/><i>F: /text/s/app/rdg[@varSeq='1']/del</i>>]
+            vF_009 [label=<trachten&#9251;naar<br/><i>F: /text/s/app/rdg[@varSeq='2']/add</i>>]
             vF_011 [label=<&#9251;een&#9251;vrouw,&#9251;de&#9251;ongewisheid&#9251;vóór&#9251;de&#9251;<br/><i>F: /text/s</i>>]
             vF_019 [label=<<br/><i>F: /text/s/lb</i>>]
             vF_020 [label=<liefelijke&#9251;toestemming!<br/><i>F: /text/s</i>>]
@@ -717,8 +717,8 @@ class XMLImporterTest : HyperCollateTest() {
             labelloc=b
             begin [label="";shape=doublecircle,rank=middle]
             vF_000 [label=<Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/><i>F: /text/s</i>>]
-            vF_006 [label=<werven&#9251;om<br/><i>F: /text/s/app/rdg(l1)</i>>]
-            vF_008 [label=<trachten&#9251;naar<br/><i>F: /text/s/app/rdg(l2)</i>>]
+            vF_006 [label=<werven&#9251;om<br/><i>F: /text/s/app/rdg[@type='l1']</i>>]
+            vF_008 [label=<trachten&#9251;naar<br/><i>F: /text/s/app/rdg[@type='l2']</i>>]
             vF_010 [label=<&#9251;een&#9251;<br/><i>F: /text/s</i>>]
             vF_012 [label=<<br/><i>F: /text/s/lb</i>>]
             vF_013 [label=<vrouw&#9251;!<br/><i>F: /text/s</i>>]

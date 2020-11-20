@@ -44,7 +44,7 @@ class HyperCollatorTest {
     @Nested
     inner class TwoWitnessTests : HyperCollateTest() {
 
-        //        @Disabled
+        @Disabled
         // both app/rdg and subst/* lead to witness branches
         // join matches from different branches of a witness, if the branches are joined
         // keep a list of which branches are joined (include sub-branches)
@@ -1366,9 +1366,9 @@ class HyperCollatorTest {
                     t002 [label=<W1,W2: One&#9251;must&#9251;have&#9251;lived&#9251;longer&#9251;with&#9251;<br/>W1,W2: <i>/s</i>>;penwidth=2]
                     t003 [label=<W1: &#9251;<br/>W1: <i>/s</i>>]
                     t004 [label=<W1,W2: system,&#9251;to&#9251;appreciate&#9251;its&#9251;advantages.<br/>W1,W2: <i>/s</i>>;penwidth=2]
-                    t005 [label=<W1: this<br/>W2: this&#9251;<br/>W1: <i>/s/app/rdg(1)/del</i><br/>W2: <i>/s</i><br/>>;penwidth=2]
-                    t006 [label=<W1: such&#9251;a<br/>W1: <i>/s/app/rdg(2)/del/add</i>>]
-                    t007 [label=<W1: a<br/>W1: <i>/s/app/rdg(3)/add</i>>]
+                    t005 [label=<W1: this<br/>W2: this&#9251;<br/>W1: <i>/s/app/rdg[@varSeq='1']/del</i><br/>W2: <i>/s</i><br/>>;penwidth=2]
+                    t006 [label=<W1: such&#9251;a<br/>W1: <i>/s/app/rdg[@varSeq='2']/del/add</i>>]
+                    t007 [label=<W1: a<br/>W1: <i>/s/app/rdg[@varSeq='3']/add</i>>]
                     t000->t002[label="W1,W2";penwidth=2]
                     t002->t005[label="W1,W2";penwidth=2]
                     t002->t006[label="W1"]
