@@ -1681,11 +1681,11 @@ class HyperCollatorTest {
     @Test
     fun min_or_null() {
         val l = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9)
-        val m = l.asSequence().minOrNull()
+        val m = l.minOrNull()
         assertThat(m).isEqualTo(1)
 
         val e = listOf<Int>()
-        val n = e.asSequence().minOrNull()
+        val n = e.minOrNull()
         assertThat(n).isNull()
     }
 

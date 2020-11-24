@@ -63,6 +63,6 @@ class SimpleTokenVertex(override val token: MarkedUpToken) : TokenVertex, Compar
     override fun compareTo(other: SimpleTokenVertex): Int =
             token.indexNumber.compareTo(other.token.indexNumber)
 
-    val indexNumber: Long?
+    val indexNumber: Long
         get() = token.indexNumber
 }

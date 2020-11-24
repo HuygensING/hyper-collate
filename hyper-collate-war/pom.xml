@@ -7,7 +7,7 @@
     <parent>
         <groupId>nl.knaw.huygens</groupId>
         <artifactId>hyper-collate</artifactId>
-        <version>1.3.5-SNAPSHOT-5</version>
+        <version>1.3.5-SNAPSHOT-6</version>
     </parent>
 
     <artifactId>hyper-collate-war</artifactId>
