@@ -159,7 +159,8 @@ class DotFactory(emphasizeWhitespace: Boolean) {
     class TextNodeComparator : Comparator<TextNode> {
         override fun compare(o1: TextNode?, o2: TextNode?): Int =
                 if (o1 == null || o2 == null) 0
-                else o1.toString().compareTo(o2.toString())
+                else o1.order().compareTo(o2.order())
+
     }
 
     fun fromCollationGraph(collation: CollationGraph, hideMarkup: Boolean): String {
@@ -167,8 +168,9 @@ class DotFactory(emphasizeWhitespace: Boolean) {
         val nodeIdentifiers: MutableMap<TextNode, String> = HashMap()
         val nodes = collation.traverseTextNodes().sortedWith(TextNodeComparator())
         for (i in nodes.indices) {
-            val node = nodes[i]
+            val node: TextNode = nodes[i]
             val nodeId = "t" + String.format("%03d", i)
+//            println(node.toString() + " - " + node.order())
             nodeIdentifiers[node] = nodeId
             dotBuilder.appendNodeLine(node, nodeId, hideMarkup)
         }
@@ -326,3 +328,11 @@ class DotFactory(emphasizeWhitespace: Boolean) {
     }
 
 }
+
+fun TextNode.order(): Long =
+        sigils.asSequence()
+                .sorted()
+                .map { tokenForSigil(it) }
+                .filterIsInstance<MarkedUpToken>()
+                .map { it.indexNumber }
+                .firstOrNull() ?: 0L

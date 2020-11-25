@@ -29,6 +29,7 @@ import nl.knaw.huygens.hypercollate.model.*
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer
 import nl.knaw.huygens.hypercollate.tools.DotFactory
+import org.assertj.core.api.SoftAssertions
 import org.assertj.core.util.Sets
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
@@ -42,6 +43,56 @@ class HyperCollatorTest {
 
     @Nested
     inner class TwoWitnessTests : HyperCollateTest() {
+
+        @Test
+        @Timeout(15)
+        fun trd_665() {
+            val importer = XMLImporter()
+            val wA = importer.importXML(
+                    "A", "<xml>Des objets en voie de disparition je détourne <subst><del>les yeux</del><add><del>les</del>mes regards</add></subst> bien à l'avance.</xml>")
+            val wB = importer.importXML(
+                    "B", "<xml>c'est bien à l'avance que je détourne mes regards.</xml>")
+            log.info("wA={}", wA.asDot())
+            val expectedDot = """
+                digraph CollationGraph{
+                labelloc=b
+                t000 [label="";shape=doublecircle,rank=middle]
+                t001 [label=<A: Des&#9251;objets&#9251;en&#9251;voie&#9251;de&#9251;disparition&#9251;<br/>A: <i>/xml</i>>]
+                t002 [label="";shape=doublecircle,rank=middle]
+                t003 [label=<B: c'est&#9251;bien&#9251;à&#9251;l'avance&#9251;que&#9251;<br/>B: <i>/xml</i>>]
+                t004 [label=<A,B: je&#9251;détourne&#9251;<br/>A,B: <i>/xml</i>>;penwidth=2]
+                t005 [label=<A<sup>-</sup>: les&#9251;yeux<br/>A: <i>/xml/subst/del</i>>]
+                t006 [label=<A<sup>+-</sup>: les<br/>A: <i>/xml/subst/add/del</i>>]
+                t007 [label=<A<sup>+</sup>,B: mes&#9251;regards<br/>A: <i>/xml/subst/add</i><br/>B: <i>/xml</i><br/>>;penwidth=2]
+                t008 [label=<A: &#9251;bien&#9251;à&#9251;l'avance<br/>A: <i>/xml</i>>]
+                t009 [label=<A,B: .<br/>A,B: <i>/xml</i>>;penwidth=2]
+                t000->t001[label=<A>]
+                t000->t003[label=<B>]
+                t001->t004[label=<A>]
+                t003->t004[label=<B>]
+                t004->t005[label=<A<sup>-</sup>>]
+                t004->t006[label=<A<sup>+-</sup>>]
+                t004->t007[label=<B>]
+                t005->t008[label=<A<sup>-</sup>>]
+                t006->t007[label=<A<sup>+-</sup>>]
+                t006->t008[label=<A<sup>+-</sup>>]
+                t007->t008[label=<A<sup>+</sup>>]
+                t007->t009[label=<B>]
+                t008->t009[label=<A>]
+                t009->t002[label=<A,B>;penwidth=2]
+                }
+                """.trimIndent()
+            val expectedTable = """
+                ┌───┬──────────────────────────────────┬────────────┬───────────────┬────────────────┬─┐
+                │[A]│                                  │            │[+] mes regards│                │ │
+                │   │                                  │            │[-] les        │                │ │
+                │   │Des objets en voie de disparition │je détourne │[-] les yeux   │bien à l'avance │.│
+                ├───┼──────────────────────────────────┼────────────┼───────────────┼────────────────┼─┤
+                │[B]│c'est bien à l'avance que         │je détourne │mes regards    │                │.│
+                └───┴──────────────────────────────────┴────────────┴───────────────┴────────────────┴─┘
+                """.trimIndent()
+            testHyperCollation(wA, wB, expectedDot, expectedTable)
+        }
 
         @Disabled
         // both app/rdg and subst/* lead to witness branches
@@ -758,22 +809,22 @@ class HyperCollatorTest {
                 digraph CollationGraph{
                 labelloc=b
                 t000 [label="";shape=doublecircle,rank=middle]
-                t001 [label="";shape=doublecircle,rank=middle]
-                t002 [label=<A,B: The&#9251;dog's&#9251;<br/>A,B: <i>/text</i>>;penwidth=2]
+                t001 [label=<A,B: The&#9251;dog's&#9251;<br/>A,B: <i>/text</i>>;penwidth=2]
+                t002 [label="";shape=doublecircle,rank=middle]
                 t003 [label=<A,B<sup>-</sup>: big&#9251;<br/>A: <i>/text</i><br/>B: <i>/text/del</i><br/>>;penwidth=2]
-                t004 [label=<A,B<sup>+</sup>: eyes<br/>A: <i>/text</i><br/>B: <i>/text/add</i><br/>>;penwidth=2]
-                t005 [label=<A,B: .<br/>A,B: <i>/text</i>>;penwidth=2]
-                t006 [label=<B<sup>-</sup>: black&#9251;ears<br/>B: <i>/text/del</i>>]
+                t004 [label=<B<sup>-</sup>: black&#9251;ears<br/>B: <i>/text/del</i>>]
+                t005 [label=<A,B<sup>+</sup>: eyes<br/>A: <i>/text</i><br/>B: <i>/text/add</i><br/>>;penwidth=2]
+                t006 [label=<A,B: .<br/>A,B: <i>/text</i>>;penwidth=2]
                 t007 [label=<B<sup>+</sup>: brown&#9251;<br/>B: <i>/text/add</i>>]
-                t000->t002[label=<A,B>;penwidth=2]
-                t002->t003[label=<A,B<sup>-</sup>>;penwidth=2]
-                t002->t007[label=<B<sup>+</sup>>]
-                t003->t004[label=<A>]
-                t003->t006[label=<B<sup>-</sup>>]
-                t004->t005[label=<A,B<sup>+</sup>>;penwidth=2]
-                t005->t001[label=<A,B>;penwidth=2]
-                t006->t005[label=<B<sup>-</sup>>]
-                t007->t004[label=<B<sup>+</sup>>]
+                t000->t001[label=<A,B>;penwidth=2]
+                t001->t003[label=<A,B<sup>-</sup>>;penwidth=2]
+                t001->t007[label=<B<sup>+</sup>>]
+                t003->t004[label=<B<sup>-</sup>>]
+                t003->t005[label=<A>]
+                t004->t006[label=<B<sup>-</sup>>]
+                t005->t006[label=<A,B<sup>+</sup>>;penwidth=2]
+                t006->t002[label=<A,B>;penwidth=2]
+                t007->t005[label=<B<sup>+</sup>>]
                 }
                 """.trimIndent()
             val expectedTable = """
@@ -1407,7 +1458,7 @@ class HyperCollatorTest {
             val duration = stopwatch.elapsed(TimeUnit.MILLISECONDS)
             log.info("Collating took {} ms.", duration)
             val collation = CollationGraphNodeJoiner.join(collation0)
-//            SoftAssertions().apply {
+            SoftAssertions().apply {
                 val dot = CollationGraphVisualizer.toDot(
                         collation,
                         emphasizeWhitespace = true,
@@ -1424,8 +1475,8 @@ class HyperCollatorTest {
 
                 val html = CollationGraphVisualizer.toTableHTML(collation, false)
                 log.debug("html=\n{}", html)
-//                assertAll()
-//            }
+                assertAll()
+            }
 
             return collation
         }
@@ -1468,51 +1519,51 @@ class HyperCollatorTest {
                 digraph CollationGraph{
                 labelloc=b
                 t000 [label="";shape=doublecircle,rank=middle]
-                t001 [label="";shape=doublecircle,rank=middle]
-                t002 [label=<F,Q,Z: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F,Q,Z: <i>/text/s</i>>;penwidth=2]
-                t003 [label=<F,Q: &#9251;<br/>F,Q: <i>/text/s</i>>;penwidth=2]
-                t004 [label=<F,Q,Z: een&#9251;<br/>F,Q,Z: <i>/text/s</i>>;penwidth=2]
-                t005 [label=<F: vrouw<br/>Q: vrouw&#9251;<br/>Z: vrouw&#9251;<br/>F,Q,Z: <i>/text/s</i>>;penwidth=2]
-                t006 [label=<F: ,&#x21A9;<br/>&#9251;de&#9251;<br/>F: <i>/text/s</i>>]
-                t007 [label=<F,Z: ongewisheid&#9251;<br/>F,Z: <i>/text/s</i>>;penwidth=2]
-                t008 [label=<F,Q,Z: vóór&#9251;de&#9251;<br/>F,Q,Z: <i>/text/s</i>>;penwidth=2]
-                t009 [label=<F: <br/>F: <i>/text/s/lb</i>>]
-                t010 [label=<F,Q,Z: liefelijke&#9251;toestemming<br/>F,Q,Z: <i>/text/s</i>>;penwidth=2]
-                t011 [label=<F: !<br/>F: <i>/text/s</i>>]
-                t012 [label=<F: <br/>F: <i>/text/s/lb</i>>]
-                t013 [label=<F<sup>-</sup>,Q<sup>-</sup>: werven&#9251;om<br/>F,Q: <i>/text/s/del</i>>;penwidth=2]
-                t014 [label=<F<sup>+</sup>: trachten&#9251;naar<br/>Q<sup>+</sup>: trachten&#9251;naar<br/>Z: trachten&#9251;naar&#9251;<br/>F: <i>/text/s/add</i><br/>Q: <i>/text/s/add</i><br/>Z: <i>/text/s</i><br/>>;penwidth=2]
-                t015 [label=<Q: <br/>Q: <i>/text/s/lb</i>>]
-                t016 [label=<Q: !&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;<br/>Z: !Die&#9251;dagen&#9251;van&#9251;<br/>Q,Z: <i>/text/s</i>>;penwidth=2]
-                t017 [label=<Q: nerveuze&#9251;verwachting&#9251;<br/>Q: <i>/text/s</i>>]
+                t001 [label=<F,Q,Z: Hoe&#9251;zoet&#9251;moet&#9251;nochtans&#9251;zijn&#9251;dit&#9251;<br/>F,Q,Z: <i>/text/s</i>>;penwidth=2]
+                t002 [label="";shape=doublecircle,rank=middle]
+                t003 [label=<F: <br/>F: <i>/text/s/lb</i>>]
+                t004 [label=<F<sup>-</sup>,Q<sup>-</sup>: werven&#9251;om<br/>F,Q: <i>/text/s/del</i>>;penwidth=2]
+                t005 [label=<F<sup>+</sup>: trachten&#9251;naar<br/>Q<sup>+</sup>: trachten&#9251;naar<br/>Z: trachten&#9251;naar&#9251;<br/>F: <i>/text/s/add</i><br/>Q: <i>/text/s/add</i><br/>Z: <i>/text/s</i><br/>>;penwidth=2]
+                t006 [label=<F,Q: &#9251;<br/>F,Q: <i>/text/s</i>>;penwidth=2]
+                t007 [label=<F,Q,Z: een&#9251;<br/>F,Q,Z: <i>/text/s</i>>;penwidth=2]
+                t008 [label=<Q: <br/>Q: <i>/text/s/lb</i>>]
+                t009 [label=<F: vrouw<br/>Q: vrouw&#9251;<br/>Z: vrouw&#9251;<br/>F,Q,Z: <i>/text/s</i>>;penwidth=2]
+                t010 [label=<F: ,&#x21A9;<br/>&#9251;de&#9251;<br/>F: <i>/text/s</i>>]
+                t011 [label=<Q: !&#x21A9;<br/>&#9251;Die&#9251;dagen&#9251;van&#9251;<br/>Z: !Die&#9251;dagen&#9251;van&#9251;<br/>Q,Z: <i>/text/s</i>>;penwidth=2]
+                t012 [label=<F,Z: ongewisheid&#9251;<br/>F,Z: <i>/text/s</i>>;penwidth=2]
+                t013 [label=<F,Q,Z: vóór&#9251;de&#9251;<br/>F,Q,Z: <i>/text/s</i>>;penwidth=2]
+                t014 [label=<Q: nerveuze&#9251;verwachting&#9251;<br/>Q: <i>/text/s</i>>]
+                t015 [label=<F: <br/>F: <i>/text/s/lb</i>>]
+                t016 [label=<F,Q,Z: liefelijke&#9251;toestemming<br/>F,Q,Z: <i>/text/s</i>>;penwidth=2]
+                t017 [label=<F: !<br/>F: <i>/text/s</i>>]
                 t018 [label=<Q,Z: .<br/>Q,Z: <i>/text/s</i>>;penwidth=2]
-                t000->t002[label=<F,Q,Z>;penwidth=2]
-                t002->t012[label=<F>]
-                t002->t013[label=<Q<sup>-</sup>>]
-                t002->t014[label=<Q<sup>+</sup>,Z>;penwidth=2]
-                t003->t004[label=<F,Q>;penwidth=2]
-                t004->t005[label=<F,Z>;penwidth=2]
-                t004->t015[label=<Q>]
-                t005->t006[label=<F>]
-                t005->t016[label=<Q,Z>;penwidth=2]
-                t006->t007[label=<F>]
-                t007->t008[label=<F,Z>;penwidth=2]
-                t008->t009[label=<F>]
-                t008->t010[label=<Q,Z>;penwidth=2]
+                t000->t001[label=<F,Q,Z>;penwidth=2]
+                t001->t003[label=<F>]
+                t001->t004[label=<Q<sup>-</sup>>]
+                t001->t005[label=<Q<sup>+</sup>,Z>;penwidth=2]
+                t003->t004[label=<F<sup>-</sup>>]
+                t003->t005[label=<F<sup>+</sup>>]
+                t004->t006[label=<F<sup>-</sup>,Q<sup>-</sup>>;penwidth=2]
+                t005->t006[label=<F<sup>+</sup>,Q<sup>+</sup>>;penwidth=2]
+                t005->t007[label=<Z>]
+                t006->t007[label=<F,Q>;penwidth=2]
+                t007->t008[label=<Q>]
+                t007->t009[label=<F,Z>;penwidth=2]
+                t008->t009[label=<Q>]
                 t009->t010[label=<F>]
-                t010->t011[label=<F>]
-                t010->t018[label=<Q,Z>;penwidth=2]
-                t011->t001[label=<F>]
-                t012->t013[label=<F<sup>-</sup>>]
-                t012->t014[label=<F<sup>+</sup>>]
-                t013->t003[label=<F<sup>-</sup>,Q<sup>-</sup>>;penwidth=2]
-                t014->t003[label=<F<sup>+</sup>,Q<sup>+</sup>>;penwidth=2]
-                t014->t004[label=<Z>]
-                t015->t005[label=<Q>]
-                t016->t007[label=<Z>]
-                t016->t017[label=<Q>]
-                t017->t008[label=<Q>]
-                t018->t001[label=<Q,Z>;penwidth=2]
+                t009->t011[label=<Q,Z>;penwidth=2]
+                t010->t012[label=<F>]
+                t011->t012[label=<Z>]
+                t011->t014[label=<Q>]
+                t012->t013[label=<F,Z>;penwidth=2]
+                t013->t015[label=<F>]
+                t013->t016[label=<Q,Z>;penwidth=2]
+                t014->t013[label=<Q>]
+                t015->t016[label=<F>]
+                t016->t017[label=<F>]
+                t016->t018[label=<Q,Z>;penwidth=2]
+                t017->t002[label=<F>]
+                t018->t002[label=<Q,Z>;penwidth=2]
                 }
                 """.trimIndent()
             val expectedTable = """
