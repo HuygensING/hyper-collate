@@ -138,7 +138,3 @@ fun VariantWitnessGraph.asRenderPair(
     }
     return renderDot(dot, format)
 }
-
-//fun VariantWitnessGraph.show(colored: Boolean = true, join: Boolean = true, emphasizeWhitespace: Boolean = false) = MIME(this.asSVGPair(colored, join, emphasizeWhitespace))
-//fun CollationGraph.asHtml() = HTML(this.asHTMLString())
-//fun CollationGraph.show(join: Boolean = true, emphasizeWhitespace: Boolean = false) = MIME(this.asSVGPair(join, emphasizeWhitespace))
