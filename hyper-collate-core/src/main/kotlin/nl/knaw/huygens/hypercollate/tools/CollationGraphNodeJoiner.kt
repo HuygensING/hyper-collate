@@ -28,10 +28,10 @@ import java.util.*
 object CollationGraphNodeJoiner {
     @JvmStatic
     fun join(originalGraph: CollationGraph): CollationGraph {
-        val mergedGraph = CollationGraph(originalGraph.sigils)
+        val mergedGraph = CollationGraph(originalGraph.sigla)
         originalGraph
                 .markupNodeList
-                .forEach { markupNode: MarkupNode -> mergedGraph.addMarkupNode(markupNode.sigil, markupNode.markup) }
+                .forEach { markupNode: MarkupNode -> mergedGraph.addMarkupNode(markupNode.siglum, markupNode.markup) }
         val originalToMerged = mergeNodes(originalGraph, mergedGraph)
         copyIncomingEdges(originalGraph, originalToMerged, mergedGraph)
         copyMarkupHyperEdges(originalGraph, originalToMerged, mergedGraph)
@@ -65,17 +65,17 @@ object CollationGraphNodeJoiner {
         if (incomingEdges.size != 1) {
             return false
         }
-        if (mergedNode.sigils != originalNode.sigils) {
+        if (mergedNode.sigla != originalNode.sigla) {
             return false
         }
         val incomingEdge = incomingEdges.iterator().next()
         val prevNode = originalGraph.getSource(incomingEdge) as TextNode
-        val sigilsMatch = prevNode.sigils == mergedNode.sigils
-        if (sigilsMatch) {
+        val siglaMatch = prevNode.sigla == mergedNode.sigla
+        if (siglaMatch) {
             var parentXPathsMatch = true
-            for (s in mergedNode.sigils) {
-                val mWitnessToken = mergedNode.tokenForSigil(s)
-                val nWitnessToken = originalNode.tokenForSigil(s)
+            for (s in mergedNode.sigla) {
+                val mWitnessToken = mergedNode.tokenForSiglum(s)
+                val nWitnessToken = originalNode.tokenForSiglum(s)
                 if (nWitnessToken == null) {
                     // it's an endtoken, so not mergeable
                     parentXPathsMatch = false
@@ -90,10 +90,10 @@ object CollationGraphNodeJoiner {
     }
 
     private fun mergeNodeTokens(lastNode: TextNode, originalNode: TextNode) {
-        originalNode.sigils.forEach { s: String -> lastNode.addBranchPath(s, originalNode.branchPathForSigil(s)) }
-        for (s in lastNode.sigils) {
-            val tokenForWitness = lastNode.tokenForSigil(s) as MarkedUpToken
-            val tokenToMerge = originalNode.tokenForSigil(s) as MarkedUpToken
+        originalNode.sigla.forEach { s: String -> lastNode.addBranchPath(s, originalNode.branchPathForSiglum(s)) }
+        for (s in lastNode.sigla) {
+            val tokenForWitness = lastNode.tokenForSiglum(s) as MarkedUpToken
+            val tokenToMerge = originalNode.tokenForSiglum(s) as MarkedUpToken
             tokenForWitness
                     .withContent(tokenForWitness.content + tokenToMerge.content)
                     .normalizedContent = tokenForWitness.normalizedContent + tokenToMerge.normalizedContent
@@ -101,12 +101,12 @@ object CollationGraphNodeJoiner {
     }
 
     private fun copyNode(originalNode: TextNode, mergedGraph: CollationGraph): TextNode {
-        val tokens: Array<Token> = originalNode.sigils
-                .mapNotNull { originalNode.tokenForSigil(it) }
+        val tokens: Array<Token> = originalNode.sigla
+                .mapNotNull { originalNode.tokenForSiglum(it) }
                 .map { cloneToken(it) }
                 .toTypedArray()
         val newNode = mergedGraph.addTextNodeWithTokens(*tokens)
-        originalNode.sigils.forEach { s: String -> newNode.addBranchPath(s, originalNode.branchPathForSigil(s)) }
+        originalNode.sigla.forEach { s: String -> newNode.addBranchPath(s, originalNode.branchPathForSiglum(s)) }
         return newNode
     }
 
@@ -136,7 +136,7 @@ object CollationGraphNodeJoiner {
                                     val oTarget: Node = originalGraph.getTarget(e)
                                     val mTarget: Node = originalToMerged[oTarget]!!
                                     Preconditions.checkNotNull(mTarget)
-                                    mergedGraph.addDirectedEdge(mSource, mTarget, e.sigils)
+                                    mergedGraph.addDirectedEdge(mSource, mTarget, e.sigla)
                                 }
                         linkedNodes += mergedNode
                     }

@@ -99,7 +99,7 @@ class HyperCollatorTest {
         // join matches from different branches of a witness, if the branches are joined
         // keep a list of which branches are joined (include sub-branches)
         // when sorting the matchlist on witness, deal with matches where multiple joined branches are involved
-        // in the dot serialization, use $sigil<sup>$branchId</sup>
+        // in the dot serialization, use $siglum<sup>$branchId</sup>
         // when determining next neighbor, if the next match is in multiple joined branches of the witness, extra neighbors must be generated
         @Test
         @Timeout(15)
@@ -1682,12 +1682,12 @@ class HyperCollatorTest {
     @Timeout(10000)
     fun potential_matches_1() {
         val importer = XMLImporter()
-        val sigil1 = "A"
-        val w1 = importer.importXML(sigil1, "<x>the black cat</x>")
-        val sigil2 = "B"
-        val w2 = importer.importXML(sigil2, "<x>the blue dog</x>")
-        val sigil3 = "C"
-        val w3 = importer.importXML(sigil3, "<x>the black dog</x>")
+        val siglum1 = "A"
+        val w1 = importer.importXML(siglum1, "<x>the black cat</x>")
+        val siglum2 = "B"
+        val w2 = importer.importXML(siglum2, "<x>the blue dog</x>")
+        val siglum3 = "C"
+        val w3 = importer.importXML(siglum3, "<x>the black dog</x>")
         val witnesses = listOf(w1, w2, w3)
         val rankings = witnesses.map { VariantWitnessGraphRanking.of(it) }
         val allPotentialMatches = hyperCollator.getPotentialMatches(witnesses, rankings)
@@ -1706,17 +1706,17 @@ class HyperCollatorTest {
         assertThat(matchStrings).containsOnly(match1, match2, match3, match4, match5, match6, match7, match8)
 
         val sortAndFilterMatchesByWitness = hyperCollator.sortAndFilterMatchesByWitness(
-                allPotentialMatches, listOf(sigil1, sigil2, sigil3))
+                allPotentialMatches, listOf(siglum1, siglum2, siglum3))
         log.info("sortAndFilterMatchesByWitness={}", sortAndFilterMatchesByWitness)
-        assertThat(sortAndFilterMatchesByWitness).containsOnlyKeys(sigil1, sigil2, sigil3)
+        assertThat(sortAndFilterMatchesByWitness).containsOnlyKeys(siglum1, siglum2, siglum3)
 
-        val listA = sortAndFilterMatchesByWitness.stringList(sigil1)
+        val listA = sortAndFilterMatchesByWitness.stringList(siglum1)
         assertThat(listA).containsOnly(match1, match2, match3, match6, match7)
 
-        val listB = sortAndFilterMatchesByWitness.stringList(sigil2)
+        val listB = sortAndFilterMatchesByWitness.stringList(siglum2)
         assertThat(listB).containsOnly(match4, match1, match5, match6, match8)
 
-        val listC = sortAndFilterMatchesByWitness.stringList(sigil3)
+        val listC = sortAndFilterMatchesByWitness.stringList(siglum3)
         assertThat(listC).containsOnly(match4, match2, match3, match5, match7, match8)
     }
 

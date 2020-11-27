@@ -24,7 +24,7 @@ import eu.interedition.collatex.Token
 
 interface TokenVertex {
     val token: Token?
-    val sigil: String
+    val siglum: String
     val branchPath: List<Int>
 
     fun addIncomingTokenVertex(incoming: TokenVertex)

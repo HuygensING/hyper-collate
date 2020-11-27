@@ -23,7 +23,7 @@ package nl.knaw.huygens.hypercollate.model
 import eu.interedition.collatex.Token
 import java.util.*
 
-class EndTokenVertex(override val sigil: String) : TokenVertex {
+class EndTokenVertex(override val siglum: String) : TokenVertex {
     private val incomingTokenVertices: MutableList<TokenVertex> = ArrayList()
 
     override val token: Token?

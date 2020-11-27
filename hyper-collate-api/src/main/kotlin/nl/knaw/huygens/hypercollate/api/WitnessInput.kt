@@ -21,13 +21,13 @@ package nl.knaw.huygens.hypercollate.api
  */
 
 class WitnessInput {
-    var sigil: String? = null
+    var siglum: String? = null
         private set
     var xml: String? = null
         private set
 
-    fun setSigil(sigil: String?): WitnessInput {
-        this.sigil = sigil
+    fun setSiglum(siglum: String?): WitnessInput {
+        this.siglum = siglum
         return this
     }
 

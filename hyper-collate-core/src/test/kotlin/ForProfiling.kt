@@ -33,7 +33,7 @@ fun main() {
     while (true) testCollations()
 }
 
-data class Witness(val sigil: String, val xml: String)
+data class Witness(val siglum: String, val xml: String)
 
 val testPairs: List<Pair<Witness, Witness>> = listOf(
         Pair(Witness("W1",
@@ -82,11 +82,11 @@ fun testCollations() {
     for (testPair in testPairs) {
         println("""
             |collating:
-            |- ${testPair.first.sigil}: ${testPair.first.xml}
-            |- ${testPair.second.sigil}: ${testPair.second.xml}
+            |- ${testPair.first.siglum}: ${testPair.first.xml}
+            |- ${testPair.second.siglum}: ${testPair.second.xml}
             """.trimMargin())
-        val w1 = importer.importXML(testPair.first.sigil, testPair.first.xml)
-        val w2 = importer.importXML(testPair.second.sigil, testPair.second.xml)
+        val w1 = importer.importXML(testPair.first.siglum, testPair.first.xml)
+        val w2 = importer.importXML(testPair.second.siglum, testPair.second.xml)
         hyperCollate(w1, w2)
     }
 }

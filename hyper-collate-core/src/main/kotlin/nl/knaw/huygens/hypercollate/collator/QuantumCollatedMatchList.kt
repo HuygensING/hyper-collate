@@ -48,7 +48,7 @@ data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val 
 
     private fun CollatedMatch.branchPaths(): Set<List<Int>> {
         val witnessBranchPaths = witnessVertex.branchPath
-        val nodeBranchPaths = collatedNode.sigils.map { collatedNode.branchPathForSigil(it) }
+        val nodeBranchPaths = collatedNode.sigla.map { collatedNode.branchPathForSiglum(it) }
         val all = mutableListOf(witnessBranchPaths)
         all.addAll(nodeBranchPaths)
         return all.toSet()
@@ -70,19 +70,19 @@ data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val 
 
     companion object {
         private fun List<CollatedMatch>.matchesInvalidatedByChoosing(match: CollatedMatch): List<CollatedMatch> {
-            val chosenBranchPaths: Map<String, List<Int>?> = match.sigils.map { it to match.getBranchPath(it) }.toMap()
+            val chosenBranchPaths: Map<String, List<Int>?> = match.sigla.map { it to match.getBranchPath(it) }.toMap()
             val node = match.collatedNode
             val tokenVertexForWitness = match.witnessVertex
             val minNodeRank = match.nodeRank
             val minVertexRank = match.vertexRank
-            val matchesInTheSameBranchAsTheChosenMatch: List<CollatedMatch> = this.filter { m -> m.sigils.map { it to m.getBranchPath(it) }.toMap() == chosenBranchPaths }
+            val matchesInTheSameBranchAsTheChosenMatch: List<CollatedMatch> = this.filter { m -> m.sigla.map { it to m.getBranchPath(it) }.toMap() == chosenBranchPaths }
             val groupBy = this.groupBy { it.toString() }
             val map = groupBy
                     .map { entry ->
                         if (entry.value.size == 1)
                             entry.value
                         else {
-                            entry.value.filter { cm -> cm.sigils.map { cm.getBranchPath(it) }.any { it !in chosenBranchPaths.values } }
+                            entry.value.filter { cm -> cm.sigla.map { cm.getBranchPath(it) }.any { it !in chosenBranchPaths.values } }
                         }
                     }
             val flatten = map
@@ -93,7 +93,7 @@ data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val 
                         m.collatedNode == node ||
                                 m.witnessVertex == tokenVertexForWitness ||
                                 m.vertexRank < minVertexRank ||
-                                (m.nodeRank < minNodeRank && m hasSigilOverlapWith node) /*||
+                                (m.nodeRank < minNodeRank && m hasSiglumOverlapWith node) /*||
                                 (m.vertexRank == match.vertexRank)*/
                     }
         }
@@ -101,10 +101,10 @@ data class QuantumCollatedMatchList(val chosenMatches: List<CollatedMatch>, val 
         // m and node have witnesses in common
         // for those witnesses they have in common, the branch path of one is the start subpath of the
         // other.
-        private infix fun CollatedMatch.hasSigilOverlapWith(node: TextNode): Boolean =
-                sigils.asSequence()
-                        .filter { it in node.sigils }
-                        .any { branchPathsOverlap(getBranchPath(it)!!, node.branchPathForSigil(it)) }
+        private infix fun CollatedMatch.hasSiglumOverlapWith(node: TextNode): Boolean =
+                sigla.asSequence()
+                        .filter { it in node.sigla }
+                        .any { branchPathsOverlap(getBranchPath(it)!!, node.branchPathForSiglum(it)) }
 
         fun branchPathsOverlap(matchBranchPath: List<Int>, nodeBranchPath: List<Int>): Boolean {
             val minSize = min(matchBranchPath.size, nodeBranchPath.size)

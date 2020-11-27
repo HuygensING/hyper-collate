@@ -37,38 +37,38 @@ object CollationGraphVisualizer {
 
     @JvmStatic
     fun toTableASCII(graph: CollationGraph, emphasizeWhitespace: Boolean): String {
-        val sigils = graph.sigils
+        val sigla = graph.sigla
         val whitespaceCharacter = if (emphasizeWhitespace) "_" else " "
         val rowMap: MutableMap<String, MutableList<Cell>> = HashMap()
-        sigils.forEach { sigil: String -> rowMap[sigil] = ArrayList() }
+        sigla.forEach { siglum: String -> rowMap[siglum] = ArrayList() }
         val ranking = CollationGraphRanking.of(graph)
         log.info("ranking size={}", ranking.size)
         val maxLayers: MutableMap<String, Int> = HashMap()
-        sigils.forEach { sigil: String -> maxLayers[sigil] = 1 }
+        sigla.forEach { siglum: String -> maxLayers[siglum] = 1 }
         for (nodeSet in ranking) {
             if (isBorderNode(nodeSet, graph)) {
                 // skip start and end nodes
                 continue
             }
             val nodeTokensPerWitness: MutableMap<String, MutableList<MarkedUpToken>> = HashMap()
-            sigils.forEach { sigil: String ->
-                nodeTokensPerWitness[sigil] = ArrayList()
+            sigla.forEach { siglum: String ->
+                nodeTokensPerWitness[siglum] = ArrayList()
                 nodeSet.forEach { node: TextNode ->
-                    val token = node.tokenForSigil(sigil)
+                    val token = node.tokenForSiglum(siglum)
                     if (token != null) {
                         val mToken = token as MarkedUpToken
-                        nodeTokensPerWitness[sigil]!!.add(mToken)
+                        nodeTokensPerWitness[siglum]!!.add(mToken)
                     }
                 }
             }
-            sigils.forEach { sigil: String ->
-                val tokens: List<MarkedUpToken> = nodeTokensPerWitness[sigil]!!
-                maxLayers[sigil] = max(maxLayers[sigil]!!, tokens.size)
+            sigla.forEach { siglum: String ->
+                val tokens: List<MarkedUpToken> = nodeTokensPerWitness[siglum]!!
+                maxLayers[siglum] = max(maxLayers[siglum]!!, tokens.size)
                 val cell = newCell(tokens, whitespaceCharacter)
-                rowMap[sigil]!!.add(cell)
+                rowMap[siglum]!!.add(cell)
             }
         }
-        return asciiTable(graph.sigils, rowMap, maxLayers).render()
+        return asciiTable(graph.sigla, rowMap, maxLayers).render()
     }
 
     private fun isBorderNode(nodeSet: Set<TextNode>, graph: CollationGraph): Boolean {
@@ -129,19 +129,19 @@ object CollationGraphVisualizer {
     }
 
     private fun asciiTable(
-            sigils: List<String>,
+            sigla: List<String>,
             rowMap: Map<String, MutableList<Cell>>,
             cellHeights: Map<String, Int>
     ): AsciiTable {
         val table = AsciiTable().setTextAlignment(TextAlignment.LEFT)
         table.renderer.cwc = CWC_LongestLine()
         table.addRule()
-        sigils.forEach { sigil: String ->
-            val row = (rowMap[sigil] ?: error("rowMap[$sigil] == null"))
-                    .map { cell: Cell -> toASCII(cell, cellHeights[sigil] ?: error("cellHeights[$sigil] == null")) }
+        sigla.forEach { siglum: String ->
+            val row = (rowMap[siglum] ?: error("rowMap[$siglum] == null"))
+                    .map { cell: Cell -> toASCII(cell, cellHeights[siglum] ?: error("cellHeights[$siglum] == null")) }
                     .toMutableList()
 
-            row.add(0, "[$sigil]")
+            row.add(0, "[$siglum]")
             table.addRow(row)
             table.addRule()
         }
@@ -169,10 +169,10 @@ object CollationGraphVisualizer {
 
     @JvmStatic
     fun toTableHTML(graph: CollationGraph, emphasizeWhitespace: Boolean): String {
-        val sigils = graph.sigils
+        val sigla = graph.sigla
         val whitespaceCharacter = if (emphasizeWhitespace) "_" else "&nbsp;"
         val ranking = CollationGraphRanking.of(graph)
-        val cells: Map<String, MutableList<String>> = sigils.map { it to mutableListOf<String>() }.toMap()
+        val cells: Map<String, MutableList<String>> = sigla.map { it to mutableListOf<String>() }.toMap()
         for (nodeSet in ranking) {
             val matchingTokens = mutableListOf<MarkedUpToken>()
             if (isBorderNode(nodeSet, graph)) {
@@ -180,22 +180,22 @@ object CollationGraphVisualizer {
                 continue
             }
             val nodeTokensPerWitness: MutableMap<String, MutableList<MarkedUpToken>> = HashMap()
-            sigils.forEach { sigil: String ->
-                nodeTokensPerWitness[sigil] = ArrayList()
+            sigla.forEach { siglum: String ->
+                nodeTokensPerWitness[siglum] = ArrayList()
                 nodeSet.forEach { node: TextNode ->
-                    val isMatch = node.sigils.size > 1
-                    val token = node.tokenForSigil(sigil)
+                    val isMatch = node.sigla.size > 1
+                    val token = node.tokenForSiglum(siglum)
                     if (token != null) {
                         val mToken = token as MarkedUpToken
-                        nodeTokensPerWitness[sigil]!!.add(mToken)
+                        nodeTokensPerWitness[siglum]!!.add(mToken)
                         if (isMatch) {
                             matchingTokens += mToken
                         }
                     }
                 }
             }
-            for (sigil: String in sigils) {
-                cells[sigil] ?: error("") += nodeTokensPerWitness[sigil]!!
+            for (siglum: String in sigla) {
+                cells[siglum] ?: error("") += nodeTokensPerWitness[siglum]!!
                         .sortedBy { it.indexNumber }
                         .joinToString("&nbsp;") {
                             var asHtml = it.content.replace(" ", whitespaceCharacter)
@@ -216,14 +216,14 @@ object CollationGraphVisualizer {
             }
         }
 
-        val rows: String = graph.sigils.joinToString("\n") { witnessRow(it, cells[it] ?: error("")) }
+        val rows: String = graph.sigla.joinToString("\n") { witnessRow(it, cells[it] ?: error("")) }
         return """<table border="1">
             $rows
             </table>""".trimIndent()
     }
 
-    private fun witnessRow(sigil: String, cells: List<String>): String =
-            "<tr><th style=\"background:lightgreen\">$sigil</th>${cells.joinToString("") { "<td>$it</td>" }}</tr>"
+    private fun witnessRow(siglum: String, cells: List<String>): String =
+            "<tr><th style=\"background:lightgreen\">$siglum</th>${cells.joinToString("") { "<td>$it</td>" }}</tr>"
 
     @JvmStatic
     fun toDot(

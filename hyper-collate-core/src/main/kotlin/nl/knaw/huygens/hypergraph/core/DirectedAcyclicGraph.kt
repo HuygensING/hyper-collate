@@ -37,8 +37,8 @@ open class DirectedAcyclicGraph<N> protected constructor() : Hypergraph<N, Tradi
     }
 
     // Question: do we want labels here?
-    fun addDirectedEdge(source: N, target: N, sigils: Set<String>) {
-        val edge = TraditionalEdge(sigils)
+    fun addDirectedEdge(source: N, target: N, sigla: Set<String>) {
+        val edge = TraditionalEdge(sigla)
         super.addDirectedHyperEdge(edge, "", source, target)
     }
 

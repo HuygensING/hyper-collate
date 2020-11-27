@@ -31,21 +31,21 @@ data class CollatedMatch(val collatedNode: TextNode, val witnessVertex: TokenVer
     var vertexRank = 0
         private set
 
-    val sigils: Set<String>
+    val sigla: Set<String>
 
     private val branchPaths: MutableMap<String, List<Int>> = HashMap()
 
     val content: String by lazy {
-        if (collatedNode.sigils.isEmpty()) {
+        if (collatedNode.sigla.isEmpty()) {
             ""
         } else {
-            val sigil = collatedNode.sigils.iterator().next()
-            val token = collatedNode.tokenForSigil(sigil) as MarkedUpToken
+            val siglum = collatedNode.sigla.iterator().next()
+            val token = collatedNode.tokenForSiglum(siglum) as MarkedUpToken
             token.normalizedContent
         }
     }
 
-    fun hasWitness(sigil: String): Boolean = sigil in sigils
+    fun hasWitness(siglum: String): Boolean = siglum in sigla
 
     fun withVertexRank(vertexRank: Int): CollatedMatch {
         this.vertexRank = vertexRank
@@ -55,15 +55,15 @@ data class CollatedMatch(val collatedNode: TextNode, val witnessVertex: TokenVer
     fun getBranchPath(s: String): List<Int>? = branchPaths[s]
 
     private val stringSerialization: String by lazy {
-        val sigils = collatedNode.sigils
-        val sigilString = sigils.sorted().joinToString(",")
-        val stringBuilder = StringBuilder("<[").append(sigilString).append("]").append(nodeRank)
+        val sigla = collatedNode.sigla
+        val siglumString = sigla.sorted().joinToString(",")
+        val stringBuilder = StringBuilder("<[").append(siglumString).append("]").append(nodeRank)
         val vString = StringBuilder()
         if (witnessVertex is SimpleTokenVertex) {
             val sv = witnessVertex
-            vString.append(sv.sigil).append(sv.indexNumber)
+            vString.append(sv.siglum).append(sv.indexNumber)
         } else {
-            vString.append(witnessVertex.sigil).append(witnessVertex.javaClass.simpleName)
+            vString.append(witnessVertex.siglum).append(witnessVertex.javaClass.simpleName)
         }
         stringBuilder.append(",").append(vString.toString()).append(">").toString()
     }
@@ -79,12 +79,12 @@ data class CollatedMatch(val collatedNode: TextNode, val witnessVertex: TokenVer
             other === this
 
     init {
-        val tmp: MutableList<String> = mutableListOf(witnessVertex.sigil)
-        tmp.addAll(collatedNode.sigils)
-        sigils = tmp.toSet()
-        for (s in collatedNode.sigils) {
-            branchPaths[s] = collatedNode.branchPathForSigil(s)
+        val tmp: MutableList<String> = mutableListOf(witnessVertex.siglum)
+        tmp.addAll(collatedNode.sigla)
+        sigla = tmp.toSet()
+        for (s in collatedNode.sigla) {
+            branchPaths[s] = collatedNode.branchPathForSiglum(s)
         }
-        branchPaths[witnessVertex.sigil] = witnessVertex.branchPath
+        branchPaths[witnessVertex.siglum] = witnessVertex.branchPath
     }
 }

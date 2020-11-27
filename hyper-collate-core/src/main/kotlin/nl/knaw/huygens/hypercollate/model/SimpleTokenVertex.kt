@@ -43,7 +43,7 @@ class SimpleTokenVertex(override val token: MarkedUpToken) : TokenVertex, Compar
     override val outgoingTokenVertexList: List<TokenVertex>
         get() = outgoingVertices
 
-    override val sigil: String
+    override val siglum: String
         get() = token.witness.sigil
 
     fun withBranchPath(branchPath: List<Int>): SimpleTokenVertex {

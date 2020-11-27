@@ -100,7 +100,7 @@ public class CollationGraphAssert
         .assertContains(info, actualTextNodeSketches, new TextNodeSketch[]{textNodeSketch});
     this.textNode =
         actual.traverseTextNodes().stream()
-            .filter(n -> !n.getSigils().isEmpty())
+            .filter(n -> !n.getSigla().isEmpty())
             .filter(
                 n -> {
                   TextNodeSketch actualTextNodeSketch = toTextNodeSketch(n);
@@ -201,17 +201,17 @@ public class CollationGraphAssert
 
   public TextNodeSketch toTextNodeSketch(TextNode node) {
     TextNodeSketch textNodeSketch = textNodeSketch();
-    node.getSigils()
+    node.getSigla()
         .forEach(
             s ->
                 textNodeSketch.withWitnessSegmentSketch(
-                    s, ((MarkedUpToken) node.tokenForSigil(s)).getContent()));
+                    s, ((MarkedUpToken) node.tokenForSiglum(s)).getContent()));
     return textNodeSketch;
   }
 
   public MarkupNodeSketch toMarkupNodeSketch(MarkupNode node) {
     return markupNodeSketch(
-        node.getSigil(), node.getMarkup().getTagName(), node.getMarkup().getAttributeMap());
+        node.getSiglum(), node.getMarkup().getTagName(), node.getMarkup().getAttributeMap());
   }
 
   /**
@@ -269,7 +269,7 @@ public class CollationGraphAssert
 
   private Set<TextNodeSketch> getActualTextNodeSketches() {
     return actual.traverseTextNodes().stream()
-        .filter(n -> !n.getSigils().isEmpty())
+        .filter(n -> !n.getSigla().isEmpty())
         .map(this::toTextNodeSketch)
         .collect(toSet());
   }

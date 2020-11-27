@@ -75,15 +75,14 @@ class MarkedUpToken : Token {
         return this
     }
 
-    override fun toString(): String {
-        return (witness!!.sigil
-                + indexNumber
-                + ":"
-                + parentXPath
-                + "='"
-                + content.replace("\n", "\\n")
-                + "'")
-    }
+    override fun toString(): String =
+            (witness!!.sigil
+                    + indexNumber
+                    + ":"
+                    + parentXPath
+                    + "='"
+                    + content.replace("\n", "\\n")
+                    + "'")
 
     fun clone(): MarkedUpToken =
             MarkedUpToken()

@@ -32,20 +32,20 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
     private var matchesSortedByNode: List<CollatedMatch> = listOf()
     private var matchesSortedByWitness: List<CollatedMatch> = listOf()
     private var maxPotential: Int? = null
-    private var groupedByBranchPathForSigil: Map<String, Map<BranchPath, List<CollatedMatch>>> = mapOf()
+    private var groupedByBranchPathForSiglum: Map<String, Map<BranchPath, List<CollatedMatch>>> = mapOf()
 
     private val quantumCollatedMatchFingerprints: MutableSet<String> = mutableSetOf()
 
     override val name: String = "Four-Neighbours"
 
-    override fun getOptimalCollatedMatchList(allPotentialMatches: Collection<CollatedMatch>, sigils: List<String>): List<CollatedMatch> {
+    override fun getOptimalCollatedMatchList(allPotentialMatches: Collection<CollatedMatch>, sigla: List<String>): List<CollatedMatch> {
         val uniqueNodesInMatches = allPotentialMatches.map { it.collatedNode }.distinct().size
         val uniqueVerticesInMatches = allPotentialMatches.map { it.witnessVertex }.distinct().size
         maxPotential = min(uniqueNodesInMatches, uniqueVerticesInMatches)
 
         matchesSortedByNode = allPotentialMatches.sortedByNode()
         matchesSortedByWitness = allPotentialMatches.sortedByWitness()
-        groupedByBranchPathForSigil = sigils.map { s -> s to allPotentialMatches.groupBy { it.getBranchPath(s) } }.toMap()
+        groupedByBranchPathForSiglum = sigla.map { s -> s to allPotentialMatches.groupBy { it.getBranchPath(s) } }.toMap()
 
         val startNode = QuantumCollatedMatchList(listOf(), allPotentialMatches.toList())
         val startCost = LostPotential(0)
@@ -98,10 +98,10 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
         val relevantMatchesSortedByWitness = (matchesSortedByWitness - matchList.chosenMatches).asSequence().filter { it in matchList.potentialMatches }
         val matchesByVertexRank = relevantMatchesSortedByWitness.groupBy { it.vertexRank }
         val nextMatchSequence: MutableList<CollatedMatch> = mutableListOf()
-        val chosenBranchesPerSigil: MutableMap<String, MutableSet<BranchPath>> = mutableMapOf()
+        val chosenBranchesPerSiglum: MutableMap<String, MutableSet<BranchPath>> = mutableMapOf()
         matchList.chosenMatches.forEach { m ->
-            m.sigils.forEach { s ->
-                chosenBranchesPerSigil
+            m.sigla.forEach { s ->
+                chosenBranchesPerSiglum
                         .getOrPut(s) { mutableSetOf() }
                         .add(m.getBranchPath(s))
             }
@@ -117,20 +117,20 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
             val allNextByVertex = matchesByVertexRank[vertexRank]
                     ?: error("rank $vertexRank not found in matchesByVertexRank")
             val nextByNodeFromChosenBranch = allNextByNode.filter { m ->
-                m.sigils.any { s ->
+                m.sigla.any { s ->
                     m.getBranchPath(s)!!.size > 1 &&
-                            chosenBranchesPerSigil.containsKey(s) &&
-                            chosenBranchesPerSigil[s]!!.isNotEmpty() &&
-                            m.getBranchPath(s) in chosenBranchesPerSigil[s]!!
+                            chosenBranchesPerSiglum.containsKey(s) &&
+                            chosenBranchesPerSiglum[s]!!.isNotEmpty() &&
+                            m.getBranchPath(s) in chosenBranchesPerSiglum[s]!!
                 }
             }
             val nextByVertexFromChosenBranch = allNextByVertex.filter { m ->
-                m.sigils.any { s ->
+                m.sigla.any { s ->
                     m.getBranchPath(s)!!.size > 1 &&
                             m.getBranchPath(s)!!.size > 1 &&
-                            chosenBranchesPerSigil.containsKey(s) &&
-                            chosenBranchesPerSigil[s]!!.isNotEmpty() &&
-                            m.getBranchPath(s) in chosenBranchesPerSigil[s]!!
+                            chosenBranchesPerSiglum.containsKey(s) &&
+                            chosenBranchesPerSiglum[s]!!.isNotEmpty() &&
+                            m.getBranchPath(s) in chosenBranchesPerSiglum[s]!!
                 }
             }
             val nextByNode = if (nextByNodeFromChosenBranch.isNotEmpty()) nextByNodeFromChosenBranch else allNextByNode
@@ -140,8 +140,8 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
                 goOn = false
             else {
                 nextMatchSequence += nextMatch
-                for (s in nextMatch.sigils) {
-                    chosenBranchesPerSigil
+                for (s in nextMatch.sigla) {
+                    chosenBranchesPerSiglum
                             .getOrPut(s) { mutableSetOf() }
                             .add(nextMatch.getBranchPath(s))
                 }

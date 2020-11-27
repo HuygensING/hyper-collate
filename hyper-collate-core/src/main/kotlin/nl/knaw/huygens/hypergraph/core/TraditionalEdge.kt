@@ -20,4 +20,4 @@ package nl.knaw.huygens.hypergraph.core
  * #L%
  */
 
-class TraditionalEdge internal constructor(var sigils: Set<String>)
+class TraditionalEdge internal constructor(var sigla: Set<String>)

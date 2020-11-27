@@ -25,7 +25,7 @@ import java.util.*
 
 typealias BranchSet = MutableList<MutableList<SimpleTokenVertex>>
 
-class VariantWitnessGraph(val sigil: String) {
+class VariantWitnessGraph(val siglum: String) {
     val startTokenVertex: TokenVertex
     val endTokenVertex: TokenVertex
 
@@ -63,7 +63,7 @@ class VariantWitnessGraph(val sigil: String) {
     fun vertices(): Iterable<TokenVertex> = VariantWitnessGraphTraversal.of(this)
 
     init {
-        startTokenVertex = StartTokenVertex(sigil)
-        endTokenVertex = EndTokenVertex(sigil)
+        startTokenVertex = StartTokenVertex(siglum)
+        endTokenVertex = EndTokenVertex(siglum)
     }
 }

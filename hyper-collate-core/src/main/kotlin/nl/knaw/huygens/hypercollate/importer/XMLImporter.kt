@@ -51,28 +51,28 @@ class XMLImporter {
         normalizer = Function { raw: String -> raw.trim { it <= ' ' }.toLowerCase() }
     }
 
-    fun importXML(sigil: String, xmlString: String): VariantWitnessGraph {
+    fun importXML(siglum: String, xmlString: String): VariantWitnessGraph {
         val inputStream: InputStream
         return try {
             inputStream = ByteArrayInputStream(xmlString.toByteArray(charset(StandardCharsets.UTF_8.name())))
-            importXML(sigil, inputStream)
+            importXML(siglum, inputStream)
         } catch (e: UnsupportedEncodingException) {
             throw RuntimeException(e)
         }
     }
 
-    fun importXML(sigil: String, xmlFile: File): VariantWitnessGraph =
+    fun importXML(siglum: String, xmlFile: File): VariantWitnessGraph =
             try {
                 val input: InputStream = FileUtils.openInputStream(xmlFile)
-                importXML(sigil, input)
+                importXML(siglum, input)
             } catch (e: IOException) {
                 throw RuntimeException(e)
             }
 
-    fun importXML(rawSigil: String, input: InputStream): VariantWitnessGraph {
-        val sigil = rawSigil.normalizedSigil()
-        val graph = VariantWitnessGraph(sigil)
-        val witness = SimpleWitness(sigil)
+    fun importXML(rawSiglum: String, input: InputStream): VariantWitnessGraph {
+        val siglum = rawSiglum.normalizedSiglum()
+        val graph = VariantWitnessGraph(siglum)
+        val witness = SimpleWitness(siglum)
         val factory = XMLInputFactory.newInstance()
         return try {
             val reader = factory.createXMLEventReader(input)
@@ -407,7 +407,7 @@ class XMLImporter {
     }
 
     companion object {
-        fun String.normalizedSigil(): String = replace("[^0-9a-zA-Z]".toRegex(), "")
+        fun String.normalizedSiglum(): String = replace("[^0-9a-zA-Z]".toRegex(), "")
 
         private fun Markup.isSubst(): Boolean = "subst" == tagName
         private fun Markup.isApp(): Boolean = "app" == tagName

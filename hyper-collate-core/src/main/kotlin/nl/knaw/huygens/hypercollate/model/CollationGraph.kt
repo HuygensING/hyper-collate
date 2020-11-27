@@ -27,9 +27,9 @@ import org.slf4j.LoggerFactory
 import java.util.*
 
 class CollationGraph
-@JvmOverloads constructor(val sigils: MutableList<String> = mutableListOf()) : Hypergraph<Node, Edge>(GraphType.ORDERED) {
-    //    textStartNode.setSigils(sigils);
-//    textEndNode.setSigils(sigils);
+@JvmOverloads constructor(val sigla: MutableList<String> = mutableListOf()) : Hypergraph<Node, Edge>(GraphType.ORDERED) {
+    //    textStartNode.setSigla(sigla);
+//    textEndNode.setSigla(sigla);
     val textStartNode = TextDelimiterNode()
     val textEndNode = TextDelimiterNode()
     private val markupNodeIndex: MutableMap<Markup, MarkupNode> = HashMap()
@@ -40,8 +40,8 @@ class CollationGraph
         return newNode
     }
 
-    fun addMarkupNode(sigil: String, markup: Markup): MarkupNode {
-        val newNode = MarkupNode(sigil, markup)
+    fun addMarkupNode(siglum: String, markup: Markup): MarkupNode {
+        val newNode = MarkupNode(siglum, markup)
         addNode(newNode, MarkupNode.LABEL)
         markupNodeIndex[markup] = newNode
         return newNode
@@ -67,7 +67,7 @@ class CollationGraph
     }
 
     val isEmpty: Boolean
-        get() = sigils.isEmpty()
+        get() = sigla.isEmpty()
 
     fun getTarget(edge: TextEdge): TextNode {
         val nodes = getTargets(edge)
@@ -77,8 +77,8 @@ class CollationGraph
         return nodes.iterator().next() as TextNode
     }
 
-    fun addDirectedEdge(source: Node?, target: Node?, sigils: MutableSet<String>) {
-        val edge = TextEdge(sigils)
+    fun addDirectedEdge(source: Node?, target: Node?, sigla: MutableSet<String>) {
+        val edge = TextEdge(sigla)
         super.addDirectedHyperEdge(edge, TextEdge.LABEL, source, target)
     }
 

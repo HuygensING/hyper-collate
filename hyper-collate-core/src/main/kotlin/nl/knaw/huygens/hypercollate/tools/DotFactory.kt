@@ -118,7 +118,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
             if (tokenVertex !in verticesDone) {
                 val tokenVariable = tokenVertex.vertexVariable()
                 if (tokenVertex is SimpleTokenVertex) {
-                    val markup = graph.sigil + ": " + tokenVertex.parentXPath
+                    val markup = graph.siglum + ": " + tokenVertex.parentXPath
                     dotBuilder
                             .append(tokenVariable)
                             .append(" [label=<")
@@ -195,27 +195,27 @@ class DotFactory(emphasizeWhitespace: Boolean) {
     }
 
     private fun TextNode.penWidthParameter(): String =
-            sigils.penWidthParameter()
+            sigla.penWidthParameter()
 
     private fun TextEdge.penWidthParameter(): String =
-            sigils.penWidthParameter()
+            sigla.penWidthParameter()
 
     private fun Set<String>.penWidthParameter() =
             if (size > 1) ";penwidth=2" else ""
 
-    data class NodeLabels(val content: String, val xpath: String, val sigilExtension: String)
+    data class NodeLabels(val content: String, val xpath: String, val siglumExtension: String)
 
     private fun TextNode.generateNodeLabel(hideMarkup: Boolean): String {
         val label = StringBuilder()
-        val sortedSigils = sigils.sorted()
-        val nodeLabelMap: Map<String, NodeLabels> = sortedSigils.generateNodeLabelsForTextNode(this)
-        val joinedSigils = sortedSigils.joinToString(",")
-        label.appendContent(sortedSigils, nodeLabelMap)
+        val sortedSigla = sigla.sorted()
+        val nodeLabelMap: Map<String, NodeLabels> = sortedSigla.generateNodeLabelsForTextNode(this)
+        val joinedSigla = sortedSigla.joinToString(",")
+        label.appendContent(sortedSigla, nodeLabelMap)
         if (!hideMarkup) {
             if (label.isNotEmpty()) {
                 label.append("<br/>")
             }
-            label.appendMarkup(sortedSigils, nodeLabelMap, joinedSigils)
+            label.appendMarkup(sortedSigla, nodeLabelMap, joinedSigla)
         }
         return label.toString()
     }
@@ -231,20 +231,20 @@ class DotFactory(emphasizeWhitespace: Boolean) {
                     .getIncomingTextEdgeList(node)
                     .forEach { e: TextEdge ->
                         val source: TextNode = collation.getSource(e) as TextNode
-                        val sourceSigilExtensionMap = e.sigils
-                                .map { it to (source.tokenForSigil(it) as MarkedUpToken?)?.parentXPath?.branchId() }
+                        val sourceSiglumExtensionMap = e.sigla
+                                .map { it to (source.tokenForSiglum(it) as MarkedUpToken?)?.parentXPath?.branchId() }
                                 .toMap()
                         val target: TextNode = collation.getTarget(e)
-                        val targetSigilExtensionMap = e.sigils
-                                .map { it to (target.tokenForSigil(it) as MarkedUpToken?)?.parentXPath?.branchId() }
+                        val targetSiglumExtensionMap = e.sigla
+                                .map { it to (target.tokenForSiglum(it) as MarkedUpToken?)?.parentXPath?.branchId() }
                                 .toMap()
-                        val edgeLabel = e.sigils.sorted().joinToString(",") { sigil: String ->
-                            val longestBranchId = listOfNotNull(sourceSigilExtensionMap[sigil], targetSigilExtensionMap[sigil])
+                        val edgeLabel = e.sigla.sorted().joinToString(",") { siglum: String ->
+                            val longestBranchId = listOfNotNull(sourceSiglumExtensionMap[siglum], targetSiglumExtensionMap[siglum])
                                     .maxByOrNull { s -> s.length }
                             if (longestBranchId.isNullOrEmpty()) {
-                                sigil
+                                siglum
                             } else {
-                                "$sigil<sup>$longestBranchId</sup>"
+                                "$siglum<sup>$longestBranchId</sup>"
                             }
                         }
                         edgeLines += "${nodeIdentifiers[source]}->${nodeIdentifiers[target]}[label=<$edgeLabel>${e.penWidthParameter()}]\n"
@@ -258,7 +258,7 @@ class DotFactory(emphasizeWhitespace: Boolean) {
     ): Map<String, NodeLabels> {
         val map: MutableMap<String, NodeLabels> = mutableMapOf()
         forEach { s: String ->
-            val token = node.tokenForSigil(s)
+            val token = node.tokenForSiglum(s)
             if (token != null) {
                 val mToken = token as MarkedUpToken
                 val xpath = mToken.parentXPath
@@ -269,42 +269,42 @@ class DotFactory(emphasizeWhitespace: Boolean) {
     }
 
     private fun StringBuilder.appendContent(
-            sortedSigils: List<String>,
+            sortedSigla: List<String>,
             nodeLabelMap: Map<String, NodeLabels>
     ) {
         val contentLabelSet: Set<String> = nodeLabelMap.values.map { it.content }.toSet()
         if (contentLabelSet.size == 1) {
-            val sigils = sortedSigils.joinToString(",") { extendedSigil(it, nodeLabelMap) }
-            append(sigils)
+            val sigla = sortedSigla.joinToString(",") { extendedSiglum(it, nodeLabelMap) }
+            append(sigla)
             append(": ").append(contentLabelSet.iterator().next())
         } else {
-            val witnessLines = sortedSigils.joinToString("<br/>") { sigil ->
-                val eSigil = extendedSigil(sigil, nodeLabelMap)
-                "$eSigil: ${nodeLabelMap[sigil]?.content}"
+            val witnessLines = sortedSigla.joinToString("<br/>") { siglum ->
+                val eSiglum = extendedSiglum(siglum, nodeLabelMap)
+                "$eSiglum: ${nodeLabelMap[siglum]?.content}"
             }
             append(witnessLines)
         }
     }
 
-    private fun extendedSigil(sigil: String, nodeLabelMap: Map<String, NodeLabels>): String {
-        val sigilExtension = nodeLabelMap[sigil]?.sigilExtension
-        val sup = if (sigilExtension.isNullOrEmpty()) "" else "<sup>${sigilExtension}</sup>"
-        return "$sigil$sup"
+    private fun extendedSiglum(siglum: String, nodeLabelMap: Map<String, NodeLabels>): String {
+        val siglumExtension = nodeLabelMap[siglum]?.siglumExtension
+        val sup = if (siglumExtension.isNullOrEmpty()) "" else "<sup>${siglumExtension}</sup>"
+        return "$siglum$sup"
     }
 
     private fun StringBuilder.appendMarkup(
-            sortedSigils: List<String>,
+            sortedSigla: List<String>,
             nodeLabelMap: Map<String, NodeLabels>,
-            joinedSigils: String
+            joinedSigla: String
     ) {
         val xpathSet: Set<String> = nodeLabelMap.values.map { it.xpath }.toSet()
         if (xpathSet.size == 1) {
-            append(joinedSigils)
+            append(joinedSigla)
                     .append(": <i>")
                     .append(xpathSet.iterator().next())
                     .append("</i>")
         } else {
-            sortedSigils.forEach { s: String -> append(s).append(": <i>").append(nodeLabelMap[s]?.xpath).append("</i><br/>") }
+            sortedSigla.forEach { s: String -> append(s).append(": <i>").append(nodeLabelMap[s]?.xpath).append("</i><br/>") }
         }
     }
 
@@ -330,9 +330,9 @@ class DotFactory(emphasizeWhitespace: Boolean) {
 }
 
 fun TextNode.order(): Long =
-        sigils.asSequence()
+        sigla.asSequence()
                 .sorted()
-                .map { tokenForSigil(it) }
+                .map { tokenForSiglum(it) }
                 .filterIsInstance<MarkedUpToken>()
                 .map { it.indexNumber }
                 .firstOrNull() ?: 0L

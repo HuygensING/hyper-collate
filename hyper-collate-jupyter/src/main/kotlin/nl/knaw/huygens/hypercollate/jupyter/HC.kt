@@ -55,11 +55,11 @@ object HC {
         // Nothing yet
     }
 
-    fun importXMLWitness(sigil: String, xml: String): VariantWitnessGraph =
-            XMLImporter().importXML(sigil, xml)
+    fun importXMLWitness(siglum: String, xml: String): VariantWitnessGraph =
+            XMLImporter().importXML(siglum, xml)
 
-    fun importXMLWitness(sigil: String, xmlFile: File): VariantWitnessGraph =
-            XMLImporter().importXML(sigil, xmlFile)
+    fun importXMLWitness(siglum: String, xmlFile: File): VariantWitnessGraph =
+            XMLImporter().importXML(siglum, xmlFile)
 
     fun collate(vararg witnesses: VariantWitnessGraph): CollationGraph =
             HyperCollator().collate(*witnesses)

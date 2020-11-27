@@ -22,8 +22,6 @@ package nl.knaw.huygens.hypercollate.model
 
 import eu.interedition.collatex.Witness
 
-class SimpleWitness(private val sigil: String) : Witness {
-    override fun getSigil(): String {
-        return sigil
-    }
+class SimpleWitness(private val siglum: String) : Witness {
+    override fun getSigil(): String = siglum
 }

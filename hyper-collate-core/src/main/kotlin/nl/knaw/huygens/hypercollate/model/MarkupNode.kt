@@ -20,7 +20,7 @@ package nl.knaw.huygens.hypercollate.model
  * #L%
  */
 
-class MarkupNode(val sigil: String, val markup: Markup) : Node {
+class MarkupNode(val siglum: String, val markup: Markup) : Node {
     companion object {
         const val LABEL = "Markup"
     }

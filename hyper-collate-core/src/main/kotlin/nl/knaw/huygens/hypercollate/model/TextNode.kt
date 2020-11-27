@@ -33,25 +33,25 @@ open class TextNode(vararg tokens: Token) : Node {
         }
     }
 
-    fun tokenForSigil(sigil: String): Token? =
-            tokenMap[sigil]
+    fun tokenForSiglum(siglum: String): Token? =
+            tokenMap[siglum]
 
-    val sigils: Set<String>
+    val sigla: Set<String>
         get() = tokenMap.keys
 
     override fun toString(): String {
-        val tokensString = sigils
+        val tokensString = sigla
                 .sorted()
                 .map { key: String -> tokenMap[key]!! }
                 .joinToString(", ") { obj: Token -> obj.toString() }
         return "($tokensString)"
     }
 
-    fun branchPathForSigil(s: String): List<Int> =
+    fun branchPathForSiglum(s: String): List<Int> =
             branchPaths[s]!!
 
-    fun addBranchPath(sigil: String, branchPath: List<Int>) {
-        branchPaths[sigil] = branchPath
+    fun addBranchPath(siglum: String, branchPath: List<Int>) {
+        branchPaths[siglum] = branchPath
     }
 
     companion object {

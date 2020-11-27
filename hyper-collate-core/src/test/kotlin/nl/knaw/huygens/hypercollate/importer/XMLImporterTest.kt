@@ -22,7 +22,7 @@ package nl.knaw.huygens.hypercollate.importer
 
 import nl.knaw.huygens.hypercollate.HyperCollateTest
 import nl.knaw.huygens.hypercollate.collator.VariantWitnessGraphRanking
-import nl.knaw.huygens.hypercollate.importer.XMLImporter.Companion.normalizedSigil
+import nl.knaw.huygens.hypercollate.importer.XMLImporter.Companion.normalizedSiglum
 import nl.knaw.huygens.hypercollate.model.BranchSet
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
@@ -882,12 +882,12 @@ class XMLImporterTest : HyperCollateTest() {
     }
 
     @Test
-    fun normalize_sigil() {
+    fun normalize_siglum() {
         val softly = SoftAssertions()
         with(softly) {
-            assertThat("A".normalizedSigil()).isEqualTo("A")
-            assertThat("remove space".normalizedSigil()).isEqualTo("removespace")
-            assertThat("1 2 3 4".normalizedSigil()).isEqualTo("1234")
+            assertThat("A".normalizedSiglum()).isEqualTo("A")
+            assertThat("remove space".normalizedSiglum()).isEqualTo("removespace")
+            assertThat("1 2 3 4".normalizedSiglum()).isEqualTo("1234")
             assertAll()
         }
     }

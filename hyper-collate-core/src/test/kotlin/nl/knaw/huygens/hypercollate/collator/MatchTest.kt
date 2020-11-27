@@ -48,7 +48,7 @@ class MatchTest : HyperCollateTest() {
         override fun getWitness(): Witness = DummyWitness()
     }
 
-    class MockVertex(override val sigil: String) : TokenVertex {
+    class MockVertex(override val siglum: String) : TokenVertex {
         private val dummyToken: Token = DummyToken()
 
         override val token: Token

@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 object TokenMerger {
     @JvmStatic
     fun merge(originalGraph: VariantWitnessGraph): VariantWitnessGraph {
-        val mergedGraph = VariantWitnessGraph(originalGraph.sigil)
+        val mergedGraph = VariantWitnessGraph(originalGraph.siglum)
         originalGraph.markupList.forEach { markup: Markup -> mergedGraph.addMarkup(markup) }
         val originalToMergedMap: MutableMap<Long, TokenVertex> = HashMap()
         val originalTokenVertex = originalGraph.startTokenVertex
@@ -118,7 +118,8 @@ object TokenMerger {
     private fun canMerge(
             originalGraph: VariantWitnessGraph,
             originalVertex: TokenVertex,
-            originalOutgoingVertices: List<TokenVertex>): Boolean =
+            originalOutgoingVertices: List<TokenVertex>
+    ): Boolean =
             (originalOutgoingVertices.size == 1
                     && (originalGraph.markupListForTokenVertex(originalVertex)
                     == originalGraph.markupListForTokenVertex(originalOutgoingVertices[0])))

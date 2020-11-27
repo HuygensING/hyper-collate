@@ -20,13 +20,13 @@ package nl.knaw.huygens.hypercollate.model
  * #L%
  */
 
-class TextEdge(internal val sigils: MutableSet<String>) : Edge {
-    fun getSigils(): Set<String> {
-        return sigils
+class TextEdge(internal val sigla: MutableSet<String>) : Edge {
+    fun getSigla(): Set<String> {
+        return sigla
     }
 
-    fun addSigil(sigil: String) {
-        sigils.add(sigil)
+    fun addSiglum(siglum: String) {
+        sigla.add(siglum)
     }
 
     companion object {

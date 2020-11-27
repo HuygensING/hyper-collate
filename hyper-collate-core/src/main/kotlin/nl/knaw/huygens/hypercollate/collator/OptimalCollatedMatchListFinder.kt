@@ -21,6 +21,6 @@ package nl.knaw.huygens.hypercollate.collator
  */
 
 internal interface OptimalCollatedMatchListFinder {
-    fun getOptimalCollatedMatchList(allPotentialMatches: Collection<CollatedMatch>, sigils: List<String>): List<CollatedMatch>
+    fun getOptimalCollatedMatchList(allPotentialMatches: Collection<CollatedMatch>, sigla: List<String>): List<CollatedMatch>
     val name: String
 }
