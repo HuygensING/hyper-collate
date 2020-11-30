@@ -84,16 +84,16 @@ object CollationGraphVisualizer {
     private fun newCell(tokens: List<MarkedUpToken>, whitespaceCharacter: String): Cell {
         val cell = Cell()
         if (tokens.isEmpty()) {
-            cell.setLayer(" ")
+            cell.addLayer(" ")
         } else {
-            tokens.forEach { token: MarkedUpToken ->
+            tokens.sortedBy { it.indexNumber }.reversed().forEach { token: MarkedUpToken ->
                 var content = token.content.replace("\n".toRegex(), " ")
                         .replace(" +".toRegex(), whitespaceCharacter)
                 val parentXPath = token.parentXPath
                 when {
-                    parentXPath.endsWith("/del/add") -> content = "[za] $content"
-                    parentXPath.endsWith("/add") -> content = "[z] $content"
-                    parentXPath.endsWith("/del") -> content = "[a] $content"
+                    parentXPath.endsWith("/del/add") -> content = "[-+] $content"
+                    parentXPath.endsWith("/add") -> content = "[+] $content"
+                    parentXPath.endsWith("/del") -> content = "[-] $content"
                     //        String layerName = determineLayerName(parentXPath);
                 }
                 if (parentXPath.contains("/rdg")) {
@@ -104,7 +104,7 @@ object CollationGraphVisualizer {
                     content = "<" + parentXPath.replace(".*/".toRegex(), "") + "/>"
                 }
                 //        String layerName = determineLayerName(parentXPath);
-                cell.setLayer(content)
+                cell.addLayer(content)
             }
         }
         return cell
@@ -121,7 +121,7 @@ object CollationGraphVisualizer {
         return layerName
     }
 
-    private fun Cell.setLayer(content: String) {
+    private fun Cell.addLayer(content: String) {
         layerContent += content
         //    String previousContent = cell.getLayerContent().put(layerName, content);
         //    Preconditions.checkState(previousContent == null, "layerName " + layerName + " used
@@ -133,35 +133,32 @@ object CollationGraphVisualizer {
             rowMap: Map<String, MutableList<Cell>>,
             cellHeights: Map<String, Int>
     ): AsciiTable {
-        val table = AsciiTable().setTextAlignment(TextAlignment.LEFT)
+        val table = AsciiTable()
         table.renderer.cwc = CWC_LongestLine()
         table.addRule()
         sigla.forEach { siglum: String ->
             val row = (rowMap[siglum] ?: error("rowMap[$siglum] == null"))
-                    .map { cell: Cell -> toASCII(cell, cellHeights[siglum] ?: error("cellHeights[$siglum] == null")) }
+                    .map { cell: Cell -> cell.toASCII(cellHeights[siglum] ?: error("cellHeights[$siglum] == null")) }
                     .toMutableList()
 
             row.add(0, "[$siglum]")
             table.addRow(row)
             table.addRule()
         }
+        table.setTextAlignment(TextAlignment.LEFT)
         return table
     }
 
-    private fun toASCII(cell: Cell, cellHeight: Int): String {
+    private fun Cell.toASCII(cellHeight: Int): String {
         val contentBuilder = StringBuilder()
         // ASCIITable has no TextAlignment.BOTTOM option, so add empty lines manually
-        val emptyLinesToAdd = cellHeight - cell.layerContent.size
+        val emptyLinesToAdd = cellHeight - layerContent.size
         for (i in 0 until emptyLinesToAdd) {
             contentBuilder.append("$NBSP<br>") // regular space or just <br> leads to ASCIITable error when rendering
         }
-        val layerContent: List<String> = cell.layerContent.sorted().reversed()
         val joiner = StringJoiner("<br>")
         for (s in layerContent) {
-            joiner.add(
-                    s.replace("""\[z]""".toRegex(), "[+]")
-                            .replace("""\[a]""".toRegex(), "[-]")
-                            .replace("""\[za]""".toRegex(), "[+-]"))
+            joiner.add(s)
         }
         val content = joiner.toString()
         return contentBuilder.append(content).toString()

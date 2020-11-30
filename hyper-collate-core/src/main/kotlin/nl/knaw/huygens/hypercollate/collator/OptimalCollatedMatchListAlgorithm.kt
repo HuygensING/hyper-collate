@@ -60,7 +60,7 @@ class OptimalCollatedMatchListAlgorithm : AstarAlgorithm<QuantumCollatedMatchLis
     override fun isGoal(matchList: QuantumCollatedMatchList): Boolean =
             matchList.isDetermined
 
-    override fun neighborNodes(matchList: QuantumCollatedMatchList): Iterable<QuantumCollatedMatchList> = neighborNodes_v1(matchList)
+    override fun neighborNodes(matchList: QuantumCollatedMatchList): Iterable<QuantumCollatedMatchList> = neighborNodes_v2(matchList)
 
     private fun neighborNodes_v1(matchList: QuantumCollatedMatchList): Iterable<QuantumCollatedMatchList> {
         val nextMatchSequence: MutableList<CollatedMatch> = mutableListOf()

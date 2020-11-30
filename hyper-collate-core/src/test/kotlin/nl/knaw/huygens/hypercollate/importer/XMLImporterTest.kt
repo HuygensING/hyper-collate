@@ -37,6 +37,39 @@ import org.slf4j.LoggerFactory
 
 class XMLImporterTest : HyperCollateTest() {
 
+    @Disabled
+    @Test
+    fun immediate_deletion() {
+        val importer = XMLImporter()
+        val xmlString = """
+            <xml>Modeling <del instant="true">deletion</del> immediate deletion is necessary.</xml>
+            """.trimIndent()
+                .replace("""\s+""".toRegex(), " ")
+                .replace("> <", "><")
+        println(xmlString)
+        val wg0: VariantWitnessGraph = importer.importXML("A", xmlString)
+
+        val expectedDot = """
+            digraph VariantWitnessGraph{
+            graph [rankdir=LR]
+            labelloc=b
+            begin [label="";shape=doublecircle,rank=middle]
+            vA_000 [label=<Mondays&#9251;are&#9251;<br/><i>A: /xml</i>>]
+            vA_002 [label=<deaf&#9251;bat<br/><i>A: /xml/app/rdg[@varSeq='1']</i>>]
+            vA_004 [label=<def&#9251;bad<br/><i>A: /xml/app/rdg[@varSeq='2']</i>>]
+            vA_006 [label=<!<br/><i>A: /xml</i>>]
+            end [label="";shape=doublecircle,rank=middle]
+            begin->vA_000
+            vA_000->vA_002
+            vA_000->vA_004
+            vA_002->vA_006
+            vA_004->vA_006
+            vA_006->end
+            }
+            """.trimIndent()
+        verifyDotExport(wg0, expectedDot)
+    }
+
     @Test
     fun witness_branch_identifier_from_xpath() {
         assertThat("/xml/subst/add".branchId()).isEqualTo("+")

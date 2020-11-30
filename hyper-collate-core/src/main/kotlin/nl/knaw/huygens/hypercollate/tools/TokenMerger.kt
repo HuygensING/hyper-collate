@@ -43,7 +43,8 @@ object TokenMerger {
                     handledTokens,
                     endTokenHandled,
                     originalVertex,
-                    mergedVertexToLinkTo)
+                    mergedVertexToLinkTo
+            )
         }
         return mergedGraph
     }
@@ -56,7 +57,8 @@ object TokenMerger {
             handledTokens: MutableList<Long>,
             endTokenHandled: AtomicBoolean,
             originalVertexIn: TokenVertex,
-            mergedVertexToLinkTo: TokenVertex) {
+            mergedVertexToLinkTo: TokenVertex
+    ) {
         var originalVertex = originalVertexIn
         if (originalVertex is EndTokenVertex) {
             if (endTokenHandled.get()) {

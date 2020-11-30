@@ -176,6 +176,7 @@ class XMLImporter {
         private var rdg: String? = ""
         private var parentXPath: String = ""
         private var afterDel = false
+        private var afterImmediateDel = false
         private val branchCounter = AtomicInteger(0)
         private val branchIds: Deque<Int> = LinkedList()
 
@@ -213,6 +214,7 @@ class XMLImporter {
                         unconnectedVertices.push(lastTokenVertex) // add link from vertex preceding the <add> to vertex following </add>
                     }
                     afterDel = false
+                    afterImmediateDel = false
                     branchIds.push(nextBranchId())
                 }
                 markup.isSubst() -> { // subst
@@ -265,6 +267,7 @@ class XMLImporter {
                     unconnectedVertices.push(lastTokenVertex)
                     branchIds.pop()
                     afterDel = true
+                    afterImmediateDel = "true" == markup.attributeMap["instant"]
                 }
                 notInAppOrSubst() && markup.isVariationEndingMarkup() -> {
                     variationEndVertices.push(lastTokenVertex)
@@ -286,6 +289,7 @@ class XMLImporter {
                 }
                 inSubst() -> {
                     unconnectedSubstVerticesStack.peek().add(lastTokenVertex)
+                    afterImmediateDel = markup.isVariationStartingMarkup() && "true" == firstToClose.attributeMap["instant"]
                     branchIds.pop()
                 }
             }
@@ -315,12 +319,18 @@ class XMLImporter {
                     .withNormalizedContent(normalizer.apply(content))
             val tokenVertex = SimpleTokenVertex(token)
             tokenVertex.branchPath = branchIds.descendingIterator().asSequence().toList()
-            graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex)
+            if (afterImmediateDel) {
+                graph.addOutgoingTokenVertexToTokenVertex(variationStartVertices.peek(), tokenVertex)
+                afterImmediateDel = false
+            } else {
+                graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex)
+            }
             if (afterDel) { // del without add
                 // add link from vertex preceding the <del> to vertex following </del>
                 graph.addOutgoingTokenVertexToTokenVertex(variationStartVertices.pop(), tokenVertex)
                 unconnectedVertices.pop()
                 afterDel = false
+                afterImmediateDel = false
             }
             while (afterAppStack.peek()) {
                 unconnectedRdgVerticesStack.pop()
