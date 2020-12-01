@@ -1,0 +1,3 @@
+#!/bin/bash
+mkdir -p ~/.jupyter_kotlin/libraries
+cp jupyter/hyper-collate.json ~/.jupyter_kotlin/libraries
