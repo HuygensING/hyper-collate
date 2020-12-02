@@ -239,6 +239,7 @@ class HyperCollatorTest {
                 t000->t001[label=<1,2>;penwidth=2]
                 t001->t003[label=<1<sup>+</sup>,2>;penwidth=2]
                 t001->t004[label=<1<sup>-</sup>>]
+                t003->t002[label=<1<sup>+</sup>>]
                 t003->t004[label=<2>]
                 t004->t002[label=<1<sup>-</sup>,2>;penwidth=2]
                 }
