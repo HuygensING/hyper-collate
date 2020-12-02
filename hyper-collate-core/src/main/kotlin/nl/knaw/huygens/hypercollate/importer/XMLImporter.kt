@@ -376,6 +376,12 @@ class XMLImporter {
                 // add link from vertex preceding the <del> to end vertex
                 graph.addOutgoingTokenVertexToTokenVertex(variationStartVertices.pop(), endTokenVertex)
             }
+            (unconnectedSubstVerticesStack + unconnectedRdgVerticesStack)
+                    .flatten()
+                    .filter { v: TokenVertex -> v != lastTokenVertex }
+                    .forEach { v: TokenVertex -> graph.addOutgoingTokenVertexToTokenVertex(v, endTokenVertex) }
+            unconnectedSubstVerticesStack.clear()
+            unconnectedRdgVerticesStack.clear()
         }
 
         private fun buildParentXPath(): String =

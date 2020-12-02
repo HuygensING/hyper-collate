@@ -23,7 +23,7 @@ package nl.knaw.huygens.hypercollate.collator
 import nl.knaw.huygens.hypercollate.HyperCollateTest
 import nl.knaw.huygens.hypercollate.importer.XMLImporter
 import nl.knaw.huygens.hypercollate.model.*
-import nl.knaw.huygens.hypercollate.tools.TokenMerger
+import nl.knaw.huygens.hypercollate.tools.TokenMerger.joined
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -32,7 +32,7 @@ class VariantWitnessGraphTraversalTest : HyperCollateTest() {
     fun testVariantWitnessGraphTraversal() {
         val importer = XMLImporter()
         val wg0 = importer.importXML("A", "<xml>Eeny, meeny, miny, <del>curly</del><add>moe</add>!</xml>")
-        val witnessGraph = TokenMerger.merge(wg0)
+        val witnessGraph = wg0.joined()
         val traversal = VariantWitnessGraphTraversal.of(witnessGraph)
         // for (TokenVertex tv : traversal) {
         // if (tv instanceof SimpleTokenVertex) {

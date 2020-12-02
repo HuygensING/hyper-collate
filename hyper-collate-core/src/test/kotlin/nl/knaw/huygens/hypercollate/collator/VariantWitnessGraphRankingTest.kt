@@ -26,18 +26,19 @@ import nl.knaw.huygens.hypercollate.model.MarkedUpToken
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex
 import nl.knaw.huygens.hypercollate.model.StartTokenVertex
 import nl.knaw.huygens.hypercollate.model.TokenVertex
-import nl.knaw.huygens.hypercollate.tools.TokenMerger
+import nl.knaw.huygens.hypercollate.tools.TokenMerger.joined
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.stream.Collectors
 
 class VariantWitnessGraphRankingTest : HyperCollateTest() {
+
     @Test
     fun test() {
         val importer = XMLImporter()
         val wg0 = importer.importXML(
                 "A", "<xml>Een ongeluk komt <del>nooit</del><add>zelden</add> alleen.</xml>")
-        val witnessGraph = TokenMerger.merge(wg0)
+        val witnessGraph = wg0.joined()
         val ranking = VariantWitnessGraphRanking.of(witnessGraph)
         val byRank = ranking.byRank
         byRank.forEach { (key: Int, value: Set<TokenVertex?>) -> println("$key:$value") }

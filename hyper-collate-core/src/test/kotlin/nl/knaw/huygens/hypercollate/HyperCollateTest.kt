@@ -25,7 +25,7 @@ import guru.nidi.graphviz.engine.Graphviz
 import guru.nidi.graphviz.parse.Parser
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
 import nl.knaw.huygens.hypercollate.tools.DotFactory
-import nl.knaw.huygens.hypercollate.tools.TokenMerger.merge
+import nl.knaw.huygens.hypercollate.tools.TokenMerger.joined
 import org.apache.commons.io.FileUtils
 import org.assertj.core.api.Assertions.assertThat
 import java.awt.FlowLayout
@@ -43,13 +43,10 @@ open class HyperCollateTest {
             expectedDot: String,
             name: String = "graph"
     ) {
-        val wg = merge(variantWitnessGraph)
-        // VariantWitnessGraph wg = variantWitnessGraph;
+        val wg = variantWitnessGraph.joined()
         val dot = DotFactory(true).fromVariantWitnessGraphSimple(wg)
-        // System.out.println(dot);
         writeGraph(dot, name)
         assertThat(dot).isEqualTo(expectedDot)
-        // showGraph(dot);
     }
 
     protected fun writeGraph(dot: String?, name: String) {

@@ -28,7 +28,7 @@ import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex
 import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
 import nl.knaw.huygens.hypercollate.tools.DotFactory
 import nl.knaw.huygens.hypercollate.tools.DotFactory.Companion.branchId
-import nl.knaw.huygens.hypercollate.tools.TokenMerger
+import nl.knaw.huygens.hypercollate.tools.TokenMerger.joined
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.Disabled
@@ -37,15 +37,99 @@ import org.slf4j.LoggerFactory
 
 class XMLImporterTest : HyperCollateTest() {
 
+    @Test
+    fun subst_at_start_and_end() {
+        val importer = XMLImporter()
+        val xmlString = """
+            <xml>
+              <subst>
+                <del>Startings</del>
+                <add>Beginnings</add>
+              </subst>
+              are as important as
+              <subst>
+                <del>finishes</del>
+                <add>endings</add>
+              </subst>
+            </xml>
+            """.xmlTrimmed()
+        println(xmlString)
+        val wg0: VariantWitnessGraph = importer.importXML("A", xmlString)
+
+        val expectedDot = """
+            digraph VariantWitnessGraph{
+            graph [rankdir=LR]
+            labelloc=b
+            begin [label="";shape=doublecircle,rank=middle]
+            vA_000 [label=<Startings<br/><i>A: /xml/subst/del</i>>]
+            vA_001 [label=<Beginnings<br/><i>A: /xml/subst/add</i>>]
+            vA_002 [label=<&#9251;are&#9251;as&#9251;important&#9251;as&#9251;<br/><i>A: /xml</i>>]
+            vA_007 [label=<finishes<br/><i>A: /xml/subst/del</i>>]
+            vA_008 [label=<endings<br/><i>A: /xml/subst/add</i>>]
+            end [label="";shape=doublecircle,rank=middle]
+            begin->vA_000
+            begin->vA_001
+            vA_000->vA_002
+            vA_001->vA_002
+            vA_002->vA_007
+            vA_002->vA_008
+            vA_007->end
+            vA_008->end
+            }
+            """.trimIndent()
+        verifyDotExport(wg0, expectedDot)
+    }
+
+    @Test
+    fun app_at_start_and_end() {
+        val importer = XMLImporter()
+        val xmlString = """
+            <xml>
+              <app>
+                <rdg varSeq="1">Startings</rdg>
+                <rdg varSeq="2">Beginnings</rdg>
+              </app>
+              are as important as
+              <app>
+                <rdg varSeq="1">finishes</rdg>
+                <rdg varSeq="2">endings</rdg>
+              </app>
+            </xml>
+            """.xmlTrimmed()
+        println(xmlString)
+        val wg0: VariantWitnessGraph = importer.importXML("A", xmlString)
+
+        val expectedDot = """
+            digraph VariantWitnessGraph{
+            graph [rankdir=LR]
+            labelloc=b
+            begin [label="";shape=doublecircle,rank=middle]
+            vA_000 [label=<Startings<br/><i>A: /xml/app/rdg[@varSeq='1']</i>>]
+            vA_001 [label=<Beginnings<br/><i>A: /xml/app/rdg[@varSeq='2']</i>>]
+            vA_002 [label=<&#9251;are&#9251;as&#9251;important&#9251;as&#9251;<br/><i>A: /xml</i>>]
+            vA_007 [label=<finishes<br/><i>A: /xml/app/rdg[@varSeq='1']</i>>]
+            vA_008 [label=<endings<br/><i>A: /xml/app/rdg[@varSeq='2']</i>>]
+            end [label="";shape=doublecircle,rank=middle]
+            begin->vA_000
+            begin->vA_001
+            vA_000->vA_002
+            vA_001->vA_002
+            vA_002->vA_007
+            vA_002->vA_008
+            vA_007->end
+            vA_008->end
+            }
+            """.trimIndent()
+        verifyDotExport(wg0, expectedDot)
+    }
+
     @Disabled
     @Test
     fun immediate_deletion() {
         val importer = XMLImporter()
         val xmlString = """
             <xml>Modeling <del instant="true">deletion</del> immediate deletion is necessary.</xml>
-            """.trimIndent()
-                .replace("""\s+""".toRegex(), " ")
-                .replace("> <", "><")
+            """.xmlTrimmed()
         println(xmlString)
         val wg0: VariantWitnessGraph = importer.importXML("A", xmlString)
 
@@ -89,9 +173,7 @@ class XMLImporterTest : HyperCollateTest() {
               <rdg varSeq="1">deaf bat</rdg>
               <rdg varSeq="2">def bad</rdg>
             </app>!</xml>
-            """.trimIndent()
-                .replace("""\s+""".toRegex(), " ")
-                .replace("> <", "><")
+            """.xmlTrimmed()
         println(xmlString)
         val wg0: VariantWitnessGraph = importer.importXML("A", xmlString)
         val deafTokenVertex = wg0.vertices().filterIsInstance<SimpleTokenVertex>().first { it.normalizedContent == "deaf" }
@@ -129,9 +211,7 @@ class XMLImporterTest : HyperCollateTest() {
               <sic>deaf bat</sic>
               <corr>def bad</corr>
             </subst>!</xml>
-            """.trimIndent()
-                .replace("""\s+""".toRegex(), " ")
-                .replace("> <", "><")
+            """.xmlTrimmed()
         println(xmlString)
 
         val wg0: VariantWitnessGraph = importer.importXML("A", xmlString)
@@ -177,9 +257,7 @@ class XMLImporterTest : HyperCollateTest() {
               <sic>deaf bat</sic>
               <corr>def bad</corr>
             </subst>!</xml>
-            """.trimIndent()
-                .replace("""\s+""".toRegex(), " ")
-                .replace("> <", "><")
+            """.xmlTrimmed()
         println(xmlString)
         val wg0: VariantWitnessGraph = importer.importXML("A", xmlString)
         val branchSetRankingRanges: Map<Int, IntRange> = wg0.showBranchSetRanges()
@@ -205,6 +283,11 @@ class XMLImporterTest : HyperCollateTest() {
             """.trimIndent()
         verifyDotExport(wg0, expectedDot)
     }
+
+    private fun String.xmlTrimmed(): String =
+            trimIndent()
+                    .replace("""\s+""".toRegex(), " ")
+                    .replace("> <", "><")
 
     private fun VariantWitnessGraph.showBranchSetRanges(): Map<Int, IntRange> {
         val ranking: VariantWitnessGraphRanking = VariantWitnessGraphRanking.of(this)
@@ -930,7 +1013,7 @@ class XMLImporterTest : HyperCollateTest() {
         LOG.info("unjoined simple:\n{}", dot0s)
         val dot0c = DotFactory(true).fromVariantWitnessGraphColored(vwg)
         LOG.info("unjoined colored:\n{}", dot0c)
-        val joined = TokenMerger.merge(vwg)
+        val joined = vwg.joined()
         val dot1s = DotFactory(true).fromVariantWitnessGraphSimple(joined)
         LOG.info("joined simple:\n{}", dot1s)
         val dot1c = DotFactory(true).fromVariantWitnessGraphColored(joined)

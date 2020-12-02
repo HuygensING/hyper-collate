@@ -26,18 +26,18 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 object TokenMerger {
     @JvmStatic
-    fun merge(originalGraph: VariantWitnessGraph): VariantWitnessGraph {
-        val mergedGraph = VariantWitnessGraph(originalGraph.siglum)
-        originalGraph.markupList.forEach { markup: Markup -> mergedGraph.addMarkup(markup) }
+    fun VariantWitnessGraph.joined(): VariantWitnessGraph {
+        val mergedGraph = VariantWitnessGraph(siglum)
+        markupList.forEach { markup: Markup -> mergedGraph.addMarkup(markup) }
         val originalToMergedMap: MutableMap<Long, TokenVertex> = HashMap()
-        val originalTokenVertex = originalGraph.startTokenVertex
+        val originalTokenVertex = startTokenVertex
         val verticesToAdd = originalTokenVertex.outgoingTokenVertexList
         val handledTokens: MutableList<Long> = ArrayList()
         val endTokenHandled = AtomicBoolean(false)
         val mergedVertexToLinkTo = mergedGraph.startTokenVertex
         verticesToAdd.forEach { originalVertex: TokenVertex ->
             handle(
-                    originalGraph,
+                    this,
                     mergedGraph,
                     originalToMergedMap,
                     handledTokens,
@@ -59,61 +59,69 @@ object TokenMerger {
             originalVertexIn: TokenVertex,
             mergedVertexToLinkTo: TokenVertex
     ) {
-        var originalVertex = originalVertexIn
-        if (originalVertex is EndTokenVertex) {
-            if (endTokenHandled.get()) {
+        when (originalVertexIn) {
+            is EndTokenVertex -> {
+                val allIncomingVerticesAreMerged = originalVertexIn.incomingTokenVertexList
+                        .map { it.token as MarkedUpToken }
+                        .all { originalToMergedMap.containsKey(it.indexNumber) }
+                if (endTokenHandled.get() || !allIncomingVerticesAreMerged) {
+                    return
+                }
+                val endTokenVertex = mergedGraph.endTokenVertex
+                originalVertexIn
+                        .incomingTokenVertexList
+                        .forEach { tv: TokenVertex ->
+                            val indexNumber = (tv.token as MarkedUpToken).indexNumber
+                            val mergedTokenVertex = originalToMergedMap[indexNumber]
+                                    ?: error("originalToMergedMap[$indexNumber] is null")
+                            mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedTokenVertex, endTokenVertex)
+                        }
+                endTokenHandled.set(true)
                 return
             }
-            val endTokenVertex = mergedGraph.endTokenVertex
-            originalVertex
-                    .incomingTokenVertexList
-                    .forEach { tv: TokenVertex ->
-                        val indexNumber = (tv.token as MarkedUpToken).indexNumber
-                        val mergedTokenVertex = originalToMergedMap[indexNumber]
-                        mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedTokenVertex, endTokenVertex)
-                    }
-            endTokenHandled.set(true)
-            return
-        }
-        val originalToken = originalVertex.token as MarkedUpToken
-        val tokenNumber = originalToken.indexNumber
-        if (tokenNumber in handledTokens) {
-            val mergedTokenVertex = originalToMergedMap[tokenNumber]
-            mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedVertexToLinkTo, mergedTokenVertex)
-            return
-        }
-        val mergedToken = MarkedUpToken()
-                .withContent(originalToken.content)
-                .withNormalizedContent(originalToken.normalizedContent)
-                .withParentXPath(originalToken.parentXPath)
-                .withWitness(originalToken.witness as SimpleWitness)
-                .withRdg(originalToken.rdg)
-                .withIndexNumber(tokenNumber)
-        val mergedVertex = SimpleTokenVertex(mergedToken).withBranchPath(originalVertex.branchPath)
-        originalGraph
-                .markupListForTokenVertex(originalVertex)
-                .forEach { markup: Markup -> mergedGraph.addMarkupToTokenVertex(mergedVertex, markup) }
-        originalToMergedMap[tokenNumber] = mergedVertex
-        mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedVertexToLinkTo, mergedVertex)
-        handledTokens += tokenNumber
-        var originalOutgoingVertices = originalVertex.outgoingTokenVertexList
-        while (canMerge(originalGraph, originalVertex, originalOutgoingVertices)) {
-            val nextOriginalToken = originalOutgoingVertices[0].token as MarkedUpToken
-            mergedToken.content += nextOriginalToken.content
-            mergedToken.normalizedContent += nextOriginalToken.normalizedContent
-            originalToMergedMap[nextOriginalToken.indexNumber] = mergedVertex
-            originalVertex = originalOutgoingVertices[0]
-            originalOutgoingVertices = originalVertex.outgoingTokenVertexList
-        }
-        originalOutgoingVertices.forEach { oVertex: TokenVertex ->
-            handle(
-                    originalGraph,
-                    mergedGraph,
-                    originalToMergedMap,
-                    handledTokens,
-                    endTokenHandled,
-                    oVertex,
-                    mergedVertex)
+            else -> {
+                var originalVertex = originalVertexIn
+                val originalToken = originalVertex.token as MarkedUpToken
+                val tokenNumber = originalToken.indexNumber
+                if (tokenNumber in handledTokens) {
+                    val mergedTokenVertex = originalToMergedMap[tokenNumber]
+                    mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedVertexToLinkTo, mergedTokenVertex)
+                    return
+                }
+                val mergedToken = MarkedUpToken()
+                        .withContent(originalToken.content)
+                        .withNormalizedContent(originalToken.normalizedContent)
+                        .withParentXPath(originalToken.parentXPath)
+                        .withWitness(originalToken.witness as SimpleWitness)
+                        .withRdg(originalToken.rdg)
+                        .withIndexNumber(tokenNumber)
+                val mergedVertex = SimpleTokenVertex(mergedToken).withBranchPath(originalVertex.branchPath)
+                originalGraph
+                        .markupListForTokenVertex(originalVertex)
+                        .forEach { markup: Markup -> mergedGraph.addMarkupToTokenVertex(mergedVertex, markup) }
+                originalToMergedMap[tokenNumber] = mergedVertex
+                mergedGraph.addOutgoingTokenVertexToTokenVertex(mergedVertexToLinkTo, mergedVertex)
+                handledTokens += tokenNumber
+                var originalOutgoingVertices = originalVertex.outgoingTokenVertexList
+                while (canMerge(originalGraph, originalVertex, originalOutgoingVertices)) {
+                    val nextOriginalToken = originalOutgoingVertices[0].token as MarkedUpToken
+                    mergedToken.content += nextOriginalToken.content
+                    mergedToken.normalizedContent += nextOriginalToken.normalizedContent
+                    originalToMergedMap[nextOriginalToken.indexNumber] = mergedVertex
+                    originalVertex = originalOutgoingVertices[0]
+                    originalOutgoingVertices = originalVertex.outgoingTokenVertexList
+                }
+                originalOutgoingVertices.forEach { oVertex: TokenVertex ->
+                    handle(
+                            originalGraph,
+                            mergedGraph,
+                            originalToMergedMap,
+                            handledTokens,
+                            endTokenHandled,
+                            oVertex,
+                            mergedVertex)
+                }
+            }
         }
     }
 

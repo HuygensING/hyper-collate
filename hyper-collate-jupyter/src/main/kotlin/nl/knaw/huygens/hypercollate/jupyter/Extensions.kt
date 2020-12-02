@@ -26,7 +26,7 @@ import nl.knaw.huygens.hypercollate.model.VariantWitnessGraph
 import nl.knaw.huygens.hypercollate.tools.CollationGraphNodeJoiner
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer
 import nl.knaw.huygens.hypercollate.tools.DotFactory
-import nl.knaw.huygens.hypercollate.tools.TokenMerger
+import nl.knaw.huygens.hypercollate.tools.TokenMerger.joined
 
 private val dotEngine = DotEngine()
 
@@ -48,19 +48,19 @@ fun VariantWitnessGraph.asDot(
         join: Boolean = false,
         emphasizeWhitespace: Boolean = false
 ): String =
-        DotFactory(emphasizeWhitespace).fromVariantWitnessGraphSimple(this.joined(join))
+        DotFactory(emphasizeWhitespace).fromVariantWitnessGraphSimple(this.optionallyJoined(join))
 
-private fun VariantWitnessGraph.joined(join: Boolean): VariantWitnessGraph {
-    return if (join) {
-        TokenMerger.merge(this)
-    } else this
-}
+private fun VariantWitnessGraph.optionallyJoined(join: Boolean): VariantWitnessGraph =
+        if (join)
+            this.joined()
+        else
+            this
 
 fun VariantWitnessGraph.asColoredDot(
         join: Boolean = false,
         emphasizeWhitespace: Boolean = false
 ): String =
-        DotFactory(emphasizeWhitespace).fromVariantWitnessGraphColored(this.joined(join))
+        DotFactory(emphasizeWhitespace).fromVariantWitnessGraphColored(this.optionallyJoined(join))
 
 fun CollationGraph.asTable(format: TableFormat = TableFormat.ASCII, join: Boolean = false, emphasizeWhitespace: Boolean = false): String =
         when (format) {
@@ -69,10 +69,10 @@ fun CollationGraph.asTable(format: TableFormat = TableFormat.ASCII, join: Boolea
         }
 
 fun CollationGraph.asASCIITable(join: Boolean = true, emphasizeWhitespace: Boolean = false): String =
-        CollationGraphVisualizer.toTableASCII(this.joined(join), emphasizeWhitespace)
+        CollationGraphVisualizer.toTableASCII(this.optionallyJoined(join), emphasizeWhitespace)
 
 fun CollationGraph.asHTMLString(join: Boolean = true, emphasizeWhitespace: Boolean = false): String =
-        CollationGraphVisualizer.toTableHTML(this.joined(join), emphasizeWhitespace)
+        CollationGraphVisualizer.toTableHTML(this.optionallyJoined(join), emphasizeWhitespace)
 
 fun CollationGraph.asSVGPair(
         join: Boolean = false,
@@ -100,9 +100,9 @@ fun CollationGraph.asDot(
         emphasizeWhitespace: Boolean = false,
         hideMarkup: Boolean = false
 ): String =
-        CollationGraphVisualizer.toDot(this.joined(join), emphasizeWhitespace, hideMarkup)
+        CollationGraphVisualizer.toDot(this.optionallyJoined(join), emphasizeWhitespace, hideMarkup)
 
-private fun CollationGraph.joined(join: Boolean): CollationGraph =
+private fun CollationGraph.optionallyJoined(join: Boolean): CollationGraph =
         if (join) {
             CollationGraphNodeJoiner.join(this)
         } else this

@@ -413,7 +413,7 @@ public class CollationsResource {
     CollationInfo collationInfo = getExistingCollationInfo(name);
     VariantWitnessGraph variantWitnessGraph = collationInfo.getWitnessGraphMap().get(sigil);
     if (joinTokens) {
-      variantWitnessGraph = TokenMerger.merge(variantWitnessGraph);
+      variantWitnessGraph = TokenMerger.joined(variantWitnessGraph);
     }
     return new DotFactory(emphasizeWhitespace).fromVariantWitnessGraphColored(variantWitnessGraph);
   }
