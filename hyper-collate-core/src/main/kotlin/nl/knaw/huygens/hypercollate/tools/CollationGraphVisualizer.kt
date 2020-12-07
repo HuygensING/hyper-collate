@@ -193,15 +193,22 @@ object CollationGraphVisualizer {
             for (siglum: String in sigla) {
                 val groupedByParentXPath = nodeTokensPerWitness[siglum]!!
                     .sortedBy { it.indexNumber }
-                    .groupBy { it.parentXPath.replace("/$INSTANT_DEL_XPATH_NODE", "") } // since instant deletions should be on the same line as the text after
-                if (groupedByParentXPath.size == 1) {
-                    cells[siglum]!! += groupedByParentXPath.values
+                    .groupBy {
+                        it.parentXPath.replace(
+                            "/$INSTANT_DEL_XPATH_NODE",
+                            ""
+                        )
+                    } // since instant deletions should be on the same line as the text after
+                cells[siglum]!! += when {
+                    groupedByParentXPath.size == 1 ->
+                        groupedByParentXPath.values
                         .flatten()
                         .tokenListToHtml(whitespaceCharacter, matchingTokens)
-                } else if (groupedByParentXPath.size > 1) { // we have textual variation
-                    val keys = groupedByParentXPath.keys.toList()
-                    val firstKey = keys[0]
-                    cells[siglum]!! +=
+
+                    groupedByParentXPath.size > 1 -> { // we have textual variation
+                        val keys = groupedByParentXPath.keys.toList()
+                        val firstKey = keys[0]
+
                         when {
                             "/rdg/" in firstKey -> // for readings, first reading goes first
                                 keys.map { groupedByParentXPath[it]!! }
@@ -211,6 +218,8 @@ object CollationGraphVisualizer {
                                     .map { groupedByParentXPath[it]!! }
                                     .toHtml(whitespaceCharacter, matchingTokens)
                         }
+                    }
+                    else -> ""
                 }
 //                cells[siglum] ?: error("") += nodeTokensPerWitness[siglum]!!
 //                    .sortedBy { it.indexNumber }

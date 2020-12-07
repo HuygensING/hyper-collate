@@ -46,7 +46,7 @@ class JupyterTest {
         val p = a.asSVGPair()
         assertThat(p.first).isEqualTo("image/svg+xml")
 
-        val b = HC.importXMLWitness("C", File("c.xml"))
+        val b = HC.importXMLWitness("C", File("../notebooks/c.xml"))
         val p2 = b.asPNGPair()
         assertThat(p2.first).isEqualTo("image/png")
 

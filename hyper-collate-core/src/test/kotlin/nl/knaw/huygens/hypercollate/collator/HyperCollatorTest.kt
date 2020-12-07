@@ -97,7 +97,7 @@ class HyperCollatorTest {
             val expectedHTML = """
                 |<table border="1">
                 |            <tr><th style="background:lightgreen">A</th><td>Des&nbsp;objets&nbsp;en&nbsp;voie&nbsp;de&nbsp;disparition&nbsp;</td><td><span style="background-color:lightblue">je&nbsp;détourne&nbsp;</span></td><td><del>les</del>&nbsp;<span style="background-color:lightblue">mes&nbsp;regards</span><br/><del>les&nbsp;yeux</del></td><td>&nbsp;bien&nbsp;à&nbsp;l'avance</td><td><span style="background-color:lightblue">.</span></td></tr>
-                |<tr><th style="background:lightgreen">B</th><td>c'est&nbsp;bien&nbsp;à&nbsp;l'avance&nbsp;que&nbsp;</td><td><span style="background-color:lightblue">je&nbsp;détourne&nbsp;</span></td><td><span style="background-color:lightblue">mes&nbsp;regards</span></td><td><span style="background-color:lightblue">.</span></td></tr>
+                |<tr><th style="background:lightgreen">B</th><td>c'est&nbsp;bien&nbsp;à&nbsp;l'avance&nbsp;que&nbsp;</td><td><span style="background-color:lightblue">je&nbsp;détourne&nbsp;</span></td><td><span style="background-color:lightblue">mes&nbsp;regards</span></td><td></td><td><span style="background-color:lightblue">.</span></td></tr>
                 |            </table>""".trimMargin()
             assertThat(html).isEqualTo(expectedHTML)
         }
