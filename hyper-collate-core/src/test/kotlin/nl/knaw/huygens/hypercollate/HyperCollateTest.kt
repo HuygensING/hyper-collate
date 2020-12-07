@@ -31,10 +31,17 @@ import org.assertj.core.api.Assertions.assertThat
 import java.awt.FlowLayout
 import java.io.File
 import java.io.IOException
+import java.io.StringReader
+import java.io.StringWriter
 import java.nio.charset.StandardCharsets
 import javax.swing.ImageIcon
 import javax.swing.JFrame
 import javax.swing.JLabel
+import javax.xml.transform.OutputKeys
+import javax.xml.transform.Source
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.stream.StreamResult
+import javax.xml.transform.stream.StreamSource
 
 open class HyperCollateTest {
 
@@ -71,4 +78,27 @@ open class HyperCollateTest {
             e.printStackTrace()
         }
     }
+
+    fun String.formatXML(): String =
+            try {
+                val xmlInput: Source = StreamSource(StringReader(this))
+                val stringWriter = StringWriter()
+                TransformerFactory.newInstance().newTransformer().apply {
+                    setOutputProperty(OutputKeys.INDENT, "yes")
+                    setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "no")
+                    setOutputProperty("{https://xml.apache.org/xslt}indent-amount", "  ")
+                    transform(xmlInput, StreamResult(stringWriter))
+                }
+                stringWriter.toString().trim { it <= ' ' }
+            } catch (e: Exception) {
+                println(this)
+                throw RuntimeException(e)
+            }
+
+    fun String.asXHTML(): String =
+            """
+            <html>
+            ${this.replace("&nbsp;","!#nbsp#!")}
+            </html>
+            """.formatXML().replace("!#nbsp#!","&nbsp;")
 }

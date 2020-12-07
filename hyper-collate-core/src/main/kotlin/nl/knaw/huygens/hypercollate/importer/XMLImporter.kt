@@ -34,7 +34,10 @@ import javax.xml.stream.XMLStreamConstants
 import javax.xml.stream.XMLStreamException
 import javax.xml.stream.events.*
 
+const val INSTANT_DEL_XPATH_NODE = "del[@instant='true']"
+
 class XMLImporter {
+
     private val tokenizer: Function<String, Stream<String>>
     private val normalizer: Function<String, String>
 
@@ -398,6 +401,11 @@ class XMLImporter {
                             val value = this.attributeMap[attr]
                             "rdg[@$attr='$value']"
                         }
+                    }
+                    "del" -> {
+                        if (this.attributeMap["instant"] == "true") {
+                            INSTANT_DEL_XPATH_NODE
+                        } else this.tagName
                     }
                     else -> this.tagName
                 }

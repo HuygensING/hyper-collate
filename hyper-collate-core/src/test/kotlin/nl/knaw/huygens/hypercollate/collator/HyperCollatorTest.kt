@@ -62,7 +62,7 @@ class HyperCollatorTest {
                 t003 [label=<B: c'est&#9251;bien&#9251;à&#9251;l'avance&#9251;que&#9251;<br/>B: <i>/xml</i>>]
                 t004 [label=<A,B: je&#9251;détourne&#9251;<br/>A,B: <i>/xml</i>>;penwidth=2]
                 t005 [label=<A<sup>-</sup>: les&#9251;yeux<br/>A: <i>/xml/subst/del</i>>]
-                t006 [label=<A<sup>+-</sup>: les<br/>A: <i>/xml/subst/add/del</i>>]
+                t006 [label=<A<sup>+</sup>: les<br/>A: <i>/xml/subst/add/del[@instant='true']</i>>]
                 t007 [label=<A<sup>+</sup>,B: mes&#9251;regards<br/>A: <i>/xml/subst/add</i><br/>B: <i>/xml</i><br/>>;penwidth=2]
                 t008 [label=<A: &#9251;bien&#9251;à&#9251;l'avance<br/>A: <i>/xml</i>>]
                 t009 [label=<A,B: .<br/>A,B: <i>/xml</i>>;penwidth=2]
@@ -71,10 +71,10 @@ class HyperCollatorTest {
                 t001->t004[label=<A>]
                 t003->t004[label=<B>]
                 t004->t005[label=<A<sup>-</sup>>]
-                t004->t006[label=<A<sup>+-</sup>>]
+                t004->t006[label=<A<sup>+</sup>>]
                 t004->t007[label=<A<sup>+</sup>,B>;penwidth=2]
                 t005->t008[label=<A<sup>-</sup>>]
-                t006->t008[label=<A<sup>+-</sup>>]
+                t006->t008[label=<A<sup>+</sup>>]
                 t007->t008[label=<A<sup>+</sup>>]
                 t007->t009[label=<B>]
                 t008->t009[label=<A>]
@@ -90,7 +90,14 @@ class HyperCollatorTest {
                 │[B]│c'est bien à l'avance que         │je détourne │mes regards    │                │.│
                 └───┴──────────────────────────────────┴────────────┴───────────────┴────────────────┴─┘
                 """.trimIndent()
-            testHyperCollation(wA, wB, expectedDot, expectedTable)
+            val collation = testHyperCollation(wA, wB, expectedDot, expectedTable)
+            val html = CollationGraphVisualizer.toTableHTML(collation, false)
+            val expectedHTML = """
+                |<table border="1">
+                |            <tr><th style="background:lightgreen">A</th><td>Des&nbsp;objets&nbsp;en&nbsp;voie&nbsp;de&nbsp;disparition&nbsp;</td><td><span style="background-color:lightblue">je&nbsp;détourne&nbsp;</span></td><td><del>les</del>&nbsp;<span style="background-color:lightblue">mes&nbsp;regards</span><br/><del>les&nbsp;yeux</del></td><td>&nbsp;bien&nbsp;à&nbsp;l'avance</td><td><span style="background-color:lightblue">.</span></td></tr>
+                |<tr><th style="background:lightgreen">B</th><td>c'est&nbsp;bien&nbsp;à&nbsp;l'avance&nbsp;que&nbsp;</td><td><span style="background-color:lightblue">je&nbsp;détourne&nbsp;</span></td><td><span style="background-color:lightblue">mes&nbsp;regards</span></td><td><span style="background-color:lightblue">.</span></td></tr>
+                |            </table>""".trimMargin()
+            assertThat(html).isEqualTo(expectedHTML)
         }
 
         @Disabled
@@ -1719,15 +1726,6 @@ class HyperCollatorTest {
         assertThat(listC).containsOnly(match4, match2, match3, match5, match7, match8)
     }
 
-    private fun Match.pretty(): String =
-            toString() + " - " + tokenVertexList.map {
-                when (it) {
-                    is SimpleTokenVertex -> "'" + it.content + "'"
-                    is EndTokenVertex -> "</end>"
-                    else -> "<somethingelse/>"
-                }
-            }.first()
-
     @Test
     fun min_or_null() {
         val l = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9)
@@ -1749,6 +1747,15 @@ class HyperCollatorTest {
 
         private fun visualize(list: List<Tuple<Int>>): String =
                 list.joinToString("") { format("<{0},{1}>", it.left, it.right) }
+
+        private fun Match.pretty(): String =
+                toString() + " - " + tokenVertexList.map {
+                    when (it) {
+                        is SimpleTokenVertex -> "'" + it.content + "'"
+                        is EndTokenVertex -> "</end>"
+                        else -> "<somethingelse/>"
+                    }
+                }.first()
 
     }
 
