@@ -1,8 +1,6 @@
 #!/bin/bash
-mkdir -p ~/.jupyter_kotlin/libraries
-cp jupyter/hyper-collate.json ~/.jupyter_kotlin/libraries
+#mkdir -p ~/.jupyter_kotlin/libraries
+#cp jupyter/hyper-collate.json ~/.jupyter_kotlin/libraries
+#echo "ls ~/.jupyter_kotlin/libraries :"
+#ls ~/.jupyter_kotlin/libraries
 cp jupyter/hyper-collate.json /srv/conda/envs/notebook/lib/python3.6/site-packages/run_kotlin_kernel/libraries/
-echo "ls ~/.jupyter_kotlin/libraries :"
-ls ~/.jupyter_kotlin/libraries
-echo "ls /srv/conda/envs/notebook/lib/python3.6/site-packages/run_kotlin_kernel/libraries/ :"
-ls /srv/conda/envs/notebook/lib/python3.6/site-packages/run_kotlin_kernel/libraries/
