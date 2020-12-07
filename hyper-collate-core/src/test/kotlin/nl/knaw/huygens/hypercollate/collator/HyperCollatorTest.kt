@@ -49,7 +49,9 @@ class HyperCollatorTest {
         fun trd_665() {
             val importer = XMLImporter()
             val wA = importer.importXML(
-                    "A", "<xml>Des objets en voie de disparition je détourne <subst><del>les yeux</del><add><del instant=\"true\">les</del>mes regards</add></subst> bien à l'avance.</xml>")
+                    "A",
+                """<xml>Des objets en voie de disparition je détourne <subst><del>les yeux</del><add><del instant="true">les</del>mes regards</add></subst> bien à l'avance.</xml>"""
+            )
             val wB = importer.importXML(
                     "B", "<xml>c'est bien à l'avance que je détourne mes regards.</xml>")
             log.info("wA={}", wA.asDot())
@@ -139,7 +141,7 @@ class HyperCollatorTest {
                 """.trimIndent()
             val expectedTable = """
                 ┌───┬─────┬──────────────────┬────────┬─┐
-                │[A]│     │[+]  at  his   own│        │ │
+                │[A]│     │[+] at his own    │        │ │
                 │   │well │[-] in his own way│[+] pace│.│
                 ├───┼─────┼──────────────────┼────────┼─┤
                 │[B]│well │at his own        │gait    │.│

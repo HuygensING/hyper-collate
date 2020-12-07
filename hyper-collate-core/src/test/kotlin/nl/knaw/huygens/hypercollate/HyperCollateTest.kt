@@ -79,7 +79,7 @@ open class HyperCollateTest {
         }
     }
 
-    fun String.formatXML(): String =
+    private fun String.formatXML(): String =
             try {
                 val xmlInput: Source = StreamSource(StringReader(this))
                 val stringWriter = StringWriter()

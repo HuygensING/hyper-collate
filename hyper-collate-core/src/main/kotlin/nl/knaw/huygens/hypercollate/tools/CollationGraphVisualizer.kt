@@ -260,7 +260,7 @@ object CollationGraphVisualizer {
             asHtml = "<span style=\"background-color:lightblue\">$asHtml</span>"
         }
         return when {
-            parentXPath.endsWith("/add") -> "$asHtml"
+            parentXPath.endsWith("/add") -> asHtml
             parentXPath.contains("/del") -> "<del>$asHtml</del>"
             else -> asHtml
         }
