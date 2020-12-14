@@ -20,9 +20,7 @@ package nl.knaw.huygens.hypercollate.tools
  * #L%
  */
 
-import nl.knaw.huygens.hypercollate.model.CollationGraph
-import nl.knaw.huygens.hypercollate.model.TextEdge
-import nl.knaw.huygens.hypercollate.model.TextNode
+import nl.knaw.huygens.hypercollate.model.*
 import java.util.*
 import java.util.function.Function
 import kotlin.math.max
@@ -46,6 +44,9 @@ class CollationGraphRanking : Iterable<Set<TextNode>>, Function<TextNode, Int> {
                 for (incomingTextEdge in graph.getIncomingTextEdgeList(textNode)) {
                     val incomingTextNode = graph.getSource(incomingTextEdge)
                     rank = max(rank, ranking.byNode[incomingTextNode] ?: -1)
+                    if (incomingTextNode.isImmediateDel() && rank == ranking.byNode[incomingTextNode]) {
+                        rank -= 1
+                    }
                 }
                 rank += 1
                 ranking.byNode[textNode] = rank
@@ -79,3 +80,11 @@ class CollationGraphRanking : Iterable<Set<TextNode>>, Function<TextNode, Int> {
     }
 
 }
+
+private fun Node.isImmediateDel(): Boolean =
+    if (this is TextNode) {
+        sigla.map { tokenForSiglum(it) }
+            .filterIsInstance<MarkedUpToken>()
+            .any { it.parentXPath.contains("@instant=") }
+    } else
+        false

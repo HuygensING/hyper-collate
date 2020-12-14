@@ -42,8 +42,8 @@ class XMLImporter {
     private val normalizer: Function<String, String>
 
     constructor(
-            tokenizer: Function<String, Stream<String>>,
-            normalizer: Function<String, String>
+        tokenizer: Function<String, Stream<String>>,
+        normalizer: Function<String, String>
     ) {
         this.tokenizer = tokenizer
         this.normalizer = normalizer
@@ -65,12 +65,12 @@ class XMLImporter {
     }
 
     fun importXML(siglum: String, xmlFile: File): VariantWitnessGraph =
-            try {
-                val input: InputStream = FileUtils.openInputStream(xmlFile)
-                importXML(siglum, input)
-            } catch (e: IOException) {
-                throw RuntimeException(e)
-            }
+        try {
+            val input: InputStream = FileUtils.openInputStream(xmlFile)
+            importXML(siglum, input)
+        } catch (e: IOException) {
+            throw RuntimeException(e)
+        }
 
     fun importXML(rawSiglum: String, input: InputStream): VariantWitnessGraph {
         val siglum = rawSiglum.normalizedSiglum()
@@ -115,13 +115,13 @@ class XMLImporter {
         val tagName = startElement.name.toString()
         val markup = Markup(tagName).setDepth(context.openMarkup.size)
         startElement
-                .attributes
-                .forEachRemaining { attr: Any ->
-                    val attribute = attr as Attribute
-                    val attributeName = attribute.name.toString()
-                    val attributeValue = attribute.value
-                    markup.addAttribute(attributeName, attributeValue)
-                }
+            .attributes
+            .forEachRemaining { attr: Any ->
+                val attribute = attr as Attribute
+                val attributeName = attribute.name.toString()
+                val attributeValue = attribute.value
+                markup.addAttribute(attributeName, attributeValue)
+            }
         context.openMarkup(markup)
     }
 
@@ -140,42 +140,45 @@ class XMLImporter {
     }
 
     private fun handleNotationDeclaration(event: XMLEvent, context: Context): Unit =
-            throw RuntimeException("unexpected event: NotationDeclaration")
+        throw RuntimeException("unexpected event: NotationDeclaration")
 
     private fun handleEntityDeclaration(event: XMLEvent, context: Context): Unit =
-            throw RuntimeException("unexpected event: EntityDeclaration")
+        throw RuntimeException("unexpected event: EntityDeclaration")
 
     private fun handleNameSpace(event: XMLEvent, context: Context): Unit =
-            throw RuntimeException("unexpected event: NameSpace")
+        throw RuntimeException("unexpected event: NameSpace")
 
     private fun handleCData(event: XMLEvent, context: Context): Unit = throw RuntimeException("unexpected event: CData")
 
     private fun handleDTD(event: XMLEvent, context: Context): Unit = throw RuntimeException("unexpected event: DTD")
 
     private fun handleAttribute(event: XMLEvent, context: Context): Unit =
-            throw RuntimeException("unexpected event: Attribute")
+        throw RuntimeException("unexpected event: Attribute")
 
     private fun handleEntityReference(event: XMLEvent, context: Context): Unit =
-            throw RuntimeException("unexpected event: EntityReference")
+        throw RuntimeException("unexpected event: EntityReference")
 
     private fun handleSpace(event: XMLEvent, context: Context): Unit = throw RuntimeException("unexpected event: Space")
 
     private fun handleComment(event: XMLEvent, context: Context) {}
 
     private fun handleProcessingInstruction(event: XMLEvent, context: Context): Unit =
-            throw RuntimeException("unexpected event: ProcessingInstruction")
+        throw RuntimeException("unexpected event: ProcessingInstruction")
 
     private class Context(
-            private val graph: VariantWitnessGraph, // tokenvertex after the </del> yet
-            private val normalizer: Function<String, String>,
-            private val witness: SimpleWitness
+        private val graph: VariantWitnessGraph, // tokenvertex after the </del> yet
+        private val normalizer: Function<String, String>,
+        private val witness: SimpleWitness
     ) {
         val openMarkup: Deque<Markup> = LinkedList()
         private var lastTokenVertex: TokenVertex
         private var tokenCounter = 0L
-        private val variationStartVertices: Deque<TokenVertex> = LinkedList() // the tokenvertices whose outgoing vertices are the variant vertices
-        private val variationEndVertices: Deque<TokenVertex> = LinkedList() // the tokenvertices that are the last in a <del>
-        private val unconnectedVertices: Deque<TokenVertex> = LinkedList() // the last tokenvertex in an <add> which hasn't been linked to the
+        private val variationStartVertices: Deque<TokenVertex> =
+            LinkedList() // the tokenvertices whose outgoing vertices are the variant vertices
+        private val variationEndVertices: Deque<TokenVertex> =
+            LinkedList() // the tokenvertices that are the last in a <del>
+        private val unconnectedVertices: Deque<TokenVertex> =
+            LinkedList() // the last tokenvertex in an <add> which hasn't been linked to the
         private var rdg: String? = ""
         private var parentXPath: String = ""
         private var afterDel = false
@@ -291,8 +294,11 @@ class XMLImporter {
                     branchIds.pop()
                 }
                 inSubst() -> {
-                    unconnectedSubstVerticesStack.peek().add(lastTokenVertex)
-                    afterImmediateDel = markup.isVariationStartingMarkup() && "true" == firstToClose.attributeMap["instant"]
+                    afterImmediateDel =
+                        markup.isVariationStartingMarkup() && "true" == firstToClose.attributeMap["instant"]
+                    if (!afterImmediateDel) {
+                        unconnectedSubstVerticesStack.peek().add(lastTokenVertex)
+                    }
                     branchIds.pop()
                 }
             }
@@ -307,26 +313,25 @@ class XMLImporter {
         private fun notInApp() = !inAppStack.peek()
 
         private fun Markup.isLitRdg(): Boolean =
-                "lit" == getAttributeValue("type").orElse("")
+            "lit" == getAttributeValue("type").orElse("")
 
         fun addNewToken(content: String) {
             if (ignoreRdgStack.peek()) {
                 return
             }
             val token = MarkedUpToken()
-                    .withContent(content)
-                    .withWitness(witness)
-                    .withRdg(rdg!!)
-                    .withIndexNumber(tokenCounter++)
-                    .withParentXPath(parentXPath)
-                    .withNormalizedContent(normalizer.apply(content))
+                .withContent(content)
+                .withWitness(witness)
+                .withRdg(rdg!!)
+                .withIndexNumber(tokenCounter++)
+                .withParentXPath(parentXPath)
+                .withNormalizedContent(normalizer.apply(content))
             val tokenVertex = SimpleTokenVertex(token)
             tokenVertex.branchPath = branchIds.descendingIterator().asSequence().toList()
+            graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex)
             if (afterImmediateDel) {
-                graph.addOutgoingTokenVertexToTokenVertex(variationStartVertices.peek(), tokenVertex)
                 afterImmediateDel = false
-            } else {
-                graph.addOutgoingTokenVertexToTokenVertex(lastTokenVertex, tokenVertex)
+                afterDel = false
             }
             if (afterDel) { // del without add
                 // add link from vertex preceding the <del> to vertex following </del>
@@ -337,19 +342,19 @@ class XMLImporter {
             }
             while (afterAppStack.peek()) {
                 unconnectedRdgVerticesStack.pop()
-                        .filter { v: TokenVertex -> v != lastTokenVertex }
-                        .forEach { v: TokenVertex -> graph.addOutgoingTokenVertexToTokenVertex(v, tokenVertex) }
+                    .filter { v: TokenVertex -> v != lastTokenVertex }
+                    .forEach { v: TokenVertex -> graph.addOutgoingTokenVertexToTokenVertex(v, tokenVertex) }
                 afterAppStack.pop()
             }
             while (afterSubstStack.peek()) {
                 unconnectedSubstVerticesStack.pop()
-                        .filter { v: TokenVertex -> v != lastTokenVertex }
-                        .forEach { v: TokenVertex -> graph.addOutgoingTokenVertexToTokenVertex(v, tokenVertex) }
+                    .filter { v: TokenVertex -> v != lastTokenVertex }
+                    .forEach { v: TokenVertex -> graph.addOutgoingTokenVertexToTokenVertex(v, tokenVertex) }
                 afterSubstStack.pop()
             }
             openMarkup
-                    .descendingIterator()
-                    .forEachRemaining { markup: Markup -> graph.addMarkupToTokenVertex(tokenVertex, markup) }
+                .descendingIterator()
+                .forEachRemaining { markup: Markup -> graph.addMarkupToTokenVertex(tokenVertex, markup) }
             checkUnconnectedVertices(tokenVertex)
             lastTokenVertex = tokenVertex
         }
@@ -380,35 +385,35 @@ class XMLImporter {
                 graph.addOutgoingTokenVertexToTokenVertex(variationStartVertices.pop(), endTokenVertex)
             }
             (unconnectedSubstVerticesStack + unconnectedRdgVerticesStack)
-                    .flatten()
-                    .filter { v: TokenVertex -> v != lastTokenVertex }
-                    .forEach { v: TokenVertex -> graph.addOutgoingTokenVertexToTokenVertex(v, endTokenVertex) }
+                .flatten()
+                .filter { v: TokenVertex -> v != lastTokenVertex }
+                .forEach { v: TokenVertex -> graph.addOutgoingTokenVertexToTokenVertex(v, endTokenVertex) }
             unconnectedSubstVerticesStack.clear()
             unconnectedRdgVerticesStack.clear()
         }
 
         private fun buildParentXPath(): String =
-                "/" + openMarkup.reversed().joinToString("/") { it.xpathNode() }
+            "/" + openMarkup.reversed().joinToString("/") { it.xpathNode() }
 
         private fun Markup.xpathNode(): String =
-                when (this.tagName) {
-                    "rdg" -> {
-                        val identifyingAttribute = this.attributeMap.keys.filter { it in rdgIdentifyingAttributes }
-                        if (identifyingAttribute.isEmpty()) {
-                            "rdg"
-                        } else {
-                            val attr = identifyingAttribute[0]
-                            val value = this.attributeMap[attr]
-                            "rdg[@$attr='$value']"
-                        }
+            when (this.tagName) {
+                "rdg" -> {
+                    val identifyingAttribute = this.attributeMap.keys.filter { it in rdgIdentifyingAttributes }
+                    if (identifyingAttribute.isEmpty()) {
+                        "rdg"
+                    } else {
+                        val attr = identifyingAttribute[0]
+                        val value = this.attributeMap[attr]
+                        "rdg[@$attr='$value']"
                     }
-                    "del" -> {
-                        if (this.attributeMap["instant"] == "true") {
-                            INSTANT_DEL_XPATH_NODE
-                        } else this.tagName
-                    }
-                    else -> this.tagName
                 }
+                "del" -> {
+                    if (this.attributeMap["instant"] == "true") {
+                        INSTANT_DEL_XPATH_NODE
+                    } else this.tagName
+                }
+                else -> this.tagName
+            }
 
         init {
             lastTokenVertex = graph.startTokenVertex
