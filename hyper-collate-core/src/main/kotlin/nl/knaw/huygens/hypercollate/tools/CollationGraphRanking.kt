@@ -44,7 +44,7 @@ class CollationGraphRanking : Iterable<Set<TextNode>>, Function<TextNode, Int> {
                 for (incomingTextEdge in graph.getIncomingTextEdgeList(textNode)) {
                     val incomingTextNode = graph.getSource(incomingTextEdge)
                     rank = max(rank, ranking.byNode[incomingTextNode] ?: -1)
-                    if (incomingTextNode.isImmediateDel() && rank == ranking.byNode[incomingTextNode]) {
+                    if ((incomingTextNode.isImmediateDel() || incomingTextNode.isWhitespace()) && rank == ranking.byNode[incomingTextNode]) {
                         rank -= 1
                     }
                 }
@@ -86,5 +86,13 @@ private fun Node.isImmediateDel(): Boolean =
         sigla.map { tokenForSiglum(it) }
             .filterIsInstance<MarkedUpToken>()
             .any { it.parentXPath.contains("@instant=") }
+    } else
+        false
+
+private fun Node.isWhitespace(): Boolean =
+    if (this is TextNode) {
+        sigla.map { tokenForSiglum(it) }
+            .filterIsInstance<MarkedUpToken>()
+            .all { it.content.isNotEmpty() && it.content.isBlank() }
     } else
         false

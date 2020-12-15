@@ -64,7 +64,7 @@ object CollationGraphVisualizer {
             }
             sigla.forEach { siglum: String ->
                 val tokens: List<MarkedUpToken> = nodeTokensPerWitness[siglum]!!
-                maxLayers[siglum] = max(maxLayers[siglum]!!, tokens.size)
+                maxLayers[siglum] = max(maxLayers[siglum]!!, tokens.filter { it.content.isNotBlank() }.size)
                 val cell = tokens.toCell(whitespaceCharacter)
                 rowMap[siglum]!!.add(cell)
             }
@@ -87,27 +87,30 @@ object CollationGraphVisualizer {
         if (isEmpty()) {
             cell.addLayer(" ")
         } else {
-            sortedBy { it.indexNumber }.reversed().forEach { token: MarkedUpToken ->
-                var content = token.content.replace("\n".toRegex(), " ")
-                    .replace(" +".toRegex(), whitespaceCharacter)
-                val parentXPath = token.parentXPath
-                when {
-                    parentXPath.endsWith("/del/add") -> content = "[-+] $content"
-                    parentXPath.endsWith("/add") -> content = "[+] $content"
-                    parentXPath.endsWith("/del") -> content = "[-] $content"
-                    parentXPath.endsWith("/$INSTANT_DEL_XPATH_NODE") -> content = "[-] $content"
+            sortedBy { it.indexNumber }
+                .reversed()
+                .filter { it.content.isEmpty() || it.content.isNotBlank() }
+                .forEach { token: MarkedUpToken ->
+                    var content = token.content.replace("\n".toRegex(), " ")
+                        .replace(" +".toRegex(), whitespaceCharacter)
+                    val parentXPath = token.parentXPath
+                    when {
+                        parentXPath.endsWith("/del/add") -> content = "[-+] $content"
+                        parentXPath.endsWith("/add") -> content = "[+] $content"
+                        parentXPath.endsWith("/del") -> content = "[-] $content"
+                        parentXPath.endsWith("/$INSTANT_DEL_XPATH_NODE") -> content = "[-] $content"
+                        //        String layerName = determineLayerName(parentXPath);
+                    }
+                    if (parentXPath.contains("/rdg")) {
+                        val rdg = token.rdg
+                        content = "<$rdg> $content".replace(">\\s+\\[".toRegex(), ">[")
+                    }
+                    if (content.isEmpty()) {
+                        content = "<" + parentXPath.replace(".*/".toRegex(), "") + "/>"
+                    }
                     //        String layerName = determineLayerName(parentXPath);
+                    cell.addLayer(content)
                 }
-                if (parentXPath.contains("/rdg")) {
-                    val rdg = token.rdg
-                    content = "<$rdg> $content".replace(">\\s+\\[".toRegex(), ">[")
-                }
-                if (content.isEmpty()) {
-                    content = "<" + parentXPath.replace(".*/".toRegex(), "") + "/>"
-                }
-                //        String layerName = determineLayerName(parentXPath);
-                cell.addLayer(content)
-            }
         }
         return cell
     }
@@ -202,8 +205,8 @@ object CollationGraphVisualizer {
                 cells[siglum]!! += when {
                     groupedByParentXPath.size == 1 ->
                         groupedByParentXPath.values
-                        .flatten()
-                        .tokenListToHtml(whitespaceCharacter, matchingTokens)
+                            .flatten()
+                            .tokenListToHtml(whitespaceCharacter, matchingTokens)
 
                     groupedByParentXPath.size > 1 -> { // we have textual variation
                         val keys = groupedByParentXPath.keys.toList()
@@ -258,7 +261,8 @@ object CollationGraphVisualizer {
         whitespaceCharacter: String,
         matchingTokens: MutableList<MarkedUpToken>
     ): String =
-        joinToString("&nbsp;") { it.toHtml(whitespaceCharacter, it in matchingTokens) }
+        this.filter { it.content.isEmpty() || it.content.isNotBlank() }
+            .joinToString("&nbsp;") { it.toHtml(whitespaceCharacter, it in matchingTokens) }
 
     private fun MarkedUpToken.toHtml(whitespaceCharacter: String, isMatch: Boolean): String {
         var asHtml = content.replace(" ", whitespaceCharacter)
