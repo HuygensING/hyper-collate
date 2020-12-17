@@ -24,6 +24,8 @@ import de.vandermeer.asciitable.AsciiTable
 import de.vandermeer.asciitable.CWC_LongestLine
 import de.vandermeer.skb.interfaces.transformers.textformat.TextAlignment
 import nl.knaw.huygens.hypercollate.importer.INSTANT_DEL_XPATH_NODE
+import nl.knaw.huygens.hypercollate.importer.SEQ0_DEL_XPATH_NODE
+import nl.knaw.huygens.hypercollate.importer.TYPE_IMMEDIATE_DEL_XPATH_NODE
 import nl.knaw.huygens.hypercollate.model.CollationGraph
 import nl.knaw.huygens.hypercollate.model.MarkedUpToken
 import nl.knaw.huygens.hypercollate.model.TextNode
@@ -99,6 +101,8 @@ object CollationGraphVisualizer {
                         parentXPath.endsWith("/add") -> content = "[+] $content"
                         parentXPath.endsWith("/del") -> content = "[-] $content"
                         parentXPath.endsWith("/$INSTANT_DEL_XPATH_NODE") -> content = "[-] $content"
+                        parentXPath.endsWith("/$SEQ0_DEL_XPATH_NODE") -> content = "[-] $content"
+                        parentXPath.endsWith("/$TYPE_IMMEDIATE_DEL_XPATH_NODE") -> content = "[-] $content"
                         //        String layerName = determineLayerName(parentXPath);
                     }
                     if (parentXPath.contains("/rdg")) {
@@ -197,10 +201,9 @@ object CollationGraphVisualizer {
                 val groupedByParentXPath = nodeTokensPerWitness[siglum]!!
                     .sortedBy { it.indexNumber }
                     .groupBy {
-                        it.parentXPath.replace(
-                            "/$INSTANT_DEL_XPATH_NODE",
-                            ""
-                        )
+                        it.parentXPath.replace("/$INSTANT_DEL_XPATH_NODE", "")
+                            .replace("/$TYPE_IMMEDIATE_DEL_XPATH_NODE", "")
+                            .replace("/$SEQ0_DEL_XPATH_NODE", "")
                     } // since instant deletions should be on the same line as the text after
                 cells[siglum]!! += when {
                     groupedByParentXPath.size == 1 ->
@@ -286,9 +289,10 @@ object CollationGraphVisualizer {
     fun toDot(
         graph: CollationGraph,
         emphasizeWhitespace: Boolean,
-        hideMarkup: Boolean
+        hideMarkup: Boolean,
+        horizontal: Boolean = false
     ): String =
-        DotFactory(emphasizeWhitespace).fromCollationGraph(graph, hideMarkup)
+        DotFactory(emphasizeWhitespace).fromCollationGraph(graph, hideMarkup, horizontal)
 
     class Cell {
         val layerContent: MutableList<String> = ArrayList()

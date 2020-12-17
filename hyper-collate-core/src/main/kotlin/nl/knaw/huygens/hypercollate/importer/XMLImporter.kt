@@ -35,6 +35,8 @@ import javax.xml.stream.XMLStreamException
 import javax.xml.stream.events.*
 
 const val INSTANT_DEL_XPATH_NODE = "del[@instant='true']"
+const val SEQ0_DEL_XPATH_NODE = "del[@seq='0']"
+const val TYPE_IMMEDIATE_DEL_XPATH_NODE = "del[@type='immediate']"
 
 class XMLImporter {
 
@@ -273,7 +275,7 @@ class XMLImporter {
                     unconnectedVertices.push(lastTokenVertex)
                     branchIds.pop()
                     afterDel = true
-                    afterImmediateDel = "true" == markup.attributeMap["instant"]
+                    afterImmediateDel = firstToClose.isImmediateDeletion()
                 }
                 notInAppOrSubst() && markup.isVariationEndingMarkup() -> {
                     variationEndVertices.push(lastTokenVertex)
@@ -295,7 +297,7 @@ class XMLImporter {
                 }
                 inSubst() -> {
                     afterImmediateDel =
-                        markup.isVariationStartingMarkup() && "true" == firstToClose.attributeMap["instant"]
+                        markup.isVariationStartingMarkup() && firstToClose.isImmediateDeletion()
                     if (!afterImmediateDel) {
                         unconnectedSubstVerticesStack.peek().add(lastTokenVertex)
                     }
@@ -303,6 +305,11 @@ class XMLImporter {
                 }
             }
         }
+
+        private fun Markup.isImmediateDeletion() =
+            "true" == attributeMap["instant"]
+                    || "0" == attributeMap["seq"]
+                    || "immediate" == attributeMap["type"]
 
         private fun notInAppOrSubst() = notInApp() && notInSubst()
 
@@ -408,9 +415,18 @@ class XMLImporter {
                     }
                 }
                 "del" -> {
-                    if (this.attributeMap["instant"] == "true") {
-                        INSTANT_DEL_XPATH_NODE
-                    } else this.tagName
+                    when {
+                        this.attributeMap["instant"] == "true" -> {
+                            INSTANT_DEL_XPATH_NODE
+                        }
+                        this.attributeMap["seq"] == "0" -> {
+                            SEQ0_DEL_XPATH_NODE
+                        }
+                        this.attributeMap["type"] == "immediate" -> {
+                            TYPE_IMMEDIATE_DEL_XPATH_NODE
+                        }
+                        else -> this.tagName
+                    }
                 }
                 else -> this.tagName
             }

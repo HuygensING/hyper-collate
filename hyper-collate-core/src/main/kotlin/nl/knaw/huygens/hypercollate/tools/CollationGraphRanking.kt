@@ -20,6 +20,9 @@ package nl.knaw.huygens.hypercollate.tools
  * #L%
  */
 
+import nl.knaw.huygens.hypercollate.importer.INSTANT_DEL_XPATH_NODE
+import nl.knaw.huygens.hypercollate.importer.SEQ0_DEL_XPATH_NODE
+import nl.knaw.huygens.hypercollate.importer.TYPE_IMMEDIATE_DEL_XPATH_NODE
 import nl.knaw.huygens.hypercollate.model.*
 import java.util.*
 import java.util.function.Function
@@ -85,7 +88,11 @@ private fun Node.isImmediateDel(): Boolean =
     if (this is TextNode) {
         sigla.map { tokenForSiglum(it) }
             .filterIsInstance<MarkedUpToken>()
-            .any { it.parentXPath.contains("@instant=") }
+            .any {
+                it.parentXPath.contains(INSTANT_DEL_XPATH_NODE)
+                        || it.parentXPath.contains(SEQ0_DEL_XPATH_NODE)
+                        || it.parentXPath.contains(TYPE_IMMEDIATE_DEL_XPATH_NODE)
+            }
     } else
         false
 
