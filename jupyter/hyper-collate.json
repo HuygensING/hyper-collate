@@ -20,7 +20,7 @@
     "HC.init()",
     "fun VariantWitnessGraph.show(colored: Boolean = true, join: Boolean = true, emphasizeWhitespace: Boolean = false) = MIME(this.asSVGPair(colored, join, emphasizeWhitespace))",
     "fun CollationGraph.asHtml(join: Boolean = true, emphasizeWhitespace: Boolean = false) = HTML(this.asHTMLString(join, emphasizeWhitespace))",
-    "fun CollationGraph.show(join: Boolean = true, emphasizeWhitespace: Boolean = false) = MIME(this.asSVGPair(join, emphasizeWhitespace))",
+    "fun CollationGraph.show(join: Boolean = true, emphasizeWhitespace: Boolean = false, hideMarkup: Boolean = false, horizontal: Boolean = false) = MIME(this.asSVGPair(join, emphasizeWhitespace, hideMarkup, horizontal))",
     "DISPLAY(HTML(\"<style>div.output_area pre {white-space: pre;} .rendered_html td {border: 1px solid; text-align: left}</style>\"))"
   ],
   "initCell": [

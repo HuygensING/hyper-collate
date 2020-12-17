@@ -31,85 +31,96 @@ import nl.knaw.huygens.hypercollate.tools.TokenMerger.joined
 private val dotEngine = DotEngine()
 
 fun VariantWitnessGraph.asSVGPair(
-        colored: Boolean = true,
-        join: Boolean = false,
-        emphasizeWhitespace: Boolean = false
+    colored: Boolean = true,
+    join: Boolean = false,
+    emphasizeWhitespace: Boolean = false
 ): Pair<String, String> =
-        asRenderPair(colored, join, emphasizeWhitespace, OutputFormat.SVG())
+    asRenderPair(colored, join, emphasizeWhitespace, OutputFormat.SVG())
 
 fun VariantWitnessGraph.asPNGPair(
-        colored: Boolean = true,
-        join: Boolean = false,
-        emphasizeWhitespace: Boolean = false
+    colored: Boolean = true,
+    join: Boolean = false,
+    emphasizeWhitespace: Boolean = false
 ): Pair<String, String> =
-        asRenderPair(colored, join, emphasizeWhitespace, OutputFormat.PNG())
+    asRenderPair(colored, join, emphasizeWhitespace, OutputFormat.PNG())
 
 fun VariantWitnessGraph.asDot(
-        join: Boolean = false,
-        emphasizeWhitespace: Boolean = false
+    join: Boolean = false,
+    emphasizeWhitespace: Boolean = false
 ): String =
-        DotFactory(emphasizeWhitespace).fromVariantWitnessGraphSimple(this.optionallyJoined(join))
+    DotFactory(emphasizeWhitespace).fromVariantWitnessGraphSimple(this.optionallyJoined(join))
 
 private fun VariantWitnessGraph.optionallyJoined(join: Boolean): VariantWitnessGraph =
-        if (join)
-            this.joined()
-        else
-            this
+    if (join)
+        this.joined()
+    else
+        this
 
 fun VariantWitnessGraph.asColoredDot(
-        join: Boolean = false,
-        emphasizeWhitespace: Boolean = false
+    join: Boolean = false,
+    emphasizeWhitespace: Boolean = false
 ): String =
-        DotFactory(emphasizeWhitespace).fromVariantWitnessGraphColored(this.optionallyJoined(join))
+    DotFactory(emphasizeWhitespace).fromVariantWitnessGraphColored(this.optionallyJoined(join))
 
-fun CollationGraph.asTable(format: TableFormat = TableFormat.ASCII, join: Boolean = false, emphasizeWhitespace: Boolean = false): String =
-        when (format) {
-            is TableFormat.ASCII -> this.asASCIITable(join, emphasizeWhitespace)
-            is TableFormat.HTML -> this.asHTMLString(join, emphasizeWhitespace)
-        }
+fun CollationGraph.asTable(
+    format: TableFormat = TableFormat.ASCII,
+    join: Boolean = false,
+    emphasizeWhitespace: Boolean = false
+): String =
+    when (format) {
+        is TableFormat.ASCII -> this.asASCIITable(join, emphasizeWhitespace)
+        is TableFormat.HTML -> this.asHTMLString(join, emphasizeWhitespace)
+    }
 
 fun CollationGraph.asASCIITable(join: Boolean = true, emphasizeWhitespace: Boolean = false): String =
-        CollationGraphVisualizer.toTableASCII(this.optionallyJoined(join), emphasizeWhitespace)
+    CollationGraphVisualizer.toTableASCII(this.optionallyJoined(join), emphasizeWhitespace)
 
 fun CollationGraph.asHTMLString(join: Boolean = true, emphasizeWhitespace: Boolean = false): String =
-        CollationGraphVisualizer.toTableHTML(this.optionallyJoined(join), emphasizeWhitespace)
+    CollationGraphVisualizer.toTableHTML(this.optionallyJoined(join), emphasizeWhitespace)
 
 fun CollationGraph.asSVGPair(
-        join: Boolean = false,
-        emphasizeWhitespace: Boolean = false
+    join: Boolean = false,
+    emphasizeWhitespace: Boolean = false,
+    hideMarkup: Boolean = false,
+    horizontal: Boolean = false
 ): Pair<String, String> =
-        asRenderPair(join, emphasizeWhitespace, OutputFormat.SVG())
+    asRenderPair(join, emphasizeWhitespace, hideMarkup, horizontal, OutputFormat.SVG())
 
 fun CollationGraph.asPNGPair(
-        join: Boolean = false,
-        emphasizeWhitespace: Boolean = false
+    join: Boolean = false,
+    emphasizeWhitespace: Boolean = false,
+    hideMarkup: Boolean = false,
+    horizontal: Boolean = false
 ): Pair<String, String> =
-        asRenderPair(join, emphasizeWhitespace, OutputFormat.PNG())
+    asRenderPair(join, emphasizeWhitespace, hideMarkup, horizontal, OutputFormat.PNG())
 
 fun CollationGraph.asRenderPair(
-        join: Boolean,
-        emphasizeWhitespace: Boolean,
-        format: OutputFormat
+    join: Boolean,
+    emphasizeWhitespace: Boolean,
+    hideMarkup: Boolean,
+    horizontal: Boolean,
+    format: OutputFormat
 ): Pair<String, String> {
-    val dot: String = asDot(join, emphasizeWhitespace, false)
+    val dot: String = asDot(join, emphasizeWhitespace, hideMarkup, horizontal)
     return renderDot(dot, format)
 }
 
 fun CollationGraph.asDot(
-        join: Boolean = false,
-        emphasizeWhitespace: Boolean = false,
-        hideMarkup: Boolean = false
+    join: Boolean = false,
+    emphasizeWhitespace: Boolean = false,
+    hideMarkup: Boolean = false,
+    horizontal: Boolean = false
 ): String =
-        CollationGraphVisualizer.toDot(this.optionallyJoined(join), emphasizeWhitespace, hideMarkup)
+    CollationGraphVisualizer.toDot(this.optionallyJoined(join), emphasizeWhitespace, hideMarkup, horizontal)
 
 private fun CollationGraph.optionallyJoined(join: Boolean): CollationGraph =
-        if (join) {
-            CollationGraphNodeJoiner.join(this)
-        } else this
+    if (join) {
+        CollationGraphNodeJoiner.join(this)
+    } else this
 
 fun renderDot(
-        dot: String,
-        format: OutputFormat
+    dot: String,
+    format: OutputFormat
 ): Pair<String, String> {
     val rendered = dotEngine.renderAs(format.extension, dot)
     return Pair(format.mimeType, rendered)
@@ -126,10 +137,10 @@ sealed class TableFormat {
 }
 
 fun VariantWitnessGraph.asRenderPair(
-        colored: Boolean,
-        join: Boolean,
-        emphasizeWhitespace: Boolean,
-        format: OutputFormat
+    colored: Boolean,
+    join: Boolean,
+    emphasizeWhitespace: Boolean,
+    format: OutputFormat
 ): Pair<String, String> {
     val dot: String = if (colored) {
         asColoredDot(join, emphasizeWhitespace)

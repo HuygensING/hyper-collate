@@ -163,8 +163,11 @@ class DotFactory(emphasizeWhitespace: Boolean) {
 
     }
 
-    fun fromCollationGraph(collation: CollationGraph, hideMarkup: Boolean): String {
+    fun fromCollationGraph(collation: CollationGraph, hideMarkup: Boolean, horizontal: Boolean): String {
         val dotBuilder = StringBuilder("digraph CollationGraph{\nlabelloc=b\n")
+        if (horizontal){
+            dotBuilder.append("graph [rankdir=LR]\n")
+        }
         val nodeIdentifiers: MutableMap<TextNode, String> = HashMap()
         val nodes = collation.traverseTextNodes().sortedWith(TextNodeComparator())
         for (i in nodes.indices) {

@@ -85,6 +85,7 @@ public class CollationsResource {
   private static final String APIPARAM_XML = "Witness Source (XML)";
   private static final String EMPHASIZE_WHITESPACE = "emphasize-whitespace";
   private static final String HIDE_MARKUP = "hide-markup";
+  private static final String HORIZONTAL = "horizontal";
   private static final String JOIN_TOKENS = "join-tokens";
 
   private static final String IMAGE_PNG = "image/png";
@@ -267,8 +268,9 @@ public class CollationsResource {
   public Response getDotVisualization(
       @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,
       @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace,
-      @DefaultValue(FALSE) @QueryParam(HIDE_MARKUP) final boolean hideMarkup) {
-    String dot = getDot(name, emphasizeWhitespace, hideMarkup);
+      @DefaultValue(FALSE) @QueryParam(HIDE_MARKUP) final boolean hideMarkup,
+      @DefaultValue(FALSE) @QueryParam(HORIZONTAL) final boolean horizontal) {
+    String dot = getDot(name, emphasizeWhitespace, hideMarkup, horizontal);
     return Response.ok(dot).build();
   }
 
@@ -282,8 +284,9 @@ public class CollationsResource {
   public Response getSVGVisualization(
       @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,
       @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace,
-      @DefaultValue(FALSE) @QueryParam(HIDE_MARKUP) final boolean hideMarkup) {
-    return getCollationGraphVisualization(name, emphasizeWhitespace, hideMarkup, SVG);
+      @DefaultValue(FALSE) @QueryParam(HIDE_MARKUP) final boolean hideMarkup,
+      @DefaultValue(FALSE) @QueryParam(HORIZONTAL) final boolean horizontal) {
+    return getCollationGraphVisualization(name, emphasizeWhitespace, hideMarkup, horizontal, SVG);
   }
 
   @GET
@@ -296,8 +299,9 @@ public class CollationsResource {
   public Response getPNGVisualization(
       @ApiParam(APIPARAM_NAME) @PathParam(PATHPARAM_NAME) final String name,
       @DefaultValue(FALSE) @QueryParam(EMPHASIZE_WHITESPACE) final boolean emphasizeWhitespace,
-      @DefaultValue(FALSE) @QueryParam(HIDE_MARKUP) final boolean hideMarkup) {
-    return getCollationGraphVisualization(name, emphasizeWhitespace, hideMarkup, PNG);
+      @DefaultValue(FALSE) @QueryParam(HIDE_MARKUP) final boolean hideMarkup,
+      @DefaultValue(FALSE) @QueryParam(HORIZONTAL) final boolean horizontal) {
+    return getCollationGraphVisualization(name, emphasizeWhitespace, hideMarkup, horizontal, PNG);
   }
 
   @GET
@@ -376,8 +380,8 @@ public class CollationsResource {
   }
 
   private Response getCollationGraphVisualization(
-      String name, boolean emphasizeWhitespace, boolean hideMarkup, String format) {
-    String dot = getDot(name, emphasizeWhitespace, hideMarkup);
+      String name, boolean emphasizeWhitespace, boolean hideMarkup, boolean horizontal, String format) {
+    String dot = getDot(name, emphasizeWhitespace, hideMarkup, horizontal);
     return renderDotAs(dot, format);
   }
 
@@ -393,9 +397,9 @@ public class CollationsResource {
     return Response.ok(stream).build();
   }
 
-  private String getDot(String name, boolean emphasizeWhitespace, boolean hideMarkup) {
+  private String getDot(String name, boolean emphasizeWhitespace, boolean hideMarkup, boolean horizontal) {
     CollationGraph collation = getExistingCollationGraph(name);
-    return CollationGraphVisualizer.toDot(collation, emphasizeWhitespace, hideMarkup);
+    return CollationGraphVisualizer.toDot(collation, emphasizeWhitespace, hideMarkup, horizontal);
   }
 
   private Response renderWitnessGraphAs(
