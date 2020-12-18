@@ -1,0 +1,2 @@
+#!/bin/bash
+cp jupyter/hyper-collate.json /srv/conda/envs/notebook/lib/python3.6/site-packages/run_kotlin_kernel/libraries/
