@@ -227,24 +227,6 @@ object CollationGraphVisualizer {
                     }
                     else -> ""
                 }
-//                cells[siglum] ?: error("") += nodeTokensPerWitness[siglum]!!
-//                    .sortedBy { it.indexNumber }
-//                    .joinToString("&nbsp;") {
-//                        var asHtml = it.content.replace(" ", whitespaceCharacter)
-//                        if (it.parentXPath.contains("app/rdg")) {
-//                            asHtml += "<br/>"
-//                        }
-//                        if (it in matchingTokens) {
-//                            asHtml = "<span style=\"background-color:lightblue\">$asHtml</span>"
-//                        }
-//                        when {
-//                            it.parentXPath.endsWith("/del/add") -> "<sup><sup>$asHtml</sup></sup>"
-//                            it.parentXPath.endsWith("/add/del") -> "<sup><del>$asHtml</del></sup>"
-//                            it.parentXPath.endsWith("/add") -> "<sup>$asHtml</sup>"
-//                            it.parentXPath.endsWith("/del") -> "<del>$asHtml</del>"
-//                            else -> asHtml
-//                        }
-//                    }
             }
         }
 

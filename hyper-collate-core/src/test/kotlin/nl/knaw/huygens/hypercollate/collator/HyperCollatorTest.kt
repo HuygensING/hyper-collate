@@ -49,11 +49,12 @@ class HyperCollatorTest {
         fun trd_665() {
             val importer = XMLImporter()
             val wA = importer.importXML(
-                    "A",
+                "A",
                 """<xml>Des objets en voie de disparition je détourne <subst><del>les yeux</del><add><del instant="true">les</del> mes regards</add></subst> bien à l'avance.</xml>"""
             )
             val wB = importer.importXML(
-                    "B", "<xml>c'est bien à l'avance que je détourne mes regards.</xml>")
+                "B", "<xml>c'est bien à l'avance que je détourne mes regards.</xml>"
+            )
             log.info("wA={}", wA.asDot())
             val expectedDot = """
                 digraph CollationGraph{
@@ -115,9 +116,11 @@ class HyperCollatorTest {
         fun trd_642_0() {
             val importer = XMLImporter()
             val wA = importer.importXML(
-                    "A", "<e>well <subst><add>at his own pace</add><del>in his own way</del></subst>.</e>")
+                "A", "<e>well <subst><add>at his own pace</add><del>in his own way</del></subst>.</e>"
+            )
             val wB = importer.importXML(
-                    "B", "<e>well at his own gait.</e>")
+                "B", "<e>well at his own gait.</e>"
+            )
             log.info("wA={}", wA.asDot())
             val expectedDot = """
                 digraph CollationGraph{
@@ -162,9 +165,12 @@ class HyperCollatorTest {
         fun trd_642_1a() {
             val importer = XMLImporter()
             val w1 = importer.importXML(
-                    "1", "<root>a long <subst><add>text that is very long</add><del>text that is different</del></subst></root>")
+                "1",
+                "<root>a long <subst><add>text that is very long</add><del>text that is different</del></subst></root>"
+            )
             val w2 = importer.importXML(
-                    "2", "<root>a long text that is very long</root>")
+                "2", "<root>a long text that is very long</root>"
+            )
             val expectedDot = """
                 digraph CollationGraph{
                 labelloc=b
@@ -197,9 +203,12 @@ class HyperCollatorTest {
         fun trd_642_1b() {
             val importer = XMLImporter()
             val w1 = importer.importXML(
-                    "1", "<root>a long <subst><del>text that is different</del><add>text that is very long</add></subst></root>")
+                "1",
+                "<root>a long <subst><del>text that is different</del><add>text that is very long</add></subst></root>"
+            )
             val w2 = importer.importXML(
-                    "2", "<root>a long text that is very long</root>")
+                "2", "<root>a long text that is very long</root>"
+            )
             val expectedDot = """
                 digraph CollationGraph{
                 labelloc=b
@@ -236,9 +245,12 @@ class HyperCollatorTest {
         fun trd_642_2() {
             val importer = XMLImporter()
             val w1 = importer.importXML(
-                    "1", "<root>Cookie Monster <subst><add>wants chocolate cookies</add><del>eating carrots</del></subst></root>")
+                "1",
+                "<root>Cookie Monster <subst><add>wants chocolate cookies</add><del>eating carrots</del></subst></root>"
+            )
             val w2 = importer.importXML(
-                    "2", "<root>Cookie Monster wants chocolate cookies eating carrots</root>")
+                "2", "<root>Cookie Monster wants chocolate cookies eating carrots</root>"
+            )
             val expectedDot = """
                 digraph CollationGraph{
                 labelloc=b
@@ -276,10 +288,13 @@ class HyperCollatorTest {
         fun trd_642_3() {
             val importer = XMLImporter()
             val w1 = importer.importXML(
-                    "1", "<root>a b <subst><add>c d e<subst><add>f g h</add><del>bla die bla</del></subst></add><del>f g</del></subst></root>")
+                "1",
+                "<root>a b <subst><add>c d e<subst><add>f g h</add><del>bla die bla</del></subst></add><del>f g</del></subst></root>"
+            )
             log.info("w1={}", w1.asDot())
             val w2 = importer.importXML(
-                    "2", "<root>a b c d e f g h</root>")
+                "2", "<root>a b c d e f g h</root>"
+            )
             val expectedDot = """
                 digraph CollationGraph{
                 labelloc=b
@@ -323,9 +338,11 @@ class HyperCollatorTest {
         fun trd_642_4() {
             val importer = XMLImporter()
             val w1 = importer.importXML(
-                    "1", "<root>a b <subst><add>c d</add><del>e f</del></subst> e f g h i j</root>")
+                "1", "<root>a b <subst><add>c d</add><del>e f</del></subst> e f g h i j</root>"
+            )
             val w2 = importer.importXML(
-                    "2", "<root>a b c d e f g h i j</root>")
+                "2", "<root>a b c d e f g h i j</root>"
+            )
             val expectedDot = """
                 digraph CollationGraph{
                 labelloc=b
@@ -665,28 +682,29 @@ class HyperCollatorTest {
 
             // test matching tokens
             assertThat(collationGraph)
-                    .containsTextNodesMatching(
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "Hoe zoet moet nochtans zijn dit ")
-                                    .withWitnessSegmentSketch("Q", "Hoe zoet moet nochtans zijn dit "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "trachten naar")
-                                    .withWitnessSegmentSketch("Q", "trachten naar"),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "werven om")
-                                    .withWitnessSegmentSketch("Q", "werven om"),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", " een ")
-                                    .withWitnessSegmentSketch("Q", " een "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "vrouw")
-                                    .withWitnessSegmentSketch("Q", "vrouw "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "vóór de ")
-                                    .withWitnessSegmentSketch("Q", "vóór de "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "liefelijke toestemming")
-                                    .withWitnessSegmentSketch("Q", "liefelijke toestemming"))
+                .containsTextNodesMatching(
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "Hoe zoet moet nochtans zijn dit ")
+                        .withWitnessSegmentSketch("Q", "Hoe zoet moet nochtans zijn dit "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "trachten naar")
+                        .withWitnessSegmentSketch("Q", "trachten naar"),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "werven om")
+                        .withWitnessSegmentSketch("Q", "werven om"),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", " een ")
+                        .withWitnessSegmentSketch("Q", " een "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "vrouw")
+                        .withWitnessSegmentSketch("Q", "vrouw "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "vóór de ")
+                        .withWitnessSegmentSketch("Q", "vóór de "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "liefelijke toestemming")
+                        .withWitnessSegmentSketch("Q", "liefelijke toestemming")
+                )
         }
 
         @Disabled
@@ -695,24 +713,26 @@ class HyperCollatorTest {
         fun testOrder() {
             val importer = XMLImporter()
             val wF = importer.importXML(
-                    "F",
-                    """
+                "F",
+                """
                     |<?xml version="1.0" encoding="UTF-8"?>
                     |<text>
                     |    <s>De vent was woedend en maakte <del type="instantCorrection">Shiriar</del> den bedremmelden
                     |        Sultan uit voor "lompen boer".</s>
                     |</text>
-                    """.trimMargin())
+                    """.trimMargin()
+            )
             val wQ = importer.importXML(
-                    "Q",
-                    """
+                "Q",
+                """
                     |<?xml version="1.0" encoding="UTF-8"?>
                     |<text>
                     |    <s>De vent was woedend en maakte <del>Shiriar</del>
                     |        <add>den bedremmelden <del>man</del>
                     |            <add>Sultan</add></add> uit voor "lompen boer".</s>
                     |</text>
-                    """.trimMargin())
+                    """.trimMargin()
+            )
             val expectedDotF = """
                 digraph VariantWitnessGraph{
                 graph [rankdir=LR]
@@ -793,22 +813,23 @@ class HyperCollatorTest {
                 """.trimIndent()
             val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
             assertThat(collationGraph)
-                    .containsTextNodesMatching(
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "De vent was woedend en maakte ")
-                                    .withWitnessSegmentSketch("Q", "De vent was woedend en maakte "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "Shiriar")
-                                    .withWitnessSegmentSketch("Q", "Shiriar"),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "den bedremmelden\n        ")
-                                    .withWitnessSegmentSketch("Q", "den bedremmelden "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "Sultan ")
-                                    .withWitnessSegmentSketch("Q", "Sultan"),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "uit voor \"lompen boer\".")
-                                    .withWitnessSegmentSketch("Q", "uit voor \"lompen boer\"."))
+                .containsTextNodesMatching(
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "De vent was woedend en maakte ")
+                        .withWitnessSegmentSketch("Q", "De vent was woedend en maakte "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "Shiriar")
+                        .withWitnessSegmentSketch("Q", "Shiriar"),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "den bedremmelden\n        ")
+                        .withWitnessSegmentSketch("Q", "den bedremmelden "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "Sultan ")
+                        .withWitnessSegmentSketch("Q", "Sultan"),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "uit voor \"lompen boer\".")
+                        .withWitnessSegmentSketch("Q", "uit voor \"lompen boer\".")
+                )
         }
 
         @Test
@@ -816,7 +837,8 @@ class HyperCollatorTest {
             val importer = XMLImporter()
             val wF = importer.importXML("A", "<text>The dog's big eyes.</text>")
             val wQ = importer.importXML(
-                    "B", "<text>The dog's <del>big black ears</del><add>brown eyes</add>.</text>")
+                "B", "<text>The dog's <del>big black ears</del><add>brown eyes</add>.</text>"
+            )
             val expectedDot = """
                 digraph CollationGraph{
                 labelloc=b
@@ -849,21 +871,22 @@ class HyperCollatorTest {
                 """.trimIndent()
             val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
             assertThat(collationGraph)
-                    .containsOnlyTextNodesMatching(
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("A", "The dog's ")
-                                    .withWitnessSegmentSketch("B", "The dog's "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("A", "big ")
-                                    .withWitnessSegmentSketch("B", "big "),
-                            CollationGraphAssert.textNodeSketch().withWitnessSegmentSketch("B", "black ears"),
-                            CollationGraphAssert.textNodeSketch().withWitnessSegmentSketch("B", "brown "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("A", "eyes")
-                                    .withWitnessSegmentSketch("B", "eyes"),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("A", ".")
-                                    .withWitnessSegmentSketch("B", "."))
+                .containsOnlyTextNodesMatching(
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("A", "The dog's ")
+                        .withWitnessSegmentSketch("B", "The dog's "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("A", "big ")
+                        .withWitnessSegmentSketch("B", "big "),
+                    CollationGraphAssert.textNodeSketch().withWitnessSegmentSketch("B", "black ears"),
+                    CollationGraphAssert.textNodeSketch().withWitnessSegmentSketch("B", "brown "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("A", "eyes")
+                        .withWitnessSegmentSketch("B", "eyes"),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("A", ".")
+                        .withWitnessSegmentSketch("B", ".")
+                )
         }
 
         @Test
@@ -901,15 +924,17 @@ class HyperCollatorTest {
                 """.trimIndent()
             val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
             assertThat(collationGraph)
-                    .containsTextNodesMatching(
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("A", "b b b b b b b ")
-                                    .withWitnessSegmentSketch("B", "b b b b b b b "))
+                .containsTextNodesMatching(
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("A", "b b b b b b b ")
+                        .withWitnessSegmentSketch("B", "b b b b b b b ")
+                )
             assertThat(collationGraph)
-                    .doesNotContainTextNodesMatching(
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("A", "T ")
-                                    .withWitnessSegmentSketch("B", "X "))
+                .doesNotContainTextNodesMatching(
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("A", "T ")
+                        .withWitnessSegmentSketch("B", "X ")
+                )
         }
 
         @Test
@@ -954,21 +979,23 @@ class HyperCollatorTest {
                 """.trimIndent()
             val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
             assertThat(collationGraph)
-                    .containsTextNodesMatching(
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("A", "A ")
-                                    .withWitnessSegmentSketch("B", "A "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("A", "E C ")
-                                    .withWitnessSegmentSketch("B", "E C "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("A", "G ")
-                                    .withWitnessSegmentSketch("B", "G "))
+                .containsTextNodesMatching(
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("A", "A ")
+                        .withWitnessSegmentSketch("B", "A "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("A", "E C ")
+                        .withWitnessSegmentSketch("B", "E C "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("A", "G ")
+                        .withWitnessSegmentSketch("B", "G ")
+                )
             assertThat(collationGraph)
-                    .doesNotContainTextNodesMatching(
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("A", "H")
-                                    .withWitnessSegmentSketch("B", "H "))
+                .doesNotContainTextNodesMatching(
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("A", "H")
+                        .withWitnessSegmentSketch("B", "H ")
+                )
         }
 
         @Test
@@ -1037,21 +1064,23 @@ class HyperCollatorTest {
                 """.trimIndent()
             val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
             assertThat(collationGraph)
-                    .containsTextNodesMatching(
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("H", "Leaning her bony breast on the hard thorn ")
-                                    .withWitnessSegmentSketch("T", "leaning her bony breast on the hard thorn"),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("H", "her forgiveness")
-                                    .withWitnessSegmentSketch("T", "her forgiveness "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("H", ".Was it then that she had her consolations  ")
-                                    .withWitnessSegmentSketch("T", ".Was it then that she had her consolations "))
+                .containsTextNodesMatching(
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("H", "Leaning her bony breast on the hard thorn ")
+                        .withWitnessSegmentSketch("T", "leaning her bony breast on the hard thorn"),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("H", "her forgiveness")
+                        .withWitnessSegmentSketch("T", "her forgiveness "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("H", ".Was it then that she had her consolations  ")
+                        .withWitnessSegmentSketch("T", ".Was it then that she had her consolations ")
+                )
             assertThat(collationGraph)
-                    .doesNotContainTextNodesMatching(
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("H", ", ")
-                                    .withWitnessSegmentSketch("T", ", "))
+                .doesNotContainTextNodesMatching(
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("H", ", ")
+                        .withWitnessSegmentSketch("T", ", ")
+                )
         }
 
         @Disabled
@@ -1157,24 +1186,27 @@ class HyperCollatorTest {
                 """.trimIndent()
             val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
             assertThat(collationGraph)
-                    .containsTextNodesMatching(
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "so ")
-                                    .withWitnessSegmentSketch("N", "so "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "destitute of every hope of consolation to live")
-                                    .withWitnessSegmentSketch("N", "destitute of every hope of consolation to live"),
-                            CollationGraphAssert.textNodeSketch().withWitnessSegmentSketch("F", " ").withWitnessSegmentSketch("N", " "),
-                            CollationGraphAssert.textNodeSketch().withWitnessSegmentSketch("F", "?").withWitnessSegmentSketch("N", "?"),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "Oh")
-                                    .withWitnessSegmentSketch("N", "oh "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "no")
-                                    .withWitnessSegmentSketch("N", "no "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "... ")
-                                    .withWitnessSegmentSketch("N", "...\n"))
+                .containsTextNodesMatching(
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "so ")
+                        .withWitnessSegmentSketch("N", "so "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "destitute of every hope of consolation to live")
+                        .withWitnessSegmentSketch("N", "destitute of every hope of consolation to live"),
+                    CollationGraphAssert.textNodeSketch().withWitnessSegmentSketch("F", " ")
+                        .withWitnessSegmentSketch("N", " "),
+                    CollationGraphAssert.textNodeSketch().withWitnessSegmentSketch("F", "?")
+                        .withWitnessSegmentSketch("N", "?"),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "Oh")
+                        .withWitnessSegmentSketch("N", "oh "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "no")
+                        .withWitnessSegmentSketch("N", "no "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "... ")
+                        .withWitnessSegmentSketch("N", "...\n")
+                )
         }
 
         @Disabled
@@ -1250,32 +1282,33 @@ class HyperCollatorTest {
                 """.trimIndent()
             val collationGraph = testHyperCollation(wF, wQ, expectedDot, expectedTable)
             assertThat(collationGraph)
-                    .containsTextNodesMatching(
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "Frankenstein discovered")
-                                    .withWitnessSegmentSketch("N", "Frankenstein discovered "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "that I")
-                                    .withWitnessSegmentSketch("N", "that I "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "or")
-                                    .withWitnessSegmentSketch("N", "or "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "made notes concerning his history")
-                                    .withWitnessSegmentSketch("N", "made notes concerning his history "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "he asked to see them ")
-                                    .withWitnessSegmentSketch("F", "he asked to see them ")
-                                    .withWitnessSegmentSketch("N", "he asked to see them "),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "himself corrected ")
-                                    .withWitnessSegmentSketch("N", "himself corrected\n"),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "and augmented ")
-                                    .withWitnessSegmentSketch("N", "and augmented"),
-                            CollationGraphAssert.textNodeSketch()
-                                    .withWitnessSegmentSketch("F", "them in many places\n")
-                                    .withWitnessSegmentSketch("N", "them in many places"))
+                .containsTextNodesMatching(
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "Frankenstein discovered")
+                        .withWitnessSegmentSketch("N", "Frankenstein discovered "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "that I")
+                        .withWitnessSegmentSketch("N", "that I "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "or")
+                        .withWitnessSegmentSketch("N", "or "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "made notes concerning his history")
+                        .withWitnessSegmentSketch("N", "made notes concerning his history "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "he asked to see them ")
+                        .withWitnessSegmentSketch("F", "he asked to see them ")
+                        .withWitnessSegmentSketch("N", "he asked to see them "),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "himself corrected ")
+                        .withWitnessSegmentSketch("N", "himself corrected\n"),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "and augmented ")
+                        .withWitnessSegmentSketch("N", "and augmented"),
+                    CollationGraphAssert.textNodeSketch()
+                        .withWitnessSegmentSketch("F", "them in many places\n")
+                        .withWitnessSegmentSketch("N", "them in many places")
+                )
         }
 
         @Test
@@ -1283,22 +1316,23 @@ class HyperCollatorTest {
         fun testCollationGraphInitialization() {
             val importer = XMLImporter()
             val wF = importer.importXML(
-                    "F",
-                    """
+                "F",
+                """
                     |<text>
                     |    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,
                     |        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>
                     |</text>
-                    """.trimMargin())
+                    """.trimMargin()
+            )
             val collationGraph = CollationGraph()
             val map: MutableMap<TokenVertex, TextNode> = mutableMapOf()
             val markupNodeIndex: MutableMap<Markup, MarkupNode> = mutableMapOf()
             hyperCollator.initialize(collationGraph, map, markupNodeIndex, wF)
             val collation = CollationGraphNodeJoiner.join(collationGraph)
             val dot = CollationGraphVisualizer.toDot(
-                    collation,
-                    emphasizeWhitespace = true,
-                    hideMarkup = false
+                collation,
+                emphasizeWhitespace = true,
+                hideMarkup = false
             )
             val expected = """
                 digraph CollationGraph{
@@ -1325,9 +1359,9 @@ class HyperCollatorTest {
                 """.trimIndent()
             assertThat(dot).isEqualTo(expected)
             val dotWithoutMarkupAndWhitespaceEmphasis = CollationGraphVisualizer.toDot(
-                    collation,
-                    emphasizeWhitespace = false,
-                    hideMarkup = true
+                collation,
+                emphasizeWhitespace = false,
+                hideMarkup = true
             )
             val expected2 = """
                 digraph CollationGraph{
@@ -1366,15 +1400,17 @@ class HyperCollatorTest {
             fun testAppRdg() {
                 val importer = XMLImporter()
                 val wF = importer.importXML(
-                        "W1",
-                        "<s>One must have lived longer with <app>"
-                                + "<rdg>this</rdg>"
-                                + "<rdg>such a</rdg>"
-                                + "<rdg>a</rdg>"
-                                + "</app> system, to appreciate its advantages.</s>")
+                    "W1",
+                    "<s>One must have lived longer with <app>"
+                            + "<rdg>this</rdg>"
+                            + "<rdg>such a</rdg>"
+                            + "<rdg>a</rdg>"
+                            + "</app> system, to appreciate its advantages.</s>"
+                )
                 val wQ = importer.importXML(
-                        "W2",
-                        "<s>One must have lived longer with this system, to appreciate its advantages.</s>")
+                    "W2",
+                    "<s>One must have lived longer with this system, to appreciate its advantages.</s>"
+                )
                 val expectedDot = """
                     digraph CollationGraph{
                     labelloc=b
@@ -1416,15 +1452,17 @@ class HyperCollatorTest {
             fun testAppRdgWithAddDel() {
                 val importer = XMLImporter()
                 val wF = importer.importXML(
-                        "W1",
-                        "<s>One must have lived longer with <app>"
-                                + "<rdg varSeq=\"1\"><del>this</del></rdg>"
-                                + "<rdg varSeq=\"2\"><del><add>such a</add></del></rdg>"
-                                + "<rdg varSeq=\"3\"><add>a</add></rdg>"
-                                + "</app> system, to appreciate its advantages.</s>")
+                    "W1",
+                    "<s>One must have lived longer with <app>"
+                            + "<rdg varSeq=\"1\"><del>this</del></rdg>"
+                            + "<rdg varSeq=\"2\"><del><add>such a</add></del></rdg>"
+                            + "<rdg varSeq=\"3\"><add>a</add></rdg>"
+                            + "</app> system, to appreciate its advantages.</s>"
+                )
                 val wQ = importer.importXML(
-                        "W2",
-                        "<s>One must have lived longer with this system, to appreciate its advantages.</s>")
+                    "W2",
+                    "<s>One must have lived longer with this system, to appreciate its advantages.</s>"
+                )
                 val expectedDot = """
                     digraph CollationGraph{
                     labelloc=b
@@ -1463,10 +1501,10 @@ class HyperCollatorTest {
         }
 
         private fun testHyperCollation(
-                witness1: VariantWitnessGraph,
-                witness2: VariantWitnessGraph,
-                expectedDot: String,
-                expectedTable: String
+            witness1: VariantWitnessGraph,
+            witness2: VariantWitnessGraph,
+            expectedDot: String,
+            expectedTable: String
         ): CollationGraph {
             val stopwatch = Stopwatch.createStarted()
             val collation0 = hyperCollator.collate(witness1, witness2)
@@ -1476,16 +1514,16 @@ class HyperCollatorTest {
             val collation = CollationGraphNodeJoiner.join(collation0)
             SoftAssertions().apply {
                 val dot = CollationGraphVisualizer.toDot(
-                        collation,
-                        emphasizeWhitespace = true,
-                        hideMarkup = false
+                    collation,
+                    emphasizeWhitespace = true,
+                    hideMarkup = false
                 )
                 log.debug("dot=\n{}", dot)
                 writeGraph(dot, "graph")
                 assertThat(dot).isEqualTo(expectedDot)
 
                 val table = CollationGraphVisualizer.toTableASCII(collation, false)
-                        .replace(" ", " ")
+                    .replace(" ", " ")
                 log.debug("table=\n{}", table)
                 assertThat(table).isEqualTo(expectedTable.replace("\n", System.lineSeparator()))
 
@@ -1499,39 +1537,76 @@ class HyperCollatorTest {
     }
 
     private fun VariantWitnessGraph.asDot(): String =
-            DotFactory(emphasizeWhitespace = true).fromVariantWitnessGraphSimple(this)
+        DotFactory(emphasizeWhitespace = true).fromVariantWitnessGraphSimple(this)
 
     @Nested
     inner class ThreeWitnessTests : HyperCollateTest() {
+        @Test
+        @Timeout(10000)
+        fun highlight_match_only_when_in_textual_variation() {
+            val importer = XMLImporter()
+            val wA = importer.importXML(
+                "A",
+                "<s>Murphy <subst><del>seized him by the arm</del><add>stayed his hand</add></subst>.</s>"
+            )
+            val wB = importer.importXML("B", "<s>Murphy stayed his hand.</s>")
+            val wC = importer.importXML("C", "<s>Murphy stayed the arm.</s>")
+            val cg = hyperCollator.collate(wA, wB, wC)
+            val jcg = CollationGraphNodeJoiner.join(cg)
+            val html = CollationGraphVisualizer.toTableHTML(jcg, false)
+
+            // 'Murphy' matches, but not in textual variation, so should not be highlighted
+//            assertThat(html).doesNotContain("<span style=\"background-color:lightblue\">Murphy")
+
+            // But 'stayed' should be highlighted, since it's within an <add> in A
+            assertThat(html).contains("<span style=\"background-color:lightblue\">stayed")
+
+            // 'his hand' should be highlighted, since it's within an <add> in A
+            assertThat(html).contains("<span style=\"background-color:lightblue\">his&nbsp;hand")
+
+            // 'the arm' should be highlighted, since it's within an <add> in A
+            assertThat(html).contains("<span style=\"background-color:lightblue\">the&nbsp;arm")
+
+            val expectedHTML = """<table border="1">
+            <tr><th style="background:lightgreen">A</th><td><span style="background-color:lightblue">Murphy&nbsp;</span></td><td><span style="background-color:lightblue">stayed&nbsp;</span><br/><del>seized&nbsp;him&nbsp;by&nbsp;</del></td><td><span style="background-color:lightblue">his&nbsp;hand</span><br/><del><span style="background-color:lightblue">the&nbsp;arm</span></del></td><td><span style="background-color:lightblue">.</span></td></tr>
+<tr><th style="background:lightgreen">B</th><td><span style="background-color:lightblue">Murphy&nbsp;</span></td><td><span style="background-color:lightblue">stayed&nbsp;</span></td><td><span style="background-color:lightblue">his&nbsp;hand</span></td><td><span style="background-color:lightblue">.</span></td></tr>
+<tr><th style="background:lightgreen">C</th><td><span style="background-color:lightblue">Murphy&nbsp;</span></td><td><span style="background-color:lightblue">stayed&nbsp;</span></td><td><span style="background-color:lightblue">the&nbsp;arm</span></td><td><span style="background-color:lightblue">.</span></td></tr>
+            </table>"""
+            assertThat(html).isEqualTo(expectedHTML)
+        }
+
         @Disabled
         @Test
         @Timeout(10000)
         fun testHierarchyWith3Witnesses() {
             val importer = XMLImporter()
             val wF = importer.importXML(
-                    "F",
-                    """
+                "F",
+                """
                     |<text>
                     |    <s>Hoe zoet moet nochtans zijn dit <lb/><del>werven om</del><add>trachten naar</add> een vrouw,
                     |        de ongewisheid vóór de <lb/>liefelijke toestemming!</s>
                     |</text>
-                    """.trimMargin())
+                    """.trimMargin()
+            )
             val wQ = importer.importXML(
-                    "Q",
-                    """
+                "Q",
+                """
                     |<text>
                     |    <s>Hoe zoet moet nochtans zijn dit <del>werven om</del><add>trachten naar</add> een <lb/>vrouw !
                     |        Die dagen van nerveuze verwachting vóór de liefelijke toestemming.</s>
                     |</text>
-                    """.trimMargin())
+                    """.trimMargin()
+            )
             val wZ = importer.importXML(
-                    "Z",
-                    """
+                "Z",
+                """
                     |<text>
                     |    <s>Hoe zoet moet nochtans zijn dit trachten naar een vrouw !
                     |        Die dagen van ongewisheid vóór de liefelijke toestemming.</s>
                     |</text>
-                    """.trimMargin())
+                    """.trimMargin()
+            )
             val expectedDot = """
                 digraph CollationGraph{
                 labelloc=b
@@ -1598,41 +1673,42 @@ class HyperCollatorTest {
 
             // test matching tokens
             val n1 = CollationGraphAssert.textNodeSketch()
-                    .withWitnessSegmentSketch("F", "Hoe zoet moet nochtans zijn dit ")
-                    .withWitnessSegmentSketch("Q", "Hoe zoet moet nochtans zijn dit ")
-                    .withWitnessSegmentSketch("Z", "Hoe zoet moet nochtans zijn dit ")
+                .withWitnessSegmentSketch("F", "Hoe zoet moet nochtans zijn dit ")
+                .withWitnessSegmentSketch("Q", "Hoe zoet moet nochtans zijn dit ")
+                .withWitnessSegmentSketch("Z", "Hoe zoet moet nochtans zijn dit ")
             val n2 = CollationGraphAssert.textNodeSketch()
-                    .withWitnessSegmentSketch("F", " ")
-                    .withWitnessSegmentSketch("Q", " ")
+                .withWitnessSegmentSketch("F", " ")
+                .withWitnessSegmentSketch("Q", " ")
             val n3 = CollationGraphAssert.textNodeSketch()
-                    .withWitnessSegmentSketch("F", "een ")
-                    .withWitnessSegmentSketch("Q", "een ")
-                    .withWitnessSegmentSketch("Z", "een ")
+                .withWitnessSegmentSketch("F", "een ")
+                .withWitnessSegmentSketch("Q", "een ")
+                .withWitnessSegmentSketch("Z", "een ")
             val n4 = CollationGraphAssert.textNodeSketch()
-                    .withWitnessSegmentSketch("F", "vrouw")
-                    .withWitnessSegmentSketch("Q", "vrouw ")
-                    .withWitnessSegmentSketch("Z", "vrouw ")
+                .withWitnessSegmentSketch("F", "vrouw")
+                .withWitnessSegmentSketch("Q", "vrouw ")
+                .withWitnessSegmentSketch("Z", "vrouw ")
             val n5 = CollationGraphAssert.textNodeSketch()
-                    .withWitnessSegmentSketch("F", "ongewisheid ")
-                    .withWitnessSegmentSketch("Z", "ongewisheid ")
+                .withWitnessSegmentSketch("F", "ongewisheid ")
+                .withWitnessSegmentSketch("Z", "ongewisheid ")
             val n6 = CollationGraphAssert.textNodeSketch()
-                    .withWitnessSegmentSketch("F", "liefelijke toestemming")
-                    .withWitnessSegmentSketch("Z", "liefelijke toestemming")
-                    .withWitnessSegmentSketch("Q", "liefelijke toestemming")
+                .withWitnessSegmentSketch("F", "liefelijke toestemming")
+                .withWitnessSegmentSketch("Z", "liefelijke toestemming")
+                .withWitnessSegmentSketch("Q", "liefelijke toestemming")
             val trachtenNaar = CollationGraphAssert.textNodeSketch()
-                    .withWitnessSegmentSketch("F", "trachten naar")
-                    .withWitnessSegmentSketch("Q", "trachten naar")
-                    .withWitnessSegmentSketch("Z", "trachten naar ")
+                .withWitnessSegmentSketch("F", "trachten naar")
+                .withWitnessSegmentSketch("Q", "trachten naar")
+                .withWitnessSegmentSketch("Z", "trachten naar ")
             val wervenOm = CollationGraphAssert.textNodeSketch()
-                    .withWitnessSegmentSketch("F", "werven om")
-                    .withWitnessSegmentSketch("Q", "werven om")
+                .withWitnessSegmentSketch("F", "werven om")
+                .withWitnessSegmentSketch("Q", "werven om")
             assertThat(collationGraph)
-                    .containsTextNodesMatching(n1, n2, n3, n4, n5, n6, trachtenNaar, wervenOm)
+                .containsTextNodesMatching(n1, n2, n3, n4, n5, n6, trachtenNaar, wervenOm)
             assertThat(collationGraph)
-                    .containsMarkupNodesMatching(
-                            CollationGraphAssert.markupNodeSketch("F", "text"),
-                            CollationGraphAssert.markupNodeSketch("Q", "text"),
-                            CollationGraphAssert.markupNodeSketch("Z", "text"))
+                .containsMarkupNodesMatching(
+                    CollationGraphAssert.markupNodeSketch("F", "text"),
+                    CollationGraphAssert.markupNodeSketch("Q", "text"),
+                    CollationGraphAssert.markupNodeSketch("Z", "text")
+                )
             val fDel = CollationGraphAssert.markupNodeSketch("F", "del")
             val qAdd = CollationGraphAssert.markupNodeSketch("Q", "add")
             assertThat(collationGraph).hasTextNodeMatching(wervenOm).withMarkupNodesMatching(fDel)
@@ -1640,11 +1716,11 @@ class HyperCollatorTest {
         }
 
         private fun testHyperCollation3(
-                witness1: VariantWitnessGraph,
-                witness2: VariantWitnessGraph,
-                witness3: VariantWitnessGraph,
-                expectedDot: String,
-                expectedTable: String
+            witness1: VariantWitnessGraph,
+            witness2: VariantWitnessGraph,
+            witness3: VariantWitnessGraph,
+            expectedDot: String,
+            expectedTable: String
         ): CollationGraph {
             //    Map<String, Long> collationDuration = new HashMap<>();
             val stopwatch = Stopwatch.createStarted()
@@ -1667,7 +1743,7 @@ class HyperCollatorTest {
             assertThat(dot).isEqualTo(expectedDot)
 
             val table = CollationGraphVisualizer.toTableASCII(collation, true)
-                    .replace(" ", " ")
+                .replace(" ", " ")
             log.info("table=\n{}", table)
             assertThat(table).isEqualTo(expectedTable.replace("\n", System.lineSeparator()))
 
@@ -1723,7 +1799,8 @@ class HyperCollatorTest {
         assertThat(matchStrings).containsOnly(match1, match2, match3, match4, match5, match6, match7, match8)
 
         val sortAndFilterMatchesByWitness = hyperCollator.sortAndFilterMatchesByWitness(
-                allPotentialMatches, listOf(siglum1, siglum2, siglum3))
+            allPotentialMatches, listOf(siglum1, siglum2, siglum3)
+        )
         log.info("sortAndFilterMatchesByWitness={}", sortAndFilterMatchesByWitness)
         assertThat(sortAndFilterMatchesByWitness).containsOnlyKeys(siglum1, siglum2, siglum3)
 
@@ -1753,20 +1830,20 @@ class HyperCollatorTest {
         val hyperCollator = HyperCollator()
 
         private fun Map<String, List<Match>>.stringList(key: String): List<String> =
-                (this[key] ?: error("key $key not found in sortAndFilterMatchesByWitness"))
-                        .map(Match::toString)
+            (this[key] ?: error("key $key not found in sortAndFilterMatchesByWitness"))
+                .map(Match::toString)
 
         private fun visualize(list: List<Tuple<Int>>): String =
-                list.joinToString("") { format("<{0},{1}>", it.left, it.right) }
+            list.joinToString("") { format("<{0},{1}>", it.left, it.right) }
 
         private fun Match.pretty(): String =
-                toString() + " - " + tokenVertexList.map {
-                    when (it) {
-                        is SimpleTokenVertex -> "'" + it.content + "'"
-                        is EndTokenVertex -> "</end>"
-                        else -> "<somethingelse/>"
-                    }
-                }.first()
+            toString() + " - " + tokenVertexList.map {
+                when (it) {
+                    is SimpleTokenVertex -> "'" + it.content + "'"
+                    is EndTokenVertex -> "</end>"
+                    else -> "<somethingelse/>"
+                }
+            }.first()
 
     }
 

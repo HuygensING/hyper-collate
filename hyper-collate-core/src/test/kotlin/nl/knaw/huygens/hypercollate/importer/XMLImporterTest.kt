@@ -123,34 +123,30 @@ class XMLImporterTest : HyperCollateTest() {
         verifyDotExport(wg0, expectedDot)
     }
 
-    @Disabled
     @Test
-    fun immediate_deletion() {
+    fun immediate_deletion_instant_is_true() {
         val importer = XMLImporter()
         val xmlString = """
             <xml>Modeling <del instant="true">deletion</del> immediate deletion is necessary.</xml>
             """.xmlTrimmed()
         println(xmlString)
         val wg0: VariantWitnessGraph = importer.importXML("A", xmlString)
-
         val expectedDot = """
             digraph VariantWitnessGraph{
             graph [rankdir=LR]
             labelloc=b
             begin [label="";shape=doublecircle,rank=middle]
-            vA_000 [label=<Mondays&#9251;are&#9251;<br/><i>A: /xml</i>>]
-            vA_002 [label=<deaf&#9251;bat<br/><i>A: /xml/app/rdg[@varSeq='1']</i>>]
-            vA_004 [label=<def&#9251;bad<br/><i>A: /xml/app/rdg[@varSeq='2']</i>>]
-            vA_006 [label=<!<br/><i>A: /xml</i>>]
+            vA_000 [label=<Modeling&#9251;<br/><i>A: /xml</i>>]
+            vA_001 [label=<deletion<br/><i>A: /xml/del[@instant='true']</i>>]
+            vA_002 [label=<&#9251;immediate&#9251;deletion&#9251;is&#9251;necessary.<br/><i>A: /xml</i>>]
             end [label="";shape=doublecircle,rank=middle]
             begin->vA_000
-            vA_000->vA_002
-            vA_000->vA_004
-            vA_002->vA_006
-            vA_004->vA_006
-            vA_006->end
+            vA_000->vA_001
+            vA_001->vA_002
+            vA_002->end
             }
             """.trimIndent()
+
         verifyDotExport(wg0, expectedDot)
     }
 

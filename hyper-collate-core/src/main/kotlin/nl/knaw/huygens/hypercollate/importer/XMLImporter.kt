@@ -271,7 +271,7 @@ class XMLImporter {
                 throw RuntimeException("XML error: expected </$expectedTag>, got </$closingTag>")
             }
             when {
-                notInAppOrSubst() && markup.isVariationStartingMarkup() -> {
+                notInAppOrSubst() && firstToClose.isVariationStartingMarkup() -> {
                     unconnectedVertices.push(lastTokenVertex)
                     branchIds.pop()
                     afterDel = true
@@ -305,11 +305,6 @@ class XMLImporter {
                 }
             }
         }
-
-        private fun Markup.isImmediateDeletion() =
-            "true" == attributeMap["instant"]
-                    || "0" == attributeMap["seq"]
-                    || "immediate" == attributeMap["type"]
 
         private fun notInAppOrSubst() = notInApp() && notInSubst()
 
@@ -457,8 +452,16 @@ class XMLImporter {
         private fun Markup.isSubst(): Boolean = "subst" == tagName
         private fun Markup.isApp(): Boolean = "app" == tagName
         private fun Markup.isRdg(): Boolean = "rdg" == tagName
-        private fun Markup.isVariationStartingMarkup(): Boolean = "del" == tagName
+
+        private fun Markup.isVariationStartingMarkup(): Boolean =
+            "del" == tagName && !this.isImmediateDeletion()
+
         private fun Markup.isVariationEndingMarkup(): Boolean = "add" == tagName
+
+        private fun Markup.isImmediateDeletion() =
+            "true" == attributeMap["instant"]
+                    || "0" == attributeMap["seq"]
+                    || "immediate" == attributeMap["type"]
 
     }
 }
