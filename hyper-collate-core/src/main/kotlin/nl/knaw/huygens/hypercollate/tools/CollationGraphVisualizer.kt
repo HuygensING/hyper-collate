@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.tools
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2021 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -177,7 +177,8 @@ object CollationGraphVisualizer {
         val ranking = CollationGraphRanking.of(graph)
         val cells: Map<String, MutableList<String>> = sigla.map { it to mutableListOf<String>() }.toMap()
         for (nodeSet in ranking) {
-            val matchingTokens = mutableListOf<MarkedUpToken>()
+            val colorDispenser = ColorDispenser()
+            val tokenBackground: MutableMap<MarkedUpToken, String> = mutableMapOf()
             if (nodeSet.isBorderNode(graph)) {
                 // skip start and end nodes
                 continue
@@ -185,15 +186,21 @@ object CollationGraphVisualizer {
             val nodeTokensPerWitness: MutableMap<String, MutableList<MarkedUpToken>> = HashMap()
             sigla.forEach { siglum: String ->
                 nodeTokensPerWitness[siglum] = ArrayList()
-                nodeSet.forEach { node: TextNode ->
+                nodeSet.sortedBy { it.hashCode() }.forEach { node: TextNode ->
                     val isMatch = node.sigla.size > 1
+                    val inTextVariation =
+                        node.sigla
+                            .map { node.tokenForSiglum(it) as MarkedUpToken }
+                            .map { it.parentXPath }
+                            .any { it.isTextVariationXPath() }
                     val token = node.tokenForSiglum(siglum)
                     if (token != null) {
                         val mToken = token as MarkedUpToken
                         nodeTokensPerWitness[siglum]!!.add(mToken)
-                        if (isMatch) {
-                            matchingTokens += mToken
+                        if (isMatch && inTextVariation) {
+                            tokenBackground[mToken] = colorDispenser.dispenseFor(mToken)
                         }
+
                     }
                 }
             }
@@ -209,7 +216,7 @@ object CollationGraphVisualizer {
                     groupedByParentXPath.size == 1 ->
                         groupedByParentXPath.values
                             .flatten()
-                            .tokenListToHtml(whitespaceCharacter, matchingTokens)
+                            .tokenListToHtml(whitespaceCharacter, tokenBackground)
 
                     groupedByParentXPath.size > 1 -> { // we have textual variation
                         val keys = groupedByParentXPath.keys.toList()
@@ -218,11 +225,11 @@ object CollationGraphVisualizer {
                         when {
                             "/rdg/" in firstKey -> // for readings, first reading goes first
                                 keys.map { groupedByParentXPath[it]!! }
-                                    .toHtml(whitespaceCharacter, matchingTokens)
+                                    .toHtml(whitespaceCharacter, tokenBackground)
                             else ->
                                 keys.reversed() // for subst, the dels should go last
                                     .map { groupedByParentXPath[it]!! }
-                                    .toHtml(whitespaceCharacter, matchingTokens)
+                                    .toHtml(whitespaceCharacter, tokenBackground)
                         }
                     }
                     else -> ""
@@ -238,24 +245,24 @@ object CollationGraphVisualizer {
 
     private fun List<List<MarkedUpToken>>.toHtml(
         whitespaceCharacter: String,
-        matchingTokens: MutableList<MarkedUpToken>
+        tokenBackground: Map<MarkedUpToken, String>
     ): String =
-        joinToString("<br/>") { it.tokenListToHtml(whitespaceCharacter, matchingTokens) }
+        joinToString("<br/>") { it.tokenListToHtml(whitespaceCharacter, tokenBackground) }
 
     private fun List<MarkedUpToken>.tokenListToHtml(
         whitespaceCharacter: String,
-        matchingTokens: MutableList<MarkedUpToken>
+        tokenBackground: Map<MarkedUpToken, String>
     ): String =
         this.filter { it.content.isEmpty() || it.content.isNotBlank() }
-            .joinToString("&nbsp;") { it.toHtml(whitespaceCharacter, it in matchingTokens) }
+            .joinToString("&nbsp;") { it.toHtml(whitespaceCharacter, tokenBackground[it]) }
 
-    private fun MarkedUpToken.toHtml(whitespaceCharacter: String, isMatch: Boolean): String {
+    private fun MarkedUpToken.toHtml(whitespaceCharacter: String, bgColor: String?): String {
         var asHtml = content.replace(" ", whitespaceCharacter)
         if (parentXPath.contains("app/rdg")) {
             asHtml += "<br/>"
         }
-        if (isMatch) {
-            asHtml = "<span style=\"background-color:lightblue\">$asHtml</span>"
+        if (bgColor != null) {
+            asHtml = """<span style="background-color:$bgColor">$asHtml</span>"""
         }
         return when {
             parentXPath.endsWith("/add") -> asHtml
@@ -276,6 +283,12 @@ object CollationGraphVisualizer {
     ): String =
         DotFactory(emphasizeWhitespace).fromCollationGraph(graph, hideMarkup, horizontal)
 
+    private fun String.isTextVariationXPath(): Boolean =
+        this.contains("/subst/")
+                || this.endsWith("/add")
+                || this.endsWith("/del")
+                || this.contains("/app/")
+
     class Cell {
         val layerContent: MutableList<String> = ArrayList()
 
@@ -287,3 +300,4 @@ object CollationGraphVisualizer {
 
     }
 }
+

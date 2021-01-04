@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.importer
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2021 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,15 +56,14 @@ class XMLImporter {
         normalizer = Function { raw: String -> raw.trim { it <= ' ' }.toLowerCase() }
     }
 
-    fun importXML(siglum: String, xmlString: String): VariantWitnessGraph {
-        val inputStream: InputStream
-        return try {
-            inputStream = ByteArrayInputStream(xmlString.toByteArray(charset(StandardCharsets.UTF_8.name())))
+    fun importXML(siglum: String, xmlString: String): VariantWitnessGraph =
+        try {
+            val inputStream: InputStream =
+                ByteArrayInputStream(xmlString.toByteArray(charset(StandardCharsets.UTF_8.name())))
             importXML(siglum, inputStream)
         } catch (e: UnsupportedEncodingException) {
             throw RuntimeException(e)
         }
-    }
 
     fun importXML(siglum: String, xmlFile: File): VariantWitnessGraph =
         try {

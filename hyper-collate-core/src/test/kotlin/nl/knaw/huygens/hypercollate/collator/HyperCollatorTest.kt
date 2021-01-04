@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.collator
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2021 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,8 +99,8 @@ class HyperCollatorTest {
             val html = CollationGraphVisualizer.toTableHTML(collation, false)
             val expectedHTML = """
                 |<table border="1">
-                |            <tr><th style="background:lightgreen">A</th><td>Des&nbsp;objets&nbsp;en&nbsp;voie&nbsp;de&nbsp;disparition&nbsp;</td><td><span style="background-color:lightblue">je&nbsp;détourne&nbsp;</span></td><td><del>les</del>&nbsp;<span style="background-color:lightblue">mes&nbsp;regards</span><br/><del>les&nbsp;yeux</del></td><td>&nbsp;bien&nbsp;à&nbsp;l'avance</td><td><span style="background-color:lightblue">.</span></td></tr>
-                |<tr><th style="background:lightgreen">B</th><td>c'est&nbsp;bien&nbsp;à&nbsp;l'avance&nbsp;que&nbsp;</td><td><span style="background-color:lightblue">je&nbsp;détourne&nbsp;</span></td><td><span style="background-color:lightblue">mes&nbsp;regards</span></td><td></td><td><span style="background-color:lightblue">.</span></td></tr>
+                |            <tr><th style="background:lightgreen">A</th><td>Des&nbsp;objets&nbsp;en&nbsp;voie&nbsp;de&nbsp;disparition&nbsp;</td><td>je&nbsp;détourne&nbsp;</td><td><del>les</del>&nbsp;<span style="background-color:lightblue">mes&nbsp;regards</span><br/><del>les&nbsp;yeux</del></td><td>&nbsp;bien&nbsp;à&nbsp;l'avance</td><td>.</td></tr>
+                |<tr><th style="background:lightgreen">B</th><td>c'est&nbsp;bien&nbsp;à&nbsp;l'avance&nbsp;que&nbsp;</td><td>je&nbsp;détourne&nbsp;</td><td><span style="background-color:lightblue">mes&nbsp;regards</span></td><td></td><td>.</td></tr>
                 |            </table>""".trimMargin()
             assertThat(html).isEqualTo(expectedHTML)
         }
@@ -1541,22 +1541,27 @@ class HyperCollatorTest {
 
     @Nested
     inner class ThreeWitnessTests : HyperCollateTest() {
+
         @Test
         @Timeout(10000)
         fun highlight_match_only_when_in_textual_variation() {
             val importer = XMLImporter()
             val wA = importer.importXML(
                 "A",
-                "<s>Murphy <subst><del>seized him by the arm</del><add>stayed his hand</add></subst>.</s>"
+                """<s>And Murphy <subst><del>seized him by the arm</del><add>stayed his hand</add></subst> at last.</s>"""
             )
-            val wB = importer.importXML("B", "<s>Murphy stayed his hand.</s>")
-            val wC = importer.importXML("C", "<s>Murphy stayed the arm.</s>")
+            val wB = importer.importXML(
+                "B", "<s>&amp; Murphy stayed his hand at last.</s>"
+            )
+            val wC = importer.importXML(
+                "C", "<s>So Murphy stayed the arm in the end.</s>"
+            )
             val cg = hyperCollator.collate(wA, wB, wC)
             val jcg = CollationGraphNodeJoiner.join(cg)
             val html = CollationGraphVisualizer.toTableHTML(jcg, false)
 
             // 'Murphy' matches, but not in textual variation, so should not be highlighted
-//            assertThat(html).doesNotContain("<span style=\"background-color:lightblue\">Murphy")
+            assertThat(html).doesNotContain("<span style=\"background-color:lightblue\">Murphy")
 
             // But 'stayed' should be highlighted, since it's within an <add> in A
             assertThat(html).contains("<span style=\"background-color:lightblue\">stayed")
@@ -1564,13 +1569,13 @@ class HyperCollatorTest {
             // 'his hand' should be highlighted, since it's within an <add> in A
             assertThat(html).contains("<span style=\"background-color:lightblue\">his&nbsp;hand")
 
-            // 'the arm' should be highlighted, since it's within an <add> in A
-            assertThat(html).contains("<span style=\"background-color:lightblue\">the&nbsp;arm")
+            // 'the arm' should be highlighted with a different color as 'his hand', since it's within an <add> in A and has the same ranking as 'his hand'
+            assertThat(html).contains("<span style=\"background-color:yellow\">the&nbsp;arm")
 
             val expectedHTML = """<table border="1">
-            <tr><th style="background:lightgreen">A</th><td><span style="background-color:lightblue">Murphy&nbsp;</span></td><td><span style="background-color:lightblue">stayed&nbsp;</span><br/><del>seized&nbsp;him&nbsp;by&nbsp;</del></td><td><span style="background-color:lightblue">his&nbsp;hand</span><br/><del><span style="background-color:lightblue">the&nbsp;arm</span></del></td><td><span style="background-color:lightblue">.</span></td></tr>
-<tr><th style="background:lightgreen">B</th><td><span style="background-color:lightblue">Murphy&nbsp;</span></td><td><span style="background-color:lightblue">stayed&nbsp;</span></td><td><span style="background-color:lightblue">his&nbsp;hand</span></td><td><span style="background-color:lightblue">.</span></td></tr>
-<tr><th style="background:lightgreen">C</th><td><span style="background-color:lightblue">Murphy&nbsp;</span></td><td><span style="background-color:lightblue">stayed&nbsp;</span></td><td><span style="background-color:lightblue">the&nbsp;arm</span></td><td><span style="background-color:lightblue">.</span></td></tr>
+            <tr><th style="background:lightgreen">A</th><td>And&nbsp;</td><td>Murphy&nbsp;</td><td><span style="background-color:lightblue">stayed&nbsp;</span><br/><del>seized&nbsp;him&nbsp;by&nbsp;</del></td><td><span style="background-color:lightblue">his&nbsp;hand</span><br/><del><span style="background-color:yellow">the&nbsp;arm</span></del></td><td>at&nbsp;last</td><td>.</td></tr>
+<tr><th style="background:lightgreen">B</th><td>&&nbsp;</td><td>Murphy&nbsp;</td><td><span style="background-color:lightblue">stayed&nbsp;</span></td><td><span style="background-color:lightblue">his&nbsp;hand&nbsp;</span></td><td>at&nbsp;last</td><td>.</td></tr>
+<tr><th style="background:lightgreen">C</th><td>So&nbsp;</td><td>Murphy&nbsp;</td><td><span style="background-color:lightblue">stayed&nbsp;</span></td><td><span style="background-color:yellow">the&nbsp;arm&nbsp;</span></td><td>in&nbsp;the&nbsp;end</td><td>.</td></tr>
             </table>"""
             assertThat(html).isEqualTo(expectedHTML)
         }
