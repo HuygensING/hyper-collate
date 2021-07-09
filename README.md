@@ -1,6 +1,8 @@
 
 # HyperCollate
 
+![](https://github.com/HuygensING/hyper-collate/workflows/tests/badge.svg)
+
 ## General
 HyperCollate is a prototype collation engine that is able to handle *in-text* variation (i.e. textual variation _within_ one witness) if it’s marked with the TEI/XML elements `<del>`, `<add>`, `<subst>`, `<app>` or `<rdg>`. HyperCollate considers these elements as an interruption in the linear flow of the text: when its parser encounters a `<del>`, `<add>`, `<subst>`, `<app>` or `<rdg>` element, the stream of text tokens splits up into two or more branches. During the alignment process, HyperCollate looks at each branch and selects the one with the most matches. This means you do not have to linearize or “flatten” your TEI/XML transcription: the multiple layers within an individual witness can be preserved.
 
