@@ -47,8 +47,7 @@ class Match(vararg matchingTokenVertices: TokenVertex) {
             rankingMap.entries
                     .filter { it.key != s }
                     .map { it.value }
-                    .min()!!
-//                    .minOrNull() ?: error("no minimum found") // 2020-09-04: results in java.lang.NoSuchMethodError: 'java.lang.Comparable kotlin.collections.CollectionsKt.minOrNull(java.lang.Iterable)'
+                    .minOrNull() ?: error("no minimum found") // 2020-09-04: results in java.lang.NoSuchMethodError: 'java.lang.Comparable kotlin.collections.CollectionsKt.minOrNull(java.lang.Iterable)'
 
     override fun toString(): String {
         val stringBuilder = StringBuilder("<")
