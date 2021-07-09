@@ -377,7 +377,7 @@
     <repositories>
         <repository>
             <id>huygens</id>
-            <url>http://maven.huygens.knaw.nl/repository/</url>
+            <url>https://maven.huygens.knaw.nl/repository/</url>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
@@ -393,7 +393,7 @@
 
     <organization>
         <name>Huygens ING (KNAW)</name>
-        <url>http://www.huygens.knaw.nl</url>
+        <url>https://www.huygens.knaw.nl</url>
     </organization>
 
     <licenses>
