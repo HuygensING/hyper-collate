@@ -70,7 +70,7 @@
         <maven-surefire.version>3.0.0-M5</maven-surefire.version>
         <maven-war.version>3.3.0</maven-war.version>
         <metrics-annotation.version>4.0.2</metrics-annotation.version> <!-- use version dropwizard uses -->
-        <mockito.version>3.9.0</mockito.version>
+        <mockito.version>3.11.2</mockito.version>
         <reflections.version>0.9.12</reflections.version> <!-- 0.9.11 leads to ReflectionsExceptions -->
         <servlet-api.version>4.0.0-b01</servlet-api.version>
         <slf4j-api.version>1.7.25</slf4j-api.version>
