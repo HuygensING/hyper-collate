@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.tools
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2021 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ package nl.knaw.huygens.hypercollate.tools
  */
 
 import nl.knaw.huygens.hypercollate.model.*
-import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.stream.Collectors
 

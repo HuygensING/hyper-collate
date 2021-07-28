@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.collator
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2021 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import nl.knaw.huygens.hypercollate.model.*
 import nl.knaw.huygens.hypercollate.tools.CollationGraphRanking
 import nl.knaw.huygens.hypercollate.tools.CollationGraphVisualizer
 import org.slf4j.LoggerFactory
-import java.util.*
 import java.util.stream.Collectors.toSet
 
 class HyperCollator {

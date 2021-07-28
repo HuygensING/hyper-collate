@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.tools
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2021 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package nl.knaw.huygens.hypercollate.tools
  * limitations under the License.
  * #L%
  */
-
-import java.util.*
 
 class ColorContext {
     private val assignedColors: MutableMap<String, String> = HashMap()

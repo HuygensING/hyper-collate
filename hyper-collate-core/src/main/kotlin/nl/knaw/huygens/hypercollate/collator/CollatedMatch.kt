@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.collator
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2021 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import nl.knaw.huygens.hypercollate.model.MarkedUpToken
 import nl.knaw.huygens.hypercollate.model.SimpleTokenVertex
 import nl.knaw.huygens.hypercollate.model.TextNode
 import nl.knaw.huygens.hypercollate.model.TokenVertex
-import java.util.*
 
 data class CollatedMatch(val collatedNode: TextNode, val witnessVertex: TokenVertex) {
     var nodeRank = 0

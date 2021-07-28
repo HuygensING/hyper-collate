@@ -4,7 +4,7 @@ package nl.knaw.huygens.hypercollate.collator
  * #%L
  * hyper-collate-core
  * =======
- * Copyright (C) 2017 - 2020 Huygens ING (KNAW)
+ * Copyright (C) 2017 - 2021 Huygens ING (KNAW)
  * =======
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import nl.knaw.huygens.hypercollate.HyperCollateTest
 import nl.knaw.huygens.hypercollate.model.TokenVertex
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-import java.util.*
 import java.util.stream.Stream
 
 class MatchTest : HyperCollateTest() {
