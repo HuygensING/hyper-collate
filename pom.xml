@@ -37,7 +37,7 @@
 
         <activation.version>1.1.1</activation.version>
         <assertj-assertions-generator.version>2.1.0</assertj-assertions-generator.version>
-        <assertj.version>3.16.1</assertj.version>
+        <assertj.version>3.20.2</assertj.version>
         <batik.version>1.9</batik.version>
         <build-helper-maven.version>3.2.0</build-helper-maven.version>
         <buildnumber-maven.version>1.4</buildnumber-maven.version>
@@ -49,15 +49,15 @@
         <graphviz-wrapper.version>1.1</graphviz-wrapper.version>
         <groovy.version>1.0-jsr-05-1</groovy.version>
         <guava.version>24.1-jre</guava.version>
-        <jackson.version>2.9.10</jackson.version><!-- use version dropwizard uses -->
+        <jackson.version>2.12.4</jackson.version><!-- use version dropwizard uses -->
         <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
         <jaxb-api.version>2.3.0</jaxb-api.version>
         <jaxen.version>1.1.6</jaxen.version>
         <jdom.version>1.1.3</jdom.version>
         <jersey.version>2.26</jersey.version>
-        <junit-jupiter.version>5.7.0-M1</junit-jupiter.version>
+        <junit-jupiter.version>5.7.2</junit-jupiter.version>
         <junitparams.version>1.1.1</junitparams.version>
-        <kotlin.version>1.5.0</kotlin.version>
+        <kotlin.version>1.5.20</kotlin.version>
         <log.version>1.1.1</log.version>
         <logback-classic.version>1.2.3</logback-classic.version>
         <maven-compiler.version>3.8.1</maven-compiler.version>
@@ -70,7 +70,7 @@
         <maven-surefire.version>3.0.0-M5</maven-surefire.version>
         <maven-war.version>3.3.0</maven-war.version>
         <metrics-annotation.version>4.0.2</metrics-annotation.version> <!-- use version dropwizard uses -->
-        <mockito.version>3.9.0</mockito.version>
+        <mockito.version>3.11.2</mockito.version>
         <reflections.version>0.9.12</reflections.version> <!-- 0.9.11 leads to ReflectionsExceptions -->
         <servlet-api.version>4.0.0-b01</servlet-api.version>
         <slf4j-api.version>1.7.25</slf4j-api.version>
