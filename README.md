@@ -3,7 +3,7 @@
 
 [![DOI](https://zenodo.org/badge/106519202.svg)](https://zenodo.org/badge/latestdoi/106519202)
 [![](https://github.com/HuygensING/hyper-collate/workflows/tests/badge.svg)](https://github.com/HuygensING/hyper-collate/actions)
-![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/HuygensING/hyper-collate?style=plastic)
+![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/HuygensING/hyper-collate)
 
 
 ## General
