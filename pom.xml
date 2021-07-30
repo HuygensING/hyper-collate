@@ -48,7 +48,7 @@
         <graphviz-java.version>0.3.0</graphviz-java.version>
         <graphviz-wrapper.version>1.1</graphviz-wrapper.version>
         <groovy.version>1.0-jsr-05-1</groovy.version>
-        <guava.version>24.1-jre</guava.version>
+        <guava.version>24.1.1-jre</guava.version>
         <jackson.version>2.12.4</jackson.version><!-- use version dropwizard uses -->
         <javax.ws.rs-api.version>2.1</javax.ws.rs-api.version>
         <jaxb-api.version>2.3.0</jaxb-api.version>
