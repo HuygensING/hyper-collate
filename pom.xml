@@ -42,7 +42,7 @@
         <build-helper-maven.version>3.2.0</build-helper-maven.version>
         <buildnumber-maven.version>1.4</buildnumber-maven.version>
         <collatex.version>1.7.1</collatex.version>
-        <commons-io.version>2.10.0</commons-io.version>
+        <commons-io.version>2.11.0</commons-io.version>
         <dropwizard-swagger.version>2.0.12-1</dropwizard-swagger.version>
         <dropwizard.version>1.3.0</dropwizard.version>
         <graphviz-java.version>0.3.0</graphviz-java.version>
