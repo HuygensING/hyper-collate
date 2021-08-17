@@ -59,7 +59,7 @@
         <junitparams.version>1.1.1</junitparams.version>
         <kotlin.version>1.5.21</kotlin.version>
         <log.version>1.1.1</log.version>
-        <logback-classic.version>1.2.4-groovyless</logback-classic.version>
+        <logback-classic.version>1.2.5</logback-classic.version>
         <maven-compiler.version>3.8.1</maven-compiler.version>
         <maven-jar.version>3.1.2</maven-jar.version>
         <maven-javadoc.version>3.2.0</maven-javadoc.version>
