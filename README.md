@@ -2,9 +2,10 @@
 # HyperCollate
 
 [![DOI](https://zenodo.org/badge/106519202.svg)](https://zenodo.org/badge/latestdoi/106519202)
-[![](https://github.com/HuygensING/hyper-collate/workflows/tests/badge.svg)](https://github.com/HuygensING/hyper-collate/actions)
+[![GitHub Actions](https://github.com/HuygensING/hyper-collate/workflows/tests/badge.svg)](https://github.com/HuygensING/hyper-collate/actions)
 ![Snyk Vulnerabilities for GitHub Repo](https://img.shields.io/snyk/vulnerabilities/github/HuygensING/hyper-collate)
 ![GitHub language count](https://img.shields.io/github/languages/count/HuygensING/hyper-collate)
+[![Project Status: Inactive – The project has reached a stable, usable state but is no longer being actively developed; support/maintenance will be provided as time allows.](https://www.repostatus.org/badges/latest/inactive.svg)](https://www.repostatus.org/#inactive)
 
 ## General
 HyperCollate is a prototype collation engine that is able to handle *in-text* variation (i.e. textual variation _within_ one witness) if it’s marked with the TEI/XML elements `<del>`, `<add>`, `<subst>`, `<app>` or `<rdg>`. HyperCollate considers these elements as an interruption in the linear flow of the text: when its parser encounters a `<del>`, `<add>`, `<subst>`, `<app>` or `<rdg>` element, the stream of text tokens splits up into two or more branches. During the alignment process, HyperCollate looks at each branch and selects the one with the most matches. This means you do not have to linearize or “flatten” your TEI/XML transcription: the multiple layers within an individual witness can be preserved.
