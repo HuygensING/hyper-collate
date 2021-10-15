@@ -9,9 +9,9 @@ package nl.knaw.huygens.hypercollate.rest;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,6 +39,7 @@ import java.util.Optional;
 // to make these fields read-only
 @JsonIgnoreProperties(
     value = {"^dot", "^png", "^svg", "^ascii_table"},
+    ignoreUnknown = true,
     allowGetters = true)
 public class CollationInfo {
 
@@ -58,8 +59,7 @@ public class CollationInfo {
   State collationState = State.needs_witness;
   private boolean join = true;
 
-  CollationInfo() {
-  }
+  CollationInfo() {}
 
   public CollationInfo(String collationId, String baseURL) {
     this.id = collationId;
