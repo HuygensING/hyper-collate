@@ -74,7 +74,7 @@
         <reflections.version>0.10.1</reflections.version> <!-- 0.9.11 leads to ReflectionsExceptions -->
         <servlet-api.version>4.0.0-b01</servlet-api.version>
         <slf4j-api.version>1.7.32</slf4j-api.version>
-        <swagger.version>1.6.2</swagger.version> <!-- use version dropwizard-swagger uses -->
+        <swagger.version>1.6.3</swagger.version> <!-- use version dropwizard-swagger uses -->
         <tomcat-jsp-api.version>9.0.1</tomcat-jsp-api.version>
         <validation-api.version>2.0.1.Final</validation-api.version>
         <wagon-ssh.version>3.3.3</wagon-ssh.version>
